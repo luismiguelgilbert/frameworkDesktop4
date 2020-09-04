@@ -108,8 +108,9 @@ export default {
             }).catch((error) => {
                 this.$q.loading.hide()
                 console.error(error)
+                console.dir(error)
                 console.dir(error.response)
-                let mensaje = 'Error'
+                let mensaje = 'Error:'
                 if(error && error.response && error.response.data && error.response.data.info && error.response.data.info.message){
                     //console.dir('cae aqui' )
                     mensaje = mensaje + ': ' + error.response.data.info.message
