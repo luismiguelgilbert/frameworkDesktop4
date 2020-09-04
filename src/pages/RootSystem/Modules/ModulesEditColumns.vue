@@ -1,0 +1,137 @@
+<template>
+<q-table
+      :data="columns"
+      :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
+      table-style="min-height: 150px; max-height: calc(100vh - 225px)"
+      row-key="sys_company_id"
+      virtual-scroll
+      :rows-per-page-options="[0]"
+      hide-bottom dense
+      :filter="filterString"
+      :columns="[
+        { name: 'db_column', field: 'db_column', required: true, label: 'Columna', align: 'left', sortable: true },
+        { name: 'db_type', field: 'db_type', required: true, label: 'Tipo de Datos', align: 'left', sortable: true },
+        { name: 'ux_type', field: 'ux_type', required: true, label: 'Tipo de Columna', align: 'left', sortable: true },
+        { name: 'is_key', field: 'is_key', required: true, label: 'Columna Principal?', align: 'left', sortable: true },
+        { name: 'is_required', field: 'is_required', required: true, label: 'Siempre Visible?', align: 'left', sortable: true },
+        { name: 'label', field: 'label', required: true, label: 'Etiqueta', align: 'left', sortable: true },
+        { name: 'align', field: 'align', required: true, label: 'Alinear', align: 'left', sortable: true },
+        { name: 'is_sortable', field: 'is_sortable', required: true, label: 'Ordenar?', align: 'left', sortable: true },
+        { name: 'is_filterable', field: 'is_filterable', required: true, label: 'Filtrar?', align: 'left', sortable: true },
+        { name: 'default_is_visible', field: 'default_is_visible', required: true, label: 'Visble x Defecto?', align: 'left', sortable: true },
+        { name: 'default_position', field: 'default_position', required: true, label: 'Posición x Defecto', align: 'left', sortable: true },
+        { name: 'cellComponent', field: 'cellComponent', required: true, label: 'Componente a Usar', align: 'left', sortable: true },
+        { name: 'cellAttributes', field: 'cellAttributes', required: true, label: 'Estilo', align: 'left', sortable: true },
+        //default_min_width // icon
+        { name: 'lookup_table', field: 'lookup_table', required: true, label: '[Lookup] Tabla', align: 'left', sortable: true },
+        { name: 'lookup_join', field: 'lookup_join', required: true, label: '[Lookup] Join', align: 'left', sortable: true },
+        { name: 'lookup_field', field: 'lookup_field', required: true, label: '[Lookup] Columna', align: 'left', sortable: true },
+        { name: 'lookup_displayField', field: 'lookup_displayField', required: true, label: '[Lookup] Mostrar Columna', align: 'left', sortable: true },
+        { name: 'lookup_is_company_filtered', field: 'lookup_is_company_filtered', required: true, label: '[Lookup] Filtrar x Compañía?', align: 'left', sortable: true },
+        { name: 'lookup_search_data_query', field: 'lookup_search_data_query', required: true, label: 'Query para Filtros', align: 'left', sortable: true },
+        
+        
+        /*{ name: 'label', required: true, label: 'Compañía', align: 'left', field: row => row.label, sortable: true },
+        { name: 'is_allowed', required: true, label: 'Permitida?', align: 'left', field: row => row.is_allowed, sortable: true },
+        { name: 'is_default', required: true, label: 'Principal?', align: 'left', field: row => row.is_default, sortable: true },*/
+      ]"
+>
+    <!--<template v-slot:top>
+        <div :class="'text-h6 '+(userColor=='blackDark'?'text-white':'text-primary')" >Lista de Compañías Activas</div>
+        <q-space />
+        <q-input borderless dense v-model="filterString" placeholder="Buscar...">
+          <template v-slot:append>
+            <q-icon name="fas fa-search" />
+          </template>
+        </q-input>
+    </template>
+    <template v-slot:body-cell-is_allowed="props">
+        <q-td :props="props">
+            <q-checkbox size="sm" color="positive" :value="props.value" @input="changeCompanyAllowStatus(props)" :disable="!allow_edit&&!allow_insert" />
+        </q-td>
+    </template>
+    <template v-slot:body-cell-is_default="props">
+        <q-td :props="props">
+            <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeCompanyDefaultStatus(props)" :disable="!allow_edit&&!allow_insert" />
+        </q-td>
+    </template>-->
+</q-table>
+    
+</template>
+<style lang="sass">
+.q-table__bottom
+    padding: 0px
+.my-sticky-header-usercompany
+  /* max height is important */
+  .q-table__middle
+    max-height: 50px
+
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th /* bg color is important for th; just specify one */
+    background-color: white
+
+  thead tr:first-child th
+    position: sticky
+    top: 0
+    opacity: 1
+    z-index: 2
+
+.my-sticky-header-usercompany-dark
+  /* max height is important */
+  .q-table__middle
+    max-height: 50px
+
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th /* bg color is important for th; just specify one */
+    background-color: $grey-10
+
+  thead tr:first-child th
+    position: sticky
+    top: 0
+    opacity: 1
+    z-index: 2
+</style>
+<script>
+import Vue from 'vue';
+import Vuex from 'vuex';
+
+export default ({
+    data () {
+        return {
+            moduleName: "Modules", filterString: ''
+        }
+    },
+    methods:{
+        changeCompanyAllowStatus(row){
+            let new_lookup_companies = JSON.parse(JSON.stringify(this.lookup_companies))
+            new_lookup_companies.find(x=>x.value==row.row.value).is_allowed=!row.row.is_allowed
+            this.lookup_companies = new_lookup_companies
+        },
+        changeCompanyDefaultStatus(row){
+            let new_lookup_companies = JSON.parse(JSON.stringify(this.lookup_companies))
+            new_lookup_companies.map(x=>{ x.is_default = false });
+            new_lookup_companies.find(x=>x.value==row.row.value).is_default=!row.row.is_default
+            this.lookup_companies = new_lookup_companies
+        }
+    },
+    computed:{
+        userColor: { get () { return this.$store.state.main.userColor }  },
+        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
+        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
+        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
+        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
+        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        columns: { 
+            get () { return this.$store.state[this.moduleName].editData.columns }, 
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataCompanies', val) }
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }  
+        },
+        sys_user_color: { 
+            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color }, 
+        },
+    }
+})
+</script>
