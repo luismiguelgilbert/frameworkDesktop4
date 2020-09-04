@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="no-padding">    
+<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="no-padding">
     <q-splitter
         v-model="splitterModel" class="no-padding"
         style="height: calc(100vh - 140px);" unit="%"
@@ -11,7 +11,7 @@
                     :zoom.sync="zoom"
                     @click="onMapClick"
                     >
-                    <googlemaps-marker 
+                    <googlemaps-marker
                         v-for="(m,index) in coordenadasParsed" :key="index"
                         :position.sync="m.location"
                         :clickable="false"
@@ -20,7 +20,7 @@
                         :title="'ID: ' + m.coordinateID + '\n' + 'Orden: ' + m.position + '\n' + m.comments"
                         :icon="m.selected?'http://maps.google.com/mapfiles/ms/icons/red-dot.png':'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'"
                         :label="{
-                                
+
                                 text: 'Punto ' + m.coordinateID.toString()
                             }"
                         >
@@ -32,8 +32,8 @@
                     <q-btn color="primary" icon="fas fa-crosshairs" label="Definir ubicación actual como Inicial" size="sm" no-caps @click="setAsInitial" />
                     <br><br><q-list  separator class="scroll" style="height: calc(100vh - 203px);">
                         <q-item-label header>Lista de Coordenadas ({{coordenadasParsed.length}})</q-item-label>
-                        <q-item v-for="(coordenada, index) in coordenadasParsed" :key="index" 
-                            clickable @click="select(coordenada)" 
+                        <q-item v-for="(coordenada, index) in coordenadasParsed" :key="index"
+                            clickable @click="select(coordenada)"
                             title="Probando"
                             :active="coordenada.selected" :active-class="userColor=='blackDark'?'bg-white text-black':'bg-blue-5 text-white'">
                             <q-item-section side>
@@ -46,14 +46,14 @@
                                 <div style="display: inline-block;">
                                     <q-btn icon="fas fa-arrow-up" flat color="primary" size="sm" dense round :disable="index==0" @click="moveUp(coordenada, index)" />
                                     <q-btn icon="fas fa-arrow-down" flat color="primary" size="sm" dense round :disable="index==coordenadasParsed.length-1" @click="moveDown(coordenada, index)" />
-                                </div>                
+                                </div>
                             </q-item-section>
                         </q-item>
 
                     </q-list>
                 </center>
-                
-                
+
+
             </template>
     </q-splitter>
 </q-form>
@@ -69,7 +69,7 @@ import VueGoogleMaps from 'vue-googlemaps'
 
 Vue.use(VueGoogleMaps, {
   load: {
-    apiKey: 'AIzaSyA05KR6QQM-1SZ3gcNMXziQLuarNzwGZb4'// Google API key
+    apiKey: this.$q.sessionStorage.getItem('Google_API_key')
     //,libraries: "places"//necessary for places input
     ,useBetaRenderer: false// Use new renderer
   },
@@ -78,8 +78,8 @@ Vue.use(VueGoogleMaps, {
 export default ({
     data () {
         return {
-            moduleName: "BitaRoutes", 
-            splitterModel: 80,  center: null, 
+            moduleName: "BitaRoutes",
+            splitterModel: 80,  center: null,
             coordenadasParsed:  []
         }
     },
@@ -91,9 +91,9 @@ export default ({
             this.zoom = 7
         }
         if(this.$q.screen.lt.sm){this.splitterModel = 60}
-        
+
         let newCoordinates = JSON.parse(JSON.stringify(this.coordinates))
-        newCoordinates.map(x=>{ 
+        newCoordinates.map(x=>{
             x['location'] = {lat: parseFloat(x.lat), lng: parseFloat(x.lng)};
             this.coordenadasParsed.push(x)
         });
@@ -175,24 +175,24 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        lat: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.lat }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'lat', value: val}) }  
+        lat: {
+            get () { return this.$store.state[this.moduleName].editData.basic.lat },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'lat', value: val}) }
         },
-        lng: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.lng }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'lng', value: val}) }  
+        lng: {
+            get () { return this.$store.state[this.moduleName].editData.basic.lng },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'lng', value: val}) }
         },
-        zoom: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.zoom }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'zoom', value: val}) }  
+        zoom: {
+            get () { return this.$store.state[this.moduleName].editData.basic.zoom },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'zoom', value: val}) }
         },
-        coordinates: { 
-            get () { return this.$store.state[this.moduleName].editData.coordinates }, 
-            set (val) { 
+        coordinates: {
+            get () { return this.$store.state[this.moduleName].editData.coordinates },
+            set (val) {
                 console.dir('change to coordinates')
                 console.dir(val)
-                this.$store.commit((this.moduleName)+'/updateCoordinates', val) 
+                this.$store.commit((this.moduleName)+'/updateCoordinates', val)
             }
         },
     },
