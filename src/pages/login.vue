@@ -99,6 +99,7 @@ export default {
                     this.$q.sessionStorage.set('sys_user_code', response.data[0].sys_user_code) //sys_user_code
                     this.$q.sessionStorage.set('sys_profile_id', response.data[0].sys_profile_id) //sys_profile_id
                     this.$q.loading.hide()
+                    console.dir('Welcome!')
                     //this.router.push({ path: '/RootHome' }); //navigate to Home Page
                     this.router.push({ path: '/' }); //navigate to MainLayout Page
                 }else{
