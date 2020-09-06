@@ -5,7 +5,7 @@
             <q-list separator>
                 <q-item
                     clickable v-close-popup  class="q-pr-xs"
-                    v-for="(filtro, index) in filters" :key="index" 
+                    v-for="(filtro, index) in filters" :key="index"
                     :title="filtro.is_default?'Este es su filtro predeterminado':''"
                     @click="applyFilter(filtro)">
                     <q-item-section side>
@@ -32,15 +32,15 @@
         <q-space />
         <q-btn color="white" icon="fas fa-times" flat stretch title="Ocultar panel" @click="isFiltersDrawerVisible = false" />
     </q-bar>
-    
+
     <q-list dense separator class="scroll" style="height: calc(100vh - 190px);">
         <!--{{currentFilter}}-->
         <!--{{filters}}-->
         <br>
         <div
             v-for="(field, index) in columnsSystem.filter(x=>x.is_filterable)" :key="index" >
-            <filtersLayoutFieldComponent 
-                :field="field" 
+            <filtersLayoutFieldComponent
+                :field="field"
                 :moduleName="moduleName"
                 @onFilterApplied="onFilterApplied"
                 />
@@ -75,33 +75,33 @@ export default({
         }
     },
     computed:{
-        loadingData: { 
-            get () { return this.$store.state[this.moduleName].loadingData }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'loadingData', value: val}) }  
+        loadingData: {
+            get () { return this.$store.state[this.moduleName].loadingData },
+            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'loadingData', value: val}) }
         },
-        columnsSystem: { 
-            get () { return this.$store.state[this.moduleName].columnsSystem }, 
+        columnsSystem: {
+            get () { return this.$store.state[this.moduleName].columnsSystem },
         },
-        isFiltersDrawerVisible: { 
-            get () { return this.$store.state[this.moduleName].isFiltersDrawerVisible }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'isFiltersDrawerVisible', value: val}) }  
+        isFiltersDrawerVisible: {
+            get () { return this.$store.state[this.moduleName].isFiltersDrawerVisible },
+            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'isFiltersDrawerVisible', value: val}) }
         },
         userCode: { get () { return this.$store.state.main.userCode } },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
-        currentFilter: { 
-            get () { return this.$store.state[this.moduleName].currentFilter }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'currentFilter', value: val}) }  
+        currentFilter: {
+            get () { return this.$store.state[this.moduleName].currentFilter },
+            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'currentFilter', value: val}) }
         },
-        isCurrentFilter: { 
-            get () { return this.$store.state[this.moduleName].currentFilter.filter(x => x.valueA != null || x.valueB != null || (x.valueC != null && x.valueC.length > 0)).length>0; }, 
+        isCurrentFilter: {
+            get () { return this.$store.state[this.moduleName].currentFilter.filter(x => x.valueA != null || x.valueB != null || (x.valueC != null && x.valueC.length > 0)).length>0; },
         },
-        filters: { 
-            get () { return this.$store.state[this.moduleName].filters }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'filters', value: val}) }  
+        filters: {
+            get () { return this.$store.state[this.moduleName].filters },
+            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'filters', value: val}) }
         },
-        filtersDetails: { 
-            get () { return this.$store.state[this.moduleName].filtersDetails }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'filtersDetails', value: val}) }  
+        filtersDetails: {
+            get () { return this.$store.state[this.moduleName].filtersDetails },
+            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'filtersDetails', value: val}) }
         }
     },
     methods: {
@@ -126,13 +126,13 @@ export default({
                 //title: 'Prompt',
                 message: 'Escriba el nombre de su filtro:',
                 prompt: { model: '', type: 'text'},
-                cancel: 'Cancelar', 
+                cancel: 'Cancelar',
                 persistent: true
             }).onOk(data => {
                 this.loadingData=true;
                 let newFilterArray = [];
                 newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
-                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserUpdate', 
+                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserUpdate',
                     {
                         link_name: this.moduleName,
                         sys_user_code: this.userCode,
@@ -163,29 +163,29 @@ export default({
             })
         },
         deleteUserFilter(filtro){
-            this.$q.dialog({
+          this.$q.dialog({
                 //title: 'Prompt',
                 message: 'Desea eliminar este filtro?',
-                cancel: 'Cancelar', 
+                cancel: 'Cancelar',
                 persistent: true
-            }).onOk(data => {
+          }).onOk(data => {
                 this.loadingData=true;
                 let newFilterArray = [];
                 newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
-                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDelete', 
+                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDelete',
                     {
                         link_name: this.moduleName,
                         sys_user_code: this.userCode,
                         filter_id: filtro.value
                     }
                     , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
-                ).then((response) => {
+                  ).then((response) => {
                     this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
                     //los filtros se reciben desde el mismo SP, entonces guardo en Vuex
                     this.filters = JSON.parse(response.data[0].filters)
                     this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
                     this.loadingData = false
-                }).catch((error) => {
+                  }).catch((error) => {
                     console.error(error)
                     let mensaje = ''
                     if(error.message){ mensaje = error.message }
@@ -198,19 +198,19 @@ export default({
                     })
                     this.loadingData = false
                 })
-            })
+        })
         },
         defaultUserFilter(filtro){
             this.$q.dialog({
                 //title: 'Prompt',
                 message: 'Desea hacer este filtro, su filtro predeterminado?',
-                cancel: 'Cancelar', 
+                cancel: 'Cancelar',
                 persistent: true
             }).onOk(data => {
                 this.loadingData=true;
                 let newFilterArray = [];
                 newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
-                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate', 
+                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate',
                     {
                         link_name: this.moduleName,
                         sys_user_code: this.userCode,
@@ -242,13 +242,13 @@ export default({
             this.$q.dialog({
                 //title: 'Prompt',
                 message: 'Desea dejar de usar este filtro como predeterminado?',
-                cancel: 'Cancelar', 
+                cancel: 'Cancelar',
                 persistent: true
             }).onOk(data => {
                 this.loadingData=true;
                 let newFilterArray = [];
                 newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
-                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate', 
+                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate',
                     {
                         link_name: this.moduleName,
                         sys_user_code: this.userCode,
@@ -277,6 +277,6 @@ export default({
             })
         },
     }
-    
+
 })
 </script>

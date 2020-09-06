@@ -87,8 +87,8 @@ export default {
         this.password = this.password.trim()
         this.$q.loading.show({ delay: 0, message: "Autenticando..", })
         let urlPath = this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') + 'spSysLogin'
-        console.dir('urlPath')
-        console.dir(urlPath)
+        //console.dir('urlPath')
+        //console.dir(urlPath)
         this.$axios.post( urlPath,
             {
                 "sys_user_id": this.username,
