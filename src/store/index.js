@@ -13,6 +13,7 @@ import BitaRounds from './BitaRounds' //Bitacora Rounds
 import BitaCars from './BitaCars' //Bitacora Rounds
 import BitacoraPeople from './BitacoraPeople' //Bitacora Rounds
 import Notifications from './Notifications' //Bitacora Rounds
+import Employees from './Employees' //Bitacora Rounds
 
 Vue.use(Vuex)
 
@@ -31,6 +32,7 @@ export default function (/* { ssrContext } */) {
       ,BitaCars
       ,BitacoraPeople
       ,Notifications
+      ,Employees
     },
 
     // enable strict mode (adds overhead!)
