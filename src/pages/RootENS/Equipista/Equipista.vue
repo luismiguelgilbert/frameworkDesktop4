@@ -58,8 +58,8 @@ export default ({
   },
   data () {
     return {
-        moduleName: "Users",
-        moduleEditName: "UsersEdit",
+        moduleName: "Equipista",
+        moduleEditName: "EquipistaEdit",
         maindataLoaded: false,
         router: this.$router,
     }

@@ -10,7 +10,7 @@ const routes = [
       ,{ path: 'RootNotifications', component: () => import('pages/RootNotifications/RootNotifications.vue') }
       ,{ path: 'mainReport', component: () => import('components/mainReport/reportComponent.vue') }
       //transactional Routes
-
+      //SYSTEM
       ,{ path: 'RootSystem/Users', component: () => import('pages/RootSystem/Users/Users.vue') }
       ,{ path: 'RootSystem/UsersEdit', component: () => import('pages/RootSystem/Users/UsersEdit.vue') }
       ,{ path: 'RootSystem/Roles', component: () => import('pages/RootSystem/Roles/Roles.vue') }
@@ -21,6 +21,7 @@ const routes = [
       ,{ path: 'RootSystem/ModulesEdit', component: () => import('pages/RootSystem/Modules/ModulesEdit.vue') }
       ,{ path: 'RootSystem/Notifications', component: () => import('pages/RootSystem/Notifications/Notifications.vue') }
       ,{ path: 'RootSystem/NotificationsEdit', component: () => import('pages/RootSystem/Notifications/NotificationsEdit.vue') }
+      //BITACORA
       ,{ path: 'RootBitacora/Bitaplaces', component: () => import('pages/RootBitacora/Bitaplaces/Bitaplaces.vue') }
       ,{ path: 'RootBitacora/BitaplacesEdit', component: () => import('pages/RootBitacora/Bitaplaces/BitaplacesEdit.vue') }
       ,{ path: 'RootBitacora/Bitacars', component: () => import('pages/RootBitacora/Bitacars/Bitacars.vue') }
@@ -39,6 +40,10 @@ const routes = [
       ,{ path: 'RootPurchase/PurchaseRequisition', component: () => import('pages/RootPurchase/PurchaseRequisition/PurchaseRequisition.vue') }
       ,{ path: 'RootPurchase/PurchaseRequisitionEdit', component: () => import('pages/RootPurchase/PurchaseRequisition/PurchaseRequisitionEdit.vue') }
       ,{ path: 'RootPurchase/PurchaseQuotes', component: () => import('pages/RootPurchase/PurchaseQuotes/PurchaseQuotes.vue') }
+      //ENS
+      ,{ path: 'RootENS/Equipistas', component: () => import('pages/RootENS/Equipistas/Equipistas.vue') }
+      ,{ path: 'RootENS/Equipista', component: () => import('pages/RootENS/Equipista/Equipista.vue') }
+      //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/Employees.vue') }
     ]
   },

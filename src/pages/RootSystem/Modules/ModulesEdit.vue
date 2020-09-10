@@ -76,16 +76,16 @@
                         <columnsComponent ref="columnsComponent" />
                     </q-tab-panel>
 
-                   
 
-                    
+
+
                 </q-tab-panels>
-        
+
             </template>
 
             </q-splitter>
     </q-card>
-    
+
     <q-inner-loading :showing="loadingData" style="z-index: 999;">
         <q-spinner-ios size="50px" color="amber" />
     </q-inner-loading>
@@ -102,7 +102,7 @@ export default ({
   components:{
      basicComponent: basicComponent
     ,columnsComponent:columnsComponent
-    
+
   },
   data () {
     return {
@@ -134,7 +134,7 @@ export default ({
             method: 'GET',
             url: this.apiURL + 'spSysModulesSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-            params: { 
+            params: {
                 userCode: this.userCode,
                 userLanguage: 'es',
                 userCompany: this.userCompany,
@@ -174,18 +174,18 @@ export default ({
                 persistent: true
             }).onOk(() => {
                 this.loadingData = true
-                
+
                 let newEditData = {
                      basic: this.editData.basic
-                    ,system: this.editData.system
-                    ,users: this.editData.users.filter(x=>x.is_allowed).map(x=>x.sys_user_code)
+                    ,columns: this.editData.columns
+                    //,users: this.editData.users.filter(x=>x.is_allowed).map(x=>x.sys_user_code)
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spSysCompaniesUpdate', {
+                this.$axios.post( this.apiURL + 'spSysModulesUpdate', {
                         "sys_user_code": this.$q.sessionStorage.getItem('sys_user_code'),
                         //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                        "currentRow": this.editMode?0:this.editRecord.row.sys_company_id_ux,
+                        "currentRow": this.editMode?0:this.editRecord.row.link_id_ux,
                         "editRecord": JSON.stringify(newEditData),
                     }
                     , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
@@ -213,11 +213,11 @@ export default ({
     }
   },
   computed:{
-    loadingData: { 
-        get () { return this.$store.state[this.moduleName].loadingData }, 
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'loadingData', value: val}) }  
+    loadingData: {
+        get () { return this.$store.state[this.moduleName].loadingData },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'loadingData', value: val}) }
     },
-    userMainToolbarComponentClass: { get () { 
+    userMainToolbarComponentClass: { get () {
         let result = 'no-padding '
         if(this.$store.state.main.userColor=='default'){
             result=result + 'bg-white text-primary'
@@ -230,17 +230,17 @@ export default ({
     userColor: { get () { return this.$store.state.main.userColor }  },
     userCode: { get () { return this.$store.state.main.userCode } },
     userCompany: { get () { return this.$store.state.main.userCompany } },
-    editRecord: { 
-      get () { return this.$store.state[this.moduleName].editRecord }, 
-      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editRecord', value: val}) }  
+    editRecord: {
+      get () { return this.$store.state[this.moduleName].editRecord },
+      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editRecord', value: val}) }
     },
-    editData: { 
-        get () { return this.$store.state[this.moduleName].editData }, 
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editData', value: val}) }  
+    editData: {
+        get () { return this.$store.state[this.moduleName].editData },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editData', value: val}) }
     },
-    editMode: { 
-        get () { return this.$store.state[this.moduleName].editMode }, 
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editMode', value: val}) }  
+    editMode: {
+        get () { return this.$store.state[this.moduleName].editMode },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editMode', value: val}) }
     },
     allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
     allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },

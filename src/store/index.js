@@ -14,6 +14,8 @@ import BitaCars from './BitaCars' //Bitacora Rounds
 import BitacoraPeople from './BitacoraPeople' //Bitacora Rounds
 import Notifications from './Notifications' //Bitacora Rounds
 import Employees from './Employees' //Bitacora Rounds
+import Equipistas from './Equipistas' //Equipistas
+import Equipista from './Equipista' //Equipista
 
 Vue.use(Vuex)
 
@@ -33,6 +35,8 @@ export default function (/* { ssrContext } */) {
       ,BitacoraPeople
       ,Notifications
       ,Employees
+      ,Equipista
+      ,Equipistas
     },
 
     // enable strict mode (adds overhead!)

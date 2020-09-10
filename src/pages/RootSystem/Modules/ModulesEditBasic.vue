@@ -1,7 +1,7 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">    
+<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <!--<q-btn color="purple" label="Pruebas" @click="pruebasClick" />-->
-    <q-input 
+    <q-input
         ref="link_id" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese el código único (ID) del registro(*)" label="Código (*)" filled
         v-model="link_id" type="number"
@@ -12,7 +12,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
-    <q-input 
+    <q-input
         ref="link_name" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese el nombre del link (*)" label="Link (*)" filled
         v-model="link_name"
@@ -23,40 +23,43 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-link" /></template>
     </q-input>
-    <q-input 
-        ref="db_table" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Ingrese el nombre de la tabla principal (*)" label="Tabla Principal (*)" filled
+    <q-select
+        label="Tabla Principal (*)" placeholder="Ingrese el nombre de la tabla principal (*)" emit-value map-options filled
+        :options="lookup_tables"
+        :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="db_table"
+        ref="db_table"
         :rules="[
-                val => !!val || '* Requerido',
-                val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
-        ]"
-        >
+          val => !!val || '* Requerido'
+        ]">
         <template v-slot:prepend><q-icon name="fas fa-table" /></template>
-    </q-input>
-    <q-input 
-        ref="primary_key" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Ingrese el nombre de la columna principal (*)" label="Columna Principal (*)" filled
+    </q-select>
+    <q-select
+        label="Campo Primario (*)" placeholder="Ingrese el nombre de la columna principal (*)" emit-value map-options filled
+        :options="lookup_cols.filter(x=>x.table_name==db_table)"
+        :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="primary_key"
+        ref="primary_key"
         :rules="[
-                val => !!val || '* Requerido',
-                val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-columns" /></template>
-    </q-input>
+          val => !!val || '* Requerido'
+        ]">
+        <template v-slot:prepend><q-icon name="fas fa-key" /></template>
+    </q-select>
     <q-toggle
         v-model="is_company_filtered" color="positive" label="La tabla se filtra por compañía?"
         />
-    <q-input 
-        ref="sortBy" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" class="q-pt-md q-pb-md"
-        placeholder="Ingrese el nombre de la columna inicial para ordenar datos" label="Ordenar Por" filled
+    <q-select
+        label="Orden Inicial (*)" placeholder="Ingrese el nombre de la columna inicial para ordenar datos (*)" emit-value map-options filled
+        :options="lookup_cols.filter(x=>x.table_name==db_table)"
+        :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="sortBy"
-        
-        >
-        <template v-slot:prepend><q-icon name="fas fa-columns" /></template>
-    </q-input>
-    <q-select 
+        ref="sortBy"
+        :rules="[
+          val => !!val || '* Requerido'
+        ]">
+        <template v-slot:prepend><q-icon name="fas fa-sort" /></template>
+    </q-select>
+    <q-select
         label="Sentido" placeholder="Seleccione el sentido para ordenar datos" emit-value map-options filled
         :options="[{value: 'asc', label: 'ascendente'},{value: 'desc', label: 'descendente'}]"
         :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -65,8 +68,13 @@
         :rules="[
           val => !!val || '* Requerido'
         ]">
-        <template v-slot:prepend><q-icon name="fas fa-sort" /></template>
+        <template v-slot:prepend><q-icon name="fas fa-sort-alpha-up-alt" /></template>
     </q-select>
+    <q-input
+        label="Filtro Adicional" placeholder="Ingrese sentencia SQL para filtrar datos. Ejemplo: INNER JOIN (select * from bitaPlacesUsers int1 where int1.sys_company_id = @sys_company_id and sys_user_code = @sys_user_code) JF on A.placeID = JF.placeID" filled
+        type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        v-model="extraFilter"
+        />
     <br><br>
 </q-form>
 </template>
@@ -88,17 +96,17 @@ export default ({
         /*isFieldErrorBG(fieldName) {
             console.dir('isFieldErrorBG: '+fieldName)
             console.dir(this.$refs.length)
-            if(Object.keys(this.$refs).length>0){//espera que existan datos 
+            if(Object.keys(this.$refs).length>0){//espera que existan datos
                 return this.$refs[fieldName].hasError?'red':undefined
             }
         },
         isFieldErrorText(fieldName) {
-            if(Object.keys(this.$refs).length>0){//espera que existan datos 
+            if(Object.keys(this.$refs).length>0){//espera que existan datos
                 return this.$refs[fieldName].hasError?'text-white':undefined
             }
         },
         isFieldErrorLabel(fieldName) {
-            if(Object.keys(this.$refs).length>0){//espera que existan datos 
+            if(Object.keys(this.$refs).length>0){//espera que existan datos
                 return this.$refs[fieldName].hasError?'white':undefined
             }
         },*/
@@ -130,7 +138,7 @@ export default ({
                 this.loadingData = false
             })
         }
-        
+
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
@@ -140,38 +148,47 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        link_id: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.link_id }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'link_id', value: val}) }  
+        link_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.link_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'link_id', value: val}) }
         },
-        link_name: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.link_name }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'link_name', value: val}) }  
+        link_name: {
+            get () { return this.$store.state[this.moduleName].editData.basic.link_name },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'link_name', value: val}) }
         },
-        db_table: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.db_table }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'db_table', value: val}) }  
+        db_table: {
+            get () { return this.$store.state[this.moduleName].editData.basic.db_table },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'db_table', value: val}) }
         },
-        primary_key: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.primary_key }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'primary_key', value: val}) }  
+        primary_key: {
+            get () { return this.$store.state[this.moduleName].editData.basic.primary_key },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'primary_key', value: val}) }
         },
-        is_company_filtered: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.is_company_filtered }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_company_filtered', value: val}) }  
+        is_company_filtered: {
+            get () { return this.$store.state[this.moduleName].editData.basic.is_company_filtered },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_company_filtered', value: val}) }
         },
-        sortBy: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.sortBy }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sortBy', value: val}) }  
+        sortBy: {
+            get () { return this.$store.state[this.moduleName].editData.basic.sortBy },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sortBy', value: val}) }
         },
-        orderBy: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.orderBy }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'orderBy', value: val}) }  
+        orderBy: {
+            get () { return this.$store.state[this.moduleName].editData.basic.orderBy },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'orderBy', value: val}) }
         },
-
-        sys_user_color: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sys_user_color', value: val}) }  
+        extraFilter: {
+            get () { return this.$store.state[this.moduleName].editData.basic.extraFilter },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'extraFilter', value: val}) }
+        },
+        lookup_tables: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_tables },
+        },
+        lookup_cols: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_cols },
+        },
+        sys_user_color: {
+            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sys_user_color', value: val}) }
         },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
     },

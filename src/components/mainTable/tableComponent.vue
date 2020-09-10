@@ -1,7 +1,7 @@
 <template>
 <div>
     <q-table
-      ref="mainTable" 
+      ref="mainTable"
       square
       :data="dataRows"
       :columns="columnsUser"
@@ -11,13 +11,13 @@
       selection="multiple"
       :row-key="columnsSystem.find(x=>x.is_key).field"
       rows-per-page-label= "Registros"
-      
+
       no-data-label= "No hay registros"
       no-results-label= "No se encontraron registros"
       loading-label= "Cargando datos"
       :rows-per-page-options="[17,27,50,100,250,1000, 0]"
       :class="userColor=='blackDark'?'my-sticky-header-table-dark bg-grey-10 ':'my-sticky-header-table '"
-      :table-style="userTableDense?'min-height: calc(100vh - 137px); max-height: calc(100vh - 137px)':'min-height: calc(100vh - 134px); max-height: calc(100vh - 134px)'"
+      :table-style="userTableDense?'min-height: calc(100vh - 136px); max-height: calc(100vh - 136px)':'min-height: calc(100vh - 153px); max-height: calc(100vh - 153px)'"
       :selected.sync="selectedRows"
       :loading="loadingData"
       :pagination.sync="pagination"
@@ -25,22 +25,15 @@
       binary-state-sort
       :virtual-scroll="pagination.rowsPerPage==0||pagination.rowsPerPage>100?true:false"
       >
-      <template v-slot:body-cell="props">
-        <q-td :props="props" class="text-weight-medium">
-          <!--<div v-if="props.col.is_key">-->
-          <div v-if="props.col.isOpenButton">
-            <q-item dense style="min-height: 20px !important;" class="no-padding">
-              <!--<q-item-section side><q-icon title="Abrir" @click="openEditForm(props, false)" class="all-pointer-events	shadow cursor-pointer" name="fas fa-external-link-alt" size="0.8rem" color="amber" /></q-item-section>-->
-              <q-item-section><q-item-label>{{props.value}}</q-item-label></q-item-section>
-            </q-item>
-          </div>
-          <div v-if="!props.col.isOpenButton&&props.col.cellComponent=='estado'" >
+      <template v-slot:body-cell="props" >
+        <q-td :props="props" class="text-weight-medium no-padding" >
+          <div v-if="props.col.cellComponent=='estado'" >
             <q-item dense class="no-padding" style="min-height: 20px !important;">
               <q-item-section side class="q-pl-none q-pr-xs" ><q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" /></q-item-section>
               <q-item-section><q-item-label>{{props.value}}</q-item-label></q-item-section>
             </q-item>
           </div>
-          <div v-if="!props.col.isOpenButton&&props.col.cellComponent=='image'" >
+          <div v-if="props.col.cellComponent=='image'" >
             <q-avatar size="20px">
                 <q-icon v-if="props.value == null" name="fas fa-camera" :color="userColor=='blackDark'?'white':'grey-7'" />
                 <q-img v-if="props.value != null" :src="$q.sessionStorage.getItem('serverFilesPath') + props.value">
@@ -51,7 +44,8 @@
             </q-avatar>
           </div>
           <!--<div v-if="!props.col.is_key && props.col.cellComponent=='div'">{{props.value}}</div>-->
-          <div v-if="!props.col.isOpenButton && props.col.cellComponent=='div'">{{props.value}}</div>
+          <div v-if="props.col.cellComponent=='div'">{{props.value}}</div>
+          <div v-if="props.col.cellComponent=='bool'" ><q-toggle color="primary" size="xs" square :value="props.value" /></div>
           <div v-if="props.col.ux_type=='open'"  >
             <!--{{columnsSystem.find(x=>x.is_key).field}}-->
             <!--<q-btn flat size="xs" icon="fas fa-external-link-alt" class="cursor-pointer" color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_key).field]; openEditForm(newProps, false)}" />-->
@@ -81,6 +75,7 @@
     top: 0
     opacity: 1
     z-index: 2
+    padding-left: 0
 
   td:last-child
     /* bg color is important for td; just specify one */
@@ -91,10 +86,12 @@
     z-index: 2
     /* bg color is important; just specify one */
     background: #fff
+    font-color: red
 
   td:last-child, th:last-child
     position: sticky
     right: 0
+
 
 .my-sticky-header-table-dark
   /* max height is important */
@@ -111,6 +108,7 @@
     top: 0
     opacity: 1
     z-index: 2
+    padding-left: 0
 </style>
 <script>
 import Vue from 'vue';
@@ -124,13 +122,13 @@ export default({
   data () {
     return {
       dataRows: [], router: this.$router,
-      //selectedRows: [], 
+      //selectedRows: [],
     }
   },
   computed:{
-    loadingData: { 
-        get () { return this.$store.state[this.moduleName].loadingData }, 
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'loadingData', value: val}) }  
+    loadingData: {
+        get () { return this.$store.state[this.moduleName].loadingData },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'loadingData', value: val}) }
     },
     allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
     allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
@@ -143,14 +141,14 @@ export default({
     userCompany: { get () { return this.$store.state.main.userCompany } },
     userTableLines: { get () { return this.$store.state.main.userTableLines } },
     userTableDense: { get () { return this.$store.state.main.userTableDense } },
-    pagination: { 
-      get () { return this.$store.state[this.moduleName].pagination }, 
-      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }  
+    pagination: {
+      get () { return this.$store.state[this.moduleName].pagination },
+      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }
     },
-    columnsUser: { 
-      //get () { return this.$store.state[this.moduleName].columnsUser.filter(x=>x.is_visible) }, 
-      get () { 
-        let newResult = this.$store.state[this.moduleName].columnsUser.filter(x=>x.is_visible) 
+    columnsUser: {
+      //get () { return this.$store.state[this.moduleName].columnsUser.filter(x=>x.is_visible) },
+      get () {
+        let newResult = this.$store.state[this.moduleName].columnsUser.filter(x=>x.is_visible)
         newResult.push({
           align: 'right'
           ,cellComponent: 'open'
@@ -171,29 +169,29 @@ export default({
         //console.dir('newResult')
         //console.dir(newResult)
         return newResult
-      }, 
+      },
     },
-    columnsSystem: { 
-      //get () { return this.$store.state[this.moduleName].columnsUser }, 
-      get () { return this.$store.state[this.moduleName].columnsSystem }, 
+    columnsSystem: {
+      //get () { return this.$store.state[this.moduleName].columnsUser },
+      get () { return this.$store.state[this.moduleName].columnsSystem },
     },
-    currentFilter: { 
+    currentFilter: {
       get () {  return this.$store.state[this.moduleName].currentFilter; }
     },
-    currentFilterSearch: { 
-        get () { return this.$store.state[this.moduleName].currentFilterSearch }, 
+    currentFilterSearch: {
+        get () { return this.$store.state[this.moduleName].currentFilterSearch },
     },
-    selectedRows: { 
-      get () { return this.$store.state[this.moduleName].selectedRows }, 
-      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'selectedRows', value: val}) }  
+    selectedRows: {
+      get () { return this.$store.state[this.moduleName].selectedRows },
+      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'selectedRows', value: val}) }
     },
-    editRecord: { 
-      get () { return this.$store.state[this.moduleName].editRecord }, 
-      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editRecord', value: val}) } 
+    editRecord: {
+      get () { return this.$store.state[this.moduleName].editRecord },
+      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editRecord', value: val}) }
     },
-    editMode: { 
-      get () { return this.$store.state[this.moduleName].editMode }, 
-      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editMode', value: val}) } 
+    editMode: {
+      get () { return this.$store.state[this.moduleName].editMode },
+      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editMode', value: val}) }
     },
   },
   mounted(){
@@ -215,7 +213,7 @@ export default({
               ,valueC: y.valueC
             })
           })
-          this.$axios.post( this.apiURL + 'getData', 
+          this.$axios.post( this.apiURL + 'getData',
               {
                   sys_user_code: this.userCode,
                   sys_company_id: this.userCompany,

@@ -3,6 +3,7 @@
     <img
       alt="BITT logo"
       src="/logoTransparent.png"
+      height="100"
     >
   </q-page>
 </template>

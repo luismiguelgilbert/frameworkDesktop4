@@ -7,8 +7,12 @@ export const updateEditData = (state, value) => {
     state.editData[value.section][value.key] = value.value
 }
 
-export const updateEditDataColumns = (state, value) => {
-  state.editData.columns = value
+export const updateEditDataCompanies = (state, value) => {
+    state.editData.lookup_companies = value
+}
+
+export const updateEditDataPassword = (state, value) => {
+    state.editData.password = value
 }
 
 export const resetToDefaultState = (state) => {

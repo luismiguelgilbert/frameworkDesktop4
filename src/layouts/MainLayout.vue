@@ -47,7 +47,7 @@
         <!--Universal Search A FUTURO-->
         <q-space />
 
-        
+
         <!--COMPANY-->
         <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps  >
           <template v-slot:label>
@@ -84,9 +84,9 @@
               <q-list separator class="text-grey-7" v-close-popup >
                 <q-item clickable v-for="(note,index) in unreadNotifications" :key="index" @click="gotoNotifications(note.sender_sys_user_code)">
                   <q-item-section avatar>
-                    <q-img 
-                      v-if="note.userPhoto&&note.userPhoto.length>2" 
-                      :src="serverFilesPath + note.userPhoto" 
+                    <q-img
+                      v-if="note.userPhoto&&note.userPhoto.length>2"
+                      :src="serverFilesPath + note.userPhoto"
                       basic style="width: 30px; max-height: 35px;"
                       spinner-color="white"
                       class="rounded-borders"
@@ -106,34 +106,34 @@
                     <q-item-label>No tiene notificaciones pendientes</q-item-label>
                   </q-item-section>
                 </q-item>
-                
+
               </q-list>
             </div>
             <q-item-label caption><q-btn icon="fas fa-external-link-alt" size="lg" label="Abrir Notificaciones" no-caps class="full-width no-border-radius" color="primary"  @click="gotoNotifications(0)" /></q-item-label>
           </q-menu>
         </q-btn>
-        
+
 
         <!--USER-->
         <span>&ensp;</span>
         <q-btn flat dense :title="userID">
-          <q-img 
-            v-if="userPhoto&&userPhoto.length>2" 
-            :src="serverFilesPath + userPhoto" 
+          <q-img
+            v-if="userPhoto&&userPhoto.length>2"
+            :src="serverFilesPath + userPhoto"
             basic style="width: 30px; max-height: 35px;"
             spinner-color="white"
             class="rounded-borders"
             />
           <q-avatar v-if="!(userPhoto&&userPhoto.length>2)" color="primary" text-color="white" icon="fas fa-user" size="md" />
-          
+
           <q-menu auto-close content-style="min-width: 325px;" >
             <q-card bordered class="text-primary q-pa-sm">
               <q-list separator dense>
                 <q-item>
                   <q-item-section avatar>
-                      <q-img 
-                        v-if="userPhoto" 
-                        :src="serverFilesPath + userPhoto" 
+                      <q-img
+                        v-if="userPhoto"
+                        :src="serverFilesPath + userPhoto"
                         basic style="width: 120px"
                         spinner-color="white"
                         class="rounded-borders"
@@ -164,8 +164,8 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer elevated bordered  v-model="leftDrawerOpen" >
-      <q-list class="text-grey-7" separator bordered>
+    <q-drawer elevated   v-model="leftDrawerOpen" >
+      <q-list class="text-grey-7"  >
         <!--
           <q-item
           v-for="(root,index) in menuData.filter(x=>x.parent==null&&x.sys_link_id!=99)" :key="index"
@@ -200,7 +200,7 @@
                 clickable @click="openModule(module)" dense
                 :active="module.link_name==currentPathModule"
                 active-class="text-primary text-weight-bold"
-                expand-separator 
+                expand-separator
                 >
                 <q-item-section side class="q-pl-lg">
                   <q-icon :name="module.icon" size="1rem" :color="module.link_name==currentPathModule?'primary':undefined" />
@@ -233,19 +233,19 @@ Vue.use(Vuex)
 export default {
   name: 'MainLayout',
 
-  created(){    
+  created(){
     this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
     if(! (this.$q.sessionStorage.getItem('sys_user_code') && this.$q.sessionStorage.getItem('sys_profile_id') && this.$q.sessionStorage.getItem('jwtToken') ) ){
       this.$q.notify({color: 'info', message: 'Ingrese su usuario y contraseña', timeout: 3000, icon: "fas fa-lock" });
       this.router.replace('/Login'); //navigate to login
       return;
     }
-    
+
     this.$axios({
       method: 'GET',
       url: this.apiURL + 'spSysUserMainData',
       headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-      params: { 
+      params: {
           sys_user_code: this.$q.sessionStorage.getItem('sys_user_code'),
           sys_profile_id: this.$q.sessionStorage.getItem('sys_profile_id'),
           sys_user_language: null
@@ -277,7 +277,7 @@ export default {
           //}else{ this.router.push({ path: '/RootHome' }) }
           }//else{ this.router.push({ path: '/' }) }
         }catch(ex){console.dir(ex)}
-        
+
       }
       this.$q.loading.hide()
     }).catch((error) => {
@@ -288,7 +288,7 @@ export default {
       if(error && error.response && error.response.data && error.response.data.info && error.response.data.info.message){
           mensaje = mensaje + ': ' + error.response.data.info.message
       }
-      this.$q.notify({ 
+      this.$q.notify({
           color: 'red'
           ,position: 'bottom'
           ,message: mensaje
@@ -347,7 +347,7 @@ export default {
     poolNotifications(){
       this.interval = setInterval(function () {
         this.loadNotifications();
-      }.bind(this), this.notificationInterval); 
+      }.bind(this), this.notificationInterval);
     },
     loadNotifications(){
       this.isNotificationBusy = true;
@@ -355,7 +355,7 @@ export default {
         method: 'GET',
         url: this.apiURL + 'spMyUnreadNotifications',
         headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-        params: { 
+        params: {
             userCode: this.userCode,
             userCompany: this.userCompany,
             userLanguage: 'es'
@@ -379,11 +379,11 @@ export default {
   },
 
   computed:{
-    userColor: { 
-      get () { return this.$store.state.main.userColor }, 
-      set (val) { this.$store.commit('main/updateState', {key: 'userColor', value: val}) }  
+    userColor: {
+      get () { return this.$store.state.main.userColor },
+      set (val) { this.$store.commit('main/updateState', {key: 'userColor', value: val}) }
     },
-    userMainLayoutToolbar: { get () { 
+    userMainLayoutToolbar: { get () {
       let result = 'no-padding '
       if(this.$store.state.main.userColor=='default'){
         result=result + 'bg-primary text-white'
@@ -397,7 +397,7 @@ export default {
       }
       return result
     }},
-    userMainDrawer: { get () { 
+    userMainDrawer: { get () {
       let result = 'no-padding '
       if(this.$store.state.main.userColor=='default'){
         result=result + 'text-primary'
