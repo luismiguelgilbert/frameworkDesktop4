@@ -16,6 +16,9 @@ import Notifications from './Notifications' //Bitacora Rounds
 import Employees from './Employees' //Bitacora Rounds
 import Equipistas from './Equipistas' //Equipistas
 import Equipista from './Equipista' //Equipista
+import ChartAccount from './ChartAccount' //Equipista
+import Taxes from './Taxes' //Equipista
+import TaxesMaster from './TaxesMaster' //Equipista
 
 Vue.use(Vuex)
 
@@ -37,6 +40,9 @@ export default function (/* { ssrContext } */) {
       ,Employees
       ,Equipista
       ,Equipistas
+      ,ChartAccount
+      ,Taxes
+      ,TaxesMaster
     },
 
     // enable strict mode (adds overhead!)

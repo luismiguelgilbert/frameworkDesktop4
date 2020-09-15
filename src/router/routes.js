@@ -21,6 +21,8 @@ const routes = [
       ,{ path: 'RootSystem/ModulesEdit', component: () => import('pages/RootSystem/Modules/ModulesEdit.vue') }
       ,{ path: 'RootSystem/Notifications', component: () => import('pages/RootSystem/Notifications/Notifications.vue') }
       ,{ path: 'RootSystem/NotificationsEdit', component: () => import('pages/RootSystem/Notifications/NotificationsEdit.vue') }
+      ,{ path: 'RootSystem/TaxesMaster', component: () => import('pages/RootSystem/TaxesMaster/TaxesMaster.vue') }
+      ,{ path: 'RootSystem/TaxesMasterEdit', component: () => import('pages/RootSystem/TaxesMaster/TaxesMasterEdit.vue') }
       //BITACORA
       ,{ path: 'RootBitacora/Bitaplaces', component: () => import('pages/RootBitacora/Bitaplaces/Bitaplaces.vue') }
       ,{ path: 'RootBitacora/BitaplacesEdit', component: () => import('pages/RootBitacora/Bitaplaces/BitaplacesEdit.vue') }
@@ -43,6 +45,12 @@ const routes = [
       //ENS
       ,{ path: 'RootENS/Equipistas', component: () => import('pages/RootENS/Equipistas/Equipistas.vue') }
       ,{ path: 'RootENS/Equipista', component: () => import('pages/RootENS/Equipista/Equipista.vue') }
+      //FINANZAS
+      ,{ path: 'RootAccounting/ChartAccount', component: () => import('pages/RootAccounting/ChartAccount/ChartAccount.vue') }
+      ,{ path: 'RootAccounting/ChartAccountEdit', component: () => import('pages/RootAccounting/ChartAccount/ChartAccountEdit.vue') }
+      ,{ path: 'RootAccounting/Taxes', component: () => import('pages/RootAccounting/Taxes/Taxes.vue') }
+      ,{ path: 'RootAccounting/TaxesEdit', component: () => import('pages/RootAccounting/Taxes/TaxesEdit.vue') }
+
       //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/Employees.vue') }
     ]
