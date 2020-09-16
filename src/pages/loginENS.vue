@@ -1,8 +1,8 @@
 <template>
 <q-card class="fixed-center shadow-5" style="min-width: 300px; max-width: 400px; margin: 0 auto;">
     <q-toolbar class="text-primary">
-        <q-img src="logoTransparent.png" width="100px" class="q-ma-sm" />
-        <div class="q-pl-md text-subtitle2" >Ingresar a Framework</div>
+        <q-img src="ens.png" width="100px" class="q-ma-sm" />
+        <div class="q-pl-md text-subtitle2" >Ingresar a ENS</div>
         <q-toolbar-title />
         <q-btn flat icon="fas fa-desktop" to="/loginMobile" title="Cambiar a Modo Celular" />
     </q-toolbar>
@@ -43,7 +43,7 @@ export default {
   },
   created(){
       console.dir(window.location)
-      alert('Estoy en Login')
+      alert('Estoy en Login ENS')
       alert(window.location.href)
       this.$q.sessionStorage.clear();//Clear Storage
       Object.keys(this.$store.state).map(x=>{this.$store.commit(x+'/resetToDefaultState');})//Loop across all vuex states, and reset each state to its initial status

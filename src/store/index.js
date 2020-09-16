@@ -19,6 +19,7 @@ import Equipista from './Equipista' //Equipista
 import ChartAccount from './ChartAccount' //Equipista
 import Taxes from './Taxes' //Equipista
 import TaxesMaster from './TaxesMaster' //Equipista
+import AccPeriods from './AccPeriods' //Equipista
 
 Vue.use(Vuex)
 
@@ -43,6 +44,7 @@ export default function (/* { ssrContext } */) {
       ,ChartAccount
       ,Taxes
       ,TaxesMaster
+      ,AccPeriods
     },
 
     // enable strict mode (adds overhead!)

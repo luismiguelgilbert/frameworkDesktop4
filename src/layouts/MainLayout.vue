@@ -234,10 +234,15 @@ export default {
   name: 'MainLayout',
 
   created(){
+    console.dir(window.location)
+    alert('Estoy en MainLayout')
+    alert(window.location.href)
     this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
     if(! (this.$q.sessionStorage.getItem('sys_user_code') && this.$q.sessionStorage.getItem('sys_profile_id') && this.$q.sessionStorage.getItem('jwtToken') ) ){
       this.$q.notify({color: 'info', message: 'Ingrese su usuario y contraseña', timeout: 3000, icon: "fas fa-lock" });
-      this.router.replace('/Login'); //navigate to login
+      //this.router.replace('/Login'); //navigate to login
+      this.router.replace('/LoginENS'); //navigate to login
+      //this.router.replace('/LoginSchoenstatt'); //navigate to login
       return;
     }
 

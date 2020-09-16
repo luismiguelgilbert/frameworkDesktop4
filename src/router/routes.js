@@ -1,6 +1,8 @@
 
 const routes = [
   { path: '/login', name: 'login', component: () => import('pages/login.vue') },
+  { path: '/loginENS', name: 'login', component: () => import('pages/loginENS.vue') },
+  { path: '/loginSchoenstatt', name: 'login', component: () => import('pages/loginSchoenstatt.vue') },
   {
     path: '/', component: () => import('layouts/MainLayout.vue'),
     children: [
@@ -50,6 +52,8 @@ const routes = [
       ,{ path: 'RootAccounting/ChartAccountEdit', component: () => import('pages/RootAccounting/ChartAccount/ChartAccountEdit.vue') }
       ,{ path: 'RootAccounting/Taxes', component: () => import('pages/RootAccounting/Taxes/Taxes.vue') }
       ,{ path: 'RootAccounting/TaxesEdit', component: () => import('pages/RootAccounting/Taxes/TaxesEdit.vue') }
+      ,{ path: 'RootAccounting/AccPeriods', component: () => import('pages/RootAccounting/AccPeriods/AccPeriods.vue') }
+      ,{ path: 'RootAccounting/AccPeriodsEdit', component: () => import('pages/RootAccounting/AccPeriods/AccPeriodsEdit.vue') }
 
       //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/Employees.vue') }
