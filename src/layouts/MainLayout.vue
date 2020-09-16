@@ -234,7 +234,7 @@ export default {
   name: 'MainLayout',
 
   created(){
-    console.dir(window.location)
+    console.dir(window.location.pathname)
     alert('Estoy en MainLayout')
     alert(window.location.href)
     this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
