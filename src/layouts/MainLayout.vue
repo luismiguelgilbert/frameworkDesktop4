@@ -234,6 +234,7 @@ export default {
   name: 'MainLayout',
 
   created(){
+    console.dir('window.location.pathname')
     console.dir(window.location.pathname)
     alert('Estoy en MainLayout')
     alert(window.location.href)
