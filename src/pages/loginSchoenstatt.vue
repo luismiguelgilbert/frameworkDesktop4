@@ -43,7 +43,7 @@ export default {
     }
   },
   created(){
-      console.dir('window.location.pathname')
+      console.dir('1window.location.pathname')
       console.dir(window.location.pathname)
       alert('Estoy en Login Schoenstatt')
       alert(window.location.href)
