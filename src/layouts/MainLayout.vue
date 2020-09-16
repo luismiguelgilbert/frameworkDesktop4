@@ -234,16 +234,19 @@ export default {
   name: 'MainLayout',
 
   created(){
-    console.dir('window.location.pathname')
-    console.dir(window.location.pathname)
-    alert('Estoy en MainLayout')
-    alert(window.location.href)
+    this.$q.sessionStorage.set('pathname',window.location.pathname)
     this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
     if(! (this.$q.sessionStorage.getItem('sys_user_code') && this.$q.sessionStorage.getItem('sys_profile_id') && this.$q.sessionStorage.getItem('jwtToken') ) ){
       this.$q.notify({color: 'info', message: 'Ingrese su usuario y contraseña', timeout: 3000, icon: "fas fa-lock" });
-      //this.router.replace('/Login'); //navigate to login
-      this.router.replace('/LoginENS'); //navigate to login
-      //this.router.replace('/LoginSchoenstatt'); //navigate to login
+      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
+        this.router.replace('/LoginENS'); //navigate to login
+      }
+      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
+        this.router.replace('/LoginSchoenstatt'); //navigate to login
+      }
+      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
+        this.router.replace('/Login'); //navigate to login
+      }
       return;
     }
 
@@ -347,8 +350,16 @@ export default {
       this.userCompany = company.companyID
     },
     logOut(){
-      this.router.push({ path: '/Login' })//states se resetean en el created de Login
       clearInterval(this.interval)
+      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
+        this.router.replace('/LoginENS'); //navigate to login
+      }
+      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
+        this.router.replace('/LoginSchoenstatt'); //navigate to login
+      }
+      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
+        this.router.replace('/Login'); //navigate to login
+      }
     },
     poolNotifications(){
       this.interval = setInterval(function () {
@@ -393,7 +404,20 @@ export default {
       let result = 'no-padding '
       if(this.$store.state.main.userColor=='default'){
         result=result + 'bg-primary text-white'
-        colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0
+
+        if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
+          console.dir('Branding ENS')
+          colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0
+        }
+        if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
+          console.dir('Branding Schoenstatt')
+          colors.setBrand('primary', '#FBC42A') //#1976D2 //1867C0
+        }
+        if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
+          console.dir('Branding Framework')
+          colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0
+        }
+
         this.$q.dark.set(false)
       }
       if(this.$store.state.main.userColor=='blackDark'){

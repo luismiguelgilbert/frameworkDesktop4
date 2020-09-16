@@ -1,10 +1,10 @@
 <template>
 <q-card class="fixed-center shadow-5" style="min-width: 300px; max-width: 400px; margin: 0 auto;">
     <q-toolbar class="text-primary">
-        <q-img src="ens.png" width="100px" class="q-ma-sm" />
+        <q-img src="ens.png" width="100px" height="50px" class="q-ma-sm" />
         <div class="q-pl-md text-subtitle2" >Ingresar a ENS</div>
         <q-toolbar-title />
-        <q-btn flat icon="fas fa-desktop" to="/loginMobile" title="Cambiar a Modo Celular" />
+        <!--<q-btn flat icon="fas fa-desktop" to="/loginMobile" title="Cambiar a Modo Celular" />-->
     </q-toolbar>
     <q-separator />
     <q-card-section class="text-primary q-pa-xl">
@@ -42,11 +42,8 @@ export default {
     }
   },
   created(){
-      console.dir('window.location.pathname')
-      console.dir(window.location.pathname)
-      alert('Estoy en Login ENS')
-      alert(window.location.href)
       this.$q.sessionStorage.clear();//Clear Storage
+      this.$q.sessionStorage.set('pathname',window.location.pathname)
       Object.keys(this.$store.state).map(x=>{this.$store.commit(x+'/resetToDefaultState');})//Loop across all vuex states, and reset each state to its initial status
       colors.setBrand('primary', '#1867C0') //#1976D2
       this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
