@@ -10,16 +10,18 @@ import Bitaplaces from './Bitaplaces' //Bitacora Places Companies
 import Bitaconsola from './Bitaconsola' //Bitacora Consola
 import BitaRoutes from './BitaRoutes' //Bitacora Routes GPS
 import BitaRounds from './BitaRounds' //Bitacora Rounds
-import BitaCars from './BitaCars' //Bitacora Rounds
-import BitacoraPeople from './BitacoraPeople' //Bitacora Rounds
-import Notifications from './Notifications' //Bitacora Rounds
-import Employees from './Employees' //Bitacora Rounds
+import BitaCars from './BitaCars' //BitaCars Cars
+import BitacoraPeople from './BitacoraPeople' //BitacoraPeople
+import Notifications from './Notifications' //Notifications
+import Employees from './Employees' //Employees
 import Equipistas from './Equipistas' //Equipistas
 import Equipista from './Equipista' //Equipista
-import ChartAccount from './ChartAccount' //Equipista
-import Taxes from './Taxes' //Equipista
-import TaxesMaster from './TaxesMaster' //Equipista
-import AccPeriods from './AccPeriods' //Equipista
+import ChartAccount from './ChartAccount' //ChartAccount
+import Taxes from './Taxes' //Taxes
+import TaxesMaster from './TaxesMaster' //TaxesMaster
+import AccPeriods from './AccPeriods' //AccPeriods
+import SCHPersonas from './SCHPersonas' //SCHPersonas
+import SCHPersona from './SCHPersona' //SCHPersona
 
 Vue.use(Vuex)
 
@@ -45,6 +47,8 @@ export default function (/* { ssrContext } */) {
       ,Taxes
       ,TaxesMaster
       ,AccPeriods
+      ,SCHPersonas
+      ,SCHPersona
     },
 
     // enable strict mode (adds overhead!)

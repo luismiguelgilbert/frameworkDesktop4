@@ -166,26 +166,6 @@
 
     <q-drawer elevated   v-model="leftDrawerOpen" >
       <q-list class="text-grey-7"  >
-        <!--
-          <q-item
-          v-for="(root,index) in menuData.filter(x=>x.parent==null&&x.sys_link_id!=99)" :key="index"
-          clickable
-          :active="root.link_name==currentPath"
-          active-class="text-primary text-weight-bold"
-          >
-            <q-item-section avatar>
-              <q-icon :name="root.icon" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label :title="root.comment">{{root.label}}</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-icon name="fas fa-chevron-right" />
-            </q-item-section>
-            <q-menu anchor="top right" self="top left">
-              <q-list class="text-grey-7">
-                <q-item
-          -->
         <q-expansion-item
           v-for="(root,index) in menuData.filter(x=>x.parent==null&&x.sys_link_id!=99&&x.sys_link_id!=98)" :key="index"
           group="sameRootGroup"

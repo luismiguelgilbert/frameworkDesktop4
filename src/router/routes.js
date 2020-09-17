@@ -54,9 +54,12 @@ const routes = [
       ,{ path: 'RootAccounting/TaxesEdit', component: () => import('pages/RootAccounting/Taxes/TaxesEdit.vue') }
       ,{ path: 'RootAccounting/AccPeriods', component: () => import('pages/RootAccounting/AccPeriods/AccPeriods.vue') }
       ,{ path: 'RootAccounting/AccPeriodsEdit', component: () => import('pages/RootAccounting/AccPeriods/AccPeriodsEdit.vue') }
-
       //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/Employees.vue') }
+      //SCHOENSTATT
+      ,{ path: 'RootSchoenstatt/SCHPersonas', component: () => import('pages/RootSchoenstatt/SCHPersonas/SCHPersonas.vue') }
+      ,{ path: 'RootSchoenstatt/SCHPersonasEdit', component: () => import('pages/RootSchoenstatt/SCHPersonas/SCHPersonasEdit.vue') }
+      ,{ path: 'RootSchoenstatt/SCHPersona', component: () => import('pages/RootSchoenstatt/SCHPersona/SCHPersona.vue') }
     ]
   },
 

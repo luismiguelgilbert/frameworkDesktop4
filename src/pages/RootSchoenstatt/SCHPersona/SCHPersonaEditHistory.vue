@@ -101,7 +101,7 @@ import Vuex from 'vuex';
 export default ({
     data () {
         return {
-            moduleName: "SCHPersonas", pagination: { rowsPerPage: 0 },
+            moduleName: "SCHPersona", pagination: { rowsPerPage: 0 },
         }
     },
     methods:{
