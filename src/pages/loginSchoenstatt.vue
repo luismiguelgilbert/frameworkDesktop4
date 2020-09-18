@@ -46,7 +46,7 @@ export default {
       this.$q.sessionStorage.clear();//Clear Storage
       this.$q.sessionStorage.set('pathname',window.location.pathname)
       Object.keys(this.$store.state).map(x=>{this.$store.commit(x+'/resetToDefaultState');})//Loop across all vuex states, and reset each state to its initial status
-      colors.setBrand('primary', '#673AB7') //#1976D2 // #1867C0
+      colors.setBrand('primary', '#1867C0') //#1976D2 // #1867C0
       this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
       this.$q.dark.set(false)//force darkMode to be off always
       //apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data')

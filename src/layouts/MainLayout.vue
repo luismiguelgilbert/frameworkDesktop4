@@ -391,7 +391,7 @@ export default {
         }
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
           console.dir('Branding Schoenstatt')
-          colors.setBrand('primary', '#FBC42A') //#1976D2 //1867C0
+          colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0 //FBC42A
         }
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
           console.dir('Branding Framework')
