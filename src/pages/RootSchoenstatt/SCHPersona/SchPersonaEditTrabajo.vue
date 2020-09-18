@@ -167,11 +167,11 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { return true }, },
+        allow_edit: { get () { return true }, },
+        allow_insert: { get () { return true }, },
+        allow_report: { get () { return true }, },
+        allow_disable: { get () { return true }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         jobs: {
             get () { return this.$store.state[this.moduleName].editData.jobs },
