@@ -60,6 +60,14 @@ const routes = [
       ,{ path: 'RootSchoenstatt/SCHPersonas', component: () => import('pages/RootSchoenstatt/SCHPersonas/SCHPersonas.vue') }
       ,{ path: 'RootSchoenstatt/SCHPersonasEdit', component: () => import('pages/RootSchoenstatt/SCHPersonas/SCHPersonasEdit.vue') }
       ,{ path: 'RootSchoenstatt/SCHPersona', component: () => import('pages/RootSchoenstatt/SCHPersona/SCHPersona.vue') }
+      ,{ path: 'RootSchoenstatt/SCHGroups', component: () => import('pages/RootSchoenstatt/SCHGroups/SCHGroups.vue') }
+      ,{ path: 'RootSchoenstatt/SCHGroupsEdit', component: () => import('pages/RootSchoenstatt/SCHGroups/SCHGroupsEdit.vue') }
+      ,{ path: 'RootSchoenstatt/SCHSectores', component: () => import('pages/RootSchoenstatt/SCHSectores/SCHSectores.vue') }
+      ,{ path: 'RootSchoenstatt/SCHSectoresEdit', component: () => import('pages/RootSchoenstatt/SCHSectores/SCHSectoresEdit.vue') }
+      ,{ path: 'RootSchoenstatt/SCHApostolados', component: () => import('pages/RootSchoenstatt/SCHApostolados/SCHApostolados.vue') }
+      ,{ path: 'RootSchoenstatt/SCHApostoladosEdit', component: () => import('pages/RootSchoenstatt/SCHApostolados/SCHApostoladosEdit.vue') }
+      ,{ path: 'RootSchoenstatt/SCHFormaciones', component: () => import('pages/RootSchoenstatt/SCHFormaciones/SCHFormaciones.vue') }
+      ,{ path: 'RootSchoenstatt/SCHFormacionesEdit', component: () => import('pages/RootSchoenstatt/SCHFormaciones/SCHFormacionesEdit.vue') }
     ]
   },
 

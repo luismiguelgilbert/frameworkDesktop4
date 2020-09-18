@@ -22,6 +22,10 @@ import TaxesMaster from './TaxesMaster' //TaxesMaster
 import AccPeriods from './AccPeriods' //AccPeriods
 import SCHPersonas from './SCHPersonas' //SCHPersonas
 import SCHPersona from './SCHPersona' //SCHPersona
+import SCHApostolados from './SCHApostolados' //SCHApostolados
+import SCHFormaciones from './SCHFormaciones' //SCHFormaciones
+import SCHGroups from './SCHGroups' //SCHGroups
+import SCHSectores from './SCHSectores' //SCHSectores
 
 Vue.use(Vuex)
 
@@ -49,6 +53,10 @@ export default function (/* { ssrContext } */) {
       ,AccPeriods
       ,SCHPersonas
       ,SCHPersona
+      ,SCHApostolados
+      ,SCHFormaciones
+      ,SCHGroups
+      ,SCHSectores
     },
 
     // enable strict mode (adds overhead!)
