@@ -22,9 +22,9 @@ export default function () {
      ,editMode: false //false = edit || new = new
      ,editData: {
         basic: {}
-       ,system: {}
-       ,users: []
-       ,rucLengths: []
+       ,contacts: []
+       ,files: []
+       ,owners: []
        ,history: []
      }
      ,moduleReports: []

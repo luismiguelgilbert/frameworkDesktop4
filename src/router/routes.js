@@ -44,6 +44,11 @@ const routes = [
       ,{ path: 'RootPurchase/PurchaseRequisition', component: () => import('pages/RootPurchase/PurchaseRequisition/PurchaseRequisition.vue') }
       ,{ path: 'RootPurchase/PurchaseRequisitionEdit', component: () => import('pages/RootPurchase/PurchaseRequisition/PurchaseRequisitionEdit.vue') }
       ,{ path: 'RootPurchase/PurchaseQuotes', component: () => import('pages/RootPurchase/PurchaseQuotes/PurchaseQuotes.vue') }
+      //ROOT_MASTER
+      ,{ path: 'RootMaster/Partners', component: () => import('pages/RootMaster/Partners/Partners.vue') }
+      ,{ path: 'RootMaster/PartnersEdit', component: () => import('pages/RootMaster/Partners/PartnersEdit.vue') }
+      ,{ path: 'RootMaster/Items', component: () => import('pages/RootMaster/Items/Items.vue') }
+      ,{ path: 'RootMaster/ItemsEdit', component: () => import('pages/RootMaster/Items/ItemsEdit.vue') }
       //ENS
       ,{ path: 'RootENS/Equipistas', component: () => import('pages/RootENS/Equipistas/Equipistas.vue') }
       ,{ path: 'RootENS/Equipista', component: () => import('pages/RootENS/Equipista/Equipista.vue') }

@@ -7,9 +7,9 @@
             input-class="text-white"
             :color="userColor=='blackDark'?'black':'primary'"
             debounce="1000" v-model="currentFilterSearch" dense  placeholder="Buscar"
-            autofocus style="min-width: 120px"
+            autofocus style="min-width: 120px;"
             maxlength="100" @input="applySearch" class="q-ml-sm " >
-            <template v-slot:prepend>
+            <template v-slot:prepend style="min-width: 120px; max-height: 20px;">
                 <q-icon name="fas fa-search" color="white">
                     <q-tooltip content-class="bg-positive" :offset="[10, 10]">
                         Campos buscados:
@@ -26,7 +26,7 @@
             v-shortkey="['alt', 'n']" @shortkey="openEditForm({value: 0, row: null}, true)"
             @click="openEditForm({value: 0, row: null}, true)"
             :disable="!allow_insert" style="height: 40px;"
-            class="q-ml-xs" title="Crear nuevo documento" >
+            class="q-ml-xs no-shadow" title="Crear nuevo documento" >
             <q-icon name="fas fa-plus-circle" color="white" />
             <div class="text-white q-pl-xs gt-sm"><u>N</u>uevo</div>
         </q-btn>
@@ -278,7 +278,6 @@ export default ({
                 })
             })
         },
-
   },
   computed:{
 
@@ -344,7 +343,7 @@ export default ({
     },
     currentReportData: {
         /*get () { return this.$store.state[this.moduleName].currentReportData },
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'currentReportData', value: val}) }*/
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'currentReportData', value: val}) }  */
         get () { return this.$store.statemain.currentReportData },
         set (val) { this.$store.commit('main/updateState', {key: 'currentReportData', value: val}) }
     },

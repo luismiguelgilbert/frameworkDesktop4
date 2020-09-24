@@ -101,7 +101,7 @@ import Vuex from 'vuex';
 export default ({
     data () {
         return {
-            moduleName: "AccPeriods", pagination: { rowsPerPage: 0 },
+            moduleName: "Partners", pagination: { rowsPerPage: 0 },
         }
     },
     methods:{

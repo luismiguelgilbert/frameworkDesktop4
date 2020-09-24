@@ -25,6 +25,10 @@ export const updateEditDataUsers = (state, value) => {
     state.editData.users = value
 }
 
+export const updateEditDataRucLengths = (state, value) => {
+  state.editData.rucLengths = value
+}
+
 export const resetToDefaultState = (state) => {
     Object.keys(index.intialState).map(x=>{
         state[x] = index.intialState[x]

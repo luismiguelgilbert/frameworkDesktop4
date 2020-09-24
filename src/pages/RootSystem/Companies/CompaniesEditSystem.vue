@@ -1,29 +1,17 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">    
+<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <q-toggle
         v-model="obligado_contabilidad" color="positive" label="Lleva Contabilidad?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-    <q-input 
-        ref="logo_path" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Ingrese la ruta donde se encuentra su logo a utilizar en los documentos" label="Logo" filled
-        v-model="logo_path"
-        :rules="[
-                val => val.length > 4 || 'Campo debe tener al menos 5 carateres',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="far fa-file-image" /></template>
-    </q-input>
-    <q-input 
-        ref="mail_logo_path" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Ingrese la ruta donde se encuentra su logo a utilizar en la firma los correos electrónicos" label="Firma en Correos" filled
-        v-model="mail_logo_path"
-        :rules="[
-                val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-envelope" /></template>
-    </q-input>
-    <q-select 
+    <q-file class="q-mb-md"
+      filled v-model="reportImage" label="Seleccionar nuevo Logo para usar en Reportes"
+      @input="newReportImage" clearable accept=".jpg, image/*" />
+
+    <q-file class="q-mb-md"
+      filled v-model="mailImage" label="Seleccionar nuevo Logo para usar en Correos Electrónicos"
+      @input="newMailImage" clearable accept=".jpg, image/*" />
+
+    <q-select
         label="Número Máximo de Decimales usado en campos numéricos (*)" placeholder="Número Máximo de Decimales usado en campos numéricos" emit-value map-options filled
         :options="[{value: 1, label: '1'},{value: 2, label: '2'},{value: 3, label: '3'},{value: 4, label: '4'},{value: 5, label: '5'}, {value: 6, label: '6'}]"
         :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -35,7 +23,7 @@
         ]">
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-select>
-    <q-select 
+    <q-select
         label="Número Máximo de Decimales usado en campos de dinero (*)" placeholder="Número Máximo de Decimales usado en campos de dinero" emit-value map-options filled
         :options="[{value: 1, label: '1'},{value: 2, label: '2'},{value: 3, label: '3'},{value: 4, label: '4'},{value: 5, label: '5'}, {value: 6, label: '6'}]"
         :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -47,13 +35,13 @@
         ]">
         <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
     </q-select>
-    <!--<q-input 
+    <!--<q-input
         label="Correo Electrónico" placeholder="Ingrese los apellidos del usuario"  filled class="q-mb-lg"
         v-model="sys_user_mail" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         >
         <template v-slot:prepend><q-icon name="fas fa-envelope" /></template>
     </q-input>
-    <q-select 
+    <q-select
         label="Color Preferido (*)" placeholder="Seleccione el color preferido" emit-value map-options filled
         :options="[ { label: 'Default', value: 'default' }, { label: 'Dark', value: 'blackDark' },]"
         v-model="sys_user_color" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -72,9 +60,9 @@
     <q-card>
         <q-toolbar>
             <q-toolbar-title>Abrir automáticamente al iniciar sesión</q-toolbar-title>
-            <q-btn 
+            <q-btn
                 v-if="sys_link_id"  :disable="!allow_edit&&!allow_insert"
-                icon="fas fa-eraser" color="primary" label="Limpiar Selección" 
+                icon="fas fa-eraser" color="primary" label="Limpiar Selección"
                 @click="sys_link_id=null" />
         </q-toolbar>
         <q-separator />
@@ -107,24 +95,24 @@ export default ({
         this.$refs.formulario.validate()
     },
     methods:{
-        /*isFieldErrorBG(fieldName) {
-            console.dir('isFieldErrorBG: '+fieldName)
-            console.dir(this.$refs.length)
-            if(Object.keys(this.$refs).length>0){//espera que existan datos 
-                return this.$refs[fieldName].hasError?'red':undefined
-            }
-        },
-        isFieldErrorText(fieldName) {
-            if(Object.keys(this.$refs).length>0){//espera que existan datos 
-                return this.$refs[fieldName].hasError?'text-white':undefined
-            }
-        },
-        isFieldErrorLabel(fieldName) {
-            if(Object.keys(this.$refs).length>0){//espera que existan datos 
-                return this.$refs[fieldName].hasError?'white':undefined
-            }
-        },*/
-        
+      newReportImage(file){
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.reportImageNew = e.target.result;
+          let removeIndex = parseInt(this.reportImageNew.indexOf(','))  + 1
+          this.reportImageNew = this.reportImageNew.substring(removeIndex) // remove data header
+        }
+        reader.readAsDataURL(file)
+      },
+      newMailImage(file){
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.mailImageNew = e.target.result;
+          let removeIndex = parseInt(this.mailImageNew.indexOf(','))  + 1
+          this.mailImageNew = this.mailImageNew.substring(removeIndex) // remove data header
+        }
+        reader.readAsDataURL(file)
+      },
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
@@ -134,33 +122,49 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        obligado_contabilidad: { 
-            get () { return this.$store.state[this.moduleName].editData.system.obligado_contabilidad }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'obligado_contabilidad', value: val}) }  
+        obligado_contabilidad: {
+            get () { return this.$store.state[this.moduleName].editData.system.obligado_contabilidad },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'obligado_contabilidad', value: val}) }
         },
-        logo_path: { 
-            get () { return this.$store.state[this.moduleName].editData.system.logo_path }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'logo_path', value: val}) }  
+        reportImage: {
+            get () { return this.$store.state[this.moduleName].editData.system.reportImage },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'reportImage', value: val}) }
         },
-        mail_logo_path: { 
-            get () { return this.$store.state[this.moduleName].editData.system.mail_logo_path }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'mail_logo_path', value: val}) }  
+        reportImageNew: {
+            get () { return this.$store.state[this.moduleName].editData.system.reportImageNew },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'reportImageNew', value: val}) }
         },
-        decimal_numbers: { 
-            get () { return this.$store.state[this.moduleName].editData.system.decimal_numbers }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'decimal_numbers', value: val}) }  
+        mailImage: {
+            get () { return this.$store.state[this.moduleName].editData.system.mailImage },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'mailImage', value: val}) }
         },
-        decimal_amount: { 
-            get () { return this.$store.state[this.moduleName].editData.system.decimal_amount }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'decimal_amount', value: val}) }  
+        mailImageNew: {
+            get () { return this.$store.state[this.moduleName].editData.system.mailImageNew },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'mailImageNew', value: val}) }
         },
-        
-        /*lookup_profiles: { 
-            get () { return this.$store.state[this.moduleName].editData.lookup_profiles }, 
+        logo_path: {
+            get () { return this.$store.state[this.moduleName].editData.system.logo_path },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'logo_path', value: val}) }
+        },
+        mail_logo_path: {
+            get () { return this.$store.state[this.moduleName].editData.system.mail_logo_path },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'mail_logo_path', value: val}) }
+        },
+        decimal_numbers: {
+            get () { return this.$store.state[this.moduleName].editData.system.decimal_numbers },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'decimal_numbers', value: val}) }
+        },
+        decimal_amount: {
+            get () { return this.$store.state[this.moduleName].editData.system.decimal_amount },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'decimal_amount', value: val}) }
+        },
+
+        /*lookup_profiles: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_profiles },
         },*/
-        sys_user_color: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sys_user_color', value: val}) }  
+        sys_user_color: {
+            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sys_user_color', value: val}) }
         },
     },
 })

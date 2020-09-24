@@ -14,7 +14,7 @@
     </q-input>
     <q-input
         ref="link_name" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Ingrese el nombre del link (*)" label="Link (*)" filled
+        placeholder="Ingrese el nombre de la ruta (*)" label="Nombre del Módulo (*)" filled
         v-model="link_name"
         :rules="[
                 val => !!val || '* Requerido',

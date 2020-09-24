@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nueva Compañía':'Editar Compañía: '+editRecord.value}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Socio':'Editar Socio: '+editRecord.value}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -22,31 +22,39 @@
                             <q-icon name="fas fa-info-circle" :color="tab=='basic'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Información de Compañía</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Información del Socio</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='system'" :active="tab=='system'" active-class="bg-primary text-white" >
+                    <q-item clickable @click="tab='picture'" :active="tab=='picture'" active-class="bg-primary text-white" >
                         <q-item-section side>
-                            <q-icon name="fas fa-cog" :color="tab=='system'?'white':'grey-7'" />
+                            <q-icon name="fas fa-camera"  :color="tab=='picture'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='system'?'text-white':'text-grey-7')">Configuración</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='picture'?'text-white':'text-grey-7')">Logo del Socio</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='users'" :active="tab=='users'" active-class="bg-primary text-white" >
+                    <q-item clickable @click="tab='contacts'" :active="tab=='contacts'" active-class="bg-primary text-white" >
                         <q-item-section side>
-                            <q-icon name="fas fa-users"  :color="tab=='users'?'white':'grey-7'" />
+                            <q-icon name="fas fa-address-book"  :color="tab=='contacts'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='users'?'text-white':'text-grey-7')">Lista de Usuarios</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='contacts'?'text-white':'text-grey-7')">Contactos del Socio</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='rucLength'" :active="tab=='rucLength'" active-class="bg-primary text-white" >
+                    <q-item clickable @click="tab='owners'" :active="tab=='owners'" active-class="bg-primary text-white" >
                         <q-item-section side>
-                            <q-icon name="fas fa-passport"  :color="tab=='rucLength'?'white':'grey-7'" />
+                            <q-icon name="fas fa-user-tie"  :color="tab=='owners'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='rucLength'?'text-white':'text-grey-7')">Control de RUCs</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='owners'?'text-white':'text-grey-7')">Vendedores Asignados</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
@@ -60,14 +68,37 @@
                 </q-list>
             </template>
 
-            <template v-slot:after >
-                <div class="q-mt-md q-ml-md q-mr-md">
-                    <basicComponent v-show="tab=='basic'" ref="basicComponent" />
-                    <systemComponent v-show="tab=='system'" ref="systemComponent" />
-                    <usersComponent v-show="tab=='users'" ref="usersComponent" />
-                    <rucComponent v-show="tab=='rucLength'" ref="rucComponent" />
-                    <historyComponent v-show="tab=='history'" ref="historyComponent" />
-                </div>
+            <template v-slot:after>
+                <q-tab-panels
+                    v-model="tab" keep-alive
+                    animated
+                    vertical
+                    transition-prev="jump-up"
+                    transition-next="jump-up"
+                    >
+                    <q-tab-panel name="basic">
+                        <basicComponent ref="basicComponent" />
+                    </q-tab-panel>
+
+                    <q-tab-panel name="contacts"> <contactsComponent ref="contactsComponent" /> </q-tab-panel>
+
+                    <q-tab-panel name="owners"> <ownersComponent ref="ownersComponent" /> </q-tab-panel>
+
+                    <q-tab-panel name="files">
+                        <filesComponent ref="filesComponent" />
+                    </q-tab-panel>
+
+
+                    <q-tab-panel name="picture">
+                        <pictureComponent />
+                    </q-tab-panel>
+
+                    <q-tab-panel name="history">
+                        <historyComponent />
+                    </q-tab-panel>
+
+                </q-tab-panels>
+
             </template>
 
             </q-splitter>
@@ -82,23 +113,27 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-import basicComponent from './CompaniesEditBasic'
-import usersComponent from './CompaniesEditUsers'
-import systemComponent from './CompaniesEditSystem'
-import rucComponent from './CompaniesEditRucLength'
-import historyComponent from './CompaniesEditHistory'
+import basicComponent from './PartnersEditBasic'
+import pictureComponent from './PartnersEditPicture'
+import contactsComponent from './PartnersEditContacts'
+import filesComponent from './PartnersEditFiles'
+import ownersComponent from './PartnersEditSales'
+import historyComponent from './PartnersEditHistory'
+
+
 
 export default ({
   components:{
      basicComponent: basicComponent
-    ,usersComponent: usersComponent
-    ,systemComponent: systemComponent
-    ,rucComponent: rucComponent
+    ,pictureComponent:pictureComponent
+    ,contactsComponent: contactsComponent
+    ,filesComponent: filesComponent
+    ,ownersComponent: ownersComponent
     ,historyComponent: historyComponent
   },
   data () {
     return {
-        moduleName: "Companies", router: this.$router,
+        moduleName: "Partners", router: this.$router,
         tab: 'basic', splitterModel: 250, dataLoaded: false,
     }
   },
@@ -124,13 +159,13 @@ export default ({
         this.loadingData = true
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spSysCompaniesSelectEdit',
+            url: this.apiURL + 'spPartnerMasterSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
-                userLanguage: 'es',
                 userCompany: this.userCompany,
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.sys_company_id_ux?this.editRecord.row.sys_company_id_ux:0,
+                userLanguage: 'es',
+                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.partnerID_ux?this.editRecord.row.partnerID_ux:0,
                 editMode: this.editMode
             }
         }).then((response) => {
@@ -140,6 +175,7 @@ export default ({
                 let name = x
                 newEditData[x] = JSON.parse(response.data[0][x])
             })
+            newEditData['password'] = '';//le agrego la contraseña, porque NO se recupera desde la base, y después quedaría como NULL limitando la reactividad
             this.editData = newEditData;
             this.loadingData = false
             this.dataLoaded = true
@@ -158,27 +194,6 @@ export default ({
         })
     },
     saveData(){
-        try{
-            this.loadingData = true
-            let promise1 = this.$refs.basicComponent.$refs.formulario.validate() //valida tab BASIC
-            let promise2 = this.$refs.systemComponent.$refs.formulario.validate() //valida tab SYSTEM
-            Promise.all([promise1, promise2]).then((resultados)=>{
-                if(resultados.filter(x=>x==false).length>0){
-                    this.loadingData = false
-                    this.$q.notify({ html: true, multiLine: false, color: 'red', message: "Revise el formulario" ,timeout: 1000, progress: true , icon: "fas fa-exclamation-circle"})
-                    if(resultados[0]==false){this.tab='basic'}
-                    if(resultados[1]==false){this.tab='system'}
-                }else{//NO hay errores, entonces guardar
-                    this.loadingData = false//xq usuario puede cancelar en la confirmación del diálogo
-                    this.saveDataExec();
-                }
-            })
-        }catch(ex){
-            this.loadingData = false
-            this.$q.notify({ html: true, multiLine: false, color: 'red', message: "Se produjo el siguiente error:<br/>"+ex.message ,timeout: 1000, progress: true , icon: "fas fa-exclamation-circle"})
-        }
-    },
-    saveDataExec(){
         this.$q.dialog({
                 title: 'CONFIRMACIÓN',
                 message: 'Desea guardar los datos?',
@@ -190,40 +205,41 @@ export default ({
 
                 let newEditData = {
                      basic: this.editData.basic
-                    ,system: this.editData.system
-                    ,users: this.editData.users.filter(x=>x.is_allowed).map(x=>x.sys_user_code)
-                    ,rucLengths: this.editData.rucLengths
+                    ,contacts: this.editData.contacts
+                    ,files: this.editData.files
+                    ,owners: this.editData.owners
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spSysCompaniesUpdate', {
-                    "sys_user_code": this.$q.sessionStorage.getItem('sys_user_code'),
-                    //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                    "currentRow": this.editMode?0:this.editRecord.row.sys_company_id_ux,
-                    "editRecord": JSON.stringify(newEditData),
-                }
-            , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
-            ).then((response) => {
-                this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
-                this.loadData = true;
-                //3 lines, same as goback (without confirmation)
-                this.editRecord = null;
-                this.editMode = false;
-                this.router.replace('/'+this.currentPathModule); //navigate to previous Main module
-            }).catch((error) => {
-                console.dir(error)
-                let mensaje = ''
-                if(error.message){ mensaje = error.message }
-                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                this.$q.notify({ html: true, multiLine: false, color: 'red'
-                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                this.$axios.post( this.apiURL + 'spPartnerMasterUpdate', {
+                        userCode: this.userCode,
+                        userCompany: this.userCompany,
+                        //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
+                        row_id: this.editMode?0:this.editRecord.row.partnerID_ux,
+                        "editRecord": JSON.stringify(newEditData),
+                    }
+                , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+                ).then((response) => {
+                    this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+                    this.loadData = true;
+                    //3 lines, same as goback (without confirmation)
+                    this.editRecord = null;
+                    this.editMode = false;
+                    this.router.replace('/'+this.currentPathModule); //navigate to previous Main module
+                }).catch((error) => {
+                    console.dir(error)
+                    let mensaje = ''
+                    if(error.message){ mensaje = error.message }
+                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                    this.$q.notify({ html: true, multiLine: false, color: 'red'
+                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                    })
+                    this.loadingData = false
                 })
-                this.loadingData = false
             })
-        })
     }
   },
   computed:{
