@@ -28,6 +28,9 @@ import SCHGroups from './SCHGroups' //SCHGroups
 import SCHSectores from './SCHSectores' //SCHSectores
 import Partners from './Partners' //partnerMaster
 import Items from './Items' //Items
+import Warehouses from './Warehouses' //Warehouses
+import UoM from './UoM' //UoM
+import Brands from './Brands' //Brands
 
 Vue.use(Vuex)
 
@@ -61,6 +64,9 @@ export default function (/* { ssrContext } */) {
       ,SCHSectores
       ,Partners
       ,Items
+      ,Warehouses
+      ,UoM
+      ,Brands
     },
 
     // enable strict mode (adds overhead!)

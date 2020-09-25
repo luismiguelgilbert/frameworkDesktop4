@@ -49,6 +49,12 @@ const routes = [
       ,{ path: 'RootMaster/PartnersEdit', component: () => import('pages/RootMaster/Partners/PartnersEdit.vue') }
       ,{ path: 'RootMaster/Items', component: () => import('pages/RootMaster/Items/Items.vue') }
       ,{ path: 'RootMaster/ItemsEdit', component: () => import('pages/RootMaster/Items/ItemsEdit.vue') }
+      ,{ path: 'RootMaster/Warehouses', component: () => import('pages/RootMaster/Warehouses/Warehouses.vue') }
+      ,{ path: 'RootMaster/WarehousesEdit', component: () => import('pages/RootMaster/Warehouses/WarehousesEdit.vue') }
+      ,{ path: 'RootMaster/UoM', component: () => import('pages/RootMaster/UoM/UoM.vue') }
+      ,{ path: 'RootMaster/UoMEdit', component: () => import('pages/RootMaster/UoM/UoMEdit.vue') }
+      ,{ path: 'RootMaster/Brands', component: () => import('pages/RootMaster/Brands/Brands.vue') }
+      ,{ path: 'RootMaster/BrandsEdit', component: () => import('pages/RootMaster/Brands/BrandsEdit.vue') }
       //ENS
       ,{ path: 'RootENS/Equipistas', component: () => import('pages/RootENS/Equipistas/Equipistas.vue') }
       ,{ path: 'RootENS/Equipista', component: () => import('pages/RootENS/Equipista/Equipista.vue') }

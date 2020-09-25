@@ -84,7 +84,7 @@
                 val => val!= null || '* Requerido',
         ]"
         >
-        <template v-slot:prepend><q-icon name="fas fa-balance-scale" /></template>
+        <template v-slot:prepend><q-icon name="fas fa-weight" /></template>
     </q-select>
 
     <q-select class="col-4"
