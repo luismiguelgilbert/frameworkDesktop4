@@ -72,10 +72,19 @@
     </q-select>
 
      <q-select class="q-mb-md q-pt-md"
-        label="Grupo Contable predeterminado para nuevos socios" placeholder="Seleccione el Grupo Contable predeterminado para nuevos socios (*)" emit-value map-options filled
+        label="Grupo Contable predeterminado para nuevos Socios" placeholder="Seleccione el Grupo Contable predeterminado para nuevos socios (*)" emit-value map-options filled
         :options="lookup_partner_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="default_partner_groupID"
         ref="default_partner_groupID"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-book" /></template>
+    </q-select>
+
+    <q-select class="q-mb-md q-pt-md"
+        label="Grupo Contable predeterminado para nuevos Items" placeholder="Seleccione el Grupo Contable predeterminado para nuevos Items (*)" emit-value map-options filled
+        :options="lookup_inv_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        v-model="default_inv_groupID"
+        ref="default_inv_groupID"
         >
         <template v-slot:prepend><q-icon name="fas fa-book" /></template>
     </q-select>
@@ -168,6 +177,10 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.default_partner_groupID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'default_partner_groupID', value: val}) }
         },
+        default_inv_groupID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.default_inv_groupID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'default_inv_groupID', value: val}) }
+        },
         lookup_countries: {
             get () { return this.$store.state[this.moduleName].editData.lookup_countries },
         },
@@ -176,6 +189,9 @@ export default ({
         },
         lookup_partner_groups: {
             get () { return this.$store.state[this.moduleName].editData.lookup_partner_groups },
+        },
+        lookup_inv_groups: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_inv_groups },
         },
 
     },

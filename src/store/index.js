@@ -27,6 +27,7 @@ import SCHFormaciones from './SCHFormaciones' //SCHFormaciones
 import SCHGroups from './SCHGroups' //SCHGroups
 import SCHSectores from './SCHSectores' //SCHSectores
 import Partners from './Partners' //partnerMaster
+import Items from './Items' //Items
 
 Vue.use(Vuex)
 
@@ -59,6 +60,7 @@ export default function (/* { ssrContext } */) {
       ,SCHGroups
       ,SCHSectores
       ,Partners
+      ,Items
     },
 
     // enable strict mode (adds overhead!)
