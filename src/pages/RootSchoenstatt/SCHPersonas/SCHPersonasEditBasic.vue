@@ -9,6 +9,7 @@
         label="Usuario (*)" placeholder="Seleccione el usuario (*)" emit-value map-options filled
         :options="lookup_users" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="sys_user_code"
+        :option-disable="opt => !opt.estado"
         ref="sys_user_code"
         :rules="[
                 val => val!= null || '* Requerido',

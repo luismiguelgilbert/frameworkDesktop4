@@ -40,10 +40,6 @@ const routes = [
       ,{ path: 'RootBitacora/BitacoraEvents', component: () => import('pages/RootBitacora/UserBitacoraEvents/BitacoraEvents.vue') }
       ,{ path: 'RootBitacora/BitacoraCars', component: () => import('pages/RootBitacora/UserBitacoraCars/BitacoraCars.vue') }
       ,{ path: 'RootBitacora/BitacoraRounds', component: () => import('pages/RootBitacora/UserBitacoraRounds/BitacoraRounds.vue') }
-      ,{ path: 'RootPurchase', component: () => import('pages/RootPurchase/RootPurchase.vue') }
-      ,{ path: 'RootPurchase/PurchaseRequisition', component: () => import('pages/RootPurchase/PurchaseRequisition/PurchaseRequisition.vue') }
-      ,{ path: 'RootPurchase/PurchaseRequisitionEdit', component: () => import('pages/RootPurchase/PurchaseRequisition/PurchaseRequisitionEdit.vue') }
-      ,{ path: 'RootPurchase/PurchaseQuotes', component: () => import('pages/RootPurchase/PurchaseQuotes/PurchaseQuotes.vue') }
       //ROOT_MASTER
       ,{ path: 'RootMaster/Partners', component: () => import('pages/RootMaster/Partners/Partners.vue') }
       ,{ path: 'RootMaster/PartnersEdit', component: () => import('pages/RootMaster/Partners/PartnersEdit.vue') }
@@ -55,6 +51,8 @@ const routes = [
       ,{ path: 'RootMaster/UoMEdit', component: () => import('pages/RootMaster/UoM/UoMEdit.vue') }
       ,{ path: 'RootMaster/Brands', component: () => import('pages/RootMaster/Brands/Brands.vue') }
       ,{ path: 'RootMaster/BrandsEdit', component: () => import('pages/RootMaster/Brands/BrandsEdit.vue') }
+      ,{ path: 'RootMaster/InvTypes', component: () => import('pages/RootMaster/InvTypes/InvTypes.vue') }
+      ,{ path: 'RootMaster/InvTypesEdit', component: () => import('pages/RootMaster/InvTypes/InvTypesEdit.vue') }
       //ENS
       ,{ path: 'RootENS/Equipistas', component: () => import('pages/RootENS/Equipistas/Equipistas.vue') }
       ,{ path: 'RootENS/Equipista', component: () => import('pages/RootENS/Equipista/Equipista.vue') }
@@ -65,6 +63,9 @@ const routes = [
       ,{ path: 'RootAccounting/TaxesEdit', component: () => import('pages/RootAccounting/Taxes/TaxesEdit.vue') }
       ,{ path: 'RootAccounting/AccPeriods', component: () => import('pages/RootAccounting/AccPeriods/AccPeriods.vue') }
       ,{ path: 'RootAccounting/AccPeriodsEdit', component: () => import('pages/RootAccounting/AccPeriods/AccPeriodsEdit.vue') }
+      //COMPRAS
+      ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/mktPR.vue') }
+      ,{ path: 'RootPurchase/mktPREdit', component: () => import('pages/RootPurchase/mktPR/mktPREdit.vue') }
       //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/Employees.vue') }
       //SCHOENSTATT

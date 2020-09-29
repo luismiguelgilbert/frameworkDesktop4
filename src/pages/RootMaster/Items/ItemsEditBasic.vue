@@ -58,6 +58,7 @@
     <q-select class="col-4"
         label="Clasificación (*)" placeholder="Seleccione la Clasificación al que pertenece el Item (*)" emit-value map-options filled
         :options="lookup_types" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :option-disable="opt => opt.estado"
         v-model="typeID"
         ref="typeID"
         :rules="[

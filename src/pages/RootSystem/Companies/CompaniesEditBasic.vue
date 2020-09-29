@@ -77,7 +77,7 @@
         v-model="default_partner_groupID"
         ref="default_partner_groupID"
         >
-        <template v-slot:prepend><q-icon name="fas fa-book" /></template>
+        <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
     </q-select>
 
     <q-select class="q-mb-md q-pt-md"
@@ -86,7 +86,7 @@
         v-model="default_inv_groupID"
         ref="default_inv_groupID"
         >
-        <template v-slot:prepend><q-icon name="fas fa-book" /></template>
+        <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
     </q-select>
 
     <br><br>

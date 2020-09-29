@@ -31,6 +31,8 @@ import Items from './Items' //Items
 import Warehouses from './Warehouses' //Warehouses
 import UoM from './UoM' //UoM
 import Brands from './Brands' //Brands
+import InvTypes from './InvTypes' //InvTypes
+import mktPR from './mktPR' //mktPR
 
 Vue.use(Vuex)
 
@@ -67,6 +69,8 @@ export default function (/* { ssrContext } */) {
       ,Warehouses
       ,UoM
       ,Brands
+      ,InvTypes
+      ,mktPR
     },
 
     // enable strict mode (adds overhead!)
