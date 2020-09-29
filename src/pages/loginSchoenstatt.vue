@@ -4,7 +4,7 @@
 
         <!--<div class="q-pl-md text-subtitle2" >Ingresar a Schoenstatt</div>-->
         <q-toolbar-title />
-        <q-img src="schoenstatt.png" height="150px" class="q-ma-sm" />
+        <q-img src="schoenstatt.png" height="150px" class="q-ma-sm" contain />
         <!--<q-btn flat icon="fas fa-desktop" to="/loginMobile" title="Cambiar a Modo Celular" />-->
     </q-toolbar>
     <q-separator />
