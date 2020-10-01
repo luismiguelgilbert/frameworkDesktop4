@@ -1,87 +1,179 @@
 <template>
-<q-table
-      :data="lines"
-      :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-      table-style="min-height: 150px; max-height: calc(100vh - 225px)"
-      row-key="lineID"
-      virtual-scroll
-      :rows-per-page-options="[0]"
-      hide-bottom dense
-      :filter="filterString"
-      :columns="[
-        { name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-        { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true },
-        { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true },
-        { name: 'price', required: true, label: 'Precio', align: 'right', field: row => row.price, sortable: true },
-        { name: 'lineSubtotal', required: true, label: 'Subtotal', align: 'right', field: row => row.lineSubtotal, sortable: true },
-        { name: 'lineDiscntPrcnt', required: true, label: 'Descuento %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true },
-        { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
-        { name: 'lineDiscntAmount', required: true, label: 'lineDiscntAmount', align: 'right', field: row => row.lineDiscntAmount, sortable: true },
-        { name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
-        { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
-        { name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
-        //{ name: 'estado', required: true, label: 'Activo?', align: 'left', field: row => row.estado, sortable: true }
-      ]"
+<div class="row q-gutter-md">
+  <q-table
+        :data="lines"
+        :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
+        table-style="min-height: calc(100vh - 410px); max-height: calc(100vh - 410px)"
+        row-key="lineID"
+        virtual-scroll
+        :rows-per-page-options="[0]"
+        hide-bottom dense
+        :filter="filterString"
+        :columns="[
+          { name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
+          { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true },
+          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true },
+          { name: 'price', required: true, label: 'Precio', align: 'right', field: row => row.price, sortable: true },
+          { name: 'lineSubtotal', required: true, label: 'Subtotal', align: 'right', field: row => row.lineSubtotal, sortable: true },
+          { name: 'lineDiscntPrcnt', required: true, label: 'Descuento %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true },
+          { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
+          //{ name: 'lineDiscntAmount', required: true, label: 'lineDiscntAmount', align: 'right', field: row => row.lineDiscntAmount, sortable: true },
+          { name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
+          { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
+          { name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
+          //{ name: 'estado', required: true, label: 'Activo?', align: 'left', field: row => row.estado, sortable: true }
+        ]"
+  >
+    <template v-slot:body="props">
+          <q-tr :props="props" >
+            <q-td key="lineID" :props="props">{{ props.row.lineID }}</q-td>
+            <!--<q-td key="invID" :props="props">{{ props.row.invName }}</q-td>-->
+            <q-td key="invID" :props="props" :tabindex="(props.key*10)+1" >
+              {{ props.row.invName }}
+              <q-popup-edit :value="props.row.invID" title="Seleccionar Item" auto-save >
+                <q-select  autofocus :value="props.row.invID" dense map-options :options="lookup_items" @input="(value)=>{updateRow(value.value,'invID',props.row)}" />
+              </q-popup-edit>
+            </q-td>
+            <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
+              {{ props.row.quantity }}
+              <q-popup-edit :value="props.row.quantity" title="Editar Cantidad" auto-save>
+                <q-input
+                  :value="props.row.quantity" type="number" :min="0" autofocus
+                  :rules="[val => !!val || 'Requerido']"
+                  @input="(value)=>{updateRow(value,'quantity',props.row)}" />
+              </q-popup-edit>
+            </q-td>
+            <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
+              <div>{{ props.row.price }}</div>
+              <q-popup-edit :value="props.row.price" title="Editar Precio" auto-save>
+                <q-input
+                  :value="props.row.price" dense type="number" :min="0" autofocus
+                  prefix="$" input-class="text-right"
+                  :rules="[ val => !!val || '* Requerido']"
+                  @input="(value)=>{updateRow(value,'price',props.row)}" />
+              </q-popup-edit>
+            </q-td>
+            <q-td key="lineSubtotal" :props="props">{{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}</q-td>
 
 
->
-  <template v-slot:body="props">
-        <q-tr :props="props" >
-          <q-td key="lineID" :props="props">{{ props.row.lineID }}</q-td>
-          <!--<q-td key="invID" :props="props">{{ props.row.invName }}</q-td>-->
-          <q-td key="invID" :props="props" :tabindex="(props.key*10)+1" >
-            {{ props.row.invName }}
-            <q-popup-edit :value="props.row.invID" title="Seleccionar Item" auto-save >
-              <q-select  autofocus :value="props.row.invID" dense map-options :options="lookup_items" @input="(value)=>{updateRow(value.value,'invID',props.row)}" />
-            </q-popup-edit>
-          </q-td>
-          <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
-            {{ props.row.quantity }}
-            <q-popup-edit :value="props.row.quantity" title="Editar Cantidad" auto-save>
-              <q-input
-                :value="props.row.quantity" type="number" :min="0" autofocus
-                :rules="[val => !!val || 'Requerido']"
-                @input="(value)=>{updateRow(value,'quantity',props.row)}" />
-            </q-popup-edit>
-          </q-td>
-          <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
-            <div>{{ props.row.price }}</div> - {{props.row.price && props.row.price.toString().includes('.') }} - {{ props.row.price.toString().substring(props.row.price.toString().indexOf('.')+1,10).length }}
-            <q-popup-edit :value="props.row.price" title="Editar Precio" auto-save>
-              <q-input
-                :value="props.row.price" dense type="number" autofocus
-                prefix="$" input-class="text-right"
-                :rules="[ val => !!val || '* Requerido' ,
-                          val => props.row.price.toString().substring(props.row.price.toString().indexOf('.')+1,10).length <= 6 || 'AQUI' ]"
-                @input="(value)=>{updateRow(value,'price',props.row)}" />
-            </q-popup-edit>
-          </q-td>
-          <q-td key="lineSubtotal" :props="props">{{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}</q-td>
-          <q-td key="lineDiscntPrcnt" :props="props">{{ props.row.lineDiscntPrcnt }}</q-td>
-          <q-td key="lineUntaxed" :props="props">{{ props.row.lineUntaxed }}</q-td>
-          <q-td key="lineDiscntAmount" :props="props">{{ props.row.lineDiscntAmount }}</q-td>
+            <q-td key="lineDiscntPrcnt" :props="props" :tabindex="(props.key*10)+4">
+              <div>{{ props.row.lineDiscntPrcnt }}</div>
+              <q-popup-edit :value="props.row.lineDiscntPrcnt" title="Editar Descuento" auto-save>
+                <q-input
+                  :value="props.row.lineDiscntPrcnt" dense type="number" :min="0" autofocus
+                  prefix="$" input-class="text-right"
+                  :rules="[ val => !!val || '* Requerido']"
+                  @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
+              </q-popup-edit>
+            </q-td>
 
-          <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
-          <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
-          <q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>
+            <q-td key="lineUntaxed" :props="props">{{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}</q-td>
 
-        </q-tr>
-  </template>
+            <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
+            <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
+            <q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>
+
+          </q-tr>
+    </template>
     <template v-slot:top>
-        <q-btn label="Agregar" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+        <q-btn :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+        <q-btn :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addRow" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>
+        <q-btn :label="$q.screen.gt.sm?'Descuento':''" title="Aplicar descuento a todo el documento" @click="addRow" icon="fas fa-percent" color="primary" no-caps  class="q-ml-sm"/>
+        <q-btn :label="$q.screen.gt.sm?'Bodega':''" title="Aplicar Bodega de Destino a todo el documento" @click="addRow" icon="fas fa-warehouse" color="primary" no-caps  class="q-ml-sm"/>
+    </template>
+      <!--<template v-slot:body-cell-is_profile="props">
+          <q-td :props="props">
+              <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeProfileforUser(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
+          </q-td>
+      </template>
+      -->
+  </q-table>
+  <q-card class="col">
+    <q-card-section class="no-padding">
+      <q-bar class="bg-transparent text-primary">
+        <div v-if="$q.screen.gt.sm" class="text-subtitle2">Resumen del Documento</div>
+        <div v-else class="text-subtitle2">Resumen</div>
         <q-space />
-        <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-          <template v-slot:append>
-            <q-icon name="fas fa-search" />
-          </template>
-        </q-input>
-    </template>
-    <!--<template v-slot:body-cell-is_profile="props">
-        <q-td :props="props">
-            <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeProfileforUser(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
-        </q-td>
-    </template>
-    -->
-</q-table>
+      </q-bar>
+      <q-separator />
+      <q-list class="scroll" style="height: 100px;">
+        <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-subtitle2 text-grey-7">Líneas:</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              {{lines.length}}
+            </q-item-section>
+        </q-item>
+        <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-subtitle2 text-grey-7">Descuento:</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              {{(lines.reduce(function(sum, d) { return sum + d.lineDiscntAmount; }, 0) * -1).toFixed(userMoneyFormat)}}
+            </q-item-section>
+        </q-item>
+        <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-subtitle2 text-grey-7"><b>Suman:</b></q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              {{lines.reduce(function(sum, d) { return sum + d.lineSubtotal; }, 0).toFixed(userMoneyFormat)}}
+            </q-item-section>
+        </q-item>
+      </q-list>
+    </q-card-section>
+  </q-card>
+  <q-card class="col-4" >
+    <q-bar class="bg-primary text-white">
+      <q-space />
+      <div v-if="$q.screen.gt.sm" class="text-subtitle2">Resumen del Documento</div>
+      <div v-else class="text-subtitle2">Resumen</div>
+    </q-bar>
+    <q-card-section class="no-padding">
+      <q-list class="scroll" style="height: 100px;">
+
+
+        <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-subtitle2 text-grey-7"><b>Subtotal:</b></q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>
+            </q-item-section>
+        </q-item>
+        <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-subtitle2 text-grey-7">IVA 12:</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              {{(lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0) *0.12).toFixed(userMoneyFormat)}}
+            </q-item-section>
+        </q-item>
+        <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-subtitle2 text-grey-7">IVA 0:</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              {{(lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0) *0.12).toFixed(userMoneyFormat)}}
+            </q-item-section>
+        </q-item>
+      </q-list>
+    </q-card-section>
+    <q-separator />
+    <q-card-actions class="no-padding">
+      <q-item clickable dense class="full-width">
+        <q-item-section >
+            <q-item-label class="text-subtitle2 text-primary"><b>TOTAL:</b></q-item-label>
+        </q-item-section>
+        <q-item-section side class="text-subtitle2 text-primary">
+          <b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>
+        </q-item-section>
+      </q-item>
+    </q-card-actions>
+
+  </q-card>
+</div>
 
 </template>
 <style lang="sass">
@@ -140,20 +232,21 @@ export default ({
           return max;
       },
       updateRow(newVal, colName, row){
-        console.dir('newVal')
-        console.dir(newVal)
-        let newRows = JSON.parse(JSON.stringify(this.lines))
-        newRows.find(x=>x.lineID==row.lineID)[colName] = newVal;
-        let invID = newRows.find(x=>x.lineID==row.lineID).invID
-        let invName = this.lookup_items.find(x => x.value == invID).label
-        let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
-        let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
-        newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
-        newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
-        newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineSubtotal - lineDiscntAmount
-        newRows.find(x=>x.lineID==row.lineID).invName = invName
-
-        this.lines = newRows
+        try{
+          let newRows = JSON.parse(JSON.stringify(this.lines))
+          newRows.find(x=>x.lineID==row.lineID)[colName] = newVal;
+          let invID = newRows.find(x=>x.lineID==row.lineID).invID
+          let invName = this.lookup_items.find(x => x.value == invID).label
+          let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
+          let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
+          newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
+          newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
+          newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineSubtotal - lineDiscntAmount
+          newRows.find(x=>x.lineID==row.lineID).invName = invName
+          this.lines = newRows
+        }catch(ex){
+          console.error(ex)
+        }
       },
       addRow(){
         let max_id = 1

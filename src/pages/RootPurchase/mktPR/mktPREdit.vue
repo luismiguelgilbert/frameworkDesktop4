@@ -30,15 +30,15 @@
                             <q-icon name="fas fa-list-ol" :color="tab=='lines'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Pedido</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Pedido ({{lines.length}})</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='linestemp'" :active="tab=='linestemp'" active-class="bg-primary text-white" >
+                    <q-item clickable @click="tab='warehouse'" :active="tab=='warehouse'" active-class="bg-primary text-white" >
                         <q-item-section side>
-                            <q-icon name="fas fa-list-ol" :color="tab=='linestemp'?'white':'grey-7'" />
+                            <q-icon name="fas fa-warehouse" :color="tab=='warehouse'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='linestemp'?'text-white':'text-grey-7')">Detalle del Pedido Perf</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='warehouse'?'text-white':'text-grey-7')">Distribución de Bodegas</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
@@ -55,79 +55,6 @@
                               <q-item-label class="text-subtitle2 text-grey-7"></q-item-label>
                           </q-item-section>
                       </q-item>
-                    <q-separator />
-
-                    <q-list dense>
-                      <q-item>
-                          <q-item-section side>
-                              <q-item-label class="text-subtitle2 text-primary">Resumen del Documento:</q-item-label>
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-grey-7">Líneas:</q-item-label>
-                          </q-item-section>
-                          <q-item-section side>
-                            {{lines.length}}
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-grey-7">Suman:</q-item-label>
-                          </q-item-section>
-                          <q-item-section side>
-                            {{lines.reduce(function(sum, d) { return sum + d.lineSubtotal; }, 0).toFixed(userMoneyFormat)}}
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-grey-7">Descuento:</q-item-label>
-                          </q-item-section>
-                          <q-item-section side>
-                            {{(lines.reduce(function(sum, d) { return sum + d.lineDiscntAmount; }, 0) * -1).toFixed(userMoneyFormat)}}
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-grey-7"><b>Subtotal:</b></q-item-label>
-                          </q-item-section>
-                          <q-item-section side>
-                            <b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-grey-7">IVA 12:</q-item-label>
-                          </q-item-section>
-                          <q-item-section side>
-                            {{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-grey-7">IVA 0:</q-item-label>
-                          </q-item-section>
-                          <q-item-section side>
-                            {{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-grey-7">ICE 0:</q-item-label>
-                          </q-item-section>
-                          <q-item-section side>
-                            {{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}
-                          </q-item-section>
-                      </q-item>
-                      <q-item clickable>
-                          <q-item-section >
-                              <q-item-label class="text-subtitle2 text-primary"><b>TOTAL:</b></q-item-label>
-                          </q-item-section>
-                          <q-item-section side class="text-subtitle2 text-primary">
-                            <b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>
-                          </q-item-section>
-                      </q-item>
-                    </q-list>
                 </q-list>
             </template>
 
@@ -140,8 +67,8 @@
                     transition-next="jump-up"
                     >
                     <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
+                    <!--<q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>-->
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>
-                    <q-tab-panel name="linestemp"><linestempComponent ref="linestempComponent" /></q-tab-panel>
                     <q-tab-panel name="history"><historyComponent /></q-tab-panel>
 
                 </q-tab-panels>
@@ -161,22 +88,22 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './mktPREditBasic'
+//import linesComponent from './mktPREditLines'
 import linesComponent from './mktPREditLines'
-import linestempComponent from './mktPREditLinesTemp'
 import historyComponent from './mktPREditHistory'
 
 
 export default ({
   components:{
      basicComponent: basicComponent
+    //,linesComponent: linesComponent
     ,linesComponent: linesComponent
-    ,linestempComponent: linestempComponent
     ,historyComponent: historyComponent
   },
   data () {
     return {
         moduleName: "mktPR", router: this.$router,
-        tab: 'basic', splitterModel: 250, dataLoaded: false,
+        tab: 'lines'/*'basic'*/, splitterModel: 250, dataLoaded: false,
     }
   },
   created(){

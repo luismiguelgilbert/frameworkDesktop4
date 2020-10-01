@@ -11,6 +11,11 @@ export const updateEditDataBins = (state, value) => {
   state.editData.bins = value
 }
 
+export const updateEditDataUsers = (state, value) => {
+    state.editData.users = value
+  }
+
+
 export const resetToDefaultState = (state) => {
     Object.keys(index.intialState).map(x=>{
         state[x] = index.intialState[x]

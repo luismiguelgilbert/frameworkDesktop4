@@ -1,6 +1,6 @@
 <template>
 <q-page>
-    <q-form style="max-height: calc(100vh - 50px)" 
+    <q-form style="max-height: calc(100vh - 50px)"
         class="scroll"
         spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off">
         <q-list class="full-width" dense>
@@ -10,13 +10,13 @@
                         <q-item-label header>Mis Datos</q-item-label>
                     </q-item-section>
                 </q-item>
-                
+
                 <q-item dense>
                     <q-item-section side>
                         <q-icon name="fas fa-user" color="primary"/>
                     </q-item-section>
                     <q-item-section>
-                        <q-input dense v-model="userName" label="Nombres" 
+                        <q-input dense v-model="userName" label="Nombres"
                             :rules="[
                                     val => !!val || '* Requerido',
                                     val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
@@ -29,7 +29,7 @@
                         <q-icon name="far fa-user" color="primary"/>
                     </q-item-section>
                     <q-item-section>
-                        <q-input dense v-model="userLastName" label="Apellidos" 
+                        <q-input dense v-model="userLastName" label="Apellidos"
                             :rules="[
                                     val => !!val || '* Requerido',
                                     val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
@@ -42,7 +42,7 @@
                         <q-icon name="fas fa-envelope" color="primary"/>
                     </q-item-section>
                     <q-item-section>
-                        <q-input dense v-model="userMail" label="Mi Correo Electrónico"
+                        <q-input dense v-model="userMail" label="Mi Correo Electrónico" type="mail"
                             :rules="[
                                     val => !!val || '* Requerido',
                                     val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
@@ -55,7 +55,7 @@
                         <q-icon name="fas fa-user-shield" color="primary"/>
                     </q-item-section>
                     <q-item-section>
-                        <q-input dense v-model="userProfileName" label="Perfil (Rol)" readonly 
+                        <q-input dense v-model="userProfileName" label="Perfil (Rol)" readonly
                             :rules="[
                                         val => !!val || '* Requerido',
                                         val => val > 0 || 'Campo debe tener al menos 3 carateres',
@@ -131,7 +131,7 @@
                         <q-icon name="fas fa-building" color="primary" />
                     </q-item-section>
                     <q-item-section>
-                        <q-select dense v-model="userCompany" :options="userCompanies" label="Compañía Predeterminada" 
+                        <q-select dense v-model="userCompany" :options="userCompanies" label="Compañía Predeterminada"
                             map-options emit-value option-value="companyID" option-label="companyShortName" />
                     </q-item-section>
                 </q-item>
@@ -140,7 +140,7 @@
                         <q-icon name="fas fa-folder-open" color="primary" />
                     </q-item-section>
                     <q-item-section>
-                        <q-select dense v-model="userLinkID" :options="menuData.filter(x=>x.sys_link_id.length==4).sort((a, b) => a.parent - b.parent )" label="Abrir al iniciar sesión" 
+                        <q-select dense v-model="userLinkID" :options="menuData.filter(x=>x.sys_link_id.length==4).sort((a, b) => a.parent - b.parent )" label="Abrir al iniciar sesión"
                             map-options emit-value option-value="sys_link_id" option-label="label" clearable >
                             <template v-slot:option="scope">
                                 <q-item
@@ -316,7 +316,7 @@
     </q-form>
     <q-page-sticky position="bottom-right" :offset="[35, 18]">
         <q-btn fab icon="fas fa-save" color="positive" :disable="isError" @click="saveUserPreferences" title="Guardar" />
-            
+
     </q-page-sticky>
 </q-page>
 </template>
@@ -411,7 +411,7 @@ methods: {
     factoryFn(files){
       return new Promise((resolve) => {
           resolve({
-              url: this.apiURL+'uploadFile' 
+              url: this.apiURL+'uploadFile'
               + '?attach_id='+this.fileToUpload.attach_id+''+'&upload_file_name=' + this.fileToUpload.upload_file_name,//agregar attach_id usado por API para marcar attachment como uploaded, y se envía Nombre de archivo a guardar en disco
               method: 'POST',
               headers: [
@@ -424,7 +424,7 @@ methods: {
       //this.$q.sessionStorage.set('sys_user_picture', this.fileToUpload.upload_file_name)
       //console.dir(this.fileToUpload)
       //this.formData.sys_user_picture = this.fileToUpload.upload_file_name
-      //:src="$q.sessionStorage.getItem('Server_Files_Path') + formData.sys_user_picture" 
+      //:src="$q.sessionStorage.getItem('Server_Files_Path') + formData.sys_user_picture"
       this.$q.loading.hide()
       this.userPhoto = this.fileToUpload.upload_file_name
       this.$q.notify({multiLine: false, color: 'positive', message: "Archivo recibido" , timeout: 1200, icon: "fas fa-check", progress: true,})
@@ -446,7 +446,7 @@ computed:{
             return resultado
         }
     },
-    userColor: { get () { return this.$store.state.main.userColor }, set (val) { 
+    userColor: { get () { return this.$store.state.main.userColor }, set (val) {
             //is also changed in MainLayout
             //if(val == 'default'){ colors.setBrand('primary', '#1867C0') }
             //if(val == 'light'){ colors.setBrand('primary', '#9C27B0') }
@@ -458,13 +458,13 @@ computed:{
             //if(val == 'grey'){ colors.setBrand('primary', '#9E9E9E') }
             //if(val == 'deep-orange'){ colors.setBrand('primary', '#FF5722') }
             //if(val == 'blackDark'){ colors.setBrand('primary', 'white') }
-            this.$store.commit('main/updateState', {key: 'userColor', value: val}) 
-        } 
+            this.$store.commit('main/updateState', {key: 'userColor', value: val})
+        }
     },
-    userDarkMode: { get () { return this.$store.state.main.userDarkMode }, set (val) { 
-            this.$store.commit('main/updateState', {key: 'userDarkMode', value: val}) 
+    userDarkMode: { get () { return this.$store.state.main.userDarkMode }, set (val) {
+            this.$store.commit('main/updateState', {key: 'userDarkMode', value: val})
             this.$q.dark.set(val)
-        }  
+        }
     },
     userPhoto: { get () { return this.$store.state.main.userPhoto }, set (val) { this.$store.commit('main/updateState', {key: 'userPhoto', value: val}) } },
     userID: { get () { return this.$store.state.main.userID }, set (val) { this.$store.commit('main/updateState', {key: 'userID', value: val}) } },

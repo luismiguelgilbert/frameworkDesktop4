@@ -33,6 +33,14 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='picture'?'text-white':'text-grey-7')">Foto de Perfil</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable @click="tab='users'" :active="tab=='users'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-users"  :color="tab=='users'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='users'?'text-white':'text-grey-7')">Usuarios Permitidos</q-item-label>
+                        </q-item-section>
+                    </q-item>
                     <q-item clickable @click="tab='bins'" :active="tab=='bins'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-warehouse"  :color="tab=='bins'?'white':'grey-7'" />
@@ -60,30 +68,11 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic">
-                        <basicComponent ref="basicComponent" />
-                    </q-tab-panel>
-
-                    <q-tab-panel name="bom"> <bomComponent ref="bomComponent" /> </q-tab-panel>
-
-                    <q-tab-panel name="vendors"> <vendorsComponent ref="vendorsComponent" /> </q-tab-panel>
-
-                    <q-tab-panel name="pricelists"> <pricelistsComponent ref="pricelistsComponent" /> </q-tab-panel>
-
+                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="bins"> <binsComponent ref="binsComponent" /> </q-tab-panel>
-
-                    <q-tab-panel name="files">
-                        <filesComponent ref="filesComponent" />
-                    </q-tab-panel>
-
-
-                    <q-tab-panel name="picture">
-                        <pictureComponent />
-                    </q-tab-panel>
-
-                    <q-tab-panel name="history">
-                        <historyComponent />
-                    </q-tab-panel>
+                    <q-tab-panel name="users"> <usersComponent ref="usersComponent" /> </q-tab-panel>
+                    <q-tab-panel name="picture"> <pictureComponent /> </q-tab-panel>
+                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
 
                 </q-tab-panels>
 
@@ -104,6 +93,7 @@ import Vuex from 'vuex';
 import basicComponent from './WarehousesEditBasic'
 import pictureComponent from './WarehousesEditPicture'
 import binsComponent from './WarehousesEditBins'
+import usersComponent from './WarehousesEditUsers'
 import historyComponent from './WarehousesEditHistory'
 
 
@@ -113,6 +103,7 @@ export default ({
      basicComponent: basicComponent
     ,pictureComponent:pictureComponent
     ,binsComponent: binsComponent
+    ,usersComponent: usersComponent
     ,historyComponent: historyComponent
   },
   data () {
@@ -190,6 +181,7 @@ export default ({
                 let newEditData = {
                      basic: this.editData.basic
                     ,bins: this.editData.bins
+                    ,users: this.editData.users.filter(x=>x.is_allowed).map(x=>x.sys_user_code)
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)

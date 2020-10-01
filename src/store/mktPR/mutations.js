@@ -11,6 +11,10 @@ export const updateEditDataLines = (state, value) => {
     state.editData.lines = value
 }
 
+export const updateEditDataLinesTaxes = (state, value) => {
+    state.editData.linesTaxes = value
+}
+
 export const updateEditDataPassword = (state, value) => {
     state.editData.password = value
 }

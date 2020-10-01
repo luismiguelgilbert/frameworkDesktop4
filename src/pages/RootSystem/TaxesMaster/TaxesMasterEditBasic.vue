@@ -1,5 +1,9 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+    <q-banner inline-actions class="text-white bg-red">
+      Los porcentajes no deberían modificarse. Si necesita un nuevo porcentaje, debe crear otro impuesto
+    </q-banner>
+
     <div class="col-sm-12 col-md-6">
       <q-toggle
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -7,6 +11,10 @@
       <q-toggle
         v-model="es_retencion" color="positive" label="Retención?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
       />
+      <q-toggle
+        v-model="isPercent" color="positive" :label="isPercent?'Porcentaje':'Valor Fijo'" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+      />
+      
 
     </div>
 
@@ -99,6 +107,10 @@ export default ({
         es_retencion: {
             get () { return this.$store.state[this.moduleName].editData.basic.es_retencion },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'es_retencion', value: val}) }
+        },
+        isPercent: {
+            get () { return this.$store.state[this.moduleName].editData.basic.isPercent },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'isPercent', value: val}) }
         },
         factor: {
             get () { return this.$store.state[this.moduleName].editData.basic.factor },

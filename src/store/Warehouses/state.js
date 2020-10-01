@@ -23,6 +23,7 @@ export default function () {
      ,editData: {
         basic: {}
        ,bins: []
+       ,users: []
        ,history: []
      }
      ,moduleReports: []
