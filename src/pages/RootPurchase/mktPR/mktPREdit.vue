@@ -38,7 +38,15 @@
                             <q-icon name="fas fa-warehouse" :color="tab=='warehouse'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='warehouse'?'text-white':'text-grey-7')">Distribución de Bodegas</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='warehouse'?'text-white':'text-grey-7')">Distribución del Pedido</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
@@ -67,8 +75,9 @@
                     transition-next="jump-up"
                     >
                     <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
-                    <!--<q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>-->
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>
+                    <q-tab-panel name="warehouse"><whComponent ref="whComponent" /></q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent /></q-tab-panel>
 
                 </q-tab-panels>
@@ -88,16 +97,18 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './mktPREditBasic'
-//import linesComponent from './mktPREditLines'
+import whComponent from './mktPREditWH'
 import linesComponent from './mktPREditLines'
+import filesComponent from './mktPREditFiles'
 import historyComponent from './mktPREditHistory'
 
 
 export default ({
   components:{
      basicComponent: basicComponent
-    //,linesComponent: linesComponent
     ,linesComponent: linesComponent
+    ,whComponent: whComponent
+    ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
   data () {
@@ -192,19 +203,14 @@ export default ({
 
                 let newEditData = {
                      basic: this.editData.basic
-                    ,phones: this.editData.phones
-                    ,address: this.editData.address
-                    ,mails: this.editData.mails
-                    ,children: this.editData.children
-                    ,groups: this.editData.groups
-                    ,apostolados: this.editData.apostolados
-                    ,formaciones: this.editData.formaciones
-                    ,jobs: this.editData.jobs
+                    ,lines: this.editData.lines
+                    ,linesTaxes: this.editData.linesTaxes
+                    ,files: this.editData.files
                     //,address: this.editData.address.filter(x=>x.is_allowed).map(x=>x.headerID_ux)
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spMktPRSelectUpdate', {
+                this.$axios.post( this.apiURL + 'spMktPRUpdate', {
                     userCode: this.userCode,
                     userCompany: this.userCompany,
                     //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),

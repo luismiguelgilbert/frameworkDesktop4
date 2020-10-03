@@ -4,7 +4,7 @@
         ref="mainTable"
         :data="lines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        table-style="min-height: calc(100vh - 410px); max-height: calc(100vh - 410px)"
+        table-style="min-height: calc(100vh - 400px); max-height: calc(100vh - 400px)"
         row-key="lineID"
         virtual-scroll
         :rows-per-page-options="[0]"
@@ -214,7 +214,7 @@
             { name: 'systemTypeName', required: true, label: 'Tipo', align: 'left', field: row => row.systemTypeName, sortable: true, style: 'min-width: 50px;', },
             { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true, style: 'min-width: 50px;'},
             { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
-            { name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
+            //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
             { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
           ]"
           row-key="value"
@@ -226,7 +226,9 @@
         </q-table>
       </q-card-section>
       <q-card-actions align="around">
-        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsDialogSelected.length<=0" @click="itemsDialogSelectAction(itemsDialogSelected)" ></q-btn>
+        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
+          :disable="itemsDialogSelected.length<=0" 
+          @click="itemsDialogSelectAction(itemsDialogSelected)" ></q-btn>
       </q-card-actions>
       <q-inner-loading :showing="itemsDialogTableBusy" style="z-index: 10" >
         <q-spinner-gears size="50px" color="primary" />
@@ -386,8 +388,11 @@ export default ({
           ,lineDiscntAmount: 0
           ,lineUntaxed: 1
           ,whID: this.defaultWhID
+          ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
           ,prjID: 0
+          ,prjName: ''
           ,transportTypeID: this.defaultTransportID
+          ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
         }
         newRows.push(nuevaFila)
         this.lines = newRows
@@ -441,12 +446,10 @@ export default ({
           //Primero agrega los impuestos correspondientes al Item con su código de línea
           let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
           newRowsTaxes = newRowsTaxes.filter(x=>x.lineID!=this.itemsDialogRowToUpdate.lineID)//remuevo los impuestos de la línea xq voy a agregarlos nuevamente
-          let itemGroupID = this.lookup_items.find(x=>x.value==this.itemsDialogSelected[0].value).groupID
-          if(itemGroupID){
-            this.lookup_taxesByGroup.filter(y=>y.groupID==itemGroupID).forEach(impuesto=>{
+          this.lookup_items_taxes.filter(x=>x.invID==this.itemsDialogSelected[0].value).forEach(impuesto=>{
               newRowsTaxes.push({
                  lineID: this.itemsDialogRowToUpdate.lineID
-                ,taxID: impuesto.tax_id
+                ,taxID: impuesto.taxID
                 ,taxName: impuesto.shortLabel
                 ,taxAmount: 0
                 ,isPercent: impuesto.isPercent
@@ -454,7 +457,6 @@ export default ({
                 ,factor_base: impuesto.factor_base
               })
             })
-          }
           this.linesTaxes = newRowsTaxes
 
           //Segundo, actualiza la fila por medio del método [updateRow] , el cual también actualiza las líneas del impuesto
@@ -476,7 +478,6 @@ export default ({
         this.isItemsBatchDialog = true
       },
       itemsBatchDialogSelectAction(){
-        //Primero agrega los impuestos correspondientes al Item con su código de línea
         let max_id = 1
         let temp = null
         if(this.lines.length > 0){
@@ -500,16 +501,18 @@ export default ({
               ,lineDiscntAmount: 0
               ,lineUntaxed: 1
               ,whID: this.defaultWhID
+              ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
               ,prjID: 0
+              ,prjName: ''
               ,transportTypeID: this.defaultTransportID
+              ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
             })
+
             //Impuestos de la línea
-            let itemGroupID = this.lookup_items.find(x=>x.value==row.value).groupID
-            if(itemGroupID){
-              this.lookup_taxesByGroup.filter(y=>y.groupID==itemGroupID).forEach(impuesto=>{
+            this.lookup_items_taxes.filter(x=>x.invID==row.value).forEach(impuesto=>{
                 newRowsTaxes.push({
                    lineID: max_id
-                  ,taxID: impuesto.tax_id
+                  ,taxID: impuesto.taxID
                   ,taxName: impuesto.shortLabel
                   ,taxAmount: impuesto.isPercent?( parseFloat(1 * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
                   ,isPercent: impuesto.isPercent
@@ -517,7 +520,6 @@ export default ({
                   ,factor_base: impuesto.factor_base
                 })
               })
-            }
           })
           this.lines = newRows
           this.linesTaxes = newRowsTaxes
@@ -594,8 +596,8 @@ export default ({
         lookup_prj: {
             get () { return this.$store.state[this.moduleName].editData.lookup_prj },
         },
-        lookup_transport: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_transport },
+        lookup_transports: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_transports },
         },
         lookup_payterms: {
             get () { return this.$store.state[this.moduleName].editData.lookup_payterms },
@@ -603,9 +605,12 @@ export default ({
         lookup_paytermsDetails: {
             get () { return this.$store.state[this.moduleName].editData.lookup_paytermsDetails },
         },
-        lookup_taxesByGroup: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_taxesByGroup },
+        lookup_items_taxes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },
         },
+        /*lookup_taxesByGroup: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_taxesByGroup },
+        },*/
         calculated_paytermsDetails: {
             get () {
               let resultado = []

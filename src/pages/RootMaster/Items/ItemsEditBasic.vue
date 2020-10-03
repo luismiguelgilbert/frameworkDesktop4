@@ -1,13 +1,13 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <div class="row">
-      <q-toggle class="col-4"
+      <q-toggle class="col-12 col-md-4"
         v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-      <q-toggle class="col-4"
+      <q-toggle class="col-12 col-md-4"
         v-model="is_sales" icon="fas fa-tag" color="blue-6" label="Se Vende?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-      <q-toggle class="col-4"
+      <q-toggle class="col-12 col-md-4"
         v-model="is_purchase" icon="fas fa-shopping-cart" color="light-blue-6" label="Se Compra?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     </div>
@@ -22,17 +22,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-cog" /></template>
     </q-select>
-    <q-select class="col-4"
-        label="Grupo Contable (*)" placeholder="Seleccione el Grupo Contable al que pertenece el Item (*)" emit-value map-options filled
-        :options="lookup_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="groupID"
-        ref="groupID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-book" /></template>
-    </q-select>
+   
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Escriba el nombre del Item (*)" label="Nombre del Item (*)" filled

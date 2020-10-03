@@ -24,6 +24,7 @@ export default function () {
         basic: {}
        ,lines: []
        ,linesTaxes: []
+       ,files: []
        ,history: []
      }
      ,moduleReports: []

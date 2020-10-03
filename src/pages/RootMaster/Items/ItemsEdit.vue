@@ -33,6 +33,15 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='bom'?'text-white':'text-grey-7')">Receta (Bill of Materials)</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable @click="tab='account'" :active="tab=='account'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-book" :color="tab=='account'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='account'?'text-white':'text-grey-7')">Configuración Contable</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                    
                     <q-item clickable @click="tab='picture'" :active="tab=='picture'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-camera"  :color="tab=='picture'?'white':'grey-7'" />
@@ -92,31 +101,15 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic">
-                        <basicComponent ref="basicComponent" />
-                    </q-tab-panel>
-
+                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
+                    <q-tab-panel name="account"> <accountComponent ref="accountComponent" /> </q-tab-panel>
                     <q-tab-panel name="bom"> <bomComponent ref="bomComponent" /> </q-tab-panel>
-
                     <q-tab-panel name="vendors"> <vendorsComponent ref="vendorsComponent" /> </q-tab-panel>
-
                     <q-tab-panel name="pricelists"> <pricelistsComponent ref="pricelistsComponent" /> </q-tab-panel>
-
                     <q-tab-panel name="bins"> <binsComponent ref="binsComponent" /> </q-tab-panel>
-
-                    <q-tab-panel name="files">
-                        <filesComponent ref="filesComponent" />
-                    </q-tab-panel>
-
-
-                    <q-tab-panel name="picture">
-                        <pictureComponent />
-                    </q-tab-panel>
-
-                    <q-tab-panel name="history">
-                        <historyComponent />
-                    </q-tab-panel>
-
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
+                    <q-tab-panel name="picture"> <pictureComponent /> </q-tab-panel>
+                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
                 </q-tab-panels>
 
             </template>
@@ -134,6 +127,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './ItemsEditBasic'
+import accountComponent from './ItemsEditAccount'
 import bomComponent from './ItemsEditBom'
 import pictureComponent from './ItemsEditPicture'
 import vendorsComponent from './ItemsEditVendors'
@@ -147,6 +141,7 @@ import historyComponent from './ItemsEditHistory'
 export default ({
   components:{
      basicComponent: basicComponent
+    ,accountComponent: accountComponent
     ,pictureComponent:pictureComponent
     ,bomComponent: bomComponent
     ,vendorsComponent: vendorsComponent
@@ -230,6 +225,7 @@ export default ({
                 let newEditData = {
                      basic: this.editData.basic
                     ,bom: this.editData.bom
+                    ,taxes: this.editData.taxes
                     ,partners: this.editData.partners
                     ,pricelists: this.editData.pricelists
                     ,bins: this.editData.bins

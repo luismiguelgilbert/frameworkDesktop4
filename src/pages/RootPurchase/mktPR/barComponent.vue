@@ -23,8 +23,8 @@
         </q-input>
         <q-btn
             no-caps no-wrap :color="userColor!=='blackDark'?'primary':undefined"
-            v-shortkey="['alt', 'n']" @shortkey="openEditForm({value: 0, row: null}, true)"
-            @click="openEditForm({value: 0, row: null}, true)"
+            v-shortkey="['alt', 'n']" @shortkey="openEditForm({value: 0, row: null}, 1)"
+            @click="openEditForm({value: 0, row: null}, 1)"
             :disable="!allow_insert" style="height: 40px;"
             class="q-ml-xs no-shadow" title="Crear nuevo documento" >
             <q-icon name="fas fa-plus-circle" color="white" />

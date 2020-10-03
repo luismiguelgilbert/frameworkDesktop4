@@ -15,9 +15,9 @@ export const updateEditDataLinesTaxes = (state, value) => {
     state.editData.linesTaxes = value
 }
 
-export const updateEditDataPassword = (state, value) => {
-    state.editData.password = value
-}
+export const updateEditDataFiles = (state, value) => {
+    state.editData.files = value
+  }
 
 export const resetToDefaultState = (state) => {
     Object.keys(index.intialState).map(x=>{
