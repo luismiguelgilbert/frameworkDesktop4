@@ -66,6 +66,19 @@ const routes = [
       //COMPRAS
       ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/mktPR.vue') }
       ,{ path: 'RootPurchase/mktPREdit', component: () => import('pages/RootPurchase/mktPR/mktPREdit.vue') }
+      //CASES_LEGAL
+      ,{ path: 'RootCases/casClientes', component: () => import('pages/RootCases/casClientes/casClientes.vue') }
+      ,{ path: 'RootCases/casClientesEdit', component: () => import('pages/RootCases/casClientes/casClientesEdit.vue') }
+      ,{ path: 'RootCases/casCasos', component: () => import('pages/RootCases/casCasos/casCasos.vue') }
+      ,{ path: 'RootCases/casCasosEdit', component: () => import('pages/RootCases/casCasos/casCasosEdit.vue') }
+      ,{ path: 'RootCases/casTasks', component: () => import('pages/RootCases/casTasks/casTasks.vue') }
+      ,{ path: 'RootCases/casTasksEdit', component: () => import('pages/RootCases/casTasks/casTasksEdit.vue') }
+      ,{ path: 'RootCases/casCasesTypes', component: () => import('pages/RootCases/casCasesTypes/casCasesTypes.vue') }
+      ,{ path: 'RootCases/casCasesTypesEdit', component: () => import('pages/RootCases/casCasesTypes/casCasesTypesEdit.vue') }
+      ,{ path: 'RootCases/casTasksTypes', component: () => import('pages/RootCases/casTasksTypes/casTasksTypes.vue') }
+      ,{ path: 'RootCases/casTasksTypesEdit', component: () => import('pages/RootCases/casTasksTypes/casTasksTypesEdit.vue') }
+      ,{ path: 'RootCases/casLocations', component: () => import('pages/RootCases/casLocations/casLocations.vue') }
+      ,{ path: 'RootCases/casLocationsEdit', component: () => import('pages/RootCases/casLocations/casLocationsEdit.vue') }
       //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/Employees.vue') }
       //SCHOENSTATT

@@ -34,6 +34,13 @@ import Brands from './Brands' //Brands
 import InvTypes from './InvTypes' //InvTypes
 import mktPR from './mktPR' //mktPR
 
+import casCasesTypes from './casCasesTypes' //casCasesTypes
+import casCasos from './casCasos' //casCasos
+import casClientes from './casClientes' //casClientes
+import casLocations from './casLocations' //casLocations
+import casTasks from './casTasks' //casTasks
+import casTasksTypes from './casTasksTypes' //casTasksTypes
+
 Vue.use(Vuex)
 
 export default function (/* { ssrContext } */) {
@@ -71,6 +78,12 @@ export default function (/* { ssrContext } */) {
       ,Brands
       ,InvTypes
       ,mktPR
+      ,casCasesTypes
+      ,casCasos
+      ,casClientes
+      ,casLocations
+      ,casTasks
+      ,casTasksTypes
     },
 
     // enable strict mode (adds overhead!)
