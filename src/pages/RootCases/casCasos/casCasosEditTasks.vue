@@ -1,6 +1,6 @@
 <template>
 <q-table
-      :data="contacts"
+      :data="tasks"
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
       table-style="min-height: 150px; max-height: calc(100vh - 225px)"
       row-key="contactID"
@@ -66,7 +66,7 @@
         </q-tr>
   </template>
     <template v-slot:top>
-        <q-btn label="Agregar Contacto" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+        <!--<q-btn label="Agregar Actividad" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
         <q-space />
         <q-input borderless dense v-model="filterString" placeholder="Buscar...">
           <template v-slot:append>
@@ -126,7 +126,7 @@ import { date } from 'quasar';
 export default ({
     data () {
         return {
-            moduleName: "casTasks", filterString: ''
+            moduleName: "casCasos", filterString: ''
         }
     },
     methods:{
@@ -176,9 +176,9 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        contacts: {
-            get () { return this.$store.state[this.moduleName].editData.contacts },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataContacts', val) }
+        tasks: {
+            get () { return this.$store.state[this.moduleName].editData.tasks },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataTasks', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
         sys_user_color: {

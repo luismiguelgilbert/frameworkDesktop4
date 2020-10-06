@@ -58,8 +58,8 @@ export default ({
   },
   data () {
     return {
-        moduleName: "casClientes", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
-        moduleEditName: "casClientesEdit",
+        moduleName: "casTasks", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
+        moduleEditName: "casTasksEdit",
         maindataLoaded: false,
         router: this.$router,
     }

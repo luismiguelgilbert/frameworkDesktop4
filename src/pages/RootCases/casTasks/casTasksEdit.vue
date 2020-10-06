@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Socio':'Editar Socio: '+editRecord.value}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nueva Actividad':'Editar Actividad: '+editRecord.value}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -26,23 +26,6 @@
                         </q-item-section>
                     </q-item>
                     
-                    <q-item clickable @click="tab='contacts'" :active="tab=='contacts'" active-class="bg-primary text-white" >
-                        <q-item-section side>
-                            <q-icon name="fas fa-address-book"  :color="tab=='contacts'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='contacts'?'text-white':'text-grey-7')">Contactos del Socio</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                   
-                    <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
-                        <q-item-section side>
-                            <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
-                        </q-item-section>
-                    </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-history" :color="tab=='history'?'white':'grey-7'" />
@@ -62,17 +45,8 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic">
-                        <basicComponent ref="basicComponent" />
-                    </q-tab-panel>
-
-                    <q-tab-panel name="contacts"> <contactsComponent ref="contactsComponent" /> </q-tab-panel>
-
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-
-                    <q-tab-panel name="history">
-                        <historyComponent />
-                    </q-tab-panel>
+                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
+                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
 
                 </q-tab-panels>
 
@@ -106,7 +80,7 @@ export default ({
   },
   data () {
     return {
-        moduleName: "casClientes", router: this.$router,
+        moduleName: "casTasks", router: this.$router,
         tab: 'basic', splitterModel: 250, dataLoaded: false,
     }
   },
@@ -132,13 +106,17 @@ export default ({
         this.loadingData = true
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spPartnerMasterSelectEdit',
+            url: this.apiURL + 'spCasCasesTasksSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
                 userCompany: this.userCompany,
                 userLanguage: 'es',
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.partnerID_ux?this.editRecord.row.partnerID_ux:0,
+                //row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.ux_pk_ux?this.editRecord.row.ux_pk_ux:0,
+                //al ser un caso especial (es un PK compuesto),se envía los 2 códigos
+                //Notar que caseID es un campo LOOKUP, entonces se envía el value
+                caseID: this.editRecord&&this.editRecord.row&&this.editRecord.row.caseID_ux_val?this.editRecord.row.caseID_ux_val:0,
+                lineID: this.editRecord&&this.editRecord.row&&this.editRecord.row.lineID_ux?this.editRecord.row.lineID_ux:0,
                 editMode: this.editMode
             }
         }).then((response) => {
@@ -178,17 +156,18 @@ export default ({
 
                 let newEditData = {
                      basic: this.editData.basic
-                    ,contacts: this.editData.contacts
-                    ,files: this.editData.files
-                    ,owners: this.editData.owners
+                    //,files: this.editData.files
                 }
                 //console.dir(this.editData)
-                //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spPartnerMasterUpdate', {
+                this.$axios.post( this.apiURL + 'spCasCasesTasksUpdate', {
                         userCode: this.userCode,
                         userCompany: this.userCompany,
                         //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                        row_id: this.editMode?0:this.editRecord.row.partnerID_ux,
+                        //al ser un caso especial (es un PK compuesto),se envía los 2 códigos
+                        //Notar que caseID es un campo LOOKUP, entonces se envía el value
+                        
+                        caseID: this.editMode?newEditData.basic.caseID:this.editRecord.row.caseID_ux_val,
+                        lineID: this.editMode?0:this.editRecord.row.lineID_ux,
                         "editRecord": JSON.stringify(newEditData),
                     }
                 , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }

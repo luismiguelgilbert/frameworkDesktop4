@@ -1,18 +1,18 @@
 <template>
 <q-table
-      :data="contacts"
+      :data="cases"
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
       table-style="min-height: 150px; max-height: calc(100vh - 225px)"
-      row-key="contactID"
+      row-key="caseID"
       virtual-scroll
       :rows-per-page-options="[0]"
       hide-bottom dense
       :filter="filterString"
       :columns="[
         //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
-        { name: 'contactName', required: true, label: 'Nombre Completo', align: 'left', field: row => row.contactName, sortable: true },
-        { name: 'mobile', required: true, label: 'Teléfono', align: 'left', field: row => row.mobile, sortable: true },
-        { name: 'mail', required: true, label: 'Correo Electrónico', align: 'left', field: row => row.mail, sortable: true },
+        { name: 'label', required: true, label: 'Caso', align: 'left', field: row => row.label, sortable: true },
+        { name: 'caseTypeName', required: true, label: 'Tipo Caso', align: 'left', field: row => row.caseTypeName, sortable: true },
+        { name: 'startDate', required: true, label: 'Fecha Inicio', align: 'left', field: row => row.startDate, sortable: true },
         { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
       ]"
 
@@ -20,32 +20,22 @@
   >
   <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="contactName" :props="props">
-            {{ props.row.contactName }}
-            <q-popup-edit :value="props.row.contactName" >
-              <q-input :value="props.row.contactName" dense autofocus counter @input="(value)=>{updateRow(value,'contactName',props.row)}" />
-            </q-popup-edit>
+          <q-td key="label" :props="props">
+            {{ props.row.label }}
           </q-td>
-          <q-td key="mobile" :props="props">
-            {{ props.row.mobile }}
-            <q-popup-edit :value="props.row.mobile" >
-              <q-input :value="props.row.mobile" dense autofocus counter @input="(value)=>{updateRow(value,'mobile',props.row)}" />
-            </q-popup-edit>
+          <q-td key="caseTypeName" :props="props">
+            {{ props.row.caseTypeName }}
           </q-td>
-          <q-td key="mail" :props="props">
-            {{ props.row.mail }}
-            <q-popup-edit :value="props.row.mail" >
-              <q-input :value="props.row.mail" dense autofocus counter @input="(value)=>{updateRow(value,'mail',props.row)}" />
-            </q-popup-edit>
-          </q-td>
-
+          <q-td key="startDate" :props="props">
+            {{ props.row.startDate }}
+        </q-td>
           <q-td key="estado" :props="props">
-            <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+            <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense /> <!--@input="updateRow(!props.row.estado,'estado',props.row)"-->
           </q-td>
         </q-tr>
   </template>
   <template v-slot:top>
-      <q-btn label="Agregar Contacto" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+      <!--<q-btn label="Agregar Contacto" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
       <q-space />
       <q-input borderless dense v-model="filterString" placeholder="Buscar...">
         <template v-slot:append>
@@ -112,25 +102,30 @@ export default ({
           return max;
       },
       updateRow(newVal, colName, row){
-        let newRows = JSON.parse(JSON.stringify(this.contacts))
-        newRows.find(x=>x.contactID==row.contactID)[colName] = newVal
-        this.contacts = newRows
+        let newRows = JSON.parse(JSON.stringify(this.cases))
+        newRows.find(x=>x.caseID==row.caseID)[colName] = newVal
+        this.cases = newRows
       },
       addRow(){
+        console.dir('addRow')
         let max_id = 1
-        if(this.contacts.length > 0){
-            let temp = this.getMax(this.contacts, "contactID");
-            max_id = parseInt(temp.contactID) + parseInt(1);
+        if(this.cases.length > 0){
+            let temp = this.getMax(this.cases, "caseID");
+            max_id = parseInt(temp.caseID) + parseInt(1);
         }
-        let newRows = JSON.parse(JSON.stringify(this.contacts))
+        console.dir('addRow 1')
+        let newRows = JSON.parse(JSON.stringify(this.cases))
+        console.dir('addRow 2')
+        console.dir(newRows)
         newRows.push({
-           contactID: max_id
+           caseID: max_id
           ,contactName: 'Nombre Completo'
           ,mobile: ''
           ,mail: ''
           ,estado: true
         })
-        this.contacts = newRows
+        console.dir(newRows)
+        this.cases = newRows
       },
       getAge(fecha){
         return date.getDateDiff(new Date(), fecha, 'years')
@@ -144,9 +139,9 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        contacts: {
-            get () { return this.$store.state[this.moduleName].editData.contacts },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataContacts', val) }
+        cases: {
+            get () { return this.$store.state[this.moduleName].editData.cases },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataCases', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
         sys_user_color: {

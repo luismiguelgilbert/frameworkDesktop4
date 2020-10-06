@@ -22,11 +22,8 @@ export default function () {
      ,editMode: false //false = edit || new = new
      ,editData: {
         basic: {}
-       ,taxes: []
-       ,bom: []
-       ,partners: []
-       ,pricelists: []
-       ,bins: []
+       ,contacts: []
+       ,cases: []
        ,files: []
        ,history: []
      }

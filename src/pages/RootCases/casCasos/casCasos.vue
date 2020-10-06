@@ -59,7 +59,7 @@ export default ({
   data () {
     return {
         moduleName: "casCasos", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
-        moduleEditName: "casCasos",
+        moduleEditName: "casCasosEdit",
         maindataLoaded: false,
         router: this.$router,
     }

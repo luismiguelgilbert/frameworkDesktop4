@@ -4,25 +4,8 @@
       <q-toggle class="col-4"
         v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-
-      <q-toggle class="col-4"
-        v-model="is_customer" icon="fas fa-tag" color="blue-6" label="Es Cliente?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        />
-      <q-toggle
-        v-model="is_vendor" icon="fas fa-shopping-cart" color="light-blue-6" label="Es Proveedor?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        />
     </div>
-    <q-select class="col-4"
-        label="Grupo Contable (*)" placeholder="Seleccione el grupo al que pertenece el socio (*)" emit-value map-options filled
-        :options="lookup_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="group_id"
-        ref="group_id" @input="changeMonth"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-book" /></template>
-    </q-select>
+
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Escriba la Razón Social del socio (*)" label="Razón Social (*)" filled
@@ -69,24 +52,6 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-phone" /></template>
     </q-input>
-
-    <q-select class="q-mb-md"
-        label="País" placeholder="Seleccione el país de origen del socio (*)" emit-value map-options filled
-        :options="lookup_countries" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="country_id"
-        ref="country_id" @input="changeMonth"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-globe" /></template>
-    </q-select>
-
-    <q-select class="q-mb-md"
-        label="Ciudad" placeholder="Seleccione la ciudad de origen del socio (*)" emit-value map-options filled
-        :options="lookup_cities" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="city_id"
-        ref="city_id" @input="changeMonth"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-city" /></template>
-    </q-select>
 
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Socio" filled
@@ -137,18 +102,6 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.estado },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'estado', value: val}) }
         },
-        group_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.group_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'group_id', value: val}) }
-        },
-        is_vendor:  {
-            get () { return this.$store.state[this.moduleName].editData.basic.is_vendor },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_vendor', value: val}) }
-        },
-        is_customer:  {
-            get () { return this.$store.state[this.moduleName].editData.basic.is_customer },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_customer', value: val}) }
-        },
         name_es: {
             get () { return this.$store.state[this.moduleName].editData.basic.name_es },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'name_es', value: val}) }
@@ -169,26 +122,9 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.billing_phone },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'billing_phone', value: val}) }
         },
-        country_id:  {
-            get () { return this.$store.state[this.moduleName].editData.basic.country_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'country_id', value: val}) }
-        },
-        city_id:  {
-            get () { return this.$store.state[this.moduleName].editData.basic.city_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'city_id', value: val}) }
-        },
         comments:  {
             get () { return this.$store.state[this.moduleName].editData.basic.comments },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'comments', value: val}) }
-        },
-        lookup_groups: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_groups },
-        },
-        lookup_countries: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_countries },
-        },
-        lookup_cities: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_cities },
         },
     },
 })

@@ -101,7 +101,7 @@ import Vuex from 'vuex';
 export default ({
     data () {
         return {
-            moduleName: "casClientes", pagination: { rowsPerPage: 0 },
+            moduleName: "casTasks", pagination: { rowsPerPage: 0 },
         }
     },
     methods:{
