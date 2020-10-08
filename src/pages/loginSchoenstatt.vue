@@ -60,6 +60,7 @@ export default {
             this.$q.sessionStorage.set('URL_Data',response.data.URL_Data)
             this.$q.sessionStorage.set('URL_Port',response.data.URL_Port)
             this.$q.sessionStorage.set('URL_Path',response.data.URL_Path)
+            this.$q.sessionStorage.set('URL_ws',response.data.URL_ws)
             //this.$q.sessionStorage.set('URL_Path',window.location.port)
             this.$q.sessionStorage.set('serverFilesPath',response.data.serverFilesPath)
             this.$q.sessionStorage.set('ReportServer_Path',response.data.ReportServer_Path)

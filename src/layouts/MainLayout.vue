@@ -378,7 +378,8 @@ export default {
       return resultado
     },
     wsOpen(){
-      this.wsConnection = new WebSocket('ws://localhost:3000');
+      //this.wsConnection = new WebSocket('ws://localhost:3000');
+      this.wsConnection = new WebSocket(this.URL_ws);
       this.wsConnection.addEventListener('open', event => {
         this.$q.notify({color: 'primary', message: 'Usted está conectado (WebSocket)' , timeout: 500, icon: "fas fa-plug" });
       });
@@ -485,6 +486,7 @@ export default {
     currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
     unreadNotifications: { get () { return this.$store.state.main.unreadNotifications }, set (val) { this.$store.commit('main/updateState', {key: 'unreadNotifications', value: val}) } },
     selectedContact: { get () { return this.$store.state.main.selectedContact }, set (val) { this.$store.commit('main/updateState', {key: 'selectedContact', value: val}) } },
+    URL_ws: { get () { return this.$q.sessionStorage.getItem('URL_ws') } },
     wsConnection: { get () { return this.$store.state.main.wsConnection }, set (val) { this.$store.commit('main/updateState', {key: 'wsConnection', value: val}) } },
   },
 
