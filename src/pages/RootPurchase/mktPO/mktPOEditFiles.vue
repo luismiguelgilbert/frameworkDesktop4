@@ -122,7 +122,7 @@ import { date } from 'quasar';
 export default ({
     data () {
         return {
-            moduleName: "mktPr", row_id: 31/*=31mktPR*/, filterString: '', dialogVisible: false
+            moduleName: "mktPO", row_id: 31/*=31mktPR*/, filterString: '', dialogVisible: false
         }
     },
     methods:{

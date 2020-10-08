@@ -27,5 +27,6 @@ export default function () {
     ,notificationInterval: 30000
     ,selectedContact: 0
     ,unreadNotifications: []
+    ,wsConnection: null
   }
 }

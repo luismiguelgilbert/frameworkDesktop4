@@ -44,7 +44,7 @@ export default {
   created(){
       this.$q.sessionStorage.clear();//Clear Storage
       this.$q.sessionStorage.set('pathname',window.location.pathname)
-      Object.keys(this.$store.state).map(x=>{this.$store.commit(x+'/resetToDefaultState');})//Loop across all vuex states, and reset each state to its initial status
+      Object.keys(this.$store.state).map(x=>{this.$store.commit(x+'/resetToDefaultState')})//Loop across all vuex states, and reset each state to its initial status
       colors.setBrand('primary', '#1867C0') //#1976D2
       this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
       this.$q.dark.set(false)//force darkMode to be off always
@@ -63,6 +63,7 @@ export default {
             this.$q.sessionStorage.set('serverFilesPath',response.data.serverFilesPath)
             this.$q.sessionStorage.set('ReportServer_Path',response.data.ReportServer_Path)
             this.$q.sessionStorage.set('ReportServer_BI_Path',response.data.ReportServer_BI_Path)
+            //this.$q.sessionStorage.set('ReportServer_PrintPath',response.data.ReportServer_PrintPath)
             this.$q.sessionStorage.set('Google_API_key',response.data.Google_API_key)
             //this.$q.sessionStorage.set('ReportServer_User',response.data.ReportServer_User)
             //this.$q.sessionStorage.set('ReportServer_Password',response.data.ReportServer_Password)

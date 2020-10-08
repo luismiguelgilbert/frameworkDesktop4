@@ -141,10 +141,6 @@ export default ({
             this.isSearchDialog = true
         },
         openSearchCustomer(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            console.dir('openSearchCustomer')
-            console.dir(UpdateFieldValueName)
-            console.dir(UpdateFieldLabelName)
-            console.dir(predefinedValue)
             this.mainLookupUpdateFieldValueName = UpdateFieldValueName
             this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
             this.mainLookupPredefinedValue = predefinedValue

@@ -64,6 +64,7 @@ export default {
             this.$q.sessionStorage.set('serverFilesPath',response.data.serverFilesPath)
             this.$q.sessionStorage.set('ReportServer_Path',response.data.ReportServer_Path)
             this.$q.sessionStorage.set('ReportServer_BI_Path',response.data.ReportServer_BI_Path)
+            //this.$q.sessionStorage.set('ReportServer_PrintPath',response.data.ReportServer_PrintPath)
             this.$q.sessionStorage.set('Google_API_key',response.data.Google_API_key)
             //this.$q.sessionStorage.set('ReportServer_User',response.data.ReportServer_User)
             //this.$q.sessionStorage.set('ReportServer_Password',response.data.ReportServer_Password)

@@ -47,6 +47,8 @@
         <!--Universal Search A FUTURO-->
         <q-space />
 
+        {{wsConnectionState()}}
+        <q-btn @click="sendMessage" :icon="wsConnectionState()?'fas fa-plug':'fas fa-unlink'" />
 
         <!--COMPANY-->
         <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps  >
@@ -210,6 +212,7 @@ import Vuex from 'vuex'
 import { debounce, colors, SessionStorage, Notify } from 'quasar'
 Vue.use(Vuex)
 
+
 export default {
   name: 'MainLayout',
 
@@ -251,8 +254,8 @@ export default {
         this.computedDataLoaded=true;//para que se cargue el router-view IF computedData is loaded
         this.userColor = this.userColor//force theme to be applied
         this.$q.dark.set(this.userDarkMode)//force darkMode to be applied
-        this.loadNotifications();//Forza 1 llamada inicial
-        this.poolNotifications();//inicia intervalo de lectura de notificaciones
+        //this.loadNotifications();//Forza 1 llamada inicial
+        //this.poolNotifications();//inicia intervalo de lectura de notificaciones
         //navigate to user default init module, if exists
         try{
           if(this.userLinkID){
@@ -286,7 +289,6 @@ export default {
       })
     })
   },
-
   methods: {
     openSameRoot(){
       if(this.currentPathModule!=null && this.currentPathModule!=null){
@@ -343,7 +345,7 @@ export default {
     },
     poolNotifications(){
       this.interval = setInterval(function () {
-        this.loadNotifications();
+        //this.loadNotifications();
       }.bind(this), this.notificationInterval);
     },
     loadNotifications(){
@@ -366,6 +368,42 @@ export default {
         console.error(error)
         console.dir(error.response)
       })
+    },
+    wsConnectionState(){
+      console.dir('Calculando wsConnectionState')
+      console.dir(this.wsConnection)
+      let resultado = (this.wsConnection&&this.wsConnection.readyState)?this.wsConnection.readyState:0; 
+      if(this.wsConnection){console.dir(this.wsConnection.readyState)}
+      console.dir(resultado)
+      return resultado
+    },
+    wsOpen(){
+      this.wsConnection = new WebSocket('ws://localhost:3000');
+      this.wsConnection.addEventListener('open', event => {
+        this.$q.notify({color: 'primary', message: 'Usted está conectado (WebSocket)' , timeout: 500, icon: "fas fa-plug" });
+      });
+      this.wsConnection.addEventListener('message', message => {
+        console.dir('se ha recibido un mensaje del servidor!')
+        console.dir(message.data)
+        this.$q.notify({color: 'primary', message: 'Mensaje:' , timeout: 500, icon: "fas fa-plug" });
+      })
+    },
+      /*wsClient.addEventListener('message', event => {
+      console.dir('@@@@@@@@@@@@@@@ Message from server');
+      console.dir(event)
+      //this.$q.notify({color: 'primary', message: event.data , timeout: 500, icon: "fas fa-plug" });
+      //wsClient.send('Hi server, this is: ME!' ); //+ this.userCode + ' (' + this.userID + ')'*/
+
+    sendMessage(){
+      if(!this.wsConnection){
+        this.wsOpen()
+      }else{
+        if(this.wsConnection.readyState==1){
+          this.wsConnection.send('Message after button clicked from ' + this.userID + '(' + this.userCode + ')');
+        }
+      }
+      
+      
     }
   },
 
@@ -447,6 +485,7 @@ export default {
     currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
     unreadNotifications: { get () { return this.$store.state.main.unreadNotifications }, set (val) { this.$store.commit('main/updateState', {key: 'unreadNotifications', value: val}) } },
     selectedContact: { get () { return this.$store.state.main.selectedContact }, set (val) { this.$store.commit('main/updateState', {key: 'selectedContact', value: val}) } },
+    wsConnection: { get () { return this.$store.state.main.wsConnection }, set (val) { this.$store.commit('main/updateState', {key: 'wsConnection', value: val}) } },
   },
 
   watch: {

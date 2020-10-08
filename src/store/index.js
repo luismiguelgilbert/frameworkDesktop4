@@ -33,6 +33,7 @@ import UoM from './UoM' //UoM
 import Brands from './Brands' //Brands
 import InvTypes from './InvTypes' //InvTypes
 import mktPR from './mktPR' //mktPR
+import mktPO from './mktPO' //mktPO
 
 import casCasesTypes from './casCasesTypes' //casCasesTypes
 import casCasos from './casCasos' //casCasos
@@ -47,16 +48,19 @@ export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
        main
+      //System
       ,Users
       ,Roles
       ,Companies
       ,Modules
+      //Bitacora
       ,Bitaplaces
       ,Bitaconsola
       ,BitaRoutes
       ,BitaRounds
       ,BitaCars
       ,BitacoraPeople
+      //Others
       ,Notifications
       ,Employees
       ,Equipista
@@ -65,19 +69,24 @@ export default function (/* { ssrContext } */) {
       ,Taxes
       ,TaxesMaster
       ,AccPeriods
+      //Schoenstatt
       ,SCHPersonas
       ,SCHPersona
       ,SCHApostolados
       ,SCHFormaciones
       ,SCHGroups
       ,SCHSectores
+      //Master
       ,Partners
       ,Items
       ,Warehouses
       ,UoM
       ,Brands
       ,InvTypes
+      //mkt
       ,mktPR
+      ,mktPO
+      //Cases
       ,casCasesTypes
       ,casCasos
       ,casClientes

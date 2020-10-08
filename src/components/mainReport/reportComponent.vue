@@ -100,6 +100,11 @@ export default ({
                 result = result + '&sys_user_code=' + this.userCode
                 result = result + '&sys_user_language=es'//result = result + '&sys_user_language=' + this.$q.sessionStorage.getItem('sys_user_language')
                 result = result + '&sys_user_company=' + this.userCompany
+                //si es que el reporte tiene row_id, lo adiciona
+                try{
+                    result = result + '&row_id=' + this.currentReportData.parameters.row_id
+                }catch(ex){}
+                console.dir(this.currentReportData)
             }else{//PBIRS
                 result = this.$q.sessionStorage.getItem('ReportServer_BI_Path');
                 result = result + this.currentReportData.report.link_name
