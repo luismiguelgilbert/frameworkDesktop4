@@ -47,8 +47,9 @@
         <!--Universal Search A FUTURO-->
         <q-space />
 
-        {{wsConnectionState()}}
-        <q-btn @click="sendMessage" :icon="wsConnectionState()?'fas fa-plug':'fas fa-unlink'" />
+        
+        <q-btn @click="openConnection" :icon="wsConnectionState()?'fas fa-plug':'fas fa-unlink'" />
+        <q-btn @click="sendMessage" icon="fas fa-envelope" class="q-ml-md" />
 
         <!--COMPANY-->
         <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps  >
@@ -415,8 +416,23 @@ export default {
       console.dir(socketIO)
       console.dir(this.URL_ws)
       //const socket = new WebSocket('wss://localhost/api/');;
-      const socket = new WebSocket(this.URL_ws);;
-      console.dir('socket')
+      const socket = new WebSocket(this.URL_ws);
+      socket.onopen = function(evento){
+        console.dir('connecion open here!!!!!!!!!')
+        console.dir(evento)
+      }
+      socket.onmessage = function(evento){
+        console.dir('MESSAGE here!!!!!!!!!')
+        console.dir(evento)
+        console.dir(evento.data)
+        
+      }
+      socket.onerror = function(evento){
+        console.dir('ERROR here!!!!!!!!!')
+        console.dir(evento)
+      }
+      this.wsConnection = socket
+      //console.dir('socket')
       //console.dir(socket)
       //this.wsConnection = socketIO(this.URL_ws);
       //let nuevaConexion = socketIO('https://localhost/api');
@@ -438,16 +454,23 @@ export default {
       //this.$q.notify({color: 'primary', message: event.data , timeout: 500, icon: "fas fa-plug" });
       //wsClient.send('Hi server, this is: ME!' ); //+ this.userCode + ' (' + this.userID + ')'*/
 
-    sendMessage(){
+    openConnection(){
       if(!this.wsConnection){
         this.wsOpen()
-      }else{
-        if(this.wsConnection.readyState==1){
-          this.wsConnection.send('Message after button clicked from ' + this.userID + '(' + this.userCode + ')');
+      }
+    },
+    sendMessage(){
+      if(this.wsConnection){
+        if(this.wsConnection.readyState){
+          console.dir('readyState')
+          console.dir(this.wsConnection.readyState)
+          try{
+            this.wsConnection.send('Message after button clicked from ' + this.userID + '(' + this.userCode + ')');
+          }catch(ex){
+            console.dir('Exception')
+          }
         }
       }
-      
-      
     }
   },
 
