@@ -210,7 +210,38 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { debounce, colors, SessionStorage, Notify } from 'quasar'
-Vue.use(Vuex)
+import socketIO from 'socket.io-client'
+
+//import VueSocketIO from 'vue-socket.io'
+
+//export const SocketInstance = new VueSocketIO('http://localhost:8080');
+//Vue.use(VueSocketIO, SocketInstance)
+
+//export const SocketInstance = socketio('http://localhost:8080');
+
+//Vue.use(Vuex)
+
+
+
+//Vue.use(VueSocketIO, socketio('https://localhost'));
+//Vue.use(VueSocketIO, 'https://localhost');
+//Vue.use(new VueSocketIO, 'https://localhost');
+/*Vue.use(new VueSocketIO({
+    debug: true,
+    connection: 'http://localhost:8080',
+}));*/
+
+
+/*Vue.use(new VueSocketIO({
+    debug: true,
+    connection: 'https://localhost',
+    vuex: {
+        store,
+        actionPrefix: 'SOCKET_',
+        mutationPrefix: 'SOCKET_'
+    },
+    //options: { path: "/my-app/" } //Optional options
+}))*/
 
 
 export default {
@@ -379,7 +410,18 @@ export default {
     },
     wsOpen(){
       //this.wsConnection = new WebSocket('ws://localhost:3000');
-      this.wsConnection = new WebSocket(this.URL_ws);
+      //console.dir('Initiating WebSocket connection to ' + this.URL_ws)
+      console.dir('Initiating WebSocket..')
+      console.dir(socketIO)
+      console.dir(this.URL_ws)
+      //const socket = new WebSocket('wss://localhost/api/');;
+      const socket = new WebSocket(this.URL_ws);;
+      console.dir('socket')
+      //console.dir(socket)
+      //this.wsConnection = socketIO(this.URL_ws);
+      //let nuevaConexion = socketIO('https://localhost/api');
+      //console.dir(nuevaConexion)
+      /*this.wsConnection = new WebSocket(this.URL_ws);
       this.wsConnection.addEventListener('open', event => {
         this.$q.notify({color: 'primary', message: 'Usted está conectado (WebSocket)' , timeout: 500, icon: "fas fa-plug" });
       });
@@ -388,6 +430,7 @@ export default {
         console.dir(message.data)
         this.$q.notify({color: 'primary', message: 'Mensaje:' , timeout: 500, icon: "fas fa-plug" });
       })
+      */
     },
       /*wsClient.addEventListener('message', event => {
       console.dir('@@@@@@@@@@@@@@@ Message from server');
