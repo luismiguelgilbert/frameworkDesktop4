@@ -417,19 +417,21 @@ export default {
       console.dir(this.URL_ws)
       //const socket = new WebSocket('wss://localhost/api/');;
       const socket = new WebSocket(this.URL_ws);
-      socket.onopen = function(evento){
+      socket.onopen = evento => {
         console.dir('connecion open here!!!!!!!!!')
         console.dir(evento)
+        this.$q.notify({color: 'primary', message: 'Conectado!' , timeout: 500 });
       }
-      socket.onmessage = function(evento){
+      socket.onmessage = evento => {
         console.dir('MESSAGE here!!!!!!!!!')
         console.dir(evento)
         console.dir(evento.data)
-        
+        this.$q.notify({color: 'primary', message: evento.data , timeout: 500 });
       }
-      socket.onerror = function(evento){
+      socket.onerror = evento => {
         console.dir('ERROR here!!!!!!!!!')
         console.dir(evento)
+        this.$q.notify({color: 'red', message: 'Lo sentimos, se produjo un error' , timeout: 500 });
       }
       this.wsConnection = socket
       //console.dir('socket')
