@@ -48,8 +48,6 @@
         <q-space />
 
         
-        <q-btn @click="openConnection" :icon="wsConnectionState()?'fas fa-plug':'fas fa-unlink'" />
-        <q-btn @click="sendMessage" icon="fas fa-envelope" class="q-ml-md" />
 
         <!--COMPANY-->
         <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps  >
@@ -80,11 +78,23 @@
 
         <!--NOTIFICATION-->
         <span>&ensp;</span>
-        <q-btn flat dense :loading="isNotificationBusy" menu-anchor="bottom left" menu-self="top left" no-caps icon="fas fa-bell" class="q-mr-md"  >
+        <q-btn flat dense menu-anchor="bottom left" menu-self="top left" no-caps 
+          :icon="isWebSocketConnected?'fas fa-bell':'fas fa-bell-slash'"
+          :title="isWebSocketConnected?'Ustes está conectado al servicio de Notificaciones':'Haga click para conectarse al servicio de Notificaciones'"
+          class="q-mr-md"  >
           <q-badge floating color="red" v-if="unreadNotifications.length>0&&unreadCount>0">!</q-badge>
           <q-menu>
             <div class="scroll" style="max-height: 240px;">
               <q-list separator class="text-grey-7" v-close-popup >
+                <q-item tag="label" v-ripple>
+                  <q-item-section>
+                    <q-item-label> {{isWebSocketConnected?'Notificaciones Activas':'Sin Notificaciones'}}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side top>
+                    <q-toggle color="primary" :value="isWebSocketConnected" @input="changeWebSocketStatus" />
+                  </q-item-section>
+                </q-item>
+
                 <q-item clickable v-for="(note,index) in unreadNotifications" :key="index" @click="gotoNotifications(note.sender_sys_user_code)">
                   <q-item-section avatar>
                     <q-img
@@ -112,7 +122,7 @@
 
               </q-list>
             </div>
-            <q-item-label caption><q-btn icon="fas fa-external-link-alt" size="lg" label="Abrir Notificaciones" no-caps class="full-width no-border-radius" color="primary"  @click="gotoNotifications(0)" /></q-item-label>
+            <q-item-label caption><q-btn icon="fas fa-external-link-alt" size="md" label="Abrir Notificaciones" no-caps class="full-width no-border-radius" color="primary"  @click="gotoNotifications(0)" /></q-item-label>
           </q-menu>
         </q-btn>
 
@@ -211,42 +221,18 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { debounce, colors, SessionStorage, Notify } from 'quasar'
-import socketIO from 'socket.io-client'
-
-//import VueSocketIO from 'vue-socket.io'
-
-//export const SocketInstance = new VueSocketIO('http://localhost:8080');
-//Vue.use(VueSocketIO, SocketInstance)
-
-//export const SocketInstance = socketio('http://localhost:8080');
-
-//Vue.use(Vuex)
-
-
-
-//Vue.use(VueSocketIO, socketio('https://localhost'));
-//Vue.use(VueSocketIO, 'https://localhost');
-//Vue.use(new VueSocketIO, 'https://localhost');
-/*Vue.use(new VueSocketIO({
-    debug: true,
-    connection: 'http://localhost:8080',
-}));*/
-
-
-/*Vue.use(new VueSocketIO({
-    debug: true,
-    connection: 'https://localhost',
-    vuex: {
-        store,
-        actionPrefix: 'SOCKET_',
-        mutationPrefix: 'SOCKET_'
-    },
-    //options: { path: "/my-app/" } //Optional options
-}))*/
+//import socketIO from 'socket.io-client'
 
 
 export default {
   name: 'MainLayout',
+
+  data () {
+    return {
+      router: this.$router, leftDrawerOpen: true, isNotificationBusy: false, unreadCount: 0, interval: null,
+      isWebSocketConnected: false
+    }
+  },
 
   created(){
     this.$q.sessionStorage.set('pathname',window.location.pathname)
@@ -302,6 +288,8 @@ export default {
           }//else{ this.router.push({ path: '/' }) }
         }catch(ex){console.dir(ex)}
 
+        //Create WebSocketConnection
+        this.openWebSocketConnection()
       }
       this.$q.loading.hide()
     }).catch((error) => {
@@ -321,6 +309,7 @@ export default {
       })
     })
   },
+  
   methods: {
     openSameRoot(){
       if(this.currentPathModule!=null && this.currentPathModule!=null){
@@ -375,12 +364,12 @@ export default {
         this.router.replace('/Login'); //navigate to login
       }
     },
-    poolNotifications(){
+    /*poolNotifications(){
       this.interval = setInterval(function () {
         //this.loadNotifications();
       }.bind(this), this.notificationInterval);
-    },
-    loadNotifications(){
+    },*/
+    /*loadNotifications(){
       this.isNotificationBusy = true;
       this.$axios({
         method: 'GET',
@@ -400,65 +389,40 @@ export default {
         console.error(error)
         console.dir(error.response)
       })
-    },
-    wsConnectionState(){
-      console.dir('Calculando wsConnectionState')
-      console.dir(this.wsConnection)
-      let resultado = (this.wsConnection&&this.wsConnection.readyState)?this.wsConnection.readyState:0; 
-      if(this.wsConnection){console.dir(this.wsConnection.readyState)}
-      console.dir(resultado)
-      return resultado
-    },
-    wsOpen(){
-      //this.wsConnection = new WebSocket('ws://localhost:3000');
-      //console.dir('Initiating WebSocket connection to ' + this.URL_ws)
-      console.dir('Initiating WebSocket..')
-      console.dir(socketIO)
-      console.dir(this.URL_ws)
-      //const socket = new WebSocket('wss://localhost/api/');;
-      const socket = new WebSocket(this.URL_ws);
-      socket.onopen = evento => {
-        console.dir('connecion open here!!!!!!!!!')
-        console.dir(evento)
-        this.$q.notify({color: 'primary', message: 'Conectado!' , timeout: 500 });
+    },*/
+    openWebSocketConnection(){
+      if(this.userCode && this.userCode > 0){
+        const socket = new WebSocket(this.URL_ws+'?userid:'+this.userCode);
+        socket.onopen = evento => {
+          this.wsConnection = socket
+          this.$q.notify({color: 'primary', message: 'Se ha conectado del servicio de Notificaciones' , timeout: 500, icon: 'fas fa-plug' });
+          this.isWebSocketConnected = true
+        }
+        socket.onmessage = evento => {
+          console.dir('MESSAGE here!!!!!!!!!')
+          console.dir(evento)
+          console.dir(evento.data)
+          this.$q.notify({color: 'primary', message: evento.data , timeout: 500 });
+        }
+        socket.onerror = evento => {
+          console.dir('Websocket error!!!!!!!!!')
+          console.dir(evento)
+          this.$q.notify({color: 'red', message: 'Lo sentimos, se produjo un error en el servicio de Notificaciones: ' + JSONS.stringify(evento) , timeout: 0 });
+        }
+        socket.onclose = evento => {
+          console.dir('Websocket disconnected!!!!!!!!!')
+          console.dir(evento)
+          this.$q.notify({color: 'red', message: 'Se ha desconectado del servicio de Notificaciones' , timeout: 500, icon: 'fas fa-unlink' });
+          this.isWebSocketConnected = false
+        }
+      }else{
+        this.$q.notify({color: 'red', message: 'userCode es inválido'});
       }
-      socket.onmessage = evento => {
-        console.dir('MESSAGE here!!!!!!!!!')
-        console.dir(evento)
-        console.dir(evento.data)
-        this.$q.notify({color: 'primary', message: evento.data , timeout: 500 });
-      }
-      socket.onerror = evento => {
-        console.dir('ERROR here!!!!!!!!!')
-        console.dir(evento)
-        this.$q.notify({color: 'red', message: 'Lo sentimos, se produjo un error' , timeout: 500 });
-      }
-      this.wsConnection = socket
-      //console.dir('socket')
-      //console.dir(socket)
-      //this.wsConnection = socketIO(this.URL_ws);
-      //let nuevaConexion = socketIO('https://localhost/api');
-      //console.dir(nuevaConexion)
-      /*this.wsConnection = new WebSocket(this.URL_ws);
-      this.wsConnection.addEventListener('open', event => {
-        this.$q.notify({color: 'primary', message: 'Usted está conectado (WebSocket)' , timeout: 500, icon: "fas fa-plug" });
-      });
-      this.wsConnection.addEventListener('message', message => {
-        console.dir('se ha recibido un mensaje del servidor!')
-        console.dir(message.data)
-        this.$q.notify({color: 'primary', message: 'Mensaje:' , timeout: 500, icon: "fas fa-plug" });
-      })
-      */
     },
-      /*wsClient.addEventListener('message', event => {
-      console.dir('@@@@@@@@@@@@@@@ Message from server');
-      console.dir(event)
-      //this.$q.notify({color: 'primary', message: event.data , timeout: 500, icon: "fas fa-plug" });
-      //wsClient.send('Hi server, this is: ME!' ); //+ this.userCode + ' (' + this.userID + ')'*/
-
-    openConnection(){
-      if(!this.wsConnection){
-        this.wsOpen()
+    closeWebSocketConnection(){
+      if(this.wsConnection){
+        this.wsConnection.close(1000,this.userCode);
+        this.isWebSocketConnected = false;
       }
     },
     sendMessage(){
@@ -473,14 +437,18 @@ export default {
           }
         }
       }
+    },
+    changeWebSocketStatus(){
+      this.isWebSocketConnected = !this.isWebSocketConnected
+      if(this.isWebSocketConnected){//true, entonces conectar
+        this.openWebSocketConnection()
+      }else{//false, entonces desconectado
+        this.closeWebSocketConnection()
+      }
     }
   },
 
-  data () {
-    return {
-      router: this.$router, leftDrawerOpen: true, isNotificationBusy: false, unreadCount: 0, interval: null
-    }
-  },
+  
 
   computed:{
     userColor: {
@@ -558,11 +526,11 @@ export default {
     wsConnection: { get () { return this.$store.state.main.wsConnection }, set (val) { this.$store.commit('main/updateState', {key: 'wsConnection', value: val}) } },
   },
 
-  watch: {
+  /*watch: {
     notificationInterval: function (val) {
       clearInterval(this.interval)
       this.poolNotifications();//inicia intervalo de lectura de notificaciones (con Intervalo actualizado)
     },
-  }
+  }*/
 }
 </script>

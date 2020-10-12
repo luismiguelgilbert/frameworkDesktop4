@@ -1,6 +1,5 @@
 <template>
   <q-page class="flex flex-center">
-    {{wsConnection?wsConnection.readyState:'no existe'}}
     <img
       alt="BITT logo"
       src="/logoTransparent.png"

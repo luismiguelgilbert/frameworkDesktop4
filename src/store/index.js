@@ -41,6 +41,7 @@ import casClientes from './casClientes' //casClientes
 import casLocations from './casLocations' //casLocations
 import casTasks from './casTasks' //casTasks
 import casTasksTypes from './casTasksTypes' //casTasksTypes
+import invIncoming from './invIncoming' //invIncoming
 
 Vue.use(Vuex)
 
@@ -86,6 +87,8 @@ export default function (/* { ssrContext } */) {
       //mkt
       ,mktPR
       ,mktPO
+      //Inventory
+      ,invIncoming
       //Cases
       ,casCasesTypes
       ,casCasos

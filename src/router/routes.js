@@ -70,6 +70,9 @@ const routes = [
       ,{ path: 'RootPurchase/mktPOEdit', component: () => import('pages/RootPurchase/mktPO/mktPOEdit.vue') }
       ,{ path: 'RootPurchase/mktPORet', component: () => import('pages/RootPurchase/mktPORet/mktPORet.vue') }
       ,{ path: 'RootPurchase/mktPORetEdit', component: () => import('pages/RootPurchase/mktPORet/mktPORetEdit.vue') }
+      //INVENTORY
+      ,{ path: 'RootInventory/invIncoming', component: () => import('pages/RootInventory/invIncoming/invIncoming.vue') }
+      ,{ path: 'RootInventory/invIncomingEdit', component: () => import('pages/RootInventory/invIncoming/invIncomingEdit.vue') }
       //CASES_LEGAL
       ,{ path: 'RootCases/casClientes', component: () => import('pages/RootCases/casClientes/casClientes.vue') }
       ,{ path: 'RootCases/casClientesEdit', component: () => import('pages/RootCases/casClientes/casClientesEdit.vue') }
