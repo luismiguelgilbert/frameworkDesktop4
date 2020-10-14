@@ -15,9 +15,11 @@
           //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
           { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
           { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
+          { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
           { name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true },
           { name: 'transportTypeID', required: true, label: 'Entrega?', align: 'left', field: row => row.transportTypeID, sortable: true },
           { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: true },
+          { name: 'expectedDate', required: true, label: 'Esperado el', align: 'left', field: row => row.expectedDate, sortable: true, style: 'min-width: 100px;' },
         ]"
     >
 
@@ -29,9 +31,21 @@
 
         <q-td key="invID" :props="props">{{ props.row.invName }}</q-td>
         <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
+        <q-td key="quantityRcvd" :props="props">{{ props.row.quantityRcvd }}</q-td>
         <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
         <q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>
         <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
+         <q-td key="expectedDate" :props="props" >
+          {{showDateName(props.row.expectedDate)}}
+          <q-popup-edit :value="props.row.expectedDate" class="no-padding">
+            <q-date :value="props.row.expectedDate" @input="(value)=>{updateRow(value,'expectedDate',props.row)}" >
+              <div class="row items-center justify-end">
+                <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+              </div>
+            </q-date>
+          </q-popup-edit>
+        </q-td>
+        
 
       </q-tr>
     </template>
@@ -329,9 +343,24 @@ export default ({
       openSearchPrj(){
         this.isPrjDialog = true
       },
+      showDateName(value){
+        let resultado = '...'
+        try{
+          resultado = date.formatDate(value, this.userDateFormat,
+            {
+              days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+              daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
+              months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+              monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            }
+          )
+        }catch(ex){console.dir(ex)}
+        return resultado;
+      }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
         allow_view: { get () { return true }, },
         allow_edit: { get () { return true }, },
         allow_insert: { get () { return true }, },

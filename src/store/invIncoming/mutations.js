@@ -7,16 +7,36 @@ export const updateEditData = (state, value) => {
     state.editData[value.section][value.key] = value.value
 }
 
-export const updateEditDataUsers = (state, value) => {
-    state.editData.users = value
+export const updateEditDataLines = (state, value) => {
+    let contador = 1
+    state.editData.lines = value
+    state.editData.accountLines = []
+    state.editData.lines.filter(x=>x.newQuantity>0).map(linea=>{
+        state.editData.accountLines.push({
+             lineID: contador
+            ,accountID: linea.accInventory
+            ,partnerID: state.editData.basic.partnerID
+            ,invID: linea.invID
+            ,debit: linea.newQuantity * linea.price
+            ,credit: 0
+            ,comments: linea.invName
+        })
+        contador++;
+        state.editData.accountLines.push({
+            lineID: contador
+           ,accountID: linea.accAllocation
+           ,partnerID: state.editData.basic.partnerID
+           ,invID: linea.invID
+           ,debit: 0
+           ,credit: linea.newQuantity * linea.price
+           ,comments: linea.invName
+       })
+       contador++;
+    })
 }
 
 export const updateEditDataFiles = (state, value) => {
   state.editData.files = value
-}
-
-export const updateEditDataLocations = (state, value) => {
-  state.editData.locations = value
 }
 
 export const resetToDefaultState = (state) => {

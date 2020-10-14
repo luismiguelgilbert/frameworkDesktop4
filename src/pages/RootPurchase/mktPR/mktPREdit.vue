@@ -114,7 +114,7 @@ export default ({
   data () {
     return {
         moduleName: "mktPR", router: this.$router,
-        tab: 'lines'/*'basic'*/, splitterModel: 250, dataLoaded: false,
+        tab: 'basic'/*'basic'*/, splitterModel: 250, dataLoaded: false,
     }
   },
   created(){

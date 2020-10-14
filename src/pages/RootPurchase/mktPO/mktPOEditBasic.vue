@@ -129,19 +129,12 @@ export default ({
             )
         },
         openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            console.dir('openSearchPartner')
-            console.dir(UpdateFieldValueName)
-            console.dir(UpdateFieldLabelName)
-            console.dir(predefinedValue)
             this.mainLookupUpdateFieldValueName = UpdateFieldValueName
             this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
             this.mainLookupPredefinedValue = predefinedValue
             this.isPartnerDialog = true
         },
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            console.dir('updateValues')
-            console.dir(this.mainLookupUpdateFieldValueName)
-            console.dir(this.mainLookupUpdateFieldLabelName)
             this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
             this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
             this.isPartnerDialog = false

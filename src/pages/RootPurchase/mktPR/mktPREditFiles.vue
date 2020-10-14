@@ -56,9 +56,10 @@
         <q-space />
         <q-input borderless dense v-model="filterString" placeholder="Buscar...">
           <template v-slot:append>
-            <q-icon name="fas fa-search" />
+            <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString?filterString='':undefined" />
           </template>
         </q-input>
+        
     </template>
   </q-table>
   <q-dialog v-model="dialogVisible">

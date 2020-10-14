@@ -1,38 +1,50 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
-    <div class="row">
-      <q-toggle class="col-4"
-        v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        />
-    </div>
-
+    <!--partnerID-->
     <q-input
-        ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="partnerName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
-        v-model="name_es"
+        :value="partnerName"
+        @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
         :rules="[
                 val => !!val || '* Requerido',
-                val => val.length > 0 || 'Campo debe tener al menos 1 carateres',
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
+        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
     </q-input>
-    <q-input
-        ref="partner_ruc" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione el Tipo de Documento (*)" label="Tipo de Documento (*)" filled
-        v-model="partner_ruc"
+
+    <q-select
+        label="Bodega (*)" placeholder="Seleccione la Bodega donde está recibiendo los Items (*)" emit-value map-options filled
+        :options="lookup_wh" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :option-disable="opt => !opt.estado" :disable="!(partnerID>0)"
+        v-model="whID" @input="loadPendingInv()"
+        ref="whID"
         :rules="[
-                val => !!val || '* Requerido',
-                val => val.length > 0 || 'Campo debe tener al menos 1 carateres',
+                val => val!= null || '* Requerido',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
+    </q-select>
+
+    <q-select
+        label="Tipo de Documento del Proveedor(*)" placeholder="Seleccione el Tipo de Documento del Proveedor (*)" emit-value map-options filled
+        :options="lookup_invDocTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :option-disable="opt => !opt.estado"
+        v-model="invDocTypeID"
+        ref="invDocTypeID"
+        :rules="[
+                val => val!= null || '* Requerido',
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-file-invoice" /></template>
-    </q-input>
+    </q-select>
 
+    
     <q-input class="q-mb-md"
-        ref="short_name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="invDocNumber" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Escriba el Número del Documento (*)" label="Número del Documento (*)" filled
-        v-model="short_name_es"
+        v-model="invDocNumber"
         >
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
@@ -44,71 +56,140 @@
         />
 
     <br><br>
+
+    <q-dialog v-model="isPartnerDialog">
+        <mainLookup 
+            titleBar="Seleccionar Proveedor ()"
+            :data="this.lookup_partners"
+            :dataRowKey="'value'"
+            :selectionMode="'single'"
+            :predefinedValue="mainLookupPredefinedValue"
+            :columns="[
+                    { name: 'label', required: true, label: 'Proveedor', align: 'left', field: row => row.label , sortable: false, style: 'min-width: 300px;' }
+                    ,{ name: 'partner_ruc', required: true, label: 'Número de Identificación', align: 'left', field: row => row.partner_ruc , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
+                    ,{ name: 'pendingOrders', required: true, label: 'Órdenes Pendientes', align: 'left', field: row => row.pendingOrders , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
+                    
+                    ]"
+            @onCancel="isPartnerDialog=false"
+            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
+        />
+    </q-dialog>
 </q-form>
 </template>
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 
 export default ({
+    components: {
+        mainLookup: mainLookup
+    },
     data () {
         return {
             moduleName: "invIncoming"
+            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
     mounted(){
         this.$refs.formulario.validate()
     },
     methods:{
-      changeMonth(){
-        /*if(this.parent_id){
-          let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id)
-          this.code_es = temporal.code_es + '.xxx'
-          this.account_type_root = temporal.account_type_root
-          this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
-        }else{
-          this.code_es = ''
-          this.account_type_root = 1
-          this.account_level = 0
-        }*/
-      }
+        openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
+            this.mainLookupUpdateFieldValueName = UpdateFieldValueName
+            this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
+            this.mainLookupPredefinedValue = predefinedValue
+            this.isPartnerDialog = true
+        },
+        updateValues(selectedRows, lookupValueField, lookupLabelField){
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this.isPartnerDialog = false
+            this.lines = []
+            this.loadPendingInv()
+        },
+        loadPendingInv(){
+            if(this.whID>0&&this.partnerID>0){
+                this.$q.loading.show()
+                this.$axios({
+                    method: 'GET',
+                    url: this.apiURL + 'spInvKardexSelectPending',
+                    headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+                    params: {
+                        userCode: this.userCode,
+                        userCompany: this.userCompany,
+                        userLanguage: 'es',
+                        partnerID: this.partnerID,
+                        whID: this.whID,
+                        direction: 1,//1=Incoming || 0==Outgoing
+                        editMode: this.editMode
+                    }
+                }).then((response) => {
+                    this.lines = response.data
+                    this.$q.loading.hide()
+                }).catch((error) => {
+                    console.dir(error)
+                    let mensaje = ''
+                    if(error.message){ mensaje = error.message }
+                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                    this.$q.notify({ html: true, multiLine: false, color: 'red'
+                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                    })
+                    this.$q.loading.hide()
+                })
+            }
+        }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userCode: { get () { return this.$store.state.main.userCode } },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        estado: {
-            get () { return this.$store.state[this.moduleName].editData.basic.estado },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'estado', value: val}) }
+        partnerID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
         },
-        name_es: {
-            get () { return this.$store.state[this.moduleName].editData.basic.name_es },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'name_es', value: val}) }
+        partnerName: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerName', value: val}) }
         },
-        partner_ruc: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_ruc },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_ruc', value: val}) }
+        whID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.whID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'whID', value: val}) }
         },
-        short_name_es: {
-            get () { return this.$store.state[this.moduleName].editData.basic.short_name_es },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'short_name_es', value: val}) }
+        invDocTypeID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.invDocTypeID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'invDocTypeID', value: val}) }
         },
-        billing_address: {
-            get () { return this.$store.state[this.moduleName].editData.basic.billing_address },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'billing_address', value: val}) }
-        },
-        billing_phone: {
-            get () { return this.$store.state[this.moduleName].editData.basic.billing_phone },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'billing_phone', value: val}) }
+        invDocNumber:  {
+            get () { return this.$store.state[this.moduleName].editData.basic.invDocNumber },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'invDocNumber', value: val}) }
         },
         comments:  {
             get () { return this.$store.state[this.moduleName].editData.basic.comments },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'comments', value: val}) }
+        },
+        lookup_partners: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_partners },
+        },
+        lookup_wh: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_wh },
+        },
+        lookup_invDocTypes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_invDocTypes },
+        },
+        lines: {
+            get () { return this.$store.state[this.moduleName].editData.lines },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
         },
     },
 })

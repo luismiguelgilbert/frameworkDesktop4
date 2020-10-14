@@ -394,6 +394,7 @@ export default ({
           ,prjName: ''
           ,transportTypeID: this.defaultTransportID
           ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
+          ,expectedDate: ''
         }
         newRows.push(nuevaFila)
         this.lines = newRows

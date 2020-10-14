@@ -55,10 +55,10 @@
         <q-btn label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" no-caps />
         <q-space />
         <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-          <template v-slot:append>
-            <q-icon name="fas fa-search" />
-          </template>
-        </q-input>
+        <template v-slot:append>
+          <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString?filterString='':undefined" />
+        </template>
+      </q-input>
     </template>
   </q-table>
   <q-dialog v-model="dialogVisible">
@@ -80,39 +80,39 @@
 
 </template>
 <style lang="sass">
-.q-table__bottom
-    padding: 0px
-.my-sticky-header-usercompany
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
+  .q-table__bottom
+      padding: 0px
+  .my-sticky-header-usercompany
+    /* max height is important */
+    .q-table__middle
+      max-height: 50px
 
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: white
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th /* bg color is important for th; just specify one */
+      background-color: white
 
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
+    thead tr:first-child th
+      position: sticky
+      top: 0
+      opacity: 1
+      z-index: 2
 
-.my-sticky-header-usercompany-dark
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
+  .my-sticky-header-usercompany-dark
+    /* max height is important */
+    .q-table__middle
+      max-height: 50px
 
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: $grey-10
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th /* bg color is important for th; just specify one */
+      background-color: $grey-10
 
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
+    thead tr:first-child th
+      position: sticky
+      top: 0
+      opacity: 1
+      z-index: 2
 </style>
 <script>
 import Vue from 'vue';
@@ -122,7 +122,7 @@ import { date } from 'quasar';
 export default ({
     data () {
         return {
-            moduleName: "invIncoming", row_id: 32	/*32=casClientes*/, filterString: '', dialogVisible: false
+            moduleName: "invIncoming", row_id: 35	/*35=invIncoming*/, filterString: '', dialogVisible: false
         }
     },
     methods:{

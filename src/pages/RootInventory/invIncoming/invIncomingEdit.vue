@@ -25,13 +25,21 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Documento de Ingreso</q-item-label>
                         </q-item-section>
                     </q-item>
-                    
-                    <q-item clickable @click="tab='items'" :active="tab=='items'" active-class="bg-primary text-white" >
+                    <q-item clickable @click="tab='items'" :active="tab=='items'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0)" >
                         <q-item-section side>
                             <q-icon name="fas fa-boxes"  :color="tab=='items'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='items'?'text-white':'text-grey-7')">Items Recibidos</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='items'?'text-white':'text-grey-7')">Items Recibidos ({{lines.filter(x=>x.newQuantity>0).length}})</q-item-label>
+                        </q-item-section>
+                    </q-item>
+
+                    <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0 && allow_accounting)" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-book"  :color="tab=='accounting'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='accounting'?'text-white':'text-grey-7')">Asiento Contable</q-item-label>
                         </q-item-section>
                     </q-item>
 
@@ -52,6 +60,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='history'?'text-white':'text-grey-7')">Auditoría de Cambios</q-item-label>
                         </q-item-section>
                     </q-item>
+                    
                 </q-list>
             </template>
 
@@ -66,6 +75,7 @@
 
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="items"> <itemsComponent ref="itemsComponent" /> </q-tab-panel>
+                    <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" /> </q-tab-panel>
                     <q-tab-panel name="cases"> <casesComponent ref="casesComponent" /> </q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
                     <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
@@ -88,6 +98,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './invIncomingEditBasic'
 import itemsComponent from './invIncomingEditLines'
+import accountingComponent from './invIncomingEditAccounting'
 import filesComponent from './invIncomingEditFiles'
 import historyComponent from './invIncomingEditHistory'
 
@@ -97,13 +108,14 @@ export default ({
   components:{
      basicComponent: basicComponent
     ,itemsComponent: itemsComponent
+    ,accountingComponent: accountingComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
   data () {
     return {
         moduleName: "invIncoming", router: this.$router,
-        tab: 'basic', splitterModel: 250, dataLoaded: false,
+        tab: 'basic', splitterModel: 220, dataLoaded: false,
     }
   },
   created(){
@@ -128,13 +140,13 @@ export default ({
         this.loadingData = true
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spCasClientesSelectEdit',
+            url: this.apiURL + 'spInvKardexSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
                 userCompany: this.userCompany,
                 userLanguage: 'es',
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.customerID_ux?this.editRecord.row.customerID_ux:0,
+                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.stockID_ux?this.editRecord.row.stockID_ux:0,
                 editMode: this.editMode
             }
         }).then((response) => {
@@ -171,19 +183,23 @@ export default ({
                 persistent: true
             }).onOk(() => {
                 this.loadingData = true
+                
+                console.dir(this.editData.lines)
+                console.dir(this.editData.lines.filter(x=>x.newQuantity>0))
 
                 let newEditData = {
                      basic: this.editData.basic
-                    ,contacts: this.editData.contacts
+                    ,lines: this.editData.lines.filter(x=>x.newQuantity>0)
+                    ,accountLines: this.editData.accountLines
                     ,files: this.editData.files
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spCasClientesUpdate', {
+                this.$axios.post( this.apiURL + 'spInvKardexIncomingUpdate', {
                         userCode: this.userCode,
                         userCompany: this.userCompany,
                         //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                        row_id: this.editMode?0:this.editRecord.row.customerID_ux,
+                        row_id: this.editMode?0:this.editRecord.row.kardexID_ux,
                         "editRecord": JSON.stringify(newEditData),
                     }
                 , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
@@ -245,12 +261,19 @@ export default ({
     allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
     allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
     allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+    allow_accounting: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_accounting').value }, },
     apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
     currentPath: { get () { return this.$store.state.main.currentPath }, set (val) { this.$store.commit('main/updateState', {key: 'currentPath', value: val}) } },
     currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
-    cases: {
-            get () { return this.$store.state[this.moduleName].editData.cases },
-    }
+    partnerID: {
+        get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
+    },
+    whID: {
+        get () { return this.$store.state[this.moduleName].editData.basic.whID },
+    },
+    lines: {
+            get () { return this.$store.state[this.moduleName].editData.lines },
+        },
   },
 })
 </script>

@@ -1,28 +1,23 @@
 <template>
 <div>
-   <q-table
+    <q-table
         ref="mainTable"
-        :data="lines"
+        :data="accountLines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        table-style="min-height: calc(100vh - 225px); max-height: calc(100vh - 225px)"
-        row-key="stockID"
-        virtual-scroll
+        table-style="min-height: calc(100vh - 175px); max-height: calc(100vh - 175px)"
+        row-key="lineID"
+        
         :rows-per-page-options="[0]"
         hide-bottom dense
-        selection="multiple" :selected.sync="selected"
+        selection="none" :selected.sync="selected"
         :filter="filterString"
         :columns="[
           //{ name: 'stockID', required: true, label: 'ID', align: 'left', field: row => row.stockID, sortable: true },
           
-          { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 150px;' },
-          { name: 'headerDate', required: true, label: 'Pedido', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
-          { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
-          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
-          { name: 'quantityRcvd', required: true, label: 'Cant. Recibida', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'quantityCancel', required: true, label: 'Cant. Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true , style: 'max-width: 70px;' },
-          { name: 'quantityOpen', required: true, label: 'Cant. Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'expectedDate', required: true, label: 'Esperado', align: 'left', field: row => row.expectedDate, sortable: true, style: 'max-width: 90px;' },
-          { name: 'newQuantity', required: true, label: 'Recibir', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+          //{ name: 'lineID', required: true, label: 'línea', align: 'right', field: row => row.lineID, sortable: false, style: 'min-width: 150px;' },
+          { name: 'accountID', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.accountID, sortable: true, style: 'min-width: 100px;' },
+          { name: 'debit', required: true, label: 'DEBE', align: 'right', field: row => row.debit, sortable: true, style: 'min-width: 200px;' },
+          { name: 'credit', required: true, label: 'HABER', align: 'right', field: row => row.credit, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
           
           //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
           //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
@@ -32,91 +27,43 @@
 
     <template v-slot:body="props">
       <q-tr :props="props" >
-        <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.stockID" />
-        </q-td>
         
-        <q-td key="mktTypeName" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
-          {{props.row.mktTypeName}} #{{props.row.headerID}}
+        <q-td key="accountID" :props="props" :tabindex="(props.key*10)+1" >
+          {{lookup_accounts.find(x=>x.value==props.row.accountID).code_es}} - {{lookup_accounts.find(x=>x.value==props.row.accountID).label}}
         </q-td>
-        
-        <q-td key="headerDate" :props="props" >
-          {{showDateName(props.row.headerDate)}}
+        <q-td key="debit" :props="props" >
+          {{ props.row.debit.toFixed(userMoneyFormat) }}
         </q-td>
-
-        
-        <q-td key="invName" :props="props" class="no-padding" :tabindex="(props.key*10)+1" :title="rowTitleInventory(props.row)">
-          {{props.row.invName}}
+        <q-td key="credit" :props="props" >
+          {{ props.row.credit.toFixed(userMoneyFormat) }}
         </q-td>
-        <!--<q-td key="invID" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
-          <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
-              :value="props.row.invName" dense item-aligned borderless
-              :rules="[val => !!val || 'Requerido']" readonly
-              
-              >
-          </q-input>
-        -->
-
-        <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantity" type="number" :min="0"
-              dense item-aligned borderless input-class="text-right"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              readonly />
-        </q-td>
-        <q-td key="quantityRcvd" :props="props" :tabindex="(props.key*10)+2">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantityRcvd" type="number" :min="0"
-              dense item-aligned borderless input-class="text-right"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              readonly />
-        </q-td>
-        <q-td key="quantityCancel" :props="props" :tabindex="(props.key*10)+2">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantityCancel" type="number" :min="0"
-              dense item-aligned borderless input-class="text-right"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              readonly />
-        </q-td>
-        <q-td key="quantityOpen" :props="props" :tabindex="(props.key*10)+2">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantityOpen" type="number" :min="0"
-              dense item-aligned borderless input-class="text-right"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              readonly />
-        </q-td>
-        <q-td key="expectedDate" :props="props">
-          {{showDateName(props.row.expectedDate)}}
-        </q-td>
-        <q-td key="newQuantity" :props="props" :tabindex="(props.key*10)+2"
-          :class="props.row.newQuantity>0?'bg-primary':(userColor=='blackDark'?'bg-grey-9':'bg-grey-2')">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.newQuantity" type="number" :min="0" :max="props.row.quantityOpen"
-              dense item-aligned borderless :input-class="props.row.newQuantity>0?'text-right text-white':'text-right'"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'newQuantity',props.row)}"
-              />
-        </q-td>
-        
-        
       </q-tr>
     </template>
-    <template v-slot:top >
-      <q-btn :label="$q.screen.gt.sm?'Recibir Todo':''" title="Recibir todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
-        icon="fas fa-people-carry" @click="receiveAll"
-        :disable="selected.length<=0" />
-      <q-btn :label="$q.screen.gt.sm?'Limpiar Todo':''" title="Limpiar todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
-        icon="fas fa-broom" @click="clearAll"
-        :disable="selected.length<=0" />
+
+    <template v-slot:bottom-row>
+        <q-tr>
+          
+          <q-td class="text-right text-subtitle2 text-primary" >
+            Suma:
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+            {{accountLines.reduce((total,item)=>{return total + item.debit}, 0).toFixed(userMoneyFormat)}}
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+            {{accountLines.reduce((total,item)=>{return total + item.credit}, 0).toFixed(userMoneyFormat)}}
+          </q-td>
+          
+        </q-tr>
+    </template>
+
+    <!--<template v-slot:top >
       <q-space />
       <q-input borderless dense v-model="filterString" placeholder="Buscar...">
         <template v-slot:append>
           <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString?filterString='':undefined" />
         </template>
       </q-input>
-      
-        
-    </template>
+    </template>-->
   </q-table>
 </div>
 
@@ -149,6 +96,12 @@
     .q-table__bottom,
     thead tr:first-child th /* bg color is important for th; just specify one */
       background-color: $grey-10
+
+    thead tr:first-child th
+      position: sticky
+      top: 0
+      opacity: 1
+      z-index: 2
 
     thead tr:first-child th
       position: sticky
@@ -194,9 +147,7 @@ export default ({
       clearAll(){
         let newRows = JSON.parse(JSON.stringify(this.lines))
         this.selected.map(x=>{
-          if(newRows.some(y=>y.stockID==x.stockID)){ //para aplicar solamente a los items seleccionados
-            newRows.find(y=>y.stockID==x.stockID).['newQuantity']=0
-          }
+          newRows.find(y=>y.stockID==x.stockID).['newQuantity']=0
           return x
         })
         this.lines = newRows
@@ -233,6 +184,7 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userColor: { get () { return this.$store.state.main.userColor }  },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
+        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
@@ -245,11 +197,19 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
         },
+        accountLines: {
+            get () { return this.$store.state[this.moduleName].editData.accountLines },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+        },
+        partnerID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
+        },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
         },
-        lookup_sexo: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_sexo },
+        lookup_accounts: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
         },
     }
 })

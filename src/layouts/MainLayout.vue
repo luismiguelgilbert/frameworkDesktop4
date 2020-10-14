@@ -47,10 +47,8 @@
         <!--Universal Search A FUTURO-->
         <q-space />
 
-        
-
         <!--COMPANY-->
-        <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps  >
+        <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps :disable="disableCompanyChange"  >
           <template v-slot:label>
             <div class="row items-center no-wrap">
               <q-icon left name="fas fa-building" />
@@ -287,7 +285,16 @@ export default {
           //}else{ this.router.push({ path: '/RootHome' }) }
           }//else{ this.router.push({ path: '/' }) }
         }catch(ex){console.dir(ex)}
-
+        //para cuando se duplica el tab
+        try{
+          if(this.router.currentRoute&&this.router.currentRoute.path&&this.router.currentRoute.path.length>1){
+            let routes = this.router.currentRoute.path.split('/')
+            if(routes.length==3){
+              this.currentPath = routes[1]
+              this.currentPathModule = routes[1] + '/' + routes[2]
+            }
+          }
+        }catch(ex){}
         //Create WebSocketConnection
         this.openWebSocketConnection()
       }
@@ -524,13 +531,17 @@ export default {
     selectedContact: { get () { return this.$store.state.main.selectedContact }, set (val) { this.$store.commit('main/updateState', {key: 'selectedContact', value: val}) } },
     URL_ws: { get () { return this.$q.sessionStorage.getItem('URL_ws') } },
     wsConnection: { get () { return this.$store.state.main.wsConnection }, set (val) { this.$store.commit('main/updateState', {key: 'wsConnection', value: val}) } },
+    disableCompanyChange:{ get() { 
+      let result = false; 
+      try{result = this.router.currentRoute.path.indexOf('Edit') > 0}catch(ex){} 
+      return result; } }
   },
 
-  /*watch: {
-    notificationInterval: function (val) {
+  watch: {
+    /*notificationInterval: function (val) {
       clearInterval(this.interval)
       this.poolNotifications();//inicia intervalo de lectura de notificaciones (con Intervalo actualizado)
-    },
-  }*/
+    },*/
+  }
 }
 </script>
