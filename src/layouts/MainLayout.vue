@@ -295,8 +295,7 @@ export default {
             }
           }
         }catch(ex){}
-        //Create WebSocketConnection
-        this.openWebSocketConnection()
+        
       }
       this.$q.loading.hide()
     }).catch((error) => {
@@ -538,6 +537,10 @@ export default {
   },
 
   watch: {
+    userCode: function(val){
+      console.dir('cambio en userCode')
+      this.openWebSocketConnection()
+    }
     /*notificationInterval: function (val) {
       clearInterval(this.interval)
       this.poolNotifications();//inicia intervalo de lectura de notificaciones (con Intervalo actualizado)
