@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Ingreso':'Ver Ingreso: '+editRecord.value}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Ingreso':'Ver Ingreso: '+editRecord.row.kardexID_ux}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -146,7 +146,7 @@ export default ({
                 userCode: this.userCode,
                 userCompany: this.userCompany,
                 userLanguage: 'es',
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.stockID_ux?this.editRecord.row.stockID_ux:0,
+                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.kardexID_ux?this.editRecord.row.kardexID_ux:0,
                 editMode: this.editMode
             }
         }).then((response) => {

@@ -38,19 +38,19 @@
               @keyup.keyCodes.113="openSearchItems(props.row)"
               :title="rowTitleInventory(props.row)"
               >
-              <template v-slot:prepend><q-btn icon="fas fa-search" title="Buscar (F2)" size="xs" round color="primary" flat @click="openSearchItems(props.row)" /></template>
+              <template v-if="editMode==true" v-slot:prepend><q-btn icon="fas fa-search" title="Buscar (F2)" size="xs" round color="primary" flat @click="openSearchItems(props.row)" /></template>
           </q-input>
         </q-td>
         <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantity" type="number" :min="0"
+              :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'quantity',props.row)}" />
         </q-td>
         <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.price" type="number" :min="0"
+              :value="props.row.price" type="number" :min="0" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'price',props.row)}" />
@@ -60,7 +60,7 @@
         </q-td>
         <q-td key="lineDiscntPrcnt" :props="props" :tabindex="(props.key*10)+4">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100"
+              :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
@@ -76,11 +76,11 @@
       </q-tr>
     </template>
     <template v-slot:top >
-        <q-btn :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary"  no-caps />
-        <q-btn :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>
-        <q-btn :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary"  no-caps />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
-        <q-btn :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps  class="q-ml-sm" :disable="selected.length<=0" />
     </template>
   </q-table>
 
@@ -252,7 +252,7 @@
         <q-table
           ref="itemsSearchTable"
           :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-          table-style="min-height: calc(100vh - 410px); max-height: calc(100vh - 410px)"
+          table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
           @keydown.native.keyCodes.115="itemsDialogSelectAction(itemsDialogSelected)"
           :data="lookup_items.filter(x=>x.estado==true)"
           :columns="[
@@ -345,6 +345,11 @@ export default ({
         try{
           //Actualiza las líneas
           let newRows = JSON.parse(JSON.stringify(this.lines))
+          if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
+            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
+          }else{
+            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
+          }
           newRows.find(x=>x.lineID==row.lineID)[colName] = newVal;
           let invID = newRows.find(x=>x.lineID==row.lineID).invID
           let invName = invID?this.lookup_items.find(x => x.value == invID).label:''
@@ -394,6 +399,7 @@ export default ({
           ,transportTypeID: this.defaultTransportID
           ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
           ,expectedDate: ''
+          ,estado: true
         }
         newRows.push(nuevaFila)
         this.lines = newRows
@@ -428,19 +434,20 @@ export default ({
         return date.getDateDiff(new Date(), fecha, 'years')
       },
       openSearchItems(currentRow){
-        this.itemsDialogRowToUpdate = currentRow
-        this.isItemsDialog = true
-        if(currentRow&&currentRow.invID&&currentRow.invID>0){
-          this.itemsDialogTableBusy = true
-          try{
-            this.itemsDialogSelected = []
-            this.itemsDialogSelected.push(this.lookup_items.find(x => x.value == currentRow.invID))
-            this.itemsDialogTableBusy = false
-          }catch(ex){
-            this.itemsDialogTableBusy = false
+        if(this.editMode==true){
+          this.itemsDialogRowToUpdate = currentRow
+          this.isItemsDialog = true
+          if(currentRow&&currentRow.invID&&currentRow.invID>0){
+            this.itemsDialogTableBusy = true
+            try{
+              this.itemsDialogSelected = []
+              this.itemsDialogSelected.push(this.lookup_items.find(x => x.value == currentRow.invID))
+              this.itemsDialogTableBusy = false
+            }catch(ex){
+              this.itemsDialogTableBusy = false
+            }
           }
         }
-        
       },
       itemsDialogSelectAction(){
         if(this.itemsDialogSelected.length>0){
@@ -479,11 +486,13 @@ export default ({
         this.isItemsBatchDialog = true
       },
       itemsBatchDialogSelectAction(){
-        let max_id = 1
+        //let max_id = 1
+        let max_id = 0
         let temp = null
         if(this.lines.length > 0){
           temp = this.getMax(this.lines, "lineID");
-          max_id = parseInt(temp.lineID) + parseInt(1);
+          //max_id = parseInt(temp.lineID) + parseInt(1);
+          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
         }
         let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
         let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
@@ -507,6 +516,7 @@ export default ({
               ,prjName: ''
               ,transportTypeID: this.defaultTransportID
               ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
+              ,estado: true
             })
 
             //Impuestos de la línea

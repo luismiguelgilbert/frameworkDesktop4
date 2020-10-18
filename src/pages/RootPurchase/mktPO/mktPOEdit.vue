@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Pedido':'Editar Pedido: '+editRecord.value}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nueva Orden de Compra':'Editar Orden de Compra: '+editRecord.value}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -38,7 +38,7 @@
                             <q-icon name="fas fa-warehouse" :color="tab=='warehouse'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='warehouse'?'text-white':'text-grey-7')">Distribución del Pedido</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='warehouse'?'text-white':'text-grey-7')">Entregas y Cancelaciones</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >

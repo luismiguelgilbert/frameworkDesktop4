@@ -285,8 +285,9 @@ export default {
           //}else{ this.router.push({ path: '/RootHome' }) }
           }//else{ this.router.push({ path: '/' }) }
         }catch(ex){console.dir(ex)}
-        //para cuando se duplica el tab
-        try{
+
+        
+        /*try{//para cuando se duplica el tab (no funciona porque se queda cargando todo)
           if(this.router.currentRoute&&this.router.currentRoute.path&&this.router.currentRoute.path.length>1){
             let routes = this.router.currentRoute.path.split('/')
             if(routes.length==3){
@@ -294,7 +295,7 @@ export default {
               this.currentPathModule = routes[1] + '/' + routes[2]
             }
           }
-        }catch(ex){}
+        }catch(ex){}*/
         
       }
       this.$q.loading.hide()
@@ -336,6 +337,7 @@ export default {
         this.currentPath = this.menuData.find(x=>x.sys_link_id==module.parent).link_name //module.link_name
         this.currentPathModule = module.link_name
         this.router.push('/'+module.link_name)
+        if(this.shouldHideMenu){this.leftDrawerOpen = false}
       }
     },
     gotoPreferences(){
@@ -530,6 +532,7 @@ export default {
     selectedContact: { get () { return this.$store.state.main.selectedContact }, set (val) { this.$store.commit('main/updateState', {key: 'selectedContact', value: val}) } },
     URL_ws: { get () { return this.$q.sessionStorage.getItem('URL_ws') } },
     wsConnection: { get () { return this.$store.state.main.wsConnection }, set (val) { this.$store.commit('main/updateState', {key: 'wsConnection', value: val}) } },
+    shouldHideMenu: { get () { return this.$store.state.main.shouldHideMenu }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideMenu', value: val}) } },
     disableCompanyChange:{ get() { 
       let result = false; 
       try{result = this.router.currentRoute.path.indexOf('Edit') > 0}catch(ex){} 

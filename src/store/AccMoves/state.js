@@ -22,10 +22,7 @@ export default function () {
      ,editMode: false //false = edit || new = new
      ,editData: {
         basic: {}
-       ,lines: []
-       ,linesTaxes: []
-       ,requisiciones: []
-       ,files: []
+       ,password: ''
        ,history: []
      }
      ,moduleReports: []

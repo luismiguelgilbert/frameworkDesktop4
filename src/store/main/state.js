@@ -25,6 +25,7 @@ export default function () {
     ,currentPathModule: null
     ,currentReportData: null
     ,notificationInterval: 30000
+    ,shouldHideMenu: false
     ,selectedContact: 0
     ,unreadNotifications: []
     ,wsConnection: null

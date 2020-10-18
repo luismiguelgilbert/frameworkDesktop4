@@ -69,7 +69,7 @@
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="comments"
         />
-    <q-card>
+    <q-card class="q-mt-lg">
         <q-toolbar>
             <q-toolbar-title>Abrir automáticamente al iniciar sesión</q-toolbar-title>
             <q-btn 

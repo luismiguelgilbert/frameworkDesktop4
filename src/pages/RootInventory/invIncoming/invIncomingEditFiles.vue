@@ -45,14 +45,14 @@
             </q-td>
 
             <q-td key="estado" :props="props">
-              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+              <q-toggle :value="props.row.estado" :disable="!(allow_edit||allow_insert)" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
             </q-td>
 
 
           </q-tr>
     </template>
     <template v-slot:top>
-        <q-btn label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" no-caps />
+        <q-btn v-if="allow_edit||allow_insert" label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" no-caps />
         <q-space />
         <q-input borderless dense v-model="filterString" placeholder="Buscar...">
         <template v-slot:append>

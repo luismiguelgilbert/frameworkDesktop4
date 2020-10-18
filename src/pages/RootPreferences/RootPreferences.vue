@@ -294,6 +294,14 @@
                 </q-item>
                 <q-item>
                     <q-item-section side>
+                        <q-icon name="fas fa-bars" color="primary" />
+                    </q-item-section>
+                    <q-item-section>
+                        <q-toggle v-model="shouldHideMenu" color="primary" label="Ocultar Menú automáticamente al abrir un módulo" />
+                    </q-item-section>
+                </q-item>
+                <!--<q-item>
+                    <q-item-section side>
                         <q-icon name="fas fa-bell" color="primary" />
                     </q-item-section>
                     <q-item-section>
@@ -309,7 +317,7 @@
                                     { label: '10 minutos', value: 600000},
                                 ]"/>
                     </q-item-section>
-                </q-item>
+                </q-item>-->
             </q-card>
         </q-list>
         <br><br><br><br>
@@ -358,6 +366,7 @@ methods: {
                         ,userRowsToRender: this.userRowsToRender
                         ,user_password_1: this.user_password_1
                         ,userCompany: this.userCompany
+                        ,shouldHideMenu: this.shouldHideMenu
                         ,notificationInterval: this.notificationInterval
                     }),
                 }
@@ -490,6 +499,8 @@ computed:{
     currentPath: { get () { return this.$store.state.main.currentPath }, set (val) { this.$store.commit('main/updateState', {key: 'currentPath', value: val}) } },
     currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
     notificationInterval: { get () { return this.$store.state.main.notificationInterval }, set (val) { this.$store.commit('main/updateState', {key: 'notificationInterval', value: val}) } },
+    shouldHideMenu: { get () { return this.$store.state.main.shouldHideMenu }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideMenu', value: val}) } },
+    
 }
 
 }

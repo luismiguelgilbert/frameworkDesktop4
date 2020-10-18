@@ -18,7 +18,8 @@
     </q-select>
     <q-select
         label="Bodega de Destino Predeterminada (*)" placeholder="Seleccione la bodega predeterminada donde desea recibir los ítems (*)" emit-value map-options filled
-        :options="lookup_wh" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :options="lookup_wh" 
+        :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :option-disable="opt => !opt.estado"
         v-model="defaultWhID"
         ref="defaultWhID"
@@ -30,7 +31,8 @@
     </q-select>
     <q-select
         label="Tipo de Entrega Predeterminada" placeholder="Seleccione el Tipo Predeterminado de Entrega de los Ítems" emit-value map-options filled
-        :options="lookup_transports" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :options="lookup_transports" 
+        :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :option-disable="opt => !opt.estado" clearable
         v-model="defaultTransportID"
         ref="defaultTransportID"

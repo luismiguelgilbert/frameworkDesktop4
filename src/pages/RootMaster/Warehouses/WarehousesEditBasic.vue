@@ -16,6 +16,16 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
     </q-input>
+    <q-input class="q-mb-lg"
+        ref="position" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Escriba la posición en que debe aparecer esta bodega" label="Posición de la Bodega" filled
+        v-model="position" type="number" :min=0
+        :rules="[
+                val => !!val || '* Requerido',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-sort-amount-up-alt" /></template>
+    </q-input>
 
     <q-select class="q-mb-lg"
         label="País" placeholder="Seleccione el País donde se encuentra la Bodega" emit-value map-options filled
@@ -96,6 +106,10 @@ export default ({
         name_es: {
             get () { return this.$store.state[this.moduleName].editData.basic.name_es },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'name_es', value: val}) }
+        },
+        position: {
+            get () { return this.$store.state[this.moduleName].editData.basic.position },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'position', value: val}) }
         },
         country_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.country_id },

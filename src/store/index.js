@@ -20,6 +20,7 @@ import ChartAccount from './ChartAccount' //ChartAccount
 import Taxes from './Taxes' //Taxes
 import TaxesMaster from './TaxesMaster' //TaxesMaster
 import AccPeriods from './AccPeriods' //AccPeriods
+import AccMoves from './AccMoves' //AccMoves
 import SCHPersonas from './SCHPersonas' //SCHPersonas
 import SCHPersona from './SCHPersona' //SCHPersona
 import SCHApostolados from './SCHApostolados' //SCHApostolados
@@ -70,6 +71,7 @@ export default function (/* { ssrContext } */) {
       ,Taxes
       ,TaxesMaster
       ,AccPeriods
+      ,AccMoves
       //Schoenstatt
       ,SCHPersonas
       ,SCHPersona

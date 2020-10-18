@@ -11,23 +11,7 @@
         hide-bottom dense
         selection="multiple" :selected.sync="selected"
         :filter="filterString"
-        :columns="[
-          //{ name: 'stockID', required: true, label: 'ID', align: 'left', field: row => row.stockID, sortable: true },
-          
-          { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 150px;' },
-          { name: 'headerDate', required: true, label: 'Pedido', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
-          { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
-          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
-          { name: 'quantityRcvd', required: true, label: 'Cant. Recibida', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'quantityCancel', required: true, label: 'Cant. Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true , style: 'max-width: 70px;' },
-          { name: 'quantityOpen', required: true, label: 'Cant. Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'expectedDate', required: true, label: 'Esperado', align: 'left', field: row => row.expectedDate, sortable: true, style: 'max-width: 90px;' },
-          { name: 'newQuantity', required: true, label: 'Recibir', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
-          
-          //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
-          //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
-          //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
-        ]"
+        :columns="columnas"
     >
 
     <template v-slot:body="props">
@@ -85,27 +69,35 @@
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               readonly />
         </q-td>
-        <q-td key="expectedDate" :props="props">
-          {{showDateName(props.row.expectedDate)}}
-        </q-td>
+       
+        
         <q-td key="newQuantity" :props="props" :tabindex="(props.key*10)+2"
           :class="props.row.newQuantity>0?'bg-primary':(userColor=='blackDark'?'bg-grey-9':'bg-grey-2')">
-          <q-input class="no-padding" style="height: 20px !important;"
+          <q-input  class="no-padding" style="height: 20px !important;"
               :value="props.row.newQuantity" type="number" :min="0" :max="props.row.quantityOpen"
               dense item-aligned borderless :input-class="props.row.newQuantity>0?'text-right text-white':'text-right'"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'newQuantity',props.row)}"
+              :readonly="!editMode"
               />
+        </q-td>
+
+        <q-td key="expectedDate" :props="props">
+          {{showDateName(props.row.expectedDate)}}
+        </q-td>
+
+        <q-td key="moveDate" :props="props">
+          {{showDateTimeName(props.row.moveDate)}}
         </q-td>
         
         
       </q-tr>
     </template>
     <template v-slot:top >
-      <q-btn :label="$q.screen.gt.sm?'Recibir Todo':''" title="Recibir todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
+      <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Recibir Todo':''" title="Recibir todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
         icon="fas fa-people-carry" @click="receiveAll"
         :disable="selected.length<=0" />
-      <q-btn :label="$q.screen.gt.sm?'Limpiar Todo':''" title="Limpiar todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
+      <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Limpiar Todo':''" title="Limpiar todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
         icon="fas fa-broom" @click="clearAll"
         :disable="selected.length<=0" />
       <q-space />
@@ -224,6 +216,20 @@ export default ({
           )
         }catch(ex){console.dir(ex)}
         return resultado;
+      },
+      showDateTimeName(value){
+        let resultado = '...'
+        try{
+          resultado = date.formatDate(value, this.userDateFormat + ' ' + this.userTimeFormat,
+            {
+              days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+              daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
+              months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+              monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            }
+          )
+        }catch(ex){console.dir(ex)}
+        return resultado;
       }
 
     },
@@ -233,6 +239,7 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userColor: { get () { return this.$store.state.main.userColor }  },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
+        userTimeFormat: { get () { return this.$store.state.main.userTimeFormat }  },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
@@ -251,6 +258,33 @@ export default ({
         lookup_sexo: {
             get () { return this.$store.state[this.moduleName].editData.lookup_sexo },
         },
+        columnas: {
+          get() {
+            let columnas = []
+            if(this.editMode){
+              columnas = [
+                { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 150px;' },
+                { name: 'headerDate', required: true, label: 'Pedido', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
+                { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
+                { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
+                { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'quantityCancel', required: true, label: 'Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true , style: 'max-width: 70px;' },
+                { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'newQuantity', required: true, label: 'Recibir', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'expectedDate', required: true, label: 'Esperado', align: 'left', field: row => row.expectedDate, sortable: true, style: 'max-width: 90px;' },
+              ]
+            }else{
+              columnas = [
+                { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 150px;' },
+                { name: 'headerDate', required: true, label: 'Pedido', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
+                { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
+                { name: 'newQuantity', required: true, label: 'Recibido', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'moveDate', required: true, label: 'Fecha de Ingreso ', align: 'right', field: row => row.moveDate, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+              ]
+            }
+            return columnas
+          }
+        }
     }
 })
 </script>

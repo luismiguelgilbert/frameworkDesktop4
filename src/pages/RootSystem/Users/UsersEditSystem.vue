@@ -95,6 +95,14 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-users" /></template>
     </q-select>
+    <q-item>
+        <q-item-section side>
+            <q-icon name="fas fa-bars" color="primary" />
+        </q-item-section>
+        <q-item-section>
+            <q-toggle v-model="shouldHideMenu" color="primary" label="Ocultar Menú automáticamente al abrir un módulo" />
+        </q-item-section>
+    </q-item>
     <br><br>
 </q-form>
 </template>
@@ -139,6 +147,10 @@ export default ({
         sys_user_usersFormat: { 
             get () { return this.$store.state[this.moduleName].editData.system.sys_user_usersFormat }, 
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'sys_user_usersFormat', value: val}) }  
+        },
+        shouldHideMenu: { 
+            get () { return this.$store.state[this.moduleName].editData.system.shouldHideMenu }, 
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'shouldHideMenu', value: val}) }  
         },
         /*sys_link_id: { 
             get () { return this.$store.state[this.moduleName].editData.system.sys_link_id }, 

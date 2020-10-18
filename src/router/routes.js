@@ -63,6 +63,8 @@ const routes = [
       ,{ path: 'RootAccounting/TaxesEdit', component: () => import('pages/RootAccounting/Taxes/TaxesEdit.vue') }
       ,{ path: 'RootAccounting/AccPeriods', component: () => import('pages/RootAccounting/AccPeriods/AccPeriods.vue') }
       ,{ path: 'RootAccounting/AccPeriodsEdit', component: () => import('pages/RootAccounting/AccPeriods/AccPeriodsEdit.vue') }
+      ,{ path: 'RootAccounting/AccMoves', component: () => import('pages/RootAccounting/AccMoves/AccMoves.vue') }
+      ,{ path: 'RootAccounting/AccMovesEdit', component: () => import('pages/RootAccounting/AccMoves/AccMovesEdit.vue') }
       //COMPRAS
       ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/mktPR.vue') }
       ,{ path: 'RootPurchase/mktPREdit', component: () => import('pages/RootPurchase/mktPR/mktPREdit.vue') }

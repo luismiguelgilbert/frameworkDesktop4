@@ -25,7 +25,7 @@
                 hide-bottom dense square flat
                 virtual-scroll :rows-per-page-options="[0]"
                 :class="userColor=='blackDark'?'my-sticky-header-table-dark bg-grey-10 ':'my-sticky-header-table '"
-                table-style="min-height: calc(100vh - 410px); max-height: calc(100vh - 410px)"
+                table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
                 @keydown.native.keyCodes.113="focusSearch"
                 @keydown.native.keyCodes.115="emitSelect"
                 >

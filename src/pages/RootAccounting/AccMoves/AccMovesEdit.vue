@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Requisición de Compra':'Editar Requisición de Compra: '+editRecord.value}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Asiento Contable':'Editar Asiento Contable: '+editRecord.value}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -22,7 +22,7 @@
                             <q-icon name="fas fa-info-circle" :color="tab=='basic'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Datos del Pedido</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Información de la Cuenta</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='lines'" :active="tab=='lines'" active-class="bg-primary text-white" >
@@ -30,23 +30,7 @@
                             <q-icon name="fas fa-list-ol" :color="tab=='lines'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Pedido ({{lines.length}})</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                    <q-item clickable @click="tab='warehouse'" :active="tab=='warehouse'" active-class="bg-primary text-white" >
-                        <q-item-section side>
-                            <q-icon name="fas fa-warehouse" :color="tab=='warehouse'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='warehouse'?'text-white':'text-grey-7')">Entregas y Cancelaciones</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                    <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
-                        <q-item-section side>
-                            <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Asiento</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
@@ -57,12 +41,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='history'?'text-white':'text-grey-7')">Auditoría de Cambios</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item>
-                          <q-item-section />
-                          <q-item-section side>
-                              <q-item-label class="text-subtitle2 text-grey-7"></q-item-label>
-                          </q-item-section>
-                      </q-item>
                 </q-list>
             </template>
 
@@ -74,11 +52,12 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
-                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>
-                    <q-tab-panel name="warehouse"><whComponent ref="whComponent" /></q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history"><historyComponent /></q-tab-panel>
+                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
+                    <q-tab-panel name="lines"> <linesComponent ref="linesComponent" /> </q-tab-panel>
+
+                    <q-tab-panel name="history">
+                        <historyComponent />
+                    </q-tab-panel>
 
                 </q-tab-panels>
 
@@ -96,25 +75,20 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-import basicComponent from './mktPREditBasic'
-import whComponent from './mktPREditWH'
-import linesComponent from './mktPREditLines'
-import filesComponent from './mktPREditFiles'
-import historyComponent from './mktPREditHistory'
-
+import basicComponent from './AccMovesEditBasic'
+import linesComponent from './AccMovesEditLines'
+import historyComponent from './AccMovesEditHistory'
 
 export default ({
   components:{
      basicComponent: basicComponent
     ,linesComponent: linesComponent
-    ,whComponent: whComponent
-    ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
   data () {
     return {
-        moduleName: "mktPR", router: this.$router,
-        tab: 'basic'/*'basic'*/, splitterModel: 250, dataLoaded: false,
+        moduleName: "AccMoves", router: this.$router,
+        tab: 'basic', splitterModel: 250, dataLoaded: false,
     }
   },
   created(){
@@ -139,13 +113,13 @@ export default ({
         this.loadingData = true
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spMktPRSelectEdit',
+            url: this.apiURL + 'spAccMovesSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
                 userCompany: this.userCompany,
                 userLanguage: 'es',
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.headerID_ux?this.editRecord.row.headerID_ux:0,
+                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.accMoveID_ux?this.editRecord.row.accMoveID_ux:0,
                 editMode: this.editMode
             }
         }).then((response) => {
@@ -155,6 +129,7 @@ export default ({
                 let name = x
                 newEditData[x] = JSON.parse(response.data[0][x])
             })
+            newEditData['password'] = '';//le agrego la contraseña, porque NO se recupera desde la base, y después quedaría como NULL limitando la reactividad
             this.editData = newEditData;
             this.loadingData = false
             this.dataLoaded = true
@@ -173,25 +148,6 @@ export default ({
         })
     },
     saveData(){
-        try{
-            this.loadingData = true
-            let promise1 = this.$refs.basicComponent.$refs.formulario.validate() //valida tab BASIC
-            Promise.all([promise1]).then((resultados)=>{
-                if(resultados.filter(x=>x==false).length>0){
-                    this.loadingData = false
-                    this.$q.notify({ html: true, multiLine: false, color: 'red', message: "Revise el formulario" ,timeout: 1000, progress: true , icon: "fas fa-exclamation-circle"})
-                    if(resultados[0]==false){this.tab='basic'}
-                }else{//NO hay errores, entonces guardar
-                    this.loadingData = false//xq usuario puede cancelar en la confirmación del diálogo
-                    this.saveDataExec();
-                }
-            })
-        }catch(ex){
-            this.loadingData = false
-            this.$q.notify({ html: true, multiLine: false, color: 'red', message: "Se produjo el siguiente error:<br/>"+ex.message ,timeout: 1000, progress: true , icon: "fas fa-exclamation-circle"})
-        }
-    },
-    saveDataExec(){
         this.$q.dialog({
                 title: 'CONFIRMACIÓN',
                 message: 'Desea guardar los datos?',
@@ -203,42 +159,38 @@ export default ({
 
                 let newEditData = {
                      basic: this.editData.basic
-                    ,lines: this.editData.lines
-                    ,linesTaxes: this.editData.linesTaxes
-                    ,files: this.editData.files
-                    //,address: this.editData.address.filter(x=>x.is_allowed).map(x=>x.headerID_ux)
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spMktPRUpdate', {
-                    userCode: this.userCode,
-                    userCompany: this.userCompany,
-                    //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                    "row_id": this.editMode?0:this.editRecord.row.headerID_ux,
-                    "editRecord": JSON.stringify(newEditData),
-                }
-            , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
-            ).then((response) => {
-                this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
-                this.loadData = true;
-                //3 lines, same as goback (without confirmation)
-                this.editRecord = null;
-                this.editMode = false;
-                this.router.replace('/'+this.currentPathModule); //navigate to previous Main module
-            }).catch((error) => {
-                console.dir(error)
-                let mensaje = ''
-                if(error.message){ mensaje = error.message }
-                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                this.$q.notify({ html: true, multiLine: false, color: 'red'
-                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                this.$axios.post( this.apiURL + 'spAccMovesUpdate', {
+                        userCode: this.userCode,
+                        userCompany: this.userCompany,
+                        //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
+                        row_id: this.editMode?0:this.editRecord.row.accMoveID_ux,
+                        "editRecord": JSON.stringify(newEditData),
+                    }
+                , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+                ).then((response) => {
+                    this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+                    this.loadData = true;
+                    //3 lines, same as goback (without confirmation)
+                    this.editRecord = null;
+                    this.editMode = false;
+                    this.router.replace('/'+this.currentPathModule); //navigate to previous Main module
+                }).catch((error) => {
+                    console.dir(error)
+                    let mensaje = ''
+                    if(error.message){ mensaje = error.message }
+                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                    this.$q.notify({ html: true, multiLine: false, color: 'red'
+                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                    })
+                    this.loadingData = false
                 })
-                this.loadingData = false
             })
-        })
     }
   },
   computed:{
@@ -279,10 +231,6 @@ export default ({
     apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
     currentPath: { get () { return this.$store.state.main.currentPath }, set (val) { this.$store.commit('main/updateState', {key: 'currentPath', value: val}) } },
     currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
-    userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
-    lines: {
-          get () { return this.$store.state[this.moduleName].editData.lines },
-      },
   },
 })
 </script>

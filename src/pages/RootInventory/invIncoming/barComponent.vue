@@ -66,35 +66,54 @@
             </q-list>
         </q-btn-dropdown>
         <q-btn-dropdown
-            flat stretch icon="fas fa-chart-bar" no-caps no-wrap class="q-ml-sm"
+            flat stretch icon="fas fa-bolt" no-caps no-wrap class="q-ml-sm"
             :color="userColor=='blackDark'?'white':'primary'" :disable="!allow_report"
             >
             <template v-slot:label>
-                <div class=" q-pl-xs gt-sm">Reportes</div>
+                <div class=" q-pl-xs gt-sm">Acciones</div>
             </template>
-
             <q-list>
-                <q-list class="text-grey-7" separator>
-                    <q-item
-                        v-for="(report,index) in moduleReports" :key="index"
-                        clickable @click="openReportForm(report)"
-                        :class="userColor=='blackDark'?'text-white':'text-primary'"
-                        >
-                        <q-item-section avatar><q-icon :name="report.icon" /></q-item-section>
-                        <q-item-section>
-                            <q-item-label>{{report.name_es}}</q-item-label>
-                            <q-item-label caption>{{report.comment_es}}</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                </q-list>
+                <q-item clickable class="q-pr-xs userColor=='blackDark'?'text-white':'text-primary'">
+                    <q-item-section side><q-icon name="fas fa-chart-bar" color="primary" /></q-item-section>
+                    <q-item-section > <q-item-label>Reportes</q-item-label> </q-item-section>
+                    <q-item-section side> <q-icon name="fas fa-chevron-right" size="0.8rem" class="q-mr-md" /> </q-item-section>
+                    <q-menu anchor="top right" self="top left">
+                        <q-list>
+                            <q-item
+                                v-for="(report,index) in moduleReports" :key="index"
+                                clickable @click="openReportForm(report)"
+                                :class="userColor=='blackDark'?'text-white':'text-primary'"
+                                >
+                                <q-item-section avatar><q-icon :name="report.icon" /></q-item-section>
+                                <q-item-section>
+                                    <q-item-label>{{report.name_es}}</q-item-label>
+                                    <q-item-label caption>{{report.comment_es}}</q-item-label>
+                                </q-item-section>
+                            </q-item>
+                        </q-list>
+                    </q-menu>
+                </q-item>
+                <q-item clickable class="q-pr-xs"
+                    :disable="selectedRows.length!=1"  
+                    @click="downloadReportForm"
+                    :title="selectedRows.length!=1?'Debe tener 1 sola fila seleccionada':'Genera documento para exportar o imprimir'"
+                    >
+                    <q-item-section side><q-icon name="fas fa-print" color="primary" /></q-item-section>
+                    <q-item-section > <q-item-label>Documento</q-item-label> </q-item-section>
+                </q-item>
+                <q-item
+                    clickable v-close-popup class="q-pr-xs"
+                    title="Reorganice las columnas según sus preferencias"
+                    @click="isFiltersDrawerVisible = false; isColumnsDrawerVisible = true;"
+                    >
+                    <q-item-section side><q-icon name="fas fa-columns" color="primary" /></q-item-section>
+                    <q-item-section ><q-item-label>Columnas</q-item-label></q-item-section>
+                </q-item>
+                
+                
             </q-list>
         </q-btn-dropdown>
-        <q-btn
-            flat stretch icon="fas fa-columns" no-caps no-wrap
-            :color="userColor=='blackDark'?'white':'primary'"
-            @click="isFiltersDrawerVisible = false; isColumnsDrawerVisible = true;">
-            <div class="q-pl-xs gt-sm">Columnas</div>
-        </q-btn>
+
         <q-space />
         <q-btn
             v-if="selectedRows.length>0"
@@ -118,167 +137,190 @@ import Vuex from 'vuex';
 Vue.use(require('vue-shortkey'))
 
 export default ({
-  props: {
-      moduleName: { type: String , required: true },
-      moduleEditName: { type: String , required: true },
-  },
-  data () {
-    return {
-        router: this.$router,
-    }
-  },
-  /*components: {
-     reportComponent: reportComponent
-  },*/
-  methods:{
-    clearFilter(){
-        this.currentFilter = [];
-        this.$emit('onClearFilter', 'onClearFilter')
+    props: {
+        moduleName: { type: String , required: true },
+        moduleEditName: { type: String , required: true },
     },
-    applySearch(){
-        this.$emit('onFilterApplied', 'onFilterApplied')
+    data () {
+        return {
+            router: this.$router,
+        }
     },
-    openEditForm(props, editMode){
-      this.editRecord = props
-      this.editMode = editMode //false = edit || true  = new
-      this.router.push(this.moduleEditName);
-    },
-    openReportForm(report){
-      let newReportData = {
-           report: report
-          ,parameters: null
-      }
-      this.currentReportData = newReportData
-      this.router.push('/mainReport');
-    },
-    applyFilter(filter){
-        let newFilter = []
-        this.filtersDetails.filter(x=>x.filter_id==filter.value).map(filtro=>{
-            newFilter.push({
-                    db_column: filtro.db_column
-                ,symbol: 'in'//se deja fijo
-                ,valueC: filtro.valueC//pendiente(this.field.ux_type==='date'||this.field.ux_type==='datetime')?JSON.stringify(this.ticked).replace('[','').replace(']',''):JSON.stringify(this.selectedRows.map(x => x.value)).replace('[','').replace(']','')
-                ,valueClabel: filtro.valueClabel//pendiente//(this.field.ux_type==='date'||this.field.ux_type==='datetime')?this.ticked.length+' fechas':this.selectedRows.map(x => x[this.firstLabelFieldName])
-            })
-        })
-        this.currentFilter = newFilter;
-        this.$emit('onFilterApplied', 'filterUpdated')
-    },
-    deleteUserFilter(filtro){
-      this.$q.dialog({
-        //title: 'Prompt',
-        message: 'Desea eliminar este filtro?',
-        cancel: 'Cancelar',
-        persistent: true
-        }).onOk(data => {
-          this.loadingData=true;
-          let newFilterArray = [];
-          newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
-                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDelete',
-                    {
-                        link_name: this.moduleName,
-                        sys_user_code: this.userCode,
-                        filter_id: filtro.value
-                    }
-                    , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
-                  ).then((response) => {
-                    this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
-                    //los filtros se reciben desde el mismo SP, entonces guardo en Vuex
-                    this.filters = JSON.parse(response.data[0].filters)
-                    this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
-                    this.loadingData = false
-                  }).catch((error) => {
-                    console.error(error)
-                    let mensaje = ''
-                    if(error.message){ mensaje = error.message }
-                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                    })
-                    this.loadingData = false
-                })
-        })
+    /*components: {
+        reportComponent: reportComponent
+    },*/
+    methods:{
+        clearFilter(){
+            this.currentFilter = [];
+            this.$emit('onClearFilter', 'onClearFilter')
         },
-    defaultUserFilter(filtro){
-            this.$q.dialog({
-                //title: 'Prompt',
-                message: 'Desea hacer este filtro, su filtro predeterminado?',
-                cancel: 'Cancelar',
-                persistent: true
+        applySearch(){
+            this.$emit('onFilterApplied', 'onFilterApplied')
+        },
+        openEditForm(props, editMode){
+        this.editRecord = props
+        this.editMode = editMode //false = edit || true  = new
+        this.router.push(this.moduleEditName);
+        },
+        openReportForm(report){
+        let newReportData = {
+            report: report
+            ,parameters: null
+        }
+        this.currentReportData = newReportData
+        this.router.push('/mainReport');
+        },
+        applyFilter(filter){
+            let newFilter = []
+            this.filtersDetails.filter(x=>x.filter_id==filter.value).map(filtro=>{
+                newFilter.push({
+                        db_column: filtro.db_column
+                    ,symbol: 'in'//se deja fijo
+                    ,valueC: filtro.valueC//pendiente(this.field.ux_type==='date'||this.field.ux_type==='datetime')?JSON.stringify(this.ticked).replace('[','').replace(']',''):JSON.stringify(this.selectedRows.map(x => x.value)).replace('[','').replace(']','')
+                    ,valueClabel: filtro.valueClabel//pendiente//(this.field.ux_type==='date'||this.field.ux_type==='datetime')?this.ticked.length+' fechas':this.selectedRows.map(x => x[this.firstLabelFieldName])
+                })
+            })
+            this.currentFilter = newFilter;
+            this.$emit('onFilterApplied', 'filterUpdated')
+        },
+        deleteUserFilter(filtro){
+        this.$q.dialog({
+            //title: 'Prompt',
+            message: 'Desea eliminar este filtro?',
+            cancel: 'Cancelar',
+            persistent: true
             }).onOk(data => {
-                this.loadingData=true;
-                let newFilterArray = [];
-                newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
-                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate',
-                    {
-                        link_name: this.moduleName,
-                        sys_user_code: this.userCode,
-                        filter_id: filtro.value
-                    }
-                    , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
-                ).then((response) => {
-                    this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
-                    //los filtros se reciben desde el mismo SP, entonces guardo en Vuex
-                    this.filters = JSON.parse(response.data[0].filters)
-                    this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
-                    this.loadingData = false
-                }).catch((error) => {
-                    console.error(error)
-                    let mensaje = ''
-                    if(error.message){ mensaje = error.message }
-                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+            this.loadingData=true;
+            let newFilterArray = [];
+            newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
+                    this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDelete',
+                        {
+                            link_name: this.moduleName,
+                            sys_user_code: this.userCode,
+                            filter_id: filtro.value
+                        }
+                        , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+                    ).then((response) => {
+                        this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+                        //los filtros se reciben desde el mismo SP, entonces guardo en Vuex
+                        this.filters = JSON.parse(response.data[0].filters)
+                        this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
+                        this.loadingData = false
+                    }).catch((error) => {
+                        console.error(error)
+                        let mensaje = ''
+                        if(error.message){ mensaje = error.message }
+                        if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                        if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                        this.$q.notify({ html: true, multiLine: false, color: 'red'
+                            ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                            ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                            ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                        })
+                        this.loadingData = false
                     })
-                    this.loadingData = false
-                })
             })
-        },
-    clearDefaultUserFilter(){
-            this.$q.dialog({
-                //title: 'Prompt',
-                message: 'Desea dejar de usar este filtro como predeterminado?',
-                cancel: 'Cancelar',
-                persistent: true
-            }).onOk(data => {
-                this.loadingData=true;
-                let newFilterArray = [];
-                newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
-                this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate',
-                    {
-                        link_name: this.moduleName,
-                        sys_user_code: this.userCode,
-                        filter_id: 0//cuando 0, el SP elimina el filtro predeterminado
-                    }
-                    , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
-                ).then((response) => {
-                    this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
-                    //los filtros se reciben desde el mismo SP, entonces guardo en Vuex
-                    this.filters = JSON.parse(response.data[0].filters)
-                    this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
-                    this.loadingData = false
-                }).catch((error) => {
-                    console.error(error)
-                    let mensaje = ''
-                    if(error.message){ mensaje = error.message }
-                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+            },
+        defaultUserFilter(filtro){
+                this.$q.dialog({
+                    //title: 'Prompt',
+                    message: 'Desea hacer este filtro, su filtro predeterminado?',
+                    cancel: 'Cancelar',
+                    persistent: true
+                }).onOk(data => {
+                    this.loadingData=true;
+                    let newFilterArray = [];
+                    newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
+                    this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate',
+                        {
+                            link_name: this.moduleName,
+                            sys_user_code: this.userCode,
+                            filter_id: filtro.value
+                        }
+                        , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+                    ).then((response) => {
+                        this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+                        //los filtros se reciben desde el mismo SP, entonces guardo en Vuex
+                        this.filters = JSON.parse(response.data[0].filters)
+                        this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
+                        this.loadingData = false
+                    }).catch((error) => {
+                        console.error(error)
+                        let mensaje = ''
+                        if(error.message){ mensaje = error.message }
+                        if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                        if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                        this.$q.notify({ html: true, multiLine: false, color: 'red'
+                            ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                            ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                            ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                        })
+                        this.loadingData = false
                     })
-                    this.loadingData = false
                 })
-            })
+            },
+        clearDefaultUserFilter(){
+                this.$q.dialog({
+                    //title: 'Prompt',
+                    message: 'Desea dejar de usar este filtro como predeterminado?',
+                    cancel: 'Cancelar',
+                    persistent: true
+                }).onOk(data => {
+                    this.loadingData=true;
+                    let newFilterArray = [];
+                    newFilterArray = JSON.parse(JSON.stringify(this.currentFilter))//clona
+                    this.$axios.post( this.apiURL + 'spSysModulesFiltersUserDefaultUpdate',
+                        {
+                            link_name: this.moduleName,
+                            sys_user_code: this.userCode,
+                            filter_id: 0//cuando 0, el SP elimina el filtro predeterminado
+                        }
+                        , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+                    ).then((response) => {
+                        this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+                        //los filtros se reciben desde el mismo SP, entonces guardo en Vuex
+                        this.filters = JSON.parse(response.data[0].filters)
+                        this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
+                        this.loadingData = false
+                    }).catch((error) => {
+                        console.error(error)
+                        let mensaje = ''
+                        if(error.message){ mensaje = error.message }
+                        if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                        if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                        this.$q.notify({ html: true, multiLine: false, color: 'red'
+                            ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                            ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                            ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                        })
+                        this.loadingData = false
+                    })
+                })
+            },
+        //CUSTOM
+        downloadReportForm(){
+            let newReportData = {
+                report: {
+                    comment_es: "Ingreso a Bodega"
+                    ,icon: "fas fa-file"
+                    ,is_paginated_rpt: true
+                    ,link_name: "invIncoming"
+                    ,name_es: "Ingreso a Bodega"
+                    ,position: 1
+                    ,report_type: "ssrs"
+                    ,sys_report_id: 1
+                }
+                //,parameters: null
+                ,parameters: {
+                    //row_id: this.selectedRows[0].[this.columnsSystem.find(x=>x.is_key).field]
+                    row_id: this.selectedRows[0].kardexID_ux
+                }
+            }
+            this.currentReportData = newReportData
+            this.router.push('/mainReport');
         },
-  },
+    },
+    
   computed:{
 
     allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },

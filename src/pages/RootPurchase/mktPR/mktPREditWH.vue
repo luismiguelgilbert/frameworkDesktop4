@@ -14,7 +14,10 @@
         :columns="[
           //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
           { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
-          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
+          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;',  },
+          { name: 'quantitymktPO', required: true, label: 'Comprado', align: 'right', field: row => row.quantitymktPO, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 5px;' },
+          { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 5px;' },
+          { name: 'estado', required: true, label: 'Estado', align: 'right', field: row => row.estado, sortable: true },
           { name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true },
           { name: 'transportTypeID', required: true, label: 'Entrega?', align: 'left', field: row => row.transportTypeID, sortable: true },
           { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: true },
@@ -30,13 +33,16 @@
 
         <q-td key="invID" :props="props">{{ props.row.invName }}</q-td>
         <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
+        <q-td key="quantitymktPO" :props="props">{{ props.row.quantitymktPO }}</q-td>
+        <q-td key="quantityRcvd" :props="props">{{ props.row.quantityRcvd }}</q-td>
+        <q-td key="estado" :props="props"><q-toggle color="primary" size="xs" dense square :value="props.row.estado" /></q-td>
         <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
         <q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>
         <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
         <q-td key="expectedDate" :props="props" >
           {{showDateName(props.row.expectedDate)}}
-          <q-popup-edit :value="props.row.expectedDate" class="no-padding">
-            <q-date :value="props.row.expectedDate" @input="(value)=>{updateRow(value,'expectedDate',props.row)}" >
+          <q-popup-edit :value="props.row.expectedDate" content-class="no-padding">
+            <q-date minimal :value="props.row.expectedDate" @input="(value)=>{updateRow(value,'expectedDate',props.row)}" >
               <div class="row items-center justify-end">
                 <q-btn v-close-popup label="Seleccionar" color="primary" flat />
               </div>
@@ -47,9 +53,11 @@
       </q-tr>
     </template>
     <template v-slot:top >
-        <q-btn :label="$q.screen.gt.sm?'Bodega':''" title="Cambiar Bodega a líneas seleccionadas" @click="openSearchWH" icon="fas fa-warehouse" color="primary"  no-caps :disable="selected.length<=0"/>
-        <q-btn :label="$q.screen.gt.sm?'Entrega':''" title="Cambiar Tipo de Entrega a líneas seleccionadas" @click="openSearchTransport" icon="fas fa-truck" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
-        <q-btn :label="$q.screen.gt.sm?'Centro de Costo':''" title="Cambiar Centro de Costo a a líneas seleccionadas" @click="openSearchPrj" icon="fas fa-folder-open" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0"/>
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Bodega':''" title="Cambiar Bodega a líneas seleccionadas" @click="openSearchWH" icon="fas fa-warehouse" color="primary"  no-caps :disable="selected.length<=0"/>
+        <q-btn v-if="editMode==true||editMode==false" :label="$q.screen.gt.sm?'Esperado':''" title="Cambiar Fecha Esperada de Entrega a líneas seleccionadas" @click="openExpected" icon="fas fa-calendar" color="primary" :class="editMode==false?undefined:'q-ml-sm'"  no-caps :disable="selected.length<=0"/>
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Entrega':''" title="Cambiar Tipo de Entrega a líneas seleccionadas" @click="openSearchTransport" icon="fas fa-truck" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Centro de Costo':''" title="Cambiar Centro de Costo a a líneas seleccionadas" @click="openSearchPrj" icon="fas fa-folder-open" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0"/>
+        <q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Inactivar':''" title="Inactivar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" class="q-ml-sm" no-caps   :disable="selected.length<=0" />
         <q-space />
     </template>
   </q-table>
@@ -161,10 +169,10 @@
         </q-select>
         <q-separator />
         <q-table
-          ref="transportSearchTable" square
+          ref="prjSearchTable" square
           :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-          table-style="min-height: calc(100vh - 410px); max-height: calc(100vh - 410px)"
-          @keydown.native.keyCodes.115="transportDialogSelectAction(transportDialogSelected)"
+          table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
+          @keydown.native.keyCodes.115="prjDialogSelectAction(prjDialogSelected)"
           :data="lookup_prj.filter(x=>x.rootID == rootPrjIDSelected)"
           :columns="[
             //{ name: 'prjID', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
@@ -194,7 +202,42 @@
       </q-card-section>
       <q-card-actions align="around">
         <q-btn  flat label="Cancelar (ESC)" no-caps color="primary" @click="isPrjDialog=false" ></q-btn>
-        <q-btn icon-right="fas fa-check-circle" label="Seleccionar (F4)" no-caps color="primary" :disable="(prjDialogSelected.length<=0||prjDialogSelected[0].row_has_children||prjDialogSelected[0].estado==false)" ></q-btn>
+        <q-btn icon-right="fas fa-check-circle" label="Seleccionar (F4)" no-caps color="primary" 
+          :disable="(prjDialogSelected.length<=0||prjDialogSelected[0].row_has_children||prjDialogSelected[0].estado==false)" 
+          @click="prjDialogSelectAction(prjDialogSelected)"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="isExpectedDialog" >
+    <q-card style="min-width: 700px;" > 
+      <q-toolbar>
+        Aplicar la siguiente Fecha a todo el documento
+      </q-toolbar>
+      <q-card-section>
+        <q-input
+          ref="expectedDialogDate"
+          mask="date" :rules="['date']"
+          placeholder="Ingrese la fecha esperada" label="Fecha Esperada" filled
+          v-model="expectedDialogDate"
+          >
+          <template v-slot:append>
+            <q-icon name="event" class="cursor-pointer">
+              <q-popup-proxy  ref="qDateProxy_expectedDialogDate" transition-show="scale" transition-hide="scale">
+                <q-date minimal v-model="expectedDialogDate" >
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+          <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+      </q-input>
+      </q-card-section>
+      <q-card-actions align="around" >
+        <q-btn label="Cancelar" @click="isExpectedDialog=false" flat />
+        <q-btn label="Seleccionar" color="primary" @click="updateExpectedDates" flat />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -249,7 +292,7 @@ export default ({
         ,isWHDialog: false, whDialogFilter: '', whDialogSelected: [], whDialogTableBusy: false
         ,isTransportDialog: false, transportDialogFilter: '', transportDialogSelected: [], transportDialogTableBusy: false
         ,isPrjDialog: false, prjDialogFilter: '', prjDialogSelected: [], prjDialogTableBusy: false, rootPrjIDSelected: null, prjIDSelected: null
-        
+        ,isExpectedDialog: false, expectedDialogDate: ''
         //,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
       }
     },
@@ -301,7 +344,13 @@ export default ({
             this.$refs.whSearchTable.scrollTo(this.lookup_wh.findIndex(x=>x.value == this.whDialogSelected[0].value))
           }catch(ex){}
         }
-        
+      },
+      openExpected(){
+        this.isExpectedDialog=true
+      },
+      updateExpectedDates(){
+        this.isExpectedDialog=false
+        this.selected.forEach(row => this.updateRow(this.expectedDialogDate, 'expectedDate' , row) );
       },
       rowTitleInventory(fila){
         let resultado = 'Seleccionar...'
@@ -339,6 +388,12 @@ export default ({
       //
       openSearchPrj(){
         this.isPrjDialog = true
+      },
+      cancelRows(){
+        this.selected.forEach(rowToUpdate=>{
+          //pone en columna quantityCancel el valor de las cantidades pendientes (open / por recibir)
+          this.updateRow(false, 'estado', rowToUpdate)
+        })
       },
       showDateName(value){
         let resultado = '...'

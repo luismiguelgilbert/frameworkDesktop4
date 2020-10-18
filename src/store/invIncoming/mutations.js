@@ -19,6 +19,8 @@ export const updateEditDataLines = (state, value) => {
             ,invID: linea.invID
             ,debit: linea.newQuantity * linea.price
             ,credit: 0
+            ,prjID: linea.prjID
+            ,stockID: linea.stockID
             ,comments: linea.invName
         })
         contador++;
@@ -29,6 +31,8 @@ export const updateEditDataLines = (state, value) => {
            ,invID: linea.invID
            ,debit: 0
            ,credit: linea.newQuantity * linea.price
+           ,prjID: linea.prjID
+           ,stockID: linea.stockID
            ,comments: linea.invName
        })
        contador++;

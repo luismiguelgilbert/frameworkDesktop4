@@ -2,22 +2,23 @@
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <!--partnerID-->
     <q-input
-        ref="partnerName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="partnerName" :readonly="!editMode"
         placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
-        :value="partnerName"
+        :value="partnerName" 
         @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
         :rules="[
                 val => !!val || '* Requerido',
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
+        <template v-if="editMode" v-slot:append><q-icon name="fas fa-search"  @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
     </q-input>
 
+    
     <q-select
         label="Bodega (*)" placeholder="Seleccione la Bodega donde está recibiendo los Items (*)" emit-value map-options filled
-        :options="lookup_wh" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        :option-disable="opt => !opt.estado" :disable="!(partnerID>0)"
+        :options="lookup_wh" 
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
         v-model="whID" @input="loadPendingInv()"
         ref="whID"
         :rules="[
@@ -27,10 +28,17 @@
         <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
     </q-select>
 
+    <q-input filled v-model="moveDate" mask="date" :rules="['date']" 
+        placeholder="Fecha del Ingreso (*)" label="Fecha del Ingreso (*)" readonly>
+      <template v-slot:prepend>
+        <q-icon name="fas fa-calendar" class="cursor-pointer" />
+      </template>
+    </q-input>
+
     <q-select
         label="Tipo de Documento del Proveedor(*)" placeholder="Seleccione el Tipo de Documento del Proveedor (*)" emit-value map-options filled
         :options="lookup_invDocTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        :option-disable="opt => !opt.estado"
+        :option-disable="opt => !opt.estado" 
         v-model="invDocTypeID"
         ref="invDocTypeID"
         :rules="[
@@ -49,6 +57,8 @@
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
 
+    
+
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Ingreso" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -59,7 +69,7 @@
 
     <q-dialog v-model="isPartnerDialog">
         <mainLookup 
-            titleBar="Seleccionar Proveedor ()"
+            titleBar="Seleccionar Proveedor"
             :data="this.lookup_partners"
             :dataRowKey="'value'"
             :selectionMode="'single'"
@@ -96,14 +106,16 @@ export default ({
     },
     methods:{
         openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            this.mainLookupUpdateFieldValueName = UpdateFieldValueName
-            this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
-            this.mainLookupPredefinedValue = predefinedValue
-            this.isPartnerDialog = true
+            if(this.editMode){
+                this.mainLookupUpdateFieldValueName = UpdateFieldValueName
+                this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
+                this.mainLookupPredefinedValue = predefinedValue
+                this.isPartnerDialog = true
+            }
         },
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
             this.isPartnerDialog = false
             this.lines = []
             this.loadPendingInv()
@@ -161,6 +173,10 @@ export default ({
         partnerName: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerName', value: val}) }
+        },
+        moveDate: {
+            get () { return this.$store.state[this.moduleName].editData.basic.moveDate },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'moveDate', value: val}) }
         },
         whID: {
             get () { return this.$store.state[this.moduleName].editData.basic.whID },

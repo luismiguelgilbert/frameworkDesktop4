@@ -1,10 +1,31 @@
 <template>
-<div>
+<q-form>
+    <div class="row q-col-gutter-xs">
+      <q-input v-if="!editMode" class="col-sm-12 col-md-4"
+          label="Asiento Contable #"  filled readonly
+          v-model="accMoveID"
+          >
+          <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
+      </q-input>
+       <q-input v-if="!editMode" class="col-sm-12 col-md-4"
+          label="Fecha del Asiento"  filled readonly
+          v-model="moveDate"
+          >
+          <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+      </q-input>
+       <q-input v-if="!editMode" class="col-sm-12 col-md-4"
+          label="Tipo de Diario"  filled readonly
+          v-model="journalName"
+          >
+          <template v-slot:prepend><q-icon name="fas fa-book" /></template>
+      </q-input>
+    </div>
+    <br />
     <q-table
         ref="mainTable"
         :data="accountLines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        table-style="min-height: calc(100vh - 175px); max-height: calc(100vh - 175px)"
+        :table-style="editMode?'min-height: calc(100vh - 195px); max-height: calc(100vh - 195px)':'min-height: calc(100vh - 255px); max-height: calc(100vh - 255px)'"
         row-key="lineID"
         
         :rows-per-page-options="[0]"
@@ -65,7 +86,7 @@
       </q-input>
     </template>-->
   </q-table>
-</div>
+</q-form>
 
 </template>
 <style lang="sass">
@@ -200,6 +221,33 @@ export default ({
         accountLines: {
             get () { return this.$store.state[this.moduleName].editData.accountLines },
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+        },
+        accMoveID: {
+            get () { 
+              let resultado = 0;
+              try{
+                resultado = this.$store.state[this.moduleName].editData.accountLines[0].accMoveID
+              }catch(ex){}
+              return resultado;
+            }
+        },
+        moveDate: {
+            get () { 
+              let resultado = '';
+              try{
+                resultado = this.$store.state[this.moduleName].editData.accountLines[0].moveDate
+              }catch(ex){}
+              return resultado;
+            }
+        },
+        journalName: {
+            get () { 
+              let resultado = '';
+              try{
+                resultado = this.$store.state[this.moduleName].editData.accountLines[0].journalName
+              }catch(ex){}
+              return resultado;
+            }
         },
         partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },

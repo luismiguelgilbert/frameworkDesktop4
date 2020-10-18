@@ -8,9 +8,9 @@
 
     <!--partnerID-->
     <q-input
-        ref="partnerName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="partnerName" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
-        :value="partnerName"
+        :value="partnerName" 
         @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
         :rules="[
                 val => !!val || '* Requerido',
@@ -33,7 +33,7 @@
     </q-select>
     <q-select
         label="Bodega de Destino Predeterminada (*)" placeholder="Seleccione la bodega predeterminada donde desea recibir los ítems (*)" emit-value map-options filled
-        :options="lookup_wh" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :options="lookup_wh" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :option-disable="opt => !opt.estado"
         v-model="defaultWhID"
         ref="defaultWhID"
@@ -45,7 +45,7 @@
     </q-select>
     <q-select
         label="Tipo de Entrega Predeterminada" placeholder="Seleccione el Tipo Predeterminado de Entrega de los Ítems" emit-value map-options filled
-        :options="lookup_transports" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :options="lookup_transports" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :option-disable="opt => !opt.estado" clearable
         v-model="defaultTransportID"
         ref="defaultTransportID"
@@ -84,14 +84,14 @@
 
     <q-dialog v-model="isPartnerDialog">
         <mainLookup 
-            titleBar="Buscar Tipo de Caso"
+            titleBar="Buscar Proveedor"
             :data="this.lookup_partners"
             :dataRowKey="'value'"
             :selectionMode="'single'"
             :predefinedValue="mainLookupPredefinedValue"
             :columns="[
-                    { name: 'label', required: true, label: 'Proveedor', align: 'left', field: row => row.label , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    ,{ name: 'partner_ruc', required: true, label: 'Número de Identificación', align: 'left', field: row => row.partner_ruc , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
+                     { name: 'label', required: true, label: 'Proveedor', align: 'left', field: row => row.label , sortable: false, style: 'min-width: 300px;' }
+                    ,{ name: 'partner_ruc', required: true, label: 'Número de Identificación', align: 'left', field: row => row.partner_ruc , sortable: false, style: 'min-width: 100px;' }
                     //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
                     ]"
             
@@ -129,14 +129,17 @@ export default ({
             )
         },
         openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            this.mainLookupUpdateFieldValueName = UpdateFieldValueName
-            this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
-            this.mainLookupPredefinedValue = predefinedValue
-            this.isPartnerDialog = true
+            if(this.editMode==true){
+                this.mainLookupUpdateFieldValueName = UpdateFieldValueName
+                this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
+                this.mainLookupPredefinedValue = predefinedValue
+                this.isPartnerDialog = true
+            }
+            
         },
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
             this.isPartnerDialog = false
         },
 
