@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpr lFf" style="min-height: 200px;">
+  <q-layout dark view="hHh lpr lFf" style="min-height: 200px;">
     <q-header >
       <q-toolbar v-if="userCompanies && userCompanies.length>0" :class="userMainLayoutToolbar">
         <span >&ensp;</span>
@@ -44,6 +44,7 @@
         </q-btn-dropdown>
 
         <q-space />
+        
         <!--Universal Search A FUTURO-->
         <q-space />
 
@@ -536,7 +537,15 @@ export default {
     disableCompanyChange:{ get() { 
       let result = false; 
       try{result = this.router.currentRoute.path.indexOf('Edit') > 0}catch(ex){} 
-      return result; } }
+      return result; } },
+    isOSdarkMode: { get() {
+      let result = false
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        result = true
+      }
+      return result
+    }}
+    
   },
 
   watch: {

@@ -47,7 +47,8 @@ export default {
       Object.keys(this.$store.state).map(x=>{this.$store.commit(x+'/resetToDefaultState');})//Loop across all vuex states, and reset each state to its initial status
       colors.setBrand('primary', '#1867C0') //#1976D2
       this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
-      this.$q.dark.set(false)//force darkMode to be off always
+      //this.$q.dark.set(false)//force darkMode to be off always
+      this.$q.dark.set(this.isOSdarkMode)
       //apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data')
       //+ ':' + this.$q.sessionStorage.getItem('URL_Port')
       //+ this.$q.sessionStorage.getItem('URL_Path') } },
@@ -126,6 +127,15 @@ export default {
 
             })
     }, 100),
+  },
+  computed:{
+    isOSdarkMode: { get() {
+      let result = false
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        result = true
+      }
+      return result
+    }}
   }
 }
 </script>
