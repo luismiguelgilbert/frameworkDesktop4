@@ -35,7 +35,6 @@ import Brands from './Brands' //Brands
 import InvTypes from './InvTypes' //InvTypes
 import mktPR from './mktPR' //mktPR
 import mktPO from './mktPO' //mktPO
-
 import casCasesTypes from './casCasesTypes' //casCasesTypes
 import casCasos from './casCasos' //casCasos
 import casClientes from './casClientes' //casClientes
@@ -43,6 +42,10 @@ import casLocations from './casLocations' //casLocations
 import casTasks from './casTasks' //casTasks
 import casTasksTypes from './casTasksTypes' //casTasksTypes
 import invIncoming from './invIncoming' //invIncoming
+import invQuery from './invQuery' //invQuery
+
+import partnerMasterGroups from './partnerMasterGroups' //partnerMasterGroups
+import invMasterGroups from './invMasterGroups' //invMasterGroups
 
 Vue.use(Vuex)
 
@@ -72,6 +75,8 @@ export default function (/* { ssrContext } */) {
       ,TaxesMaster
       ,AccPeriods
       ,AccMoves
+      ,partnerMasterGroups
+      ,invMasterGroups
       //Schoenstatt
       ,SCHPersonas
       ,SCHPersona
@@ -91,6 +96,7 @@ export default function (/* { ssrContext } */) {
       ,mktPO
       //Inventory
       ,invIncoming
+      ,invQuery
       //Cases
       ,casCasesTypes
       ,casCasos

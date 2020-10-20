@@ -20,13 +20,14 @@ export default function () {
      ,security: []
      ,editRecord: null
      ,editMode: false //false = edit || new = new
+     ,whID: null
+     ,whName: ''
+     ,lookup_wh: []
      ,editData: {
         basic: {}
-       ,contacts: []
-       ,pricelists: []
-       ,payterms: []
+       ,lines: []
+       ,accountLines: []
        ,files: []
-       ,owners: []
        ,history: []
      }
      ,moduleReports: []

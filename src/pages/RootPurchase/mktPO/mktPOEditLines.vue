@@ -590,9 +590,6 @@ export default ({
         this.isRequisicionDialog = true;
       },
       requisicionesBatchDialogSelectAction(){
-        console.dir('pendiente')
-        console.dir(this.requisicionesDialogSelected)
-
         let max_id = 0
         let temp = null
         if(this.lines.length > 0){

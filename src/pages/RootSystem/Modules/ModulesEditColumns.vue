@@ -137,6 +137,7 @@
                     ,{value: 'lookup', label: 'lookup'}
                     ,{value: 'money', label: 'money'}
                     ,{value: 'numeric', label: 'numeric'}
+                    ,{value: 'quantity', label: 'quantity'}
                     ,{value: 'string', label: 'string'}
                     ,{value: 'user', label: 'user'}
                   ]"

@@ -240,7 +240,7 @@
                         <q-icon name="fas fa-dollar-sign" color="primary" />
                     </q-item-section>
                     <q-item-section>
-                        <q-select dense v-model="userMoneyFormat" label="Formato usado para mostrar Dinero (guarde para aplicar cambios)" emit-value map-options
+                        <q-select dense v-model="userMoneyFormat" label="Formato usado para mostrar Dinero y Cantidades (guarde para aplicar cambios)" emit-value map-options
                             :options="[
                                     { label: '0 Decimales', value: 0},
                                     { label: '1 Decimal', value: 1},

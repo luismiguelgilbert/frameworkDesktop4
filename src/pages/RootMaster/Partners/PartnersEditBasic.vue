@@ -12,7 +12,7 @@
         v-model="is_vendor" icon="fas fa-shopping-cart" color="light-blue-6" label="Es Proveedor?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     </div>
-    <q-select class="col-4"
+    <!--porque está en tab Contable <q-select class="col-4"
         label="Grupo Contable (*)" placeholder="Seleccione el grupo al que pertenece el socio (*)" emit-value map-options filled
         :options="lookup_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="group_id"
@@ -22,7 +22,7 @@
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-book" /></template>
-    </q-select>
+    </q-select>-->
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Escriba la Razón Social del socio (*)" label="Razón Social (*)" filled

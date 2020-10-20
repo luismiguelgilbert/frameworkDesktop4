@@ -28,6 +28,9 @@
                 table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
                 @keydown.native.keyCodes.113="focusSearch"
                 @keydown.native.keyCodes.115="emitSelect"
+                no-data-label= "No hay registros"
+                no-results-label= "No se encontraron registros"
+                loading-label= "Cargando datos"
                 >
                 <template v-slot:body-selection="scope">
                     <div>

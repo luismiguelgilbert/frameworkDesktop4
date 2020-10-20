@@ -65,6 +65,10 @@ const routes = [
       ,{ path: 'RootAccounting/AccPeriodsEdit', component: () => import('pages/RootAccounting/AccPeriods/AccPeriodsEdit.vue') }
       ,{ path: 'RootAccounting/AccMoves', component: () => import('pages/RootAccounting/AccMoves/AccMoves.vue') }
       ,{ path: 'RootAccounting/AccMovesEdit', component: () => import('pages/RootAccounting/AccMoves/AccMovesEdit.vue') }
+      ,{ path: 'RootAccounting/invMasterGroups', component: () => import('pages/RootAccounting/invMasterGroups/invMasterGroups.vue') }
+      ,{ path: 'RootAccounting/invMasterGroupsEdit', component: () => import('pages/RootAccounting/invMasterGroups/invMasterGroupsEdit.vue') }
+      ,{ path: 'RootAccounting/partnerMasterGroups', component: () => import('pages/RootAccounting/partnerMasterGroups/partnerMasterGroups.vue') }
+      ,{ path: 'RootAccounting/partnerMasterGroupsEdit', component: () => import('pages/RootAccounting/partnerMasterGroups/partnerMasterGroupsEdit.vue') }
       //COMPRAS
       ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/mktPR.vue') }
       ,{ path: 'RootPurchase/mktPREdit', component: () => import('pages/RootPurchase/mktPR/mktPREdit.vue') }
@@ -73,6 +77,8 @@ const routes = [
       ,{ path: 'RootPurchase/mktPORet', component: () => import('pages/RootPurchase/mktPORet/mktPORet.vue') }
       ,{ path: 'RootPurchase/mktPORetEdit', component: () => import('pages/RootPurchase/mktPORet/mktPORetEdit.vue') }
       //INVENTORY
+      ,{ path: 'RootInventory/invQuery', component: () => import('pages/RootInventory/invQuery/invQuery.vue') }
+      ,{ path: 'RootInventory/invQueryEdit', component: () => import('pages/RootInventory/invQuery/invQueryEdit.vue') }
       ,{ path: 'RootInventory/invIncoming', component: () => import('pages/RootInventory/invIncoming/invIncoming.vue') }
       ,{ path: 'RootInventory/invIncomingEdit', component: () => import('pages/RootInventory/invIncoming/invIncomingEdit.vue') }
       //CASES_LEGAL
