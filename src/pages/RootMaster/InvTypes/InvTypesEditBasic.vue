@@ -6,7 +6,7 @@
         />
     </div>
     <q-select clearable
-        label="Pertenece al Grupo" placeholder="Seleccione la cuenta contable a la que pertenece" emit-value map-options filled
+        label="Pertenece al Grupo" placeholder="Seleccione el grupo al que pertenece" emit-value map-options filled
         :options="lookup_types" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="parent"
         ref="parent" @input="changeParent"
@@ -15,7 +15,7 @@
     </q-select>
     <q-input
         ref="code_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" class="q-pt-md"
-        placeholder="Complete el código de la cuenta contable (*)" label="Código de Cuenta (*)" filled
+        placeholder="Complete el código del grupo (*)" label="Código de Grupo (*)" filled
         v-model="code_es"
         :rules="[
                 val => !!val || '* Requerido',
@@ -26,7 +26,7 @@
     </q-input>
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Ingrese el código del Punto de Control (*)" label="Nombre de Cuenta (*)" filled
+        placeholder="Ingrese el código del Punto de Control (*)" label="Nombre de Grupo (*)" filled
         v-model="name_es"
         :rules="[
                 val => !!val || '* Requerido',
@@ -37,7 +37,7 @@
     </q-input>
     <q-input
         ref="account_level" :readonly="true" class="q-pt-md"
-        placeholder="Nivel (*)" label="Nivel de Cuenta (*)" filled
+        placeholder="Nivel (*)" label="Nivel de Grupo (*)" filled
         v-model="account_level"
         >
         <template v-slot:prepend><q-icon name="fas fa-indent" /></template>

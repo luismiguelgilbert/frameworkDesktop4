@@ -69,6 +69,9 @@ const routes = [
       ,{ path: 'RootAccounting/invMasterGroupsEdit', component: () => import('pages/RootAccounting/invMasterGroups/invMasterGroupsEdit.vue') }
       ,{ path: 'RootAccounting/partnerMasterGroups', component: () => import('pages/RootAccounting/partnerMasterGroups/partnerMasterGroups.vue') }
       ,{ path: 'RootAccounting/partnerMasterGroupsEdit', component: () => import('pages/RootAccounting/partnerMasterGroups/partnerMasterGroupsEdit.vue') }
+      ,{ path: 'RootAccounting/Payterms', component: () => import('pages/RootAccounting/Payterms/Payterms.vue') }
+      ,{ path: 'RootAccounting/PaytermsEdit', component: () => import('pages/RootAccounting/Payterms/PaytermsEdit.vue') }
+      
       //COMPRAS
       ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/mktPR.vue') }
       ,{ path: 'RootPurchase/mktPREdit', component: () => import('pages/RootPurchase/mktPR/mktPREdit.vue') }

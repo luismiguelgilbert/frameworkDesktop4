@@ -15,6 +15,7 @@
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
+    
     </q-input>
     <q-input class="q-mb-lg"
         ref="position" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"

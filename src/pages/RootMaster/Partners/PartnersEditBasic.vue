@@ -1,15 +1,18 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <div class="row">
-      <q-toggle class="col-4"
+      <q-toggle class="col-3"
         v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
 
-      <q-toggle class="col-4"
+      <q-toggle class="col-3"
         v-model="is_customer" icon="fas fa-tag" color="blue-6" label="Es Cliente?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-      <q-toggle
+      <q-toggle class="col-3"
         v-model="is_vendor" icon="fas fa-shopping-cart" color="light-blue-6" label="Es Proveedor?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        />
+    <q-toggle class="col-3"
+        v-model="is_foreign" icon="fas fa-flag" color="light-blue-6" label="Es Extranjero?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     </div>
     <!--porque está en tab Contable <q-select class="col-4"
@@ -148,6 +151,10 @@ export default ({
         is_customer:  {
             get () { return this.$store.state[this.moduleName].editData.basic.is_customer },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_customer', value: val}) }
+        },
+        is_foreign:  {
+            get () { return this.$store.state[this.moduleName].editData.basic.is_foreign },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_foreign', value: val}) }
         },
         name_es: {
             get () { return this.$store.state[this.moduleName].editData.basic.name_es },

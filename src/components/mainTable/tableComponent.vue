@@ -26,7 +26,7 @@
       :virtual-scroll="pagination.rowsPerPage==0||pagination.rowsPerPage>100?true:false"
       >
       <template v-slot:body-cell="props" >
-        <q-td :props="props" class="text-weight-medium no-padding" >
+        <q-td :props="props" class="text-weight-medium q-pt-none q-pb-none ellipsis q-pr-md" :title="props.value" >
           <div v-if="props.col.cellComponent=='estado'" >
             <q-item dense class="no-padding" style="min-height: 20px !important;">
               <q-item-section side class="q-pl-none q-pr-xs" ><q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" /></q-item-section>

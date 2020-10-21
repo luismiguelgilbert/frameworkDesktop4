@@ -43,7 +43,7 @@ import casTasks from './casTasks' //casTasks
 import casTasksTypes from './casTasksTypes' //casTasksTypes
 import invIncoming from './invIncoming' //invIncoming
 import invQuery from './invQuery' //invQuery
-
+import Payterms from './Payterms' //Payterms
 import partnerMasterGroups from './partnerMasterGroups' //partnerMasterGroups
 import invMasterGroups from './invMasterGroups' //invMasterGroups
 
@@ -70,6 +70,7 @@ export default function (/* { ssrContext } */) {
       ,Employees
       ,Equipista
       ,Equipistas
+      //FINANCES
       ,ChartAccount
       ,Taxes
       ,TaxesMaster
@@ -77,6 +78,7 @@ export default function (/* { ssrContext } */) {
       ,AccMoves
       ,partnerMasterGroups
       ,invMasterGroups
+      ,Payterms
       //Schoenstatt
       ,SCHPersonas
       ,SCHPersona

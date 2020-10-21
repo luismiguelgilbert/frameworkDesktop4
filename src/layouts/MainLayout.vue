@@ -237,7 +237,7 @@ export default {
     this.$q.sessionStorage.set('pathname',window.location.pathname)
     this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
     if(! (this.$q.sessionStorage.getItem('sys_user_code') && this.$q.sessionStorage.getItem('sys_profile_id') && this.$q.sessionStorage.getItem('jwtToken') ) ){
-      this.$q.notify({color: 'info', message: 'Ingrese su usuario y contraseña', timeout: 3000, icon: "fas fa-lock" });
+      this.$q.notify({color: 'info', message: 'Ingrese su usuario y contraseña', timeout: 1500, icon: "fas fa-lock" });
       if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
         this.router.replace('/LoginENS'); //navigate to login
       }
