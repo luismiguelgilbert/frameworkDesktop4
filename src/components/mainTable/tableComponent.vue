@@ -17,7 +17,7 @@
       loading-label= "Cargando datos"
       :rows-per-page-options="[17,27,50,100,250,1000, 0]"
       :class="userColor=='blackDark'?'my-sticky-header-table-dark bg-grey-10 ':'my-sticky-header-table '"
-      :table-style="userTableDense?'min-height: calc(100vh - 136px); max-height: calc(100vh - 136px)':'min-height: calc(100vh - 153px); max-height: calc(100vh - 153px)'"
+      :table-style="userTableDense?'min-height: calc(100vh - 135px); max-height: calc(100vh - 135px)':'min-height: calc(100vh - 153px); max-height: calc(100vh - 153px)'"
       :selected.sync="selectedRows"
       :loading="loadingData"
       :pagination.sync="pagination"
@@ -26,8 +26,8 @@
       :virtual-scroll="pagination.rowsPerPage==0||pagination.rowsPerPage>100?true:false"
       >
       <template v-slot:body-cell="props" >
-        <q-td :props="props" class="text-weight-medium q-pt-none q-pb-none ellipsis q-pr-md" :title="props.value" >
-          <div v-if="props.col.cellComponent=='estado'" >
+        <q-td :props="props" class="text-weight-medium ellipsis no-padding" :title="props.value" >
+          <div v-if="props.col.cellComponent=='estado'" class="q-pl-xs">
             <q-item dense class="no-padding" style="min-height: 20px !important;">
               <q-item-section side class="q-pl-none q-pr-xs" ><q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" /></q-item-section>
               <q-item-section><q-item-label>{{props.value}}</q-item-label></q-item-section>
@@ -44,8 +44,8 @@
             </q-avatar>
           </div>
           <!--<div v-if="!props.col.is_key && props.col.cellComponent=='div'">{{props.value}}</div>-->
-          <div v-if="props.col.cellComponent=='div'">{{props.value}}</div>
-          <div v-if="props.col.cellComponent=='bool'" ><q-toggle color="primary" size="xs" square :value="props.value" /></div>
+          <div v-if="props.col.cellComponent=='div'" class="q-pl-xs q-pr-sm">{{props.value}}</div>
+          <div v-if="props.col.cellComponent=='bool'" ><q-toggle class="no-padding" style="min-height: 20px !important;" color="primary" size="xs"  :value="props.value" /></div>
           <div v-if="props.col.ux_type=='open'"  >
             <!--{{columnsSystem.find(x=>x.is_key).field}}-->
             <!--<q-btn flat size="xs" icon="fas fa-external-link-alt" class="cursor-pointer" color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_key).field]; openEditForm(newProps, false)}" />-->
@@ -75,7 +75,9 @@
     top: 0
     opacity: 1
     z-index: 2
-    padding-left: 0
+    padding-left: 5px
+    font-weight: bolder
+    color: $grey-7
 
   td:last-child
     /* bg color is important for td; just specify one */
@@ -108,7 +110,9 @@
     top: 0
     opacity: 1
     z-index: 2
-    padding-left: 0
+    padding-left: 5px
+    font-weight: bolder
+    color: $grey-6
 </style>
 <script>
 import Vue from 'vue';

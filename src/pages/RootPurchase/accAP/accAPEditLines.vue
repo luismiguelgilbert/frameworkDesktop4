@@ -1,5 +1,6 @@
 <template>
 <div class="row ">
+  
   <q-table
         ref="mainTable"
         :data="lines"
@@ -33,12 +34,10 @@
         <q-td key="invID" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
           <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
               :value="props.row.invName" dense item-aligned borderless
-              :rules="[val => !!val || 'Requerido']"
-              @input="(value)=>{updateRow(value,'invName',props.row)}"
-              @keyup.keyCodes.113="openSearchItems(props.row)"
+              :rules="[val => !!val || 'Requerido']" 
+              readonly
               :title="rowTitleInventory(props.row)"
               >
-              <template v-if="editMode==true" v-slot:prepend><q-btn icon="fas fa-search" title="Buscar (F2)" size="xs" round color="primary" flat @click="openSearchItems(props.row)" /></template>
           </q-input>
         </q-td>
         <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
@@ -46,41 +45,45 @@
               :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'quantity',props.row)}" />
+              debounce="1000" @input="(value)=>{updateRow(value,'quantity',props.row)}" />
         </q-td>
         <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.price" type="number" :min="0" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
+              :value="props.row.price" type="number" :min="0" :readonly="(props.row.quantityRcvd>0)"
+              :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'price',props.row)}" />
+              debounce="1000" @input="(value)=>{updateRow(value,'price',props.row)}" />
         </q-td>
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" key="lineSubtotal" :props="props">
           {{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}
         </q-td>
         <q-td key="lineDiscntPrcnt" :props="props" :tabindex="(props.key*10)+4">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
+              :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100" :readonly="(props.row.quantityRcvd>0)"
+              :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
+              debounce="1000" @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
         </q-td>
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
           {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
         </q-td>
 
-        <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
+        <!--<q-td key="whID" :props="props">{{ props.row.whName }}</q-td>-->
         <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
-        <q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>
+        <!--<q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>-->
 
       </q-tr>
     </template>
     <template v-slot:top >
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary"  no-caps />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Servicio" @click="()=>{itemsBatchDialogSelected=[];isItemsBatchDialog=true}" icon="fas fa-plus" color="primary"  no-caps />
+        <!--<q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Servicios" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>-->
+        <q-btn v-if="editMode==true" :disable="!(partnerID>0)" :label="$q.screen.gt.sm?'Productos':''" title="Agregar Ítems de Ingresos a Bodega y Órdenes de Compra" @click="isRequisicionDialog=true" icon="fas fa-boxes" color="primary" no-caps  class="q-ml-sm"/>
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+        <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
     </template>
   </q-table>
 
@@ -190,53 +193,6 @@
     </q-card>
   </div>
 
-  <q-dialog v-model="isItemsDialog" @show="itemsDialogShown" @hide="checkIfRowNull" >
-    <q-card style="min-width: 800px;" > 
-      <q-bar class="bg-primary text-white">
-        Buscar Item
-        <q-space />
-        <q-input input-class="text-white" borderless dense debounce="300" autofocus v-model="itemsDialogFilter" placeholder="Buscar">
-          <template v-slot:append>
-            <q-icon v-if="!itemsDialogFilter" name="fas fa-search" flat round size="xs" color="white" />
-            <q-btn v-if="itemsDialogFilter" @click="itemsDialogFilter=''" flat round icon="fas fa-times" size="xs" color="white" />
-          </template>
-        </q-input>
-      </q-bar>
-      <q-card-section class="no-padding">
-        <q-table
-          ref="itemsSearchTable"
-          :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-          table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-          @keydown.native.keyCodes.115="itemsDialogSelectAction(itemsDialogSelected)"
-          :data="lookup_items.filter(x=>x.estado==true)"
-          :columns="[
-            { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
-            { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
-            { name: 'systemTypeName', required: true, label: 'Tipo', align: 'left', field: row => row.systemTypeName, sortable: true, style: 'min-width: 50px;', },
-            { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true, style: 'min-width: 50px;'},
-            { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
-            //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
-            { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
-          ]"
-          row-key="value"
-          virtual-scroll :rows-per-page-options="[0]"
-          hide-bottom dense
-          selection="single" :selected.sync="itemsDialogSelected"
-          :filter="itemsDialogFilter"
-          >
-        </q-table>
-      </q-card-section>
-      <q-card-actions align="around">
-        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
-          :disable="itemsDialogSelected.length<=0" 
-          @click="itemsDialogSelectAction(itemsDialogSelected)" ></q-btn>
-      </q-card-actions>
-      <q-inner-loading :showing="itemsDialogTableBusy" style="z-index: 10" >
-        <q-spinner-gears size="50px" color="primary" />
-      </q-inner-loading>
-    </q-card>
-  </q-dialog>
-
   <q-dialog v-model="isItemsBatchDialog">
     <q-card style="min-width: 800px;" > 
       <q-bar class="bg-primary text-white">
@@ -254,8 +210,8 @@
           ref="itemsSearchTable"
           :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
           table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-          @keydown.native.keyCodes.115="itemsDialogSelectAction(itemsDialogSelected)"
-          :data="lookup_items.filter(x=>x.estado==true)"
+          @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
+          :data="lookup_items.filter(x=>x.estado==true&&x.systemType==1/*1=Servicios porque Productos SOLO vinculados a mktPO*/)"
           :columns="[
             { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
             { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
@@ -274,13 +230,87 @@
         </q-table>
       </q-card-section>
       <q-card-actions align="around">
-        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.length<=0" @click="itemsBatchDialogSelectAction(itemsBatchDialogSelected)" ></q-btn>
+        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
+          :disable="itemsBatchDialogSelected.length<=0" 
+          @click="addRows(itemsBatchDialogSelected)" ></q-btn>
       </q-card-actions>
       <q-inner-loading :showing="itemsBatchDialogTableBusy" style="z-index: 10" >
         <q-spinner-gears size="50px" color="primary" />
       </q-inner-loading>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="isRequisicionDialog" @show="loadmktPOPendientes">
+    <q-card style="min-width: 950px;">
+      <q-bar class="bg-primary text-white">
+        Órdenes de Compra del Proveedor
+        <q-space />
+        <q-input input-class="text-white" borderless dense debounce="300" v-model="requisicionesFilterString" placeholder="Buscar">
+          <template v-slot:append>
+            <q-icon v-if="!requisicionesFilterString" name="fas fa-search" flat round size="xs" color="white" />
+            <q-btn v-if="requisicionesFilterString" @click="requisicionesFilterString=''" flat round icon="fas fa-times" size="xs" color="white" />
+          </template>
+        </q-input>
+      </q-bar>
+      <q-card-section class="no-padding">
+        <q-table
+          ref="requisicionesSearchTable"
+          :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
+          table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
+          :data="requisiciones"
+          :columns="[
+            { name: 'mktPOHeader', required: true, label: 'OC #', align: 'left', field: row => row.mktPOHeader, sortable: true, style: 'max-width: 50px;', },
+            { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 250px;', },
+            { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'min-width: 50px;', },
+            { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'min-width: 50px;', classes:'bg-grey-6' },
+            { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'min-width: 50px;', },
+            { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true, style: 'min-width: 50px;', },
+            { name: 'quantityInvoiced', required: true, label: 'Facturado', align: 'right', field: row => row.quantityInvoiced, sortable: true, style: 'min-width: 50px;'},
+            { name: 'quantityInvoiceOpen', required: true, label: 'Por Facturar', align: 'right', field: row => row.quantityInvoiceOpen, sortable: true, style: 'min-width: 50px;', classes:'bg-grey-6' },
+            { name: 'whName', required: true, label: 'Bodega', align: 'left', field: row => row.whName, sortable: true, style: 'min-width: 50px;'},
+            { name: 'comments', required: true, label: 'Comentarios', align: 'left', field: row => row.comments, sortable: true, style: 'min-width: 50px;'},
+            
+          ]"
+          row-key="value"
+          virtual-scroll :rows-per-page-options="[0]"
+          hide-bottom dense
+          selection="multiple" :selected.sync="requisicionesDialogSelected"
+          :filter="requisicionesFilterString"
+          />
+      </q-card-section>
+      <q-card-actions align="around">
+        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
+        :disable="requisicionesDialogSelected.length<=0" @click="addRows(requisicionesDialogSelected)" ></q-btn>
+      </q-card-actions>
+      <q-inner-loading :showing="isRequisicionDialogLoading" style="z-index: 10" >
+        <q-spinner-gears size="50px" color="primary" />
+      </q-inner-loading>
+    </q-card>
+  </q-dialog >
+
+  <q-dialog v-model="isStatsDialog" >
+    <q-card style="min-width: 500px;">
+      <q-markup-table dense v-if="selected.length>0">
+        <thead >
+          <tr>
+            <th class="text-left">Seleccionadas</th>
+            <th class="text-right">Cantidad</th>
+            <th class="text-right">Suma</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).length}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.quantity); }, 0).toFixed(userMoneyFormat)}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineSubtotal); }, 0).toFixed(userMoneyFormat)}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineUntaxed); }, 0).toFixed(userMoneyFormat)}}</td>
+          </tr>
+        </tbody>
+      </q-markup-table>
+    </q-card>
+  </q-dialog>
+  
 
 </div>
 
@@ -328,9 +358,12 @@ import { date } from 'quasar';
 export default ({
     data () {
       return {
-          moduleName: "mktPR", filterString: '', selected: []
+          moduleName: "accAP", filterString: '', selected: []
+        ,isUpdateItemDialog: false
         ,isItemsDialog: false, itemsDialogFilter: '', itemsDialogSelected: [], itemsDialogRowToUpdate: null, itemsDialogTableBusy: false
         ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
+        ,isRequisicionDialog: false, requisicionesDialogSelected: [], requisicionesFilterString: '', isRequisicionDialogLoading: false
+        ,isStatsDialog: false
       }
     },
     methods:{
@@ -342,72 +375,152 @@ export default ({
           }
           return max;
       },
-      updateRow(newVal, colName, row){
+      addRows(rows){
         try{
-          //Actualiza las líneas
-          let newRows = JSON.parse(JSON.stringify(this.lines))
-          if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
-            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
-          }else{
-            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
+          this.$q.loading.show()
+          //#region NextIDs
+          let newLineID = 0
+          if(this.lines.length > 0){
+            let temp = this.getMax(this.lines, "lineID");
+            newLineID = parseInt(temp.lineID);
           }
-          newRows.find(x=>x.lineID==row.lineID)[colName] = newVal;
-          let invID = newRows.find(x=>x.lineID==row.lineID).invID
-          let invName = invID?this.lookup_items.find(x => x.value == invID).label:''
-          let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
-          let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
-          let lineUntaxed = lineSubtotal - lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
-          newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineUntaxed
-          newRows.find(x=>x.lineID==row.lineID).invName = invName
-          this.lines = newRows
+          let newTaxLineID = 0
+          if(this.linesTaxes.length > 0){
+            let taxTemp = this.getMax(this.linesTaxes, "taxLineID");
+            newTaxLineID = parseInt(taxTemp.taxLineID);
+          }
+          //#endregion NextIDs
 
-          //Actualiza todas las taxLines correspondientes a la línea modificada
+          //#region BackupData
+          let newRows = JSON.parse(JSON.stringify(this.lines))
           let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-          newRowsTaxes.filter(x=>x.lineID==row.lineID).map(lineaImpuesto=>{
-            lineaImpuesto.lineUntaxed = lineUntaxed;
-            lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor);
-            return lineaImpuesto
-            //return lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor)
+          //#endregion BackupData
+          
+          //#region RowAndTaxes
+          rows.map(row=>{
+            //addLine
+            newLineID++;
+            let nuevaFila = {
+              lineID: newLineID
+              ,sri_sustento: row.sri_sustento
+              ,sri_sustentoName: this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==row.sri_sustento).label
+              ,systemType: row.systemType
+              ,invID: row.value&&row.value>0?row.value:row.invID
+              ,invName: row.invName&&row.invName.length>0?row.invName:this.lookup_items.find(x=>x.value==row.value).label
+              ,account_id: row.account_id
+              ,account_name: this.lookup_accounts.find(t=>t.value==row.account_id).fullLabel
+              ,quantity: row.quantityInvoiceOpen&&row.quantityInvoiceOpen>=0?row.quantityInvoiceOpen:1
+              ,price: row.price&&row.price>=0?row.price:0
+              ,lineSubtotal: row.lineSubtotal&&row.lineSubtotal>=0?row.lineSubtotal:0
+              ,lineDiscntPrcnt: row.lineDiscntPrcnt&&row.lineDiscntPrcnt>=0?row.lineDiscntPrcnt:0
+              ,lineDiscntAmount: row.lineDiscntAmount&&row.lineDiscntAmount>=0?row.lineDiscntAmount:0
+              ,lineUntaxed: row.lineUntaxed&&row.lineUntaxed>=0?row.lineUntaxed:0
+              ,prjID: row.prjID&&row.prjID>0?row.prjID:0
+              ,prjName: row.prjName&&row.prjName.length>0?row.prjName:''
+              ,comments: row.comments&&row.comments.length>0?row.comments:''
+              ,mktPOHeader: row.mktPOHeader&&row.mktPOHeader>0?row.mktPOHeader:0
+              ,mktPOlineID: row.mktPOlineID&&row.mktPOlineID>0?row.mktPOlineID:0
+          }
+            newRows.push(nuevaFila)
+            //addTaxes
+            this.lookup_items_taxes.filter(x=>x.invID==nuevaFila.invID).forEach(impuesto=>{
+              newTaxLineID++;
+              newRowsTaxes.push({
+                  lineID: newLineID
+                ,taxLineID: newTaxLineID
+                ,account_id: impuesto.account_id
+                ,invID: nuevaFila.invID
+                ,comments: impuesto.taxName
+                ,taxID: impuesto.taxID
+                ,taxName: impuesto.shortLabel
+                ,taxAmount: impuesto.isPercent?( parseFloat( (nuevaFila.lineUntaxed) * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
+                ,isPercent: impuesto.isPercent
+                ,factor: impuesto.factor
+                ,factor_base: impuesto.factor_base
+                ,lineUntaxed: nuevaFila.lineUntaxed
+              })
+            })
           })
+          //#endregion RowAndTaxes
+          
+          //#region Finalize
+          this.lines = newRows
           this.linesTaxes = newRowsTaxes
-
+          this.isItemsBatchDialog=false;
+          this.isRequisicionDialog=false;
+          this.$q.loading.hide()
+          this.calculateAccMove();
+          //#endregion Finalize
         }catch(ex){
-          console.error(ex)
+          console.dir(ex)
+          this.$q.loading.hide()  
         }
       },
-      addRow(){
-        //Get Next LineID
-        let max_id = 1
-        if(this.lines.length > 0){
-          let temp = this.getMax(this.lines, "lineID");
-          max_id = parseInt(temp.lineID) + parseInt(1);
-        }
+      calculateAccMove(){
+        this.$q.loading.show()
+        let newRowsAccount = [] //no necesito guardarlo, xq recalculo siempre JSON.parse(JSON.stringify(this.accountLines))
+        let partnerCredit = 0
+        let newAccLineID = 0
+        //#region ITEM_LINES_debit
+        this.lines.map(row=>{
+          newAccLineID++;
+          partnerCredit += row.lineUntaxed
+          newRowsAccount.push({
+             accLineID: newAccLineID
+            ,lineID: row.lineID
+            ,taxLineID: 0
+            ,accountID: row.account_id
+            ,partnerID: 0
+            ,debit: row.lineUntaxed
+            ,credit: 0
+            ,invID: row.invID
+            ,prjID: row.prjID
+            ,mktLineID: row.lineID
+            ,comments: row.invName
+          })
+        })
+        //#endregion ITEM_LINES_debit
+        //#region TAX_LINES_debit
+        this.linesTaxes.map(row=>{
+          newAccLineID++;
+          partnerCredit += row.taxAmount
+          newRowsAccount.push({
+             accLineID: newAccLineID
+            ,lineID: row.lineID
+            ,taxLineID: row.taxLineID
+            ,accountID: row.account_id
+            ,partnerID: 0
+            ,debit: row.taxAmount
+            ,credit: 0
+            ,invID: row.invID
+            ,prjID: this.lines.find(x=>x.lineID==row.lineID).prjID
+            ,mktLineID: row.lineID
+            ,comments: row.taxName + ' (' + this.lines.find(x=>x.lineID==row.lineID).invName + ')'
+          })
+        })
+        //#endregion ITEM_LINES_debit
         
-        //Add Line
-        let newRows = JSON.parse(JSON.stringify(this.lines))
-        let nuevaFila = {
-           lineID: max_id
-          ,invID: 0
-          ,quantity: 1
-          ,price: 1
-          ,lineSubtotal: 1
-          ,lineDiscntPrcnt: 0
-          ,lineDiscntAmount: 0
-          ,lineUntaxed: 1
-          ,whID: this.defaultWhID
-          ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
-          ,prjID: 0
-          ,prjName: ''
-          ,transportTypeID: this.defaultTransportID
-          ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
-          ,expectedDate: ''
-          ,estado: true
-        }
-        newRows.push(nuevaFila)
-        this.lines = newRows
-        this.openSearchItems(nuevaFila)//autoOpen Items Search
+        //#region PARTNER_Credit
+        newAccLineID++;
+        newRowsAccount.push({
+             accLineID: newAccLineID
+            ,lineID: 0
+            ,taxLineID: 0
+            ,accountID: this.partner_account_id
+            ,partnerID: this.partnerID
+            ,debit: 0
+            ,credit: partnerCredit
+            ,invID: 0
+            ,prjID: 0
+            ,mktLineID: 0
+            ,comments: this.partnerName
+          })
+        //#endregion PARTNER_Credit
+        
+        //#region Finalize
+        this.accountLines = newRowsAccount
+        this.$q.loading.hide()
+        //#endregion Finalize
       },
       removeRows(){
         if(this.selected.length > 0){
@@ -431,13 +544,158 @@ export default ({
             this.linesTaxes = newRowsTaxes
 
             this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
+            this.calculateAccMove();
           })
         }
       },
-      getAge(fecha){
-        return date.getDateDiff(new Date(), fecha, 'years')
+      updateRow(newVal, colName, row){
+        try{
+          this.$q.loading.show()
+          //Actualiza las líneas
+          let newRows = JSON.parse(JSON.stringify(this.lines))
+          if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
+            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
+          }else{//comentario, CódigoCentroCosto, CódigoCuentaContable, CódigoSustento
+            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
+            //si es campo de tipo Lookup, entonces para mejorar rendimiento SOLO busca nuevo campo si es necesario
+            if(colName=="sri_sustento"){
+              newRows.find(x=>x.lineID==row.lineID).sri_sustentoName = this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==newVal).label
+            }
+            if(colName=="account_id"){
+              newRows.find(x=>x.lineID==row.lineID).account_name = this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==newVal).label
+            }
+            /*if(colName=="prjID"){
+              console.dir('actualiza Sustento')
+              console.dir(this.lookup_accounts.find(t=>t.value==newVal).label)
+              newRows.find(x=>x.lineID==row.lineID).sri_sustentoName = this.lookup_accounts.find(t=>t.value==newVal).label
+            }*/
+          }
+          //let invID = newRows.find(x=>x.lineID==row.lineID).invID
+          //let itemFound = this.lookup_items.find(x => x.value == invID)
+          
+          //Actualiza Campos de Dinero
+          let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
+          let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
+          let lineUntaxed = lineSubtotal - lineDiscntAmount
+          newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
+          newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
+          newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineUntaxed
+
+          //newRows.find(x=>x.lineID==row.lineID).invName = itemFound.label
+          //newRows.find(x=>x.lineID==row.lineID).systemType = itemFound.systemType
+          //newRows.find(x=>x.lineID==row.lineID).sri_sustento = itemFound.sri_sustento
+          //newRows.find(x=>x.lineID==row.lineID).account_id = itemFound.account_id
+          //newRows.find(x=>x.lineID==row.lineID).account_name = this.lookup_accounts.find(t=>t.value==itemFound.account_id).fullLabel
+          
+
+          //Actualiza todas las taxLines correspondientes a la línea modificada
+          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
+          newRowsTaxes.filter(x=>x.lineID==row.lineID).map(lineaImpuesto=>{
+            lineaImpuesto.lineUntaxed = lineUntaxed;
+            lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor);
+            return lineaImpuesto
+          })
+          this.lines = newRows;
+          this.linesTaxes = newRowsTaxes;
+          this.$q.loading.hide()
+          this.calculateAccMove();
+        }catch(ex){
+          console.error(ex)
+          this.$q.loading.hide()
+        }
       },
-      openSearchItems(currentRow){
+      mktPOBatchDialogSelectAction(){
+        let max_id = 0
+        let temp = null
+        if(this.lines.length > 0){
+          temp = this.getMax(this.lines, "lineID");
+          //max_id = parseInt(temp.lineID) + parseInt(1);
+          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+        }
+        let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
+        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
+        if(this.requisicionesDialogSelected.length>0){
+          this.requisicionesDialogSelected.map(row => {
+            max_id = parseInt(max_id) + parseInt(1);
+            //líneas
+            newRows.push({
+               lineID: max_id
+              ,invID: row.invID
+              ,invName: row.invName
+              ,sri_sustento: row.sri_sustento
+              ,sri_sustentoName: row.sri_sustentoName
+              ,systemType: row.systemType
+              ,account_id: row.account_id
+              ,account_name: this.lookup_accounts.find(t=>t.value==row.account_id).fullLabel
+              ,quantity: row.quantityInvoiceOpen//porque no deberían poder facturar más allá de lo pendiente de facturar
+              ,price: row.price
+              ,lineSubtotal: row.lineSubtotal
+              ,lineDiscntPrcnt: row.lineDiscntPrcnt
+              ,lineDiscntAmount: row.lineDiscntAmount
+              ,lineUntaxed: row.lineUntaxed
+              //,whID: row.whID
+              //,whName: row.whName//this.lookup_wh.find(x => x.value == this.defaultWhID).label
+              ,prjID: row.prjID
+              ,prjName: row.prjName
+              //,transportTypeID: this.defaultTransportID
+              //,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
+              ,mktPOHeader: row.mktPOHeader
+              ,mktPOlineID: row.mktPOlineID
+            })
+
+            //Impuestos de la línea
+            this.lookup_items_taxes.filter(x=>x.invID==row.invID).forEach(impuesto=>{
+                newRowsTaxes.push({
+                   lineID: max_id
+                  ,taxID: impuesto.taxID
+                  ,taxName: impuesto.shortLabel
+                  ,taxAmount: impuesto.isPercent?( parseFloat( (row.lineUntaxed) * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
+                  ,isPercent: impuesto.isPercent
+                  ,factor: impuesto.factor
+                  ,factor_base: impuesto.factor_base
+                  ,lineUntaxed: row.lineUntaxed
+                })
+              })
+          })
+          this.lines = newRows
+          this.linesTaxes = newRowsTaxes
+          this.isItemsBatchDialog = false
+        }
+
+        this.isRequisicionDialog = false;
+      },
+      loadmktPOPendientes(){
+        this.isRequisicionDialogLoading = true;
+        this.$axios({
+            method: 'GET',
+            url: this.apiURL + 'spAccAPSelectmktPO',
+            headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+            params: {
+                userCode: this.userCode,
+                userCompany: this.userCompany,
+                userLanguage: 'es',
+                partnerID: this.partnerID
+            }
+        }).then((response) => {
+            this.requisiciones = response.data
+            this.isRequisicionDialogLoading = false;
+        }).catch((error) => {
+            console.dir(error)
+            let mensaje = ''
+            if(error.message){ mensaje = error.message }
+            if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+            if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+            this.$q.notify({ html: true, multiLine: false, color: 'red'
+                ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+            })
+            this.isRequisicionDialogLoading = false;
+        })
+    
+      },
+
+      /*openSearchItems(currentRow){
         if(this.editMode==true){
           this.itemsDialogRowToUpdate = currentRow
           this.isItemsDialog = true
@@ -452,100 +710,10 @@ export default ({
             }
           }
         }
-      },
-      itemsDialogSelectAction(){
-        if(this.itemsDialogSelected.length>0){
-          //Primero agrega los impuestos correspondientes al Item con su código de línea
-          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-          newRowsTaxes = newRowsTaxes.filter(x=>x.lineID!=this.itemsDialogRowToUpdate.lineID)//remuevo los impuestos de la línea xq voy a agregarlos nuevamente
-          this.lookup_items_taxes.filter(x=>x.invID==this.itemsDialogSelected[0].value).forEach(impuesto=>{
-              newRowsTaxes.push({
-                 lineID: this.itemsDialogRowToUpdate.lineID
-                ,taxID: impuesto.taxID
-                ,taxName: impuesto.shortLabel
-                ,taxAmount: 0
-                ,isPercent: impuesto.isPercent
-                ,factor: impuesto.factor
-                ,factor_base: impuesto.factor_base
-                ,lineUntaxed: 0
-              })
-            })
-          this.linesTaxes = newRowsTaxes
-
-          //Segundo, actualiza la fila por medio del método [updateRow] , el cual también actualiza las líneas del impuesto
-          if(this.itemsDialogSelected[0].estado==true){
-            this.updateRow(this.itemsDialogSelected[0].value, 'invID', this.itemsDialogRowToUpdate)
-            this.isItemsDialog = false
-          }
-        }
-      },
-      itemsDialogShown(){
-        if(this.itemsDialogSelected.length>0){
-          try{
-            this.$refs.itemsSearchTable.scrollTo(this.lookup_items.findIndex(x=>x.value == this.itemsDialogSelected[0].value))
-          }catch(ex){}
-        }
         
-      },
-      checkIfRowNull(){
-        this.lines = this.lines.filter(x=>x.invID>0)
-      },
-      addBatch(){
-        this.isItemsBatchDialog = true
-      },
-      itemsBatchDialogSelectAction(){
-        //let max_id = 1
-        let max_id = 0
-        let temp = null
-        if(this.lines.length > 0){
-          temp = this.getMax(this.lines, "lineID");
-          //max_id = parseInt(temp.lineID) + parseInt(1);
-          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
-        }
-        let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
-        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
-        if(this.itemsBatchDialogSelected.length>0){
-          this.itemsBatchDialogSelected.filter(x=>x.estado).map(row => {
-            max_id = parseInt(max_id) + parseInt(1);
-            //líneas
-            newRows.push({
-               lineID: max_id
-              ,invID: row.value
-              ,invName: row.label
-              ,quantity: 1
-              ,price: 1
-              ,lineSubtotal: 1
-              ,lineDiscntPrcnt: 0
-              ,lineDiscntAmount: 0
-              ,lineUntaxed: 1
-              ,whID: this.defaultWhID
-              ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
-              ,prjID: 0
-              ,prjName: ''
-              ,transportTypeID: this.defaultTransportID
-              ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
-              ,estado: true
-            })
-
-            //Impuestos de la línea
-            this.lookup_items_taxes.filter(x=>x.invID==row.value).forEach(impuesto=>{
-                newRowsTaxes.push({
-                   lineID: max_id
-                  ,taxID: impuesto.taxID
-                  ,taxName: impuesto.shortLabel
-                  ,taxAmount: impuesto.isPercent?( parseFloat(1 * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
-                  ,isPercent: impuesto.isPercent
-                  ,factor: impuesto.factor
-                  ,factor_base: impuesto.factor_base
-                  ,lineUntaxed: 1
-                })
-              })
-          })
-          this.lines = newRows
-          this.linesTaxes = newRowsTaxes
-          this.isItemsBatchDialog = false
-        }
-      },
+        
+      },*/
+      
       rowTitleInventory(fila){
         let resultado = 'Seleccionar...'
         let target = null
@@ -572,23 +740,30 @@ export default ({
         }).onOk(data => {
           this.selected.forEach(row => this.updateRow(data.toString() ,'lineDiscntPrcnt', row) );
         })
+      },
+      showStats(){
+        this.isStatsDialog = !this.isStatsDialog
       }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userCode: { get () { return this.$store.state.main.userCode } },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
         allow_view: { get () { return true }, },
         allow_edit: { get () { return true }, },
         allow_insert: { get () { return true }, },
         allow_report: { get () { return true }, },
         allow_disable: { get () { return true }, },
+        apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        defaultWhID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultWhID', value: val}) }
+        partnerID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
         },
-        defaultTransportID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.defaultTransportID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultTransportID', value: val}) }
+        partnerName: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
+        },
+        partner_account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
         },
         paytermID: {
             get () { return this.$store.state[this.moduleName].editData.basic.paytermID },
@@ -599,9 +774,18 @@ export default ({
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
+        requisiciones: {
+            get () { return this.$store.state[this.moduleName].editData.requisiciones },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataRequisiciones', val) }
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+        },
         linesTaxes: {
             get () { return this.$store.state[this.moduleName].editData.linesTaxes },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLinesTaxes', val) }
+        },
+        accountLines: {
+            get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
         },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         sys_user_color: {
@@ -609,6 +793,9 @@ export default ({
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },
+        },
+        lookup_accounts: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
         },
         lookup_wh: {
             get () { return this.$store.state[this.moduleName].editData.lookup_wh },
@@ -627,6 +814,9 @@ export default ({
         },
         lookup_items_taxes: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },
+        },
+        lookup_SRI_Tabla_Tipo_Sustento: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_SRI_Tabla_Tipo_Sustento },
         },
         /*lookup_taxesByGroup: {
             get () { return this.$store.state[this.moduleName].editData.lookup_taxesByGroup },

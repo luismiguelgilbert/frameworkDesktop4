@@ -28,9 +28,9 @@
         ref="mainTable"
         :data="accMoveGrouped?accountLinesGrouped:accountLines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        :table-style="editMode?'min-height: calc(100vh - 275px); max-height: calc(100vh - 275px)':'min-height: calc(100vh - 335px); max-height: calc(100vh - 335px)'"
-        row-key="lineID"
-        
+        :table-style="editMode?'min-height: calc(100vh - 255px); max-height: calc(100vh - 255px)':'min-height: calc(100vh - 335px); max-height: calc(100vh - 335px)'"
+        row-key="accLineID"
+        hide-bottom
         :rows-per-page-options="[0]"
         dense
         selection="none" :selected.sync="selected"
@@ -41,6 +41,7 @@
           { name: 'accountID', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.accountID, sortable: true, style: 'min-width: 100px;' },
           { name: 'debit', required: true, label: 'DEBE', align: 'right', field: row => row.debit, sortable: true, style: 'min-width: 200px;' },
           { name: 'credit', required: true, label: 'HABER', align: 'right', field: row => row.credit, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
+          { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, headerStyle: 'padding-right: 20px;' },
           
           //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
           //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
@@ -54,7 +55,7 @@
     </template>
 
     <template v-slot:body="props">
-      <q-tr :props="props" >
+      <q-tr :props="props" v-if="props.row.accountID>0" >
         <q-td key="accountID" :props="props" :tabindex="(props.key*10)+1" >
           {{lookup_accounts.find(x=>x.value==props.row.accountID).code_es}} - {{lookup_accounts.find(x=>x.value==props.row.accountID).label}}
         </q-td>
@@ -64,10 +65,13 @@
         <q-td key="credit" :props="props" >
           {{ props.row.credit.toFixed(userMoneyFormat) }}
         </q-td>
+        <q-td key="comments" :props="props" >
+          {{ props.row.comments }}
+        </q-td>
       </q-tr>
     </template>
 
-    <!--<template v-slot:bottom-row>
+    <template v-slot:bottom-row>
         <q-tr>
           
           <q-td class="text-right text-subtitle2 text-primary" >
@@ -81,20 +85,6 @@
           </q-td>
           
         </q-tr>
-    </template>-->
-
-    <template v-slot:bottom>
-      <div class="row full-width">
-          <q-td class="text-right text-subtitle2 text-primary col-8" >
-            Suma:
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary col-2">
-            {{accountLines.reduce((total,item)=>{return total + item.debit}, 0).toFixed(userMoneyFormat)}}
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary col-2">
-            {{accountLines.reduce((total,item)=>{return total + item.credit}, 0).toFixed(userMoneyFormat)}}
-          </q-td>
-      </div>
     </template>
 
     <!--<template v-slot:top >
@@ -159,7 +149,7 @@ import { date } from 'quasar';
 export default ({
     data () {
         return {
-            moduleName: "invIncoming"
+            moduleName: "accAP"
             ,selected: []
             ,row_id: 32	/*32=casClientes*/, filterString: '', dialogVisible: false
             ,accMoveGrouped: true

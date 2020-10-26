@@ -46,6 +46,8 @@ import invQuery from './invQuery' //invQuery
 import Payterms from './Payterms' //Payterms
 import partnerMasterGroups from './partnerMasterGroups' //partnerMasterGroups
 import invMasterGroups from './invMasterGroups' //invMasterGroups
+import Locations from './Locations' //Locations
+import accAP from './accAP' //Locations
 
 Vue.use(Vuex)
 
@@ -79,6 +81,7 @@ export default function (/* { ssrContext } */) {
       ,partnerMasterGroups
       ,invMasterGroups
       ,Payterms
+      ,Locations
       //Schoenstatt
       ,SCHPersonas
       ,SCHPersona
@@ -93,9 +96,10 @@ export default function (/* { ssrContext } */) {
       ,UoM
       ,Brands
       ,InvTypes
-      //mkt
+      //mkt PURCHASE
       ,mktPR
       ,mktPO
+      ,accAP
       //Inventory
       ,invIncoming
       ,invQuery

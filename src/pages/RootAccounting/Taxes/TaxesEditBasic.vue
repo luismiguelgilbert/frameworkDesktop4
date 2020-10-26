@@ -38,37 +38,82 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-tags" /></template>
     </q-input>
+    <q-input
+        ref="accSalesName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Seleccione la Cuenta Contable del Impuesto en Ventas (*)" label="Cuenta usada en Ventas (*)" filled
+        :value="accSalesName" title="Por ejemplo, va al HABER cuando se emite una Factura de Venta"
+        @keyup.keyCodes.113="openSearchAccount('accSales','accSalesName',accSales)"
+        :rules="[
+                val => !!val || '* Requerido',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-tags" /></template>
+        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accSales','accSalesName',accSales)"/></template>
+    </q-input>
+    <q-input
+        ref="accPurchaseName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Seleccione la Cuenta Contable del Impuesto en Compras (*)" label="Cuenta usada en Compras (*)" filled
+        :value="accPurchaseName" title="Por ejemplo, va al DEBE cuando se emite una Factura de Compra"
+        @keyup.keyCodes.113="openSearchAccount('accPurchase','accPurchaseName',accPurchase)"
+        :rules="[
+                val => !!val || '* Requerido',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-shopping-cart" /></template>
+        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accPurchase','accPurchaseName',accPurchase)"/></template>
+    </q-input>
+
+    <q-dialog v-model="isSearchDialog">
+        <mainLookup 
+            titleBar="Buscar Cuenta Contable"
+            :data="lookup_accounts"
+            :dataRowKey="'value'"
+            :selectionMode="'single'"
+            :predefinedValue="mainLookupPredefinedValue"
+            :columns="[
+                     { name: 'code_es', required: true, label: 'Código', align: 'left', field: row => row.code_es , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
+                    ,{ name: 'label', required: true, label: 'Cuenta Contable', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
+                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
+                    ]"
+            boldIfChildrenFielname="account_has_children"
+            @onCancel="isSearchDialog=false"
+            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'fullLabel')}"
+        />
+    </q-dialog>
+
     <br><br>
 </q-form>
 </template>
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 
 export default ({
+    components: {
+        mainLookup: mainLookup
+    },
     data () {
         return {
             moduleName: "Taxes"
+            ,isSearchDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
     mounted(){
         this.$refs.formulario.validate()
     },
     methods:{
-      changeParent(){
-        if(this.parent_id){
-          let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id)
-          this.code_es = temporal.code_es + '.xxx'
-          this.account_type_root = temporal.account_type_root
-          this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
-        }else{
-          this.code_es = ''
-          this.account_type_root = 1
-          this.account_level = 0
-        }
-
-      }
+        openSearchAccount(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
+            this.mainLookupUpdateFieldValueName = UpdateFieldValueName
+            this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
+            this.mainLookupPredefinedValue = predefinedValue
+            this.isSearchDialog = true
+        },
+        updateValues(selectedRows, lookupValueField, lookupLabelField){
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this.isSearchDialog = false
+        },
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
@@ -97,6 +142,26 @@ export default ({
         lookup_taxes: {
             get () { return this.$store.state[this.moduleName].editData.lookup_taxes },
         },
+        lookup_accounts: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+        },
+        accSales: {
+            get () { return this.$store.state[this.moduleName].editData.basic.accSales },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'accSales', value: val}) }
+        },
+        accSalesName: {
+            get () { return this.$store.state[this.moduleName].editData.basic.accSalesName },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'accSalesName', value: val}) }
+        },
+        accPurchase: {
+            get () { return this.$store.state[this.moduleName].editData.basic.accPurchase },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'accPurchase', value: val}) }
+        },
+        accPurchaseName: {
+            get () { return this.$store.state[this.moduleName].editData.basic.accPurchaseName },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'accPurchaseName', value: val}) }
+        },
+        
     },
 })
 </script>

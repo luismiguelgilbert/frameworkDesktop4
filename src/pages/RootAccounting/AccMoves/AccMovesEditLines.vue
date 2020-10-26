@@ -1,11 +1,10 @@
 <template>
 <div class="row ">
-  {{lines}}
   <q-table
         ref="mainTable"
-        :data="lines"
+        :data="accMoveGrouped?linesGrouped:lines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        table-style="min-height: calc(100vh - 400px); max-height: calc(100vh - 400px)"
+        table-style="min-height: calc(100vh - 230px); max-height: calc(100vh - 230px)"
         row-key="lineID"
         :rows-per-page-options="[0]"
         hide-bottom dense
@@ -16,6 +15,7 @@
           { name: 'account_id', required: true, label: 'Cuenta', align: 'left', field: row => row.account_id, sortable: true, style: 'min-width: 300px;' },
           { name: 'debit', required: true, label: 'DEBE', align: 'right', field: row => row.debit, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
           { name: 'credit', required: true, label: 'HABER', align: 'right', field: row => row.credit, sortable: true , style: 'max-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+          { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, headerStyle: 'padding-right: 20px;' },
           //{ name: 'lineSubtotal', required: true, label: 'Suman', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
           //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
           //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
@@ -52,6 +52,7 @@
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'credit',props.row)}" />
         </q-td>
+        <q-td key="comments" :props="props">{{ props.row.comments }}</q-td>
         <!--pendiente-->
         <q-td key="partnerID" :props="props">{{ props.row.partnerName }}</q-td>
         <q-td key="invID" :props="props">{{ props.row.invName }}</q-td>
@@ -64,6 +65,7 @@
         <!--<q-btn v-if="!(allow_edit==false || allow_insert==false || journalID!=1)" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>-->
         <q-btn v-if="!(allow_edit==false || allow_insert==false || journalID!=1)" :disable="selected.length<=0" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm"  />
         <q-space />
+        <q-toggle v-model="accMoveGrouped" class="text-right" color="primary" label="Agrupado por Cuenta?" />
     </template>
 
     <template v-slot:bottom-row>
@@ -72,7 +74,7 @@
 
           </q-td>
           <q-td class="text-right text-subtitle2 text-primary" >
-            Balance: {{lines.reduce((total,item)=>{return total + item.debit}, 0) - lines.reduce((total,item)=>{return total + item.credit}, 0) }}
+            Suma: <!--{{lines.reduce((total,item)=>{return total + item.debit}, 0) - lines.reduce((total,item)=>{return total + item.credit}, 0) }}-->
           </q-td>
           <q-td class="text-right text-subtitle2 text-primary">
             {{lines.reduce((total,item)=>{return total + item.debit}, 0).toFixed(userMoneyFormat)}}
@@ -134,6 +136,7 @@ export default ({
           moduleName: "AccMoves", filterString: '', selected: []
         ,isItemsDialog: false, itemsDialogFilter: '', itemsDialogSelected: [], itemsDialogRowToUpdate: null, itemsDialogTableBusy: false
         ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
+        ,accMoveGrouped: true
       }
     },
     methods:{
@@ -336,6 +339,25 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+        },
+        linesGrouped:{
+            get () { 
+              let resultado = [];
+              this.lines.map(x=>{
+                if(resultado.some(y=>y.account_id==x.account_id)){
+                  resultado.find(y=>y.account_id==x.account_id).debit += x.debit
+                  resultado.find(y=>y.account_id==x.account_id).credit += x.credit
+                }else{
+                  resultado.push({
+                     account_id: x.account_id
+                    ,account_name: x.account_name
+                    ,debit: x.debit
+                    ,credit: x.credit 
+                  })
+                }
+              })
+              return resultado;
+            }
         },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         sys_user_color: {

@@ -16,6 +16,7 @@
           { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
           { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', },
           { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;',  },
+          { name: 'quantityInvoiced', required: true, label: 'Facturado', align: 'right', field: row => row.quantityInvoiced, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityCancel', required: true, label: 'Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true, style: 'max-width: 100px;',  },
           { name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true },
@@ -35,6 +36,7 @@
         <q-td key="invID" :props="props">{{ props.row.invName }}</q-td>
         <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
         <q-td key="quantityRcvd" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityRcvd }}</q-td>
+        <q-td key="quantityInvoiced" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityInvoiced }}</q-td>
         <q-td key="quantityCancel" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.quantityCancel" type="number" :min="0" :readonly="(editMode==true)" :max="props.row.quantityOpen"
@@ -42,6 +44,7 @@
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'quantityCancel',props.row)}" />
         </q-td>
+        
         <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>
         <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
 

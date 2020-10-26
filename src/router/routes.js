@@ -71,7 +71,8 @@ const routes = [
       ,{ path: 'RootAccounting/partnerMasterGroupsEdit', component: () => import('pages/RootAccounting/partnerMasterGroups/partnerMasterGroupsEdit.vue') }
       ,{ path: 'RootAccounting/Payterms', component: () => import('pages/RootAccounting/Payterms/Payterms.vue') }
       ,{ path: 'RootAccounting/PaytermsEdit', component: () => import('pages/RootAccounting/Payterms/PaytermsEdit.vue') }
-      
+      ,{ path: 'RootAccounting/Locations', component: () => import('pages/RootAccounting/Locations/Locations.vue') }
+      ,{ path: 'RootAccounting/LocationsEdit', component: () => import('pages/RootAccounting/Locations/LocationsEdit.vue') }
       //COMPRAS
       ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/mktPR.vue') }
       ,{ path: 'RootPurchase/mktPREdit', component: () => import('pages/RootPurchase/mktPR/mktPREdit.vue') }
@@ -79,6 +80,9 @@ const routes = [
       ,{ path: 'RootPurchase/mktPOEdit', component: () => import('pages/RootPurchase/mktPO/mktPOEdit.vue') }
       ,{ path: 'RootPurchase/mktPORet', component: () => import('pages/RootPurchase/mktPORet/mktPORet.vue') }
       ,{ path: 'RootPurchase/mktPORetEdit', component: () => import('pages/RootPurchase/mktPORet/mktPORetEdit.vue') }
+      ,{ path: 'RootPurchase/accAP', component: () => import('pages/RootPurchase/accAP/accAP.vue') }
+      ,{ path: 'RootPurchase/accAPEdit', component: () => import('pages/RootPurchase/accAP/accAPEdit.vue') }
+      
       //INVENTORY
       ,{ path: 'RootInventory/invQuery', component: () => import('pages/RootInventory/invQuery/invQuery.vue') }
       ,{ path: 'RootInventory/invQueryEdit', component: () => import('pages/RootInventory/invQuery/invQueryEdit.vue') }

@@ -27,6 +27,7 @@
             />
     </q-drawer>
 
+
     <q-inner-loading :showing="loadingData" style="z-index: 999;">
         <q-spinner-ios size="50px" color="primary" />
     </q-inner-loading>
@@ -57,8 +58,8 @@ export default ({
   },
   data () {
     return {
-        moduleName: "Users",
-        moduleEditName: "UsersEdit",
+        moduleName: "accAP",
+        moduleEditName: "accAPEdit",
         maindataLoaded: false,
         router: this.$router,
     }

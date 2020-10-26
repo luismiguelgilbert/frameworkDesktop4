@@ -10,14 +10,14 @@
     <q-card-section class="text-primary q-pa-xl">
         <center>
             <q-form spellcheck="false" autocorrect="off" autocapitalize="off">
-                <q-input class="text-white" autofocus standout="bg-primary text-white" placeholder="Ingrese su usuario" v-model="username" aria-required required >
+                <q-input class="text-white" autofocus standout="bg-primary" :input-class="isOSdarkMode?'text-white':undefined" placeholder="Ingrese su usuario" v-model="username" aria-required required >
                     <template v-slot:prepend>
-                        <q-icon name="fas fa-user" />
+                        <q-icon name="fas fa-user" :color="isOSdarkMode?'grey-4':undefined" />
                     </template>
                 </q-input>
-                <q-input standout="bg-primary text-white" type="password" placeholder="Ingrese su contraseña" class="q-pt-md" v-model="password" aria-required required>
+                <q-input standout="bg-primary" :input-class="isOSdarkMode?'text-white':undefined" type="password" placeholder="Ingrese su contraseña" class="q-pt-md" v-model="password" aria-required required>
                     <template v-slot:prepend>
-                        <q-icon name="fas fa-key" />
+                        <q-icon name="fas fa-key" :color="isOSdarkMode?'grey-4':undefined" />
                     </template>
                 </q-input>
             </q-form>

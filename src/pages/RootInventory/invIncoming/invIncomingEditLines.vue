@@ -72,10 +72,10 @@
        
         
         <q-td key="newQuantity" :props="props" :tabindex="(props.key*10)+2"
-          :class="props.row.newQuantity>0?'bg-primary':(userColor=='blackDark'?'bg-grey-9':'bg-grey-2')">
+          :class="props.row.newQuantity>0?'bg-primary':(userColor=='blackDark'?'bg-primary':'bg-primary')">
           <q-input  class="no-padding" style="height: 20px !important;"
               :value="props.row.newQuantity" type="number" :min="0" :max="props.row.quantityOpen"
-              dense item-aligned borderless :input-class="props.row.newQuantity>0?'text-right text-white':'text-right'"
+              dense item-aligned borderless :input-class="props.row.newQuantity>0?'text-right text-white':'text-right text-white'"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'newQuantity',props.row)}"
               :readonly="!editMode"
@@ -94,7 +94,7 @@
       </q-tr>
     </template>
     <template v-slot:top >
-      <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Recibir Todo':''" title="Recibir todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
+      <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Recibir Todo':''" title="Recibir todas líneas seleccionadas" color="primary" no-caps  
         icon="fas fa-people-carry" @click="receiveAll"
         :disable="selected.length<=0" />
       <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Limpiar Todo':''" title="Limpiar todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
@@ -263,8 +263,8 @@ export default ({
             let columnas = []
             if(this.editMode){
               columnas = [
-                { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 150px;' },
-                { name: 'headerDate', required: true, label: 'Pedido', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
+                { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 85px; max-width: 85px;' },
+                { name: 'headerDate', required: true, label: 'Pedido El', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
                 { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
                 { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
                 { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
@@ -275,8 +275,8 @@ export default ({
               ]
             }else{
               columnas = [
-                { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 150px;' },
-                { name: 'headerDate', required: true, label: 'Pedido', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
+                { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 85px; max-width: 85px;' },
+                { name: 'headerDate', required: true, label: 'Pedido El', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
                 { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
                 { name: 'newQuantity', required: true, label: 'Recibido', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
                 { name: 'moveDate', required: true, label: 'Fecha de Ingreso ', align: 'right', field: row => row.moveDate, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },

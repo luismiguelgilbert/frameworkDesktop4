@@ -84,6 +84,7 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Requisiciones':''" title="Agregar Ítems de Requisiciones Pendientes" @click="addRequisiciones" icon="far fa-file-alt" color="primary" no-caps  class="q-ml-sm"/>
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
+        <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
     </template>
   </q-table>
@@ -160,6 +161,7 @@
               <b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>
             </q-item-section>
           </q-item>
+          <q-separator />
           <!--Sección Impuestos, que están en [calculatedSumOfTaxes] :key="fila.value"-->
           <q-item clickable dense v-for="lines in calculatedSumOfTaxes" :key="lines.index">
               <q-item-section >
@@ -193,8 +195,8 @@
     </q-card>
   </div>
 
-  <q-dialog v-model="isItemsDialog" @show="itemsDialogShown">
-    <q-card style="min-width: 700px;" > 
+  <q-dialog v-model="isItemsDialog" @show="itemsDialogShown" @hide="checkIfRowNull" >
+    <q-card style="min-width: 800px;" > 
       <q-bar class="bg-primary text-white">
         Buscar Item
         <q-space />
@@ -241,7 +243,7 @@
   </q-dialog>
 
   <q-dialog v-model="isItemsBatchDialog">
-    <q-card style="min-width: 700px;" > 
+    <q-card style="min-width: 800px;" > 
       <q-bar class="bg-primary text-white">
         Buscar Items
         <q-space />
@@ -265,7 +267,7 @@
             { name: 'systemTypeName', required: true, label: 'Tipo', align: 'left', field: row => row.systemTypeName, sortable: true, style: 'min-width: 50px;', },
             { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true, style: 'min-width: 50px;'},
             { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
-            { name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
+            //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
             { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
           ]"
           row-key="value"
@@ -330,6 +332,29 @@
     </q-card>
   </q-dialog >
 
+  <q-dialog v-model="isStatsDialog" >
+    <q-card style="min-width: 500px;">
+      <q-markup-table dense v-if="selected.length>0">
+        <thead >
+          <tr>
+            <th class="text-left">Seleccionadas</th>
+            <th class="text-right">Cantidad</th>
+            <th class="text-right">Suma</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).length}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.quantity); }, 0).toFixed(userMoneyFormat)}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineSubtotal); }, 0).toFixed(userMoneyFormat)}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineUntaxed); }, 0).toFixed(userMoneyFormat)}}</td>
+          </tr>
+        </tbody>
+      </q-markup-table>
+    </q-card>
+  </q-dialog>
+
 </div>
 
 </template>
@@ -380,6 +405,7 @@ export default ({
         ,isItemsDialog: false, itemsDialogFilter: '', itemsDialogSelected: [], itemsDialogRowToUpdate: null, itemsDialogTableBusy: false
         ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
         ,isRequisicionDialog: false, requisicionesDialogSelected: [], requisicionesFilterString: '', isRequisicionDialogLoading: false
+        ,isStatsDialog: false
       }
     },
     methods:{
@@ -415,7 +441,10 @@ export default ({
           //Actualiza todas las taxLines correspondientes a la línea modificada
           let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
           newRowsTaxes.filter(x=>x.lineID==row.lineID).map(lineaImpuesto=>{
-            return lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor)
+            lineaImpuesto.lineUntaxed = lineUntaxed;
+            lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor);
+            return lineaImpuesto
+            //return lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor)
           })
           this.linesTaxes = newRowsTaxes
 
@@ -514,6 +543,7 @@ export default ({
                 ,isPercent: impuesto.isPercent
                 ,factor: impuesto.factor
                 ,factor_base: impuesto.factor_base
+                ,lineUntaxed: 0
               })
             })
           this.linesTaxes = newRowsTaxes
@@ -532,6 +562,9 @@ export default ({
           }catch(ex){}
         }
         
+      },
+      checkIfRowNull(){
+        this.lines = this.lines.filter(x=>x.invID>0)
       },
       addBatch(){
         this.isItemsBatchDialog = true
@@ -578,6 +611,7 @@ export default ({
                   ,isPercent: impuesto.isPercent
                   ,factor: impuesto.factor
                   ,factor_base: impuesto.factor_base
+                  ,lineUntaxed: 1
                 })
               })
           })
@@ -633,6 +667,7 @@ export default ({
                   ,isPercent: impuesto.isPercent
                   ,factor: impuesto.factor
                   ,factor_base: impuesto.factor_base
+                  ,lineUntaxed: row.lineUntaxed
                 })
               })
           })
@@ -678,7 +713,7 @@ export default ({
         if(fila&&fila.invID&&fila.invID>0){
           try{
             target = this.lookup_items.find(x=>x.value == fila.invID)
-            resultado = 'Código: ' + target.internal_code + ' || Tipo: ' + target.groupName + ' || Unidad: ' + target.uomName + ' || Marca: ' + target.brandName
+            resultado = 'Código: ' + target.internal_code + ' || Unidad: ' + target.uomName + ' || Marca: ' + target.brandName
           }catch(ex){}
         }
         return resultado
@@ -790,7 +825,16 @@ export default ({
         },
         calculatedSumOfTaxes: {
           get () {
+            //Sección Subtotales
             //acc = acumulador  ||  it = fila
+            const resultadoSubtotales = this.linesTaxes.reduce((acc, it) => {
+              //crea en el acumulador el atributo con el nombre del impuesto, ej: acc[IVA 12%]
+              //luego, suma el valor del acumulador cuando coincida el nombre (ej: acc[IVA 12%] debe ser igual a it.taxName que sería 'IVA 12%')
+              //y luego toma el valor y le suma el campo taxAmount
+              acc[it.taxName] = ((acc[it.taxName]?acc[it.taxName]:0) + it.lineUntaxed);
+              return acc;
+            }, {});
+            //sección Impuestos
             const resultado = this.linesTaxes.reduce((acc, it) => {
               //crea en el acumulador el atributo con el nombre del impuesto, ej: acc[IVA 12%]
               //luego, suma el valor del acumulador cuando coincida el nombre (ej: acc[IVA 12%] debe ser igual a it.taxName que sería 'IVA 12%')
@@ -800,6 +844,13 @@ export default ({
             }, {});
             //resultado es un objeto, entonces se convierte a Array object a Array
             var result = [];
+            for(var i in resultadoSubtotales){
+              result.push({
+                 label: 'Subtotal ' + i
+                ,value: resultadoSubtotales[i]
+                }
+              )
+            }
             for(var i in resultado){
               result.push({
                  label: i
