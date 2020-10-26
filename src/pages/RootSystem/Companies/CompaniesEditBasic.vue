@@ -75,6 +75,7 @@
         label="Grupo Contable predeterminado para nuevos Socios" placeholder="Seleccione el Grupo Contable predeterminado para nuevos socios (*)" emit-value map-options filled
         :options="lookup_partner_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="default_partner_groupID"
+        :option-disable="opt => !opt.estado"
         ref="default_partner_groupID"
         >
         <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
@@ -83,6 +84,7 @@
     <q-select class="q-mb-md q-pt-md"
         label="Grupo Contable predeterminado para nuevos Items" placeholder="Seleccione el Grupo Contable predeterminado para nuevos Items (*)" emit-value map-options filled
         :options="lookup_inv_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :option-disable="opt => !opt.estado"
         v-model="default_inv_groupID"
         ref="default_inv_groupID"
         >

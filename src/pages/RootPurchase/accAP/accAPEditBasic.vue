@@ -141,6 +141,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+import xml2js from 'xml2js'
 
 export default ({
     components: {
@@ -180,44 +181,46 @@ export default ({
             this.isPartnerDialog = false
         },
         readXmlFile(file){
-            //let xmlContent = null
-            let xmlParsed = null
-            let xmlParsedRoot = null
-            let xmlComprobante = null
             const reader = new FileReader();
-            const parser = new DOMParser();
+            var parser = new xml2js.Parser();
             reader.addEventListener('load', (event) => {
-                //xmlContent = event.target.result;
-                xmlParsed = parser.parseFromString(event.target.result,"text/xml");
-                xmlParsedRoot = xmlParsed.getElementsByTagName("autorizacion")[0]
-                try{ this.autorizacionDoc = xmlParsedRoot.getElementsByTagName("numeroAutorizacion")[0].textContent }catch(ex){}
-                //let comprobante = xmlParsedRoot.getElementsByTagName("comprobante")[0]
-                xmlComprobante = xmlParsedRoot.getElementsByTagName("comprobante")[0].childNodes[0].wholeText
-                console.dir(xmlComprobante)
-                
-                
-                var XML = new DOMParser().parseFromString(String(xmlComprobante), "text/xml");
-                console.dir(XML)
-                var obj = parse(XML)
-                console.dir(obj)
-
-                //console.dir(parser.parseFromString(xmlComprobante,"text/xml"))
-                //console.dir(comprobante.wholeText)
-                //console.dir(parser.parseFromString(comprobante,"text/xml"))
-                
-                
-                //console.dir(comprobante.childNodes[0])
-                
-                //console.dir(parser.parseFromString(comprobante,"text/xml"))
-                //xmlParsedRoot.getElementsByTagName("comprobante")[0]
-                //xmlComprobante = parser.parseFromString(,"text/xml")
-                //console.dir('xmlComprobante')
-                //console.dir(xmlComprobante)
-                //try{ this.autorizacionDoc = xmlParsedRoot.getElementsByTagName("comprobante")[0].textContent }catch(ex){}
-                //console.dir(xmlParsedRoot.getElementsByTagName("comprobante")[0])
+                parser.parseString(event.target.result, (err, result)=>{//lee XML
+                    if(err){ console.error(err); return;}
+                    try{ this.autorizacionDoc = result.autorizacion.numeroAutorizacion[0] }catch(ex){}
+                        parser.parseString(result.autorizacion.comprobante[0], (errA, resultA)=>{//lee Comprobante dentro del resultado
+                            if(errA){console.error(errA);return;}
+                            try{ //arma numero de documento
+                                let numerodocumento = resultA.factura.infoTributaria[0].estab[0]
+                                numerodocumento += resultA.factura.infoTributaria[0].ptoEmi[0]
+                                numerodocumento += resultA.factura.infoTributaria[0].secuencial[0]
+                                this.numeroDoc = numerodocumento 
+                            }catch(ex){}
+                            try{ //arma fecha
+                                let fechaemision = resultA.factura.infoFactura[0].fechaEmision[0].substring(6,11) + '/'
+                                fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(3,5) + '/'
+                                fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(0,2)
+                                this.headerDate = fechaemision
+                            }catch(ex){}
+                            try{ //arma fecha
+                                let ruc = resultA.factura.infoTributaria[0].ruc[0].trim()
+                                if(this.lookup_partners.some(x=>x.partner_ruc==ruc)){
+                                    let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
+                                    this.partnerID = partner.value
+                                    this.partnerName = partner.label
+                                    this.partner_account_id = partner.account_id;//usado para calcular el asiento contable
+                                }
+                                
+                                //this.lookup_partners.some(x=>)
+                                //numerodocumento += resultA.factura.infoTributaria[0].ptoEmi[0]
+                            }catch(ex){}
+                            try{ //arma fecha
+                                this.comments = JSON.stringify(resultA.factura.infoAdicional[0].campoAdicional)
+                            }catch(ex){}
+                            
+                        })
+                });
             });
             reader.readAsText(file);
-            //reader.readAsDataURL(file);
         }
     },
     computed:{

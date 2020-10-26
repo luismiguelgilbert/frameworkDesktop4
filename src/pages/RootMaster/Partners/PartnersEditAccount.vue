@@ -18,7 +18,7 @@
         ref="accSalesInvoiceName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Seleccione la Cuenta Contable por Cobrar una Venta (*)" label="Cuenta x Cobrar al Cliente(*)" filled
         :value="accSalesInvoiceName" title="Por ejemplo, va al DEBE cuando se emite una Factura de Venta"
-        @keyup.keyCodes.113="openSearchAccount('accSalesInvoice','accSalesInvoiceName',accSalesInvoice)"
+        @keyup.keyCodes.113="openSearchAccount('accSalesInvoice','accSalesInvoiceName','accSalesInvoice')"
         :rules="[
                 val => !!val || '* Requerido',
         ]"
@@ -248,6 +248,7 @@ export default ({
         applyNewGroup(){
             //aplica valores y nombres
             let newValue = this.lookup_groups.find(x=>x.value==this.groupID)
+            //let newValue = this.lookup_groups.find(x=>x.value==newGroupID)
             this.accSalesInvoice = newValue.accSalesInvoice
             this.accSalesInvoiceName = newValue.accSalesInvoiceName
             this.accPaymentIncomeAdvance = newValue.accPaymentIncomeAdvance
@@ -256,6 +257,8 @@ export default ({
             this.accPurchaseInvoiceName = newValue.accPurchaseInvoiceName
             this.accPaymentOutcomeAdvance = newValue.accPaymentOutcomeAdvance
             this.accPaymentOutcomeAdvanceName = newValue.accPaymentOutcomeAdvanceName
+            
+            
             
             //aplica pricelists del grupo
             let newTaxes = []

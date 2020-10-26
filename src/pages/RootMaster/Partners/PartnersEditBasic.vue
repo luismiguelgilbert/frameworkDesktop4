@@ -85,6 +85,7 @@
     <q-select class="q-mb-md"
         label="Ciudad" placeholder="Seleccione la ciudad de origen del socio (*)" emit-value map-options filled
         :options="lookup_cities" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :option-disable="opt => !opt.estado"
         v-model="city_id"
         ref="city_id" @input="changeMonth"
         >
