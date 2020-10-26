@@ -1,0 +1,732 @@
+<template>
+<div class="row ">
+  <q-table
+        ref="mainTable"
+        :data="lines"
+        :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
+        table-style="min-height: calc(100vh - 400px); max-height: calc(100vh - 400px)"
+        row-key="lineID"
+        virtual-scroll
+        :rows-per-page-options="[0]"
+        hide-bottom dense
+        selection="multiple" :selected.sync="selected"
+        :filter="filterString"
+        :columns="[
+          //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
+          { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
+          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
+          { name: 'price', required: true, label: 'Precio', align: 'right', field: row => row.price, sortable: true , style: 'max-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+          { name: 'lineSubtotal', required: true, label: 'Suman', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
+          { name: 'lineDiscntPrcnt', required: true, label: 'Descuento %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true , style: 'max-width: 60px;' , headerStyle: 'padding-right: 20px;' },
+          { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true , style: 'max-width: 100px;' },
+          //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
+          //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
+          //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
+        ]"
+    >
+
+    <template v-slot:body="props">
+      <q-tr :props="props" >
+        <q-td auto-width>
+          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+        </q-td>
+        <q-td key="invID" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
+          <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
+              :value="props.row.invName" dense item-aligned borderless
+              :rules="[val => !!val || 'Requerido']"
+              @input="(value)=>{updateRow(value,'invName',props.row)}"
+              @keyup.keyCodes.113="openSearchItems(props.row)"
+              :title="rowTitleInventory(props.row)"
+              >
+              <template v-if="editMode==true" v-slot:prepend><q-btn icon="fas fa-search" title="Buscar (F2)" size="xs" round color="primary" flat @click="openSearchItems(props.row)" /></template>
+          </q-input>
+        </q-td>
+        <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
+          <q-input class="no-padding" style="height: 20px !important;"
+              :value="props.row.quantity" type="number" :min="0" :max="props.row.maxQuantity" :readonly="(editMode==false)"
+              dense item-aligned borderless input-class="text-right"
+              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @input="(value)=>{updateRow(value,'quantity',props.row)}" />
+        </q-td>
+        <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
+          <q-input class="no-padding" style="height: 20px !important;"
+              :value="props.row.price" type="number" :min="0" readonly
+              :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
+              dense item-aligned borderless input-class="text-right"
+              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @input="(value)=>{updateRow(value,'price',props.row)}" />
+        </q-td>
+        <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" key="lineSubtotal" :props="props">
+          {{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}
+        </q-td>
+        <q-td key="lineDiscntPrcnt" :props="props" :tabindex="(props.key*10)+4">
+          <q-input class="no-padding" style="height: 20px !important;"
+              :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100" readonly
+              :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
+              dense item-aligned borderless input-class="text-right"
+              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
+        </q-td>
+        <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
+          {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
+        </q-td>
+
+        <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
+        <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
+        <q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>
+
+      </q-tr>
+    </template>
+    <template v-slot:top >
+        <!--
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary"  no-caps />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>
+        -->
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Ingresos':''" title="Agregar Ítems de Ingresos a Bodega" @click="addRequisiciones" icon="far fa-file-alt" color="primary" no-caps  />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+        <q-space />
+        <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
+    </template>
+  </q-table>
+
+  <div class="row col-12 q-pt-sm ">
+    <q-card class="col-md-12" >
+      <q-bar class="bg-primary text-white">
+        <q-icon name="fas fa-dollar-sign" color="white" />
+        <q-space />
+        <div v-if="$q.screen.gt.sm" class="text-subtitle2">Resumen del Documento</div>
+        <div v-else class="text-subtitle2">Resumen</div>
+      </q-bar>
+      <q-card-section class="no-padding">
+        <q-list class="scroll" style="height: 100px;">
+          <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-grey-7">Suman:</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              {{lines.reduce(function(sum, d) { return sum + d.lineSubtotal; }, 0).toFixed(userMoneyFormat)}}
+            </q-item-section>
+          </q-item>
+          <q-item clickable dense>
+            <q-item-section >
+                <q-item-label class="text-grey-7">Descuento:</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              {{(lines.reduce(function(sum, d) { return sum + d.lineDiscntAmount; }, 0) * -1).toFixed(userMoneyFormat)}}
+            </q-item-section>
+          </q-item>
+          <q-item clickable dense>
+            <q-item-section>
+              <b class="text-subtitle2 text-grey-7" >Subtotal:</b>
+            </q-item-section>
+            <q-item-section side>
+              <b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>
+            </q-item-section>
+          </q-item>
+          <q-separator />
+          <!--Sección Impuestos, que están en [calculatedSumOfTaxes] :key="fila.value"-->
+          <q-item clickable dense v-for="lines in calculatedSumOfTaxes" :key="lines.index">
+              <q-item-section >
+                  <q-item-label class="text-grey-7">{{lines.label}}:</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                {{lines.value.toFixed(userMoneyFormat)}}
+              </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+      <q-separator />
+      <q-card-actions class="no-padding">
+        <q-item clickable dense class="full-width">
+          <q-item-section >
+              <q-item-label class="text-subtitle2 text-primary"><b>TOTAL:</b></q-item-label>
+          </q-item-section>
+          <q-item-section side class="text-subtitle2 text-primary q-mr-md">
+            <!--<b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>-->
+            {{
+              (
+                lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0)
+                +
+                linesTaxes.reduce(function(sum, d) { return sum + d.taxAmount; }, 0)
+              ).toFixed(userMoneyFormat)
+            }}
+          </q-item-section>
+        </q-item>
+      </q-card-actions>
+
+    </q-card>
+  </div>
+
+  <q-dialog v-model="isRequisicionDialog" @show="loadRequisicionesPendientes">
+    <q-card style="min-width: 950px;">
+      <q-bar class="bg-primary text-white">
+        Requisiciones Pendientes
+        <q-space />
+        <q-input input-class="text-white" borderless dense debounce="300" v-model="requisicionesFilterString" placeholder="Buscar">
+          <template v-slot:append>
+            <q-icon v-if="!requisicionesFilterString" name="fas fa-search" flat round size="xs" color="white" />
+            <q-btn v-if="requisicionesFilterString" @click="requisicionesFilterString=''" flat round icon="fas fa-times" size="xs" color="white" />
+          </template>
+        </q-input>
+      </q-bar>
+      <q-card-section class="no-padding">
+        <q-table
+          ref="requisicionesSearchTable"
+          :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
+          table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
+          :data="requisiciones"
+          :columns="[
+            { name: 'mktPOHeaderID', required: true, label: 'OC #', align: 'left', field: row => row.mktPOHeaderID, sortable: true, style: 'min-width: 30px;', },
+            { name: 'mktPOLineID', required: true, label: 'OC Línea #', align: 'left', field: row => row.mktPOLineID, sortable: true, style: 'min-width: 30px;', },
+            { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 250px;', },
+            { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'min-width: 50px;', },
+            { name: 'quantityReturned', required: true, label: 'Devolución', align: 'right', field: row => row.quantityReturned, sortable: true, style: 'min-width: 50px;', },
+            { name: 'whName', required: true, label: 'Bodega', align: 'left', field: row => row.whName, sortable: true, style: 'min-width: 50px;'},
+            { name: 'moveDate', required: true, label: 'Fecha Ingreso', align: 'left', field: row => row.moveDate, sortable: true, style: 'min-width: 50px;'},
+            { name: 'kardexID', required: true, label: 'Ingreso #', align: 'left', field: row => row.kardexID, sortable: true, style: 'min-width: 50px;'},
+            { name: 'moveID', required: true, label: 'ID', align: 'left', field: row => row.moveID, sortable: true, style: 'min-width: 50px;'},
+            { name: 'invDocTypeName', required: true, label: 'Documento Ingreso', align: 'left', field: row => row.invDocTypeName, sortable: true, style: 'min-width: 50px;'},
+            { name: 'invDocNumber', required: true, label: '# Documento', align: 'left', field: row => row.invDocNumber, sortable: true, style: 'min-width: 50px;'},
+          ]"
+          row-key="moveID"
+          virtual-scroll :rows-per-page-options="[0]"
+          hide-bottom dense
+          selection="multiple" :selected.sync="requisicionesDialogSelected"
+          :filter="requisicionesFilterString"
+          />
+      </q-card-section>
+      <q-card-actions align="around">
+        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
+        :disable="requisicionesDialogSelected.length<=0" @click="requisicionesBatchDialogSelectAction(requisicionesDialogSelected)" ></q-btn>
+      </q-card-actions>
+      <q-inner-loading :showing="isRequisicionDialogLoading" style="z-index: 10" >
+        <q-spinner-gears size="50px" color="primary" />
+      </q-inner-loading>
+    </q-card>
+  </q-dialog >
+
+  <q-dialog v-model="isStatsDialog" >
+    <q-card style="min-width: 500px;">
+      <q-markup-table dense v-if="selected.length>0">
+        <thead >
+          <tr>
+            <th class="text-left">Seleccionadas</th>
+            <th class="text-right">Cantidad</th>
+            <th class="text-right">Suma</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).length}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.quantity); }, 0).toFixed(userMoneyFormat)}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineSubtotal); }, 0).toFixed(userMoneyFormat)}}</td>
+            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineUntaxed); }, 0).toFixed(userMoneyFormat)}}</td>
+          </tr>
+        </tbody>
+      </q-markup-table>
+    </q-card>
+  </q-dialog>
+
+</div>
+
+</template>
+<style lang="sass">
+  .q-table__bottom
+      padding: 0px
+  .my-sticky-header-usercompany
+    /* max height is important */
+    .q-table__middle
+      max-height: 50px
+
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th /* bg color is important for th; just specify one */
+      background-color: white
+
+    thead tr:first-child th
+      position: sticky
+      top: 0
+      opacity: 1
+      z-index: 2
+
+  .my-sticky-header-usercompany-dark
+    /* max height is important */
+    .q-table__middle
+      max-height: 50px
+
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th /* bg color is important for th; just specify one */
+      background-color: $grey-10
+
+    thead tr:first-child th
+      position: sticky
+      top: 0
+      opacity: 1
+      z-index: 2
+</style>
+<script>
+import Vue from 'vue';
+import Vuex from 'vuex';
+import { date } from 'quasar';
+
+export default ({
+    data () {
+      return {
+          moduleName: "mktPORet", filterString: '', selected: []
+        ,isItemsDialog: false, itemsDialogFilter: '', itemsDialogSelected: [], itemsDialogRowToUpdate: null, itemsDialogTableBusy: false
+        ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
+        ,isRequisicionDialog: false, requisicionesDialogSelected: [], requisicionesFilterString: '', isRequisicionDialogLoading: false
+        ,isStatsDialog: false
+      }
+    },
+    methods:{
+      getMax(arr, prop) {
+          var max;
+          for (var i=0 ; i<arr.length ; i++) {
+              if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
+                  max = arr[i];
+          }
+          return max;
+      },
+      updateRow(newVal, colName, row){
+        try{
+          //Actualiza las líneas
+          let newRows = JSON.parse(JSON.stringify(this.lines))
+          if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
+            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
+          }else{
+            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
+          }
+          newRows.find(x=>x.lineID==row.lineID)[colName] = newVal;
+          let invID = newRows.find(x=>x.lineID==row.lineID).invID
+          let invName = invID?this.lookup_items.find(x => x.value == invID).label:''
+          let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
+          let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
+          let lineUntaxed = lineSubtotal - lineDiscntAmount
+          newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
+          newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
+          newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineUntaxed
+          newRows.find(x=>x.lineID==row.lineID).invName = invName
+          this.lines = newRows
+
+          //Actualiza todas las taxLines correspondientes a la línea modificada
+          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
+          newRowsTaxes.filter(x=>x.lineID==row.lineID).map(lineaImpuesto=>{
+            lineaImpuesto.lineUntaxed = lineUntaxed;
+            lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor);
+            return lineaImpuesto
+            //return lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor)
+          })
+          this.linesTaxes = newRowsTaxes
+
+        }catch(ex){
+          console.error(ex)
+        }
+      },
+      addRow(){
+        //Get Next LineID
+        let max_id = 1
+        if(this.lines.length > 0){
+          let temp = this.getMax(this.lines, "lineID");
+          max_id = parseInt(temp.lineID) + parseInt(1);
+        }
+        
+        //Add Line
+        let newRows = JSON.parse(JSON.stringify(this.lines))
+        let nuevaFila = {
+           lineID: max_id
+          ,invID: 0
+          ,quantity: 1
+          ,price: 1
+          ,lineSubtotal: 1
+          ,lineDiscntPrcnt: 0
+          ,lineDiscntAmount: 0
+          ,lineUntaxed: 1
+          ,whID: this.defaultWhID
+          ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
+          ,prjID: 0
+          ,prjName: ''
+          ,transportTypeID: this.defaultTransportID
+          ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
+          ,expectedDate: ''
+        }
+        newRows.push(nuevaFila)
+        this.lines = newRows
+        this.openSearchItems(nuevaFila)//autoOpen Items Search
+      },
+      removeRows(){
+        if(this.selected.length > 0){
+          this.$q.dialog({ 
+            title: 'Confirmación'
+            ,message: 'Desea quitar las líneas seleccionadas?'
+            ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
+            ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
+          }
+          ).onOk(() => {
+            //Líneas
+            let newRows = JSON.parse(JSON.stringify(this.lines))
+            this.selected.map(row=>{
+              newRows = newRows.filter(x=>x.lineID!=row.lineID);
+            })
+            this.lines = newRows
+
+            //Impuestos
+            let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
+            newRowsTaxes = newRowsTaxes.filter(x=>newRows.some(y=>y.lineID==x.lineID))
+            this.linesTaxes = newRowsTaxes
+
+            this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
+          })
+        }
+      },
+      getAge(fecha){
+        return date.getDateDiff(new Date(), fecha, 'years')
+      },
+      openSearchItems(currentRow){
+        if(this.editMode==true){
+          this.itemsDialogRowToUpdate = currentRow
+          this.isItemsDialog = true
+          if(currentRow&&currentRow.invID&&currentRow.invID>0){
+            this.itemsDialogTableBusy = true
+            try{
+              this.itemsDialogSelected = []
+              this.itemsDialogSelected.push(this.lookup_items.find(x => x.value == currentRow.invID))
+              this.itemsDialogTableBusy = false
+            }catch(ex){
+              this.itemsDialogTableBusy = false
+            }
+          }
+        }
+        
+        
+      },
+      itemsDialogSelectAction(){
+        if(this.itemsDialogSelected.length>0){
+          //Primero agrega los impuestos correspondientes al Item con su código de línea
+          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
+          newRowsTaxes = newRowsTaxes.filter(x=>x.lineID!=this.itemsDialogRowToUpdate.lineID)//remuevo los impuestos de la línea xq voy a agregarlos nuevamente
+          this.lookup_items_taxes.filter(x=>x.invID==this.itemsDialogSelected[0].value).forEach(impuesto=>{
+              newRowsTaxes.push({
+                 lineID: this.itemsDialogRowToUpdate.lineID
+                ,taxID: impuesto.taxID
+                ,taxName: impuesto.shortLabel
+                ,taxAmount: 0
+                ,isPercent: impuesto.isPercent
+                ,factor: impuesto.factor
+                ,factor_base: impuesto.factor_base
+                ,lineUntaxed: 0
+              })
+            })
+          this.linesTaxes = newRowsTaxes
+
+          //Segundo, actualiza la fila por medio del método [updateRow] , el cual también actualiza las líneas del impuesto
+          if(this.itemsDialogSelected[0].estado==true){
+            this.updateRow(this.itemsDialogSelected[0].value, 'invID', this.itemsDialogRowToUpdate)
+            this.isItemsDialog = false
+          }
+        }
+      },
+      itemsDialogShown(){
+        if(this.itemsDialogSelected.length>0){
+          try{
+            this.$refs.itemsSearchTable.scrollTo(this.lookup_items.findIndex(x=>x.value == this.itemsDialogSelected[0].value))
+          }catch(ex){}
+        }
+        
+      },
+      checkIfRowNull(){
+        this.lines = this.lines.filter(x=>x.invID>0)
+      },
+      addBatch(){
+        this.isItemsBatchDialog = true
+      },
+      itemsBatchDialogSelectAction(){
+        let max_id = 0
+        let temp = null
+        if(this.lines.length > 0){
+          temp = this.getMax(this.lines, "lineID");
+          //max_id = parseInt(temp.lineID) + parseInt(1);
+          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+        }
+        let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
+        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
+        if(this.itemsBatchDialogSelected.length>0){
+          this.itemsBatchDialogSelected.filter(x=>x.estado).map(row => {
+            max_id = parseInt(max_id) + parseInt(1);
+            //líneas
+            newRows.push({
+               lineID: max_id
+              ,invID: row.value
+              ,invName: row.label
+              ,quantity: 1
+              ,price: 1
+              ,lineSubtotal: 1
+              ,lineDiscntPrcnt: 0
+              ,lineDiscntAmount: 0
+              ,lineUntaxed: 1
+              ,whID: this.defaultWhID
+              ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
+              ,prjID: 0
+              ,prjName: ''
+              ,transportTypeID: this.defaultTransportID
+              ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
+            })
+
+            //Impuestos de la línea
+            this.lookup_items_taxes.filter(x=>x.invID==row.value).forEach(impuesto=>{
+                newRowsTaxes.push({
+                   lineID: max_id
+                  ,taxID: impuesto.taxID
+                  ,taxName: impuesto.shortLabel
+                  ,taxAmount: impuesto.isPercent?( parseFloat(1 * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
+                  ,isPercent: impuesto.isPercent
+                  ,factor: impuesto.factor
+                  ,factor_base: impuesto.factor_base
+                  ,lineUntaxed: 1
+                })
+              })
+          })
+          this.lines = newRows
+          this.linesTaxes = newRowsTaxes
+          this.isItemsBatchDialog = false
+        }
+      },
+      addRequisiciones(){
+        this.isRequisicionDialog = true;
+      },
+      requisicionesBatchDialogSelectAction(){
+        let max_id = 0
+        let temp = null
+        if(this.lines.length > 0){
+          temp = this.getMax(this.lines, "lineID");
+          //max_id = parseInt(temp.lineID) + parseInt(1);
+          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+        }
+        let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
+        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
+        if(this.requisicionesDialogSelected.length>0){
+          this.requisicionesDialogSelected.map(row => {
+            console.dir(row)
+            max_id = parseInt(max_id) + parseInt(1);
+            //líneas
+            newRows.push({
+               lineID: max_id
+              ,invID: row.invID
+              ,invName: row.invName
+              ,quantity: row.quantityReturnedNew
+              ,maxQuantity: row.maxQuantity
+              ,price: row.price
+              ,lineSubtotal: row.quantityReturnedNew * row.price
+              ,lineDiscntPrcnt: 0
+              ,lineDiscntAmount: 0
+              ,lineUntaxed: row.quantityReturnedNew * row.price
+              ,whID: row.whID
+              ,whName: row.whName//this.lookup_wh.find(x => x.value == this.defaultWhID).label
+              ,prjID: row.prjID
+              ,prjName: row.prjName
+              ,kardexID: row.kardexID
+              ,stockID: row.stockID
+              ,moveID: row.moveID
+            })
+
+            /*//Impuestos de la línea
+            this.lookup_items_taxes.filter(x=>x.invID==row.invID).forEach(impuesto=>{
+                newRowsTaxes.push({
+                   lineID: max_id
+                  ,taxID: impuesto.taxID
+                  ,taxName: impuesto.shortLabel
+                  ,taxAmount: impuesto.isPercent?( parseFloat( (row.lineUntaxed) * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
+                  ,isPercent: impuesto.isPercent
+                  ,factor: impuesto.factor
+                  ,factor_base: impuesto.factor_base
+                  ,lineUntaxed: row.lineUntaxed
+                })
+              })*/
+          })
+          this.lines = newRows
+          //this.linesTaxes = newRowsTaxes
+          this.isItemsBatchDialog = false
+        }
+        this.isRequisicionDialog = false;
+      },
+      loadRequisicionesPendientes(){
+        this.isRequisicionDialogLoading = true;
+        this.$axios({
+            method: 'GET',
+            url: this.apiURL + 'spMktPORetSelectPending',
+            headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+            params: {
+                userCode: this.userCode,
+                userCompany: this.userCompany,
+                userLanguage: 'es',
+                partnerID: this.partnerID
+            }
+        }).then((response) => {
+            this.requisiciones = response.data
+            this.isRequisicionDialogLoading = false;
+        }).catch((error) => {
+            console.dir(error)
+            let mensaje = ''
+            if(error.message){ mensaje = error.message }
+            if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+            if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+            this.$q.notify({ html: true, multiLine: false, color: 'red'
+                ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+            })
+            this.isRequisicionDialogLoading = false;
+        })
+    
+      },
+      rowTitleInventory(fila){
+        let resultado = 'Seleccionar...'
+        let target = null
+        if(fila&&fila.invID&&fila.invID>0){
+          try{
+            target = this.lookup_items.find(x=>x.value == fila.invID)
+            resultado = 'Código: ' + target.internal_code + ' || Unidad: ' + target.uomName + ' || Marca: ' + target.brandName
+          }catch(ex){}
+        }
+        return resultado
+      },
+      batchUpdateDiscount(){
+        this.$q.dialog({
+          title: 'Aplicar el siguiente descuento a todo el documento',
+          //message: 'Des?',
+          prompt: {
+            model: 0,
+            type: 'number',
+            //isValid: val => val >= 0, // << here is the magic
+            isValid: val => val >=0 && val <= 100
+          },
+          ok: { label: 'Aplicar', noCaps: true },
+          cancel: { label: 'Cancelar', noCaps: true, flat: true },
+        }).onOk(data => {
+          this.selected.forEach(row => this.updateRow(data.toString() ,'lineDiscntPrcnt', row) );
+        })
+      }
+    },
+    computed:{
+        userColor: { get () { return this.$store.state.main.userColor }  },
+        userCode: { get () { return this.$store.state.main.userCode } },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
+        allow_view: { get () { return true }, },
+        allow_edit: { get () { return true }, },
+        allow_insert: { get () { return true }, },
+        allow_report: { get () { return true }, },
+        allow_disable: { get () { return true }, },
+        apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
+        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        partnerID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
+        },
+        lines: {
+            get () { return this.$store.state[this.moduleName].editData.lines },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+        },
+        requisiciones: {
+            get () { return this.$store.state[this.moduleName].editData.requisiciones },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataRequisiciones', val) }
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+        },
+        linesTaxes: {
+            get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLinesTaxes', val) }
+        },
+        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
+        sys_user_color: {
+            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
+        },
+        lookup_items: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_items },
+        },
+        lookup_wh: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_wh },
+        },
+        lookup_prj: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_prj },
+        },
+        lookup_transports: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_transports },
+        },
+        lookup_payterms: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_payterms },
+        },
+        lookup_paytermsDetails: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_paytermsDetails },
+        },
+        lookup_items_taxes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },
+        },
+        /*lookup_taxesByGroup: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_taxesByGroup },
+        },*/
+        calculated_paytermsDetails: {
+            get () {
+              let resultado = []
+              let grandTotal = this.lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0)
+              if(this.paytermID&&this.paytermID>0){
+                if(this.lookup_paytermsDetails.filter(x=>x.paytermID==this.paytermID)){
+                  let linea = {}
+                  this.lookup_paytermsDetails.filter(x=>x.paytermID==this.paytermID).map(row=>{
+                    linea = {
+                      value: row.value
+                      ,label: row.label
+                      ,factor: row.factor
+                      ,days: row.days
+                      ,amount: (grandTotal * (row.factor/100)).toFixed(this.userMoneyFormat)
+                    }
+                    resultado.push(linea)
+                  })
+                  
+                }
+              }
+              return resultado
+            },
+        },
+        calculatedSumOfTaxes: {
+          get () {
+            //Sección Subtotales
+            //acc = acumulador  ||  it = fila
+            const resultadoSubtotales = this.linesTaxes.reduce((acc, it) => {
+              //crea en el acumulador el atributo con el nombre del impuesto, ej: acc[IVA 12%]
+              //luego, suma el valor del acumulador cuando coincida el nombre (ej: acc[IVA 12%] debe ser igual a it.taxName que sería 'IVA 12%')
+              //y luego toma el valor y le suma el campo taxAmount
+              acc[it.taxName] = ((acc[it.taxName]?acc[it.taxName]:0) + it.lineUntaxed);
+              return acc;
+            }, {});
+            //sección Impuestos
+            const resultado = this.linesTaxes.reduce((acc, it) => {
+              //crea en el acumulador el atributo con el nombre del impuesto, ej: acc[IVA 12%]
+              //luego, suma el valor del acumulador cuando coincida el nombre (ej: acc[IVA 12%] debe ser igual a it.taxName que sería 'IVA 12%')
+              //y luego toma el valor y le suma el campo taxAmount
+              acc[it.taxName] = ((acc[it.taxName]?acc[it.taxName]:0) + it.taxAmount);
+              return acc;
+            }, {});
+            //resultado es un objeto, entonces se convierte a Array object a Array
+            var result = [];
+            for(var i in resultadoSubtotales){
+              result.push({
+                 label: 'Subtotal ' + i
+                ,value: resultadoSubtotales[i]
+                }
+              )
+            }
+            for(var i in resultado){
+              result.push({
+                 label: i
+                ,value: resultado[i]
+                }
+              )
+            }
+            return result
+          }
+        }
+    }
+})
+</script>

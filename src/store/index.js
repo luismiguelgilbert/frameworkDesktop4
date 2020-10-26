@@ -35,6 +35,7 @@ import Brands from './Brands' //Brands
 import InvTypes from './InvTypes' //InvTypes
 import mktPR from './mktPR' //mktPR
 import mktPO from './mktPO' //mktPO
+import mktPORet from './mktPORet' //mktPORet
 import casCasesTypes from './casCasesTypes' //casCasesTypes
 import casCasos from './casCasos' //casCasos
 import casClientes from './casClientes' //casClientes
@@ -99,6 +100,7 @@ export default function (/* { ssrContext } */) {
       //mkt PURCHASE
       ,mktPR
       ,mktPO
+      ,mktPORet
       ,accAP
       //Inventory
       ,invIncoming
