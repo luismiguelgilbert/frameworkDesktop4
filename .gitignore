@@ -5,7 +5,6 @@ node_modules
 # Agregado Manualmente
 .vscode
 /public/config.json
-debug.log
 
 
 # Quasar core related directories

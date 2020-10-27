@@ -178,6 +178,7 @@ export default ({
             this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
             this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
             this.partner_account_id = selectedRows[0].account_id;//usado para calcular el asiento contable
+            //this.lines = []//encera líneas
             this.isPartnerDialog = false
         },
         readXmlFile(file){
@@ -201,7 +202,7 @@ export default ({
                                 fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(0,2)
                                 this.headerDate = fechaemision
                             }catch(ex){}
-                            try{ //arma fecha
+                            try{ //aplica Proveedor
                                 let ruc = resultA.factura.infoTributaria[0].ruc[0].trim()
                                 if(this.lookup_partners.some(x=>x.partner_ruc==ruc)){
                                     let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
@@ -209,12 +210,13 @@ export default ({
                                     this.partnerName = partner.label
                                     this.partner_account_id = partner.account_id;//usado para calcular el asiento contable
                                 }
-                                
-                                //this.lookup_partners.some(x=>)
-                                //numerodocumento += resultA.factura.infoTributaria[0].ptoEmi[0]
                             }catch(ex){}
-                            try{ //arma fecha
-                                this.comments = JSON.stringify(resultA.factura.infoAdicional[0].campoAdicional)
+                            try{ //arma comentarios
+                                let resultado = ''
+                                resultA.factura.infoAdicional[0].campoAdicional.map(x=>{
+                                    resultado += x.$.nombre + ': ' + x._ + '  ||  '
+                                })
+                                this.comments = resultado
                             }catch(ex){}
                             
                         })
@@ -231,6 +233,11 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        lines: {
+            get () { return this.$store.state[this.moduleName].editData.lines },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+        },
         headerUser: {
             get () { return this.$store.state[this.moduleName].editData.basic.headerUser },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerUser', value: val}) }

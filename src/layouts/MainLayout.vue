@@ -158,12 +158,17 @@
                     </q-item>
                     <q-item dense>
                       <q-item-section side><q-icon name="fas fa-envelope"/></q-item-section>
-                      <q-item-section><q-item-label class="text-caption">{{userMail}}</q-item-label></q-item-section>
+                      <q-item-section><q-item-label class="text-primary text-caption">{{userMail}}</q-item-label></q-item-section>
                     </q-item>
                     <q-item dense>
                       <q-item-section side><q-icon name="fas fa-user-shield"/></q-item-section>
                       <q-item-section><q-item-label class="text-primary text-subtitle2">{{userProfileName}}</q-item-label></q-item-section>
                     </q-item>
+                    <q-item dense>
+                      <q-item-section side><q-icon name="fas fa-code-branch"/></q-item-section>
+                      <q-item-section><q-item-label class="text-primary text-subtitle2">{{version}}</q-item-label></q-item-section>
+                    </q-item>
+                    
                     <!--<q-item-label caption>{{userProfileName}}</q-item-label>-->
                     <q-item-label caption><q-btn icon="fas fa-user-edit" label="Mi Cuenta" no-caps class="full-width q-mt-sm" color="primary"  @click="gotoPreferences" /></q-item-label>
                     <q-item-label caption><q-btn icon="fas fa-sign-out-alt" label="Cerrar Sesión" no-caps class="full-width" color="red"  @click="logOut" /></q-item-label>
@@ -221,7 +226,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { debounce, colors, SessionStorage, Notify } from 'quasar'
 //import socketIO from 'socket.io-client'
-
+import {version} from '../../package.json'
 
 export default {
   name: 'MainLayout',
@@ -229,7 +234,7 @@ export default {
   data () {
     return {
       router: this.$router, leftDrawerOpen: true, isNotificationBusy: false, unreadCount: 0, interval: null,
-      isWebSocketConnected: false
+      isWebSocketConnected: false, version: version
     }
   },
 
@@ -534,6 +539,7 @@ export default {
     URL_ws: { get () { return this.$q.sessionStorage.getItem('URL_ws') } },
     wsConnection: { get () { return this.$store.state.main.wsConnection }, set (val) { this.$store.commit('main/updateState', {key: 'wsConnection', value: val}) } },
     shouldHideMenu: { get () { return this.$store.state.main.shouldHideMenu }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideMenu', value: val}) } },
+    shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideTableButtons', value: val}) } },
     disableCompanyChange:{ get() { 
       let result = false; 
       try{result = this.router.currentRoute.path.indexOf('Edit') > 0}catch(ex){} 

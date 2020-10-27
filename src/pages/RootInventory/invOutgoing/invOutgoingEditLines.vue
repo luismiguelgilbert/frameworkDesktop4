@@ -156,9 +156,9 @@ import { date } from 'quasar';
 export default ({
     data () {
         return {
-            moduleName: "invIncoming"
+            moduleName: "invOutgoing"
             ,selected: []
-            ,filterString: '', dialogVisible: false
+            , filterString: '', dialogVisible: false
         }
     },
     methods:{

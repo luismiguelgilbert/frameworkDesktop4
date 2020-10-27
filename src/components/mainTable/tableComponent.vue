@@ -27,6 +27,22 @@
       >
       <template v-slot:body-cell="props" >
         <q-td :props="props" class="text-weight-medium ellipsis no-padding" :title="props.value" >
+          <q-menu touch-position context-menu :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'">
+            <q-list separator style="min-width: 100px">
+              <q-item clickable v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir">
+                <q-item-section avatar>
+                  <q-icon color="primary" name="fas fa-external-link-alt" />
+                </q-item-section>
+                <q-item-section>Abrir Registro</q-item-section>
+              </q-item>
+              <q-item v-if="allow_insert" clickable v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar">
+                <q-item-section avatar>
+                  <q-icon color="primary" name="fas fa-copy" />
+                </q-item-section>
+                <q-item-section>Copiar Registro</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
           <div v-if="props.col.cellComponent=='estado'" class="q-pl-xs">
             <q-item dense class="no-padding" style="min-height: 20px !important;">
               <q-item-section side class="q-pl-none q-pr-xs" ><q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" /></q-item-section>
@@ -43,14 +59,11 @@
                 </q-img>
             </q-avatar>
           </div>
-          <!--<div v-if="!props.col.is_key && props.col.cellComponent=='div'">{{props.value}}</div>-->
           <div v-if="props.col.cellComponent=='div'" class="q-pl-xs q-pr-sm">{{props.value}}</div>
-          <div v-if="props.col.cellComponent=='bool'" ><q-toggle class="no-padding" style="min-height: 20px !important;" color="primary" size="xs"  :value="props.value" /></div>
-          <div v-if="props.col.ux_type=='open'"  >
-            <!--{{columnsSystem.find(x=>x.is_key).field}}-->
-            <!--<q-btn flat size="xs" icon="fas fa-external-link-alt" class="cursor-pointer" color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_key).field]; openEditForm(newProps, false)}" />-->
-            <q-btn flat size="xs" icon="fas fa-external-link-alt" class="cursor-pointer" color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir" />
-            <q-btn v-if="allow_insert" flat size="xs" icon="fas fa-copy" class="cursor-pointer" color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar" />
+          <div v-if="props.col.cellComponent=='bool'" ><q-toggle class="no-padding" style="min-height: 20px !important;" :color="props.col.name=='voided'?'red':'primary'" :icon="props.col.name=='voided'?'fas fa-disable':undefined" size="xs"  :value="props.value"  /></div>
+          <div v-if="props.col.ux_type=='open'&&shouldHideTableButtons==false" style="max-width: 60px;">
+            <q-btn flat size="xs" round icon="fas fa-external-link-alt"  color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir" />
+            <q-btn v-if="allow_insert" flat round size="xs" icon="fas fa-copy" class="cursor-pointer" color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar" />
           </div>
         </q-td>
       </template>
@@ -92,17 +105,17 @@
 
   td:last-child, th:last-child
     position: sticky
-    right: 0
+    
 
 
 .my-sticky-header-table-dark
   /* max height is important */
   .q-table__middle
     max-height: 50px
-
   .q-table__top,
   .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
+  thead tr:first-child th 
+    /* bg color is important for th; just specify one */
     background-color: $grey-10
 
   thead tr:first-child th
@@ -113,6 +126,8 @@
     padding-left: 5px
     font-weight: bolder
     color: $grey-6
+
+
 </style>
 <script>
 import Vue from 'vue';
@@ -145,6 +160,7 @@ export default({
     userCompany: { get () { return this.$store.state.main.userCompany } },
     userTableLines: { get () { return this.$store.state.main.userTableLines } },
     userTableDense: { get () { return this.$store.state.main.userTableDense } },
+    shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons } },
     pagination: {
       get () { return this.$store.state[this.moduleName].pagination },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }
@@ -170,8 +186,9 @@ export default({
           //,sortable: (...)
           ,ux_type: 'open'
         })
-        //console.dir('newResult')
-        //console.dir(newResult)
+
+        
+
         return newResult
       },
     },

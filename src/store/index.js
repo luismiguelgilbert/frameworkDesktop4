@@ -43,6 +43,7 @@ import casLocations from './casLocations' //casLocations
 import casTasks from './casTasks' //casTasks
 import casTasksTypes from './casTasksTypes' //casTasksTypes
 import invIncoming from './invIncoming' //invIncoming
+import invOutgoing from './invOutgoing' //invOutgoing
 import invQuery from './invQuery' //invQuery
 import Payterms from './Payterms' //Payterms
 import partnerMasterGroups from './partnerMasterGroups' //partnerMasterGroups
@@ -104,6 +105,7 @@ export default function (/* { ssrContext } */) {
       ,accAP
       //Inventory
       ,invIncoming
+      ,invOutgoing
       ,invQuery
       //Cases
       ,casCasesTypes

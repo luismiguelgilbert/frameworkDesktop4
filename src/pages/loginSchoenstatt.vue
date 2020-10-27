@@ -33,7 +33,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { debounce, colors } from 'quasar'
 Vue.use(require('vue-shortkey'))
-
 export default {
   name: 'Login',
   data() {
@@ -70,7 +69,6 @@ export default {
             this.$q.sessionStorage.set('Google_API_key',response.data.Google_API_key)
             //this.$q.sessionStorage.set('ReportServer_User',response.data.ReportServer_User)
             //this.$q.sessionStorage.set('ReportServer_Password',response.data.ReportServer_Password)
-
             this.$q.loading.hide()
         }
       })
@@ -125,7 +123,6 @@ export default {
                     ,icon: 'fas fa-exclamation-circle'
                     ,multiLine: true, html: true
                 })
-
             })
     }, 100),
   },

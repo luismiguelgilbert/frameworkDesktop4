@@ -78,15 +78,10 @@
       </q-tr>
     </template>
     <template v-slot:top >
-        <!--
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary"  no-caps />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>
-        -->
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Ingresos':''" title="Agregar Ítems de Ingresos a Bodega" @click="addRequisiciones" icon="far fa-file-alt" color="primary" no-caps  />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
         <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
     </template>
   </q-table>
 
@@ -161,7 +156,7 @@
   <q-dialog v-model="isRequisicionDialog" @show="loadRequisicionesPendientes">
     <q-card style="min-width: 950px;">
       <q-bar class="bg-primary text-white">
-        Requisiciones Pendientes
+        Ingresos a Bodega
         <q-space />
         <q-input input-class="text-white" borderless dense debounce="300" v-model="requisicionesFilterString" placeholder="Buscar">
           <template v-slot:append>
@@ -326,37 +321,6 @@ export default ({
           console.error(ex)
         }
       },
-      addRow(){
-        //Get Next LineID
-        let max_id = 1
-        if(this.lines.length > 0){
-          let temp = this.getMax(this.lines, "lineID");
-          max_id = parseInt(temp.lineID) + parseInt(1);
-        }
-        
-        //Add Line
-        let newRows = JSON.parse(JSON.stringify(this.lines))
-        let nuevaFila = {
-           lineID: max_id
-          ,invID: 0
-          ,quantity: 1
-          ,price: 1
-          ,lineSubtotal: 1
-          ,lineDiscntPrcnt: 0
-          ,lineDiscntAmount: 0
-          ,lineUntaxed: 1
-          ,whID: this.defaultWhID
-          ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
-          ,prjID: 0
-          ,prjName: ''
-          ,transportTypeID: this.defaultTransportID
-          ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
-          ,expectedDate: ''
-        }
-        newRows.push(nuevaFila)
-        this.lines = newRows
-        this.openSearchItems(nuevaFila)//autoOpen Items Search
-      },
       removeRows(){
         if(this.selected.length > 0){
           this.$q.dialog({ 
@@ -439,9 +403,6 @@ export default ({
       },
       checkIfRowNull(){
         this.lines = this.lines.filter(x=>x.invID>0)
-      },
-      addBatch(){
-        this.isItemsBatchDialog = true
       },
       itemsBatchDialogSelectAction(){
         let max_id = 0
@@ -554,6 +515,7 @@ export default ({
       },
       loadRequisicionesPendientes(){
         this.isRequisicionDialogLoading = true;
+        this.requisicionesDialogSelected = [];
         this.$axios({
             method: 'GET',
             url: this.apiURL + 'spMktPORetSelectPending',
@@ -580,7 +542,6 @@ export default ({
             })
             this.isRequisicionDialogLoading = false;
         })
-    
       },
       rowTitleInventory(fila){
         let resultado = 'Seleccionar...'
@@ -593,22 +554,6 @@ export default ({
         }
         return resultado
       },
-      batchUpdateDiscount(){
-        this.$q.dialog({
-          title: 'Aplicar el siguiente descuento a todo el documento',
-          //message: 'Des?',
-          prompt: {
-            model: 0,
-            type: 'number',
-            //isValid: val => val >= 0, // << here is the magic
-            isValid: val => val >=0 && val <= 100
-          },
-          ok: { label: 'Aplicar', noCaps: true },
-          cancel: { label: 'Cancelar', noCaps: true, flat: true },
-        }).onOk(data => {
-          this.selected.forEach(row => this.updateRow(data.toString() ,'lineDiscntPrcnt', row) );
-        })
-      }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },

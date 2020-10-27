@@ -34,11 +34,8 @@
           <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
               :value="props.row.invName" dense item-aligned borderless
               :rules="[val => !!val || 'Requerido']"
-              @input="(value)=>{updateRow(value,'invName',props.row)}"
-              @keyup.keyCodes.113="openSearchItems(props.row)"
               :title="rowTitleInventory(props.row)"
               >
-              <template v-if="editMode==true" v-slot:prepend><q-btn icon="fas fa-search" title="Buscar (F2)" size="xs" round color="primary" flat @click="openSearchItems(props.row)" /></template>
           </q-input>
         </q-td>
         <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
@@ -46,14 +43,14 @@
               :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'quantity',props.row)}" />
+              debounce="1000" @input="(value)=>{updateRow(value,'quantity',props.row)}" />
         </q-td>
         <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.price" type="number" :min="0" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'price',props.row)}" />
+              debounce="1000" @input="(value)=>{updateRow(value,'price',props.row)}" />
         </q-td>
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" key="lineSubtotal" :props="props">
           {{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}
@@ -63,7 +60,7 @@
               :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
+              debounce="1000" @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
         </q-td>
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
           {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
@@ -76,8 +73,7 @@
       </q-tr>
     </template>
     <template v-slot:top >
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary"  no-caps />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true;" icon="fas fa-plus" color="primary" no-caps />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps  class="q-ml-sm" :disable="selected.length<=0" />
@@ -189,53 +185,6 @@
 
     </q-card>
   </div>
-
-  <q-dialog v-model="isItemsDialog" @show="itemsDialogShown" @hide="checkIfRowNull" >
-    <q-card style="min-width: 800px;" > 
-      <q-bar class="bg-primary text-white">
-        Buscar Item
-        <q-space />
-        <q-input input-class="text-white" borderless dense debounce="300" autofocus v-model="itemsDialogFilter" placeholder="Buscar">
-          <template v-slot:append>
-            <q-icon v-if="!itemsDialogFilter" name="fas fa-search" flat round size="xs" color="white" />
-            <q-btn v-if="itemsDialogFilter" @click="itemsDialogFilter=''" flat round icon="fas fa-times" size="xs" color="white" />
-          </template>
-        </q-input>
-      </q-bar>
-      <q-card-section class="no-padding">
-        <q-table
-          ref="itemsSearchTable"
-          :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-          table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-          @keydown.native.keyCodes.115="itemsDialogSelectAction(itemsDialogSelected)"
-          :data="lookup_items.filter(x=>x.estado==true)"
-          :columns="[
-            { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
-            { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
-            { name: 'systemTypeName', required: true, label: 'Tipo', align: 'left', field: row => row.systemTypeName, sortable: true, style: 'min-width: 50px;', },
-            { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true, style: 'min-width: 50px;'},
-            { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
-            //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
-            { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
-          ]"
-          row-key="value"
-          virtual-scroll :rows-per-page-options="[0]"
-          hide-bottom dense
-          selection="single" :selected.sync="itemsDialogSelected"
-          :filter="itemsDialogFilter"
-          >
-        </q-table>
-      </q-card-section>
-      <q-card-actions align="around">
-        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
-          :disable="itemsDialogSelected.length<=0" 
-          @click="itemsDialogSelectAction(itemsDialogSelected)" ></q-btn>
-      </q-card-actions>
-      <q-inner-loading :showing="itemsDialogTableBusy" style="z-index: 10" >
-        <q-spinner-gears size="50px" color="primary" />
-      </q-inner-loading>
-    </q-card>
-  </q-dialog>
 
   <q-dialog v-model="isItemsBatchDialog">
     <q-card style="min-width: 800px;" > 
@@ -377,38 +326,6 @@ export default ({
           console.error(ex)
         }
       },
-      addRow(){
-        //Get Next LineID
-        let max_id = 1
-        if(this.lines.length > 0){
-          let temp = this.getMax(this.lines, "lineID");
-          max_id = parseInt(temp.lineID) + parseInt(1);
-        }
-        
-        //Add Line
-        let newRows = JSON.parse(JSON.stringify(this.lines))
-        let nuevaFila = {
-           lineID: max_id
-          ,invID: 0
-          ,quantity: 1
-          ,price: 1
-          ,lineSubtotal: 1
-          ,lineDiscntPrcnt: 0
-          ,lineDiscntAmount: 0
-          ,lineUntaxed: 1
-          ,whID: this.defaultWhID
-          ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
-          ,prjID: 0
-          ,prjName: ''
-          ,transportTypeID: this.defaultTransportID
-          ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
-          ,expectedDate: ''
-          ,estado: true
-        }
-        newRows.push(nuevaFila)
-        this.lines = newRows
-        this.openSearchItems(nuevaFila)//autoOpen Items Search
-      },
       removeRows(){
         if(this.selected.length > 0){
           this.$q.dialog({ 
@@ -432,25 +349,6 @@ export default ({
 
             this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
           })
-        }
-      },
-      getAge(fecha){
-        return date.getDateDiff(new Date(), fecha, 'years')
-      },
-      openSearchItems(currentRow){
-        if(this.editMode==true){
-          this.itemsDialogRowToUpdate = currentRow
-          this.isItemsDialog = true
-          if(currentRow&&currentRow.invID&&currentRow.invID>0){
-            this.itemsDialogTableBusy = true
-            try{
-              this.itemsDialogSelected = []
-              this.itemsDialogSelected.push(this.lookup_items.find(x => x.value == currentRow.invID))
-              this.itemsDialogTableBusy = false
-            }catch(ex){
-              this.itemsDialogTableBusy = false
-            }
-          }
         }
       },
       itemsDialogSelectAction(){
@@ -478,20 +376,6 @@ export default ({
             this.isItemsDialog = false
           }
         }
-      },
-      itemsDialogShown(){
-        if(this.itemsDialogSelected.length>0){
-          try{
-            this.$refs.itemsSearchTable.scrollTo(this.lookup_items.findIndex(x=>x.value == this.itemsDialogSelected[0].value))
-          }catch(ex){}
-        }
-        
-      },
-      checkIfRowNull(){
-        this.lines = this.lines.filter(x=>x.invID>0)
-      },
-      addBatch(){
-        this.isItemsBatchDialog = true
       },
       itemsBatchDialogSelectAction(){
         //let max_id = 1

@@ -26,6 +26,7 @@ export default function () {
     ,currentReportData: null
     ,notificationInterval: 30000
     ,shouldHideMenu: false
+    ,shouldHideTableButtons: false
     ,selectedContact: 0
     ,unreadNotifications: []
     ,wsConnection: null

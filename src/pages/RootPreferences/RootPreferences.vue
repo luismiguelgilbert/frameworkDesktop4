@@ -300,6 +300,14 @@
                         <q-toggle v-model="shouldHideMenu" color="primary" label="Ocultar Menú automáticamente al abrir un módulo" />
                     </q-item-section>
                 </q-item>
+                <q-item>
+                    <q-item-section side>
+                        <q-icon name="fas fa-external-link-alt" color="primary" />
+                    </q-item-section>
+                    <q-item-section>
+                        <q-toggle v-model="shouldHideTableButtons" color="primary" label="Ocultar Botones de Edición en Tablas Principales" />
+                    </q-item-section>
+                </q-item>
                 <!--<q-item>
                     <q-item-section side>
                         <q-icon name="fas fa-bell" color="primary" />
@@ -367,6 +375,7 @@ methods: {
                         ,user_password_1: this.user_password_1
                         ,userCompany: this.userCompany
                         ,shouldHideMenu: this.shouldHideMenu
+                        ,shouldHideTableButtons: this.shouldHideTableButtons
                         ,notificationInterval: this.notificationInterval
                     }),
                 }
@@ -500,6 +509,8 @@ computed:{
     currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
     notificationInterval: { get () { return this.$store.state.main.notificationInterval }, set (val) { this.$store.commit('main/updateState', {key: 'notificationInterval', value: val}) } },
     shouldHideMenu: { get () { return this.$store.state.main.shouldHideMenu }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideMenu', value: val}) } },
+    shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideTableButtons', value: val}) } },
+    
     
 }
 

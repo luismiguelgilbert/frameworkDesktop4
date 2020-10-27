@@ -1,6 +1,5 @@
 <template>
 <div class="row ">
-  
   <q-table
         ref="mainTable"
         :data="lines"

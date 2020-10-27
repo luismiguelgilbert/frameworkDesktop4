@@ -395,6 +395,17 @@ export default ({
           this.updateRow(false, 'estado', rowToUpdate)
         })
       },
+      prjDialogSelectAction(){
+        if(this.prjDialogSelected.length>0){
+          //Segundo, actualiza la fila por medio del método [updateRow]
+          if(this.prjDialogSelected[0].estado==true){
+            this.selected.forEach(rowToUpdate=>{
+                this.updateRow(this.prjDialogSelected[0].value, 'prjID', rowToUpdate)
+            })
+            this.isPrjDialog = false
+          }
+        }
+      },
       showDateName(value){
         let resultado = '...'
         try{
