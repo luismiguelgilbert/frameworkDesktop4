@@ -23,6 +23,7 @@
         ref="whID"
         :rules="[
                 val => val!= null || '* Requerido',
+                val => val>0      || '* Requerido',
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
@@ -48,16 +49,40 @@
         <template v-slot:prepend><q-icon name="fas fa-file-invoice" /></template>
     </q-select>
 
+    <q-select
+        label="Establecimiento (*)" placeholder="Seleccione el Establecimiento correspondiente al despacho los Items (*)" emit-value map-options filled
+        :options="lookup_establecimientos" 
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
+        v-model="sys_location_id"
+        ref="sys_location_id" @input="sys_location_pos_id=null"
+        :rules="[
+                val => val!= null || '* Requerido',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-store" /></template>
+    </q-select>
+    
+    <q-select
+        label="Punto de Emisión (*)" placeholder="Seleccione el Punto de Emisión correspondiente al despacho los Items (*)" emit-value map-options filled
+        :options="sys_location_id>0?lookup_pos.filter(x=>x.sys_location_id==sys_location_id):[]"
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
+        v-model="sys_location_pos_id"
+        ref="sys_location_pos_id"
+        :rules="[
+                val => val!= null || '* Requerido',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-cash-register" /></template>
+    </q-select>
     
     <q-input class="q-mb-md"
         ref="invDocNumber" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba el Número del Documento (*)" label="Número del Documento (*)" filled
-        v-model="invDocNumber"
+        placeholder="Escriba el Número de Secuencia del Documento (*)" label="Número de Secuencia del Documento (*)" filled
+        v-model="invDocNumber" :disable="sys_location_pos_id>0?lookup_pos.find(x=>x.sys_location_id==sys_location_id&&x.value==sys_location_pos_id).esElectronica:true"
+        mask="#########" unmasked-value
         >
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
-
-    
 
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Ingreso" filled
@@ -186,6 +211,14 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.invDocTypeID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'invDocTypeID', value: val}) }
         },
+        sys_location_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.sys_location_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sys_location_id', value: val}) }
+        },
+        sys_location_pos_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.sys_location_pos_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'sys_location_pos_id', value: val}) }
+        },
         invDocNumber:  {
             get () { return this.$store.state[this.moduleName].editData.basic.invDocNumber },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'invDocNumber', value: val}) }
@@ -202,6 +235,12 @@ export default ({
         },
         lookup_invDocTypes: {
             get () { return this.$store.state[this.moduleName].editData.lookup_invDocTypes },
+        },
+        lookup_establecimientos: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_establecimientos },
+        },
+        lookup_pos: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_pos },
         },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },

@@ -30,7 +30,7 @@
                             <q-icon name="fas fa-boxes"  :color="tab=='items'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='items'?'text-white':'text-grey-7')">Items Recibidos ({{lines.filter(x=>x.newQuantity>0).length}})</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='items'?'text-white':'text-grey-7')">Items Entregados ({{lines.filter(x=>x.newQuantity>0).length}})</q-item-label>
                         </q-item-section>
                     </q-item>
 

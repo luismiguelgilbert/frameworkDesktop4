@@ -267,9 +267,9 @@ export default ({
                 { name: 'headerDate', required: true, label: 'Pedido El', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
                 { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
                 { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
-                { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'quantityRcvd', required: true, label: 'Entregado', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
                 { name: 'quantityCancel', required: true, label: 'Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true , style: 'max-width: 70px;' },
-                { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'quantityOpen', required: true, label: 'Por Entregar', align: 'right', field: row => row.quantityOpen, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
                 { name: 'newQuantity', required: true, label: 'Recibir', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
                 { name: 'expectedDate', required: true, label: 'Esperado', align: 'left', field: row => row.expectedDate, sortable: true, style: 'max-width: 90px;' },
               ]
