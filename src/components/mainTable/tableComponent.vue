@@ -33,13 +33,13 @@
                 <q-item-section avatar>
                   <q-icon color="primary" name="fas fa-external-link-alt" />
                 </q-item-section>
-                <q-item-section>Abrir Registro</q-item-section>
+                <q-item-section>Abrir Registro {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
               </q-item>
               <q-item v-if="allow_insert" clickable v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar">
                 <q-item-section avatar>
                   <q-icon color="primary" name="fas fa-copy" />
                 </q-item-section>
-                <q-item-section>Copiar Registro</q-item-section>
+                <q-item-section>Copiar Registro {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
               </q-item>
             </q-list>
           </q-menu>

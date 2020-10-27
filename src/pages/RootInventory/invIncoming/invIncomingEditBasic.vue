@@ -3,7 +3,7 @@
     <!--partnerID-->
     <q-input
         ref="partnerName" :readonly="!editMode"
-        placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
+        placeholder="Seleccione el Proveedor/Cliente (*)" label="Proveedor/Cliente (*)" filled
         :value="partnerName" 
         @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
         :rules="[

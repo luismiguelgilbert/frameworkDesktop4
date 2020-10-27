@@ -13,6 +13,10 @@
           //{ name: 'lineID', required: true, label: 'lineID', align: 'left', field: row => row.lineID, sortable: true },
           { name: 'pos_code', required: true, label: 'Número de Serie del Punto de Emisión', align: 'left', field: row => row.pos_code, sortable: true },
           { name: 'esElectronica', required: true, label: 'Emisión Electrónica?', align: 'center', field: row => row.esElectronica, sortable: true },
+          { name: 'firstNumberAR', required: true, label: 'Facturas', align: 'right', field: row => row.firstNumberAR, sortable: true },
+          { name: 'firstNumberDelivery', required: true, label: 'Guías', align: 'right', field: row => row.firstNumberDelivery, sortable: true },
+          { name: 'firstNumberNC', required: true, label: 'Notas de Crédito', align: 'right', field: row => row.firstNumberNC, sortable: true },
+          { name: 'firstNumberRetencion', required: true, label: 'Retenciones', align: 'right', field: row => row.firstNumberRetencion, sortable: true },
           { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
         ]"
 
@@ -29,6 +33,34 @@
             
             <q-td key="esElectronica" :props="props">
               <q-toggle :value="props.row.esElectronica" color="primary" icon="fas fa-plug" dense @input="updateRow(!props.row.esElectronica,'esElectronica',props.row)" />
+            </q-td>
+
+            <q-td key="firstNumberAR" :props="props" title="Secuencia Inicial de Facturas" >
+              <q-input borderless
+                :value="props.row.firstNumberAR" dense input-class="text-right" :min="0" type="number"
+                @input="(value)=>{updateRow(value,'firstNumberAR',props.row)}"
+                />
+            </q-td>
+            
+            <q-td key="firstNumberDelivery" :props="props" title="Secuencia Inicial de Guias de Remisión" >
+              <q-input borderless
+                :value="props.row.firstNumberDelivery" dense input-class="text-right" :min="0" type="number"
+                @input="(value)=>{updateRow(value,'firstNumberDelivery',props.row)}"
+                />
+            </q-td>
+
+            <q-td key="firstNumberNC" :props="props" title="Secuencia Inicial de Notas de Crédito" >
+              <q-input borderless
+                :value="props.row.firstNumberNC" dense input-class="text-right" :min="0" type="number"
+                @input="(value)=>{updateRow(value,'firstNumberNC',props.row)}"
+                />
+            </q-td>
+
+            <q-td key="firstNumberRetencion" :props="props" title="Secuencia Inicial de Retenciones" >
+              <q-input borderless
+                :value="props.row.firstNumberRetencion" dense input-class="text-right" :min="0" type="number"
+                @input="(value)=>{updateRow(value,'firstNumberRetencion',props.row)}"
+                />
             </q-td>
             
             <q-td key="estado" :props="props">

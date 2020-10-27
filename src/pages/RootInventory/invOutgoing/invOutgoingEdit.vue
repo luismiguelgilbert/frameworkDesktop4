@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Ingreso':'Ver Ingreso: '+editRecord.row.kardexID_ux}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Egreso':'Ver Egreso: '+editRecord.row.kardexID_ux}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -140,7 +140,7 @@ export default ({
         this.loadingData = true
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spInvKardexSelectEdit',
+            url: this.apiURL + 'spInvKardexOutgoingSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
@@ -191,7 +191,7 @@ export default ({
                     ,accountLines: this.editData.accountLines
                     ,files: this.editData.files
                 }
-                this.$axios.post( this.apiURL + 'spInvKardexIncomingUpdate', {
+                this.$axios.post( this.apiURL + 'spInvKardexOutgoingUpdate', {
                         userCode: this.userCode,
                         userCompany: this.userCompany,
                         //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
