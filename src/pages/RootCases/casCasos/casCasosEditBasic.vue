@@ -67,6 +67,14 @@
         <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
     </q-input>
 
+    <q-input class="q-pb-md"
+        ref="referenceNumber" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Escriba el Número de Referencia del Caso" label="Número de Referencia" filled
+        v-model="referenceNumber"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
+    </q-input>
+
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Socio" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -168,6 +176,10 @@ export default ({
         name_es: {
             get () { return this.$store.state[this.moduleName].editData.basic.name_es },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'name_es', value: val}) }
+        },
+        referenceNumber: {
+            get () { return this.$store.state[this.moduleName].editData.basic.referenceNumber },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'referenceNumber', value: val}) }
         },
         caseTypeID: {
             get () { return this.$store.state[this.moduleName].editData.basic.caseTypeID },

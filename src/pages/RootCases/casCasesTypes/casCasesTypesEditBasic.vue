@@ -27,6 +27,14 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-compress-alt" /></template>
     </q-input>
+    <q-input class="q-pb-md"
+        ref="avgDurationInMonths" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Ingrese la Duración Promedio del Tipo de Caso (Meses)" label="Duración Promedio del Tipo de Caso (Meses)" filled
+        v-model="avgDurationInMonths" type="number" :min="0"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+    </q-input>
+    
 
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Tipo de Caso" filled
@@ -84,6 +92,10 @@ export default ({
         short_name_es: {
             get () { return this.$store.state[this.moduleName].editData.basic.short_name_es },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'short_name_es', value: val}) }
+        },
+        avgDurationInMonths: {
+            get () { return this.$store.state[this.moduleName].editData.basic.avgDurationInMonths },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'avgDurationInMonths', value: val}) }
         },
         comments:  {
             get () { return this.$store.state[this.moduleName].editData.basic.comments },

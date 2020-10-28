@@ -31,7 +31,7 @@
             </q-tr>
       </template>
         <template v-slot:top>
-            <q-btn label="Agregar Material" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
+            <q-btn label="Agregar Usuario" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
             <q-space />
         </template>
     </q-table>

@@ -8,6 +8,15 @@
     <q-separator />
     <q-list dense separator class="scroll" style="height: calc(100vh - 190px);">
         <q-item v-for="(columna, index) in columnsUser" :key="index">
+            <q-menu touch-position context-menu>
+                <q-bar class="bg-primary text-white q-pl-none q-pr-none">
+                    <div class="text-white q-pl-md">{{columna.label}}</div>
+                </q-bar>
+                <q-form class="q-pa-md">
+                    <q-input :value="columna.min_width" label="Ancho Mínimo" dense type="number" :min="0" debounce="500" @input="(value)=>{updateRow(value,'min_width',columna)}" />
+                    <q-input :value="columna.max_width" label="Ancho Máximo" dense type="number" :min="0" debounce="500" @input="(value)=>{updateRow(value,'max_width',columna)}" />
+                </q-form>
+            </q-menu>
             <q-item-section side>
                 <q-checkbox 
                     :disable="columna.is_required" 
@@ -115,16 +124,38 @@ export default({
             this.columnsUser = this.columnsSystem
             this.loadingData = false;
         },
+        updateRow(newVal, colName, row){
+            try{
+                this.loadingData = true;
+                let cloneResult = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].columnsUser)) //clona
+                cloneResult.find(x=>x.db_column==row.db_column)[colName] = parseFloat(newVal) //cambia el valor
+                let newColumn = cloneResult.find(x=>x.db_column==row.db_column)
+                if(newColumn.min_width > newColumn.max_width){
+                    newColumn.max_width = newColumn.min_width
+                }
+                newColumn.style = 'min-width: ' + newColumn.min_width + 'px; max-width: '+newColumn.max_width+'px;'
+                cloneResult.find(x=>x.db_column==row.db_column).min_width = newColumn.min_width  //cambia el valor
+                cloneResult.find(x=>x.db_column==row.db_column).max_width = newColumn.max_width  //cambia el valor
+                cloneResult.find(x=>x.db_column==row.db_column).style = newColumn.style //cambia el valor
+                this.columnsUser = cloneResult;
+                this.loadingData = false;
+            }catch(ex){
+                console.error(ex)
+            }
+        },
         saveConfig(){
                 this.loadingData = true
                 let gridColumnsFormated = []
                 let contador = 0;
                 this.columnsUser.map(x => {
+                            console.dir(x)
                     contador = contador + 1;
                     gridColumnsFormated.push({
                         db_column: x.db_column
                         ,position: contador
                         ,is_visible: x.is_visible
+                        ,min_width: x.min_width
+                        ,max_width: x.max_width
                         //,min_width: parseInt(x.style.replace(/\D/g,''))
                     })
                 })
