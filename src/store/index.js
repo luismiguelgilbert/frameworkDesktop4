@@ -39,6 +39,8 @@ import mktPORet from './mktPORet' //mktPORet
 import casCasesTypes from './casCasesTypes' //casCasesTypes
 import casCasos from './casCasos' //casCasos
 import casClientes from './casClientes' //casClientes
+import casContracts from './casContracts' //casContracts
+import casInvoices from './casInvoices' //casInvoices
 import casLocations from './casLocations' //casLocations
 import casTasks from './casTasks' //casTasks
 import casTasksTypes from './casTasksTypes' //casTasksTypes
@@ -114,6 +116,8 @@ export default function (/* { ssrContext } */) {
       ,casLocations
       ,casTasks
       ,casTasksTypes
+      ,casContracts
+      ,casInvoices
     },
 
     // enable strict mode (adds overhead!)

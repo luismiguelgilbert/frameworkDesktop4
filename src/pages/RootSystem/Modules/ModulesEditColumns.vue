@@ -129,7 +129,17 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-text-width" /></template>
       </q-input>
-      <q-select
+      <q-input
+        ref="label" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Ingrese longitud máxima del campo (*)" label="Ancho máxima de columna (*)" filled type="number"
+        v-model="selectedColumn.default_max_width"
+        :rules="[
+                val => !!val || '* Requerido',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-text-width" /></template>
+      </q-input>
+      <q-select class="q-mt-xl"
           label="Tipo de Dato en Interface (*)" placeholder="Seleccione el tipo de datos en interface" emit-value map-options filled
           :options="[{value: 'bool', label: 'bool'}
                     ,{value: 'date', label: 'date'}
@@ -149,7 +159,7 @@
           ]">
           <template v-slot:prepend><q-icon name="fas fa-keyboard" /></template>
       </q-select>
-      <q-select v-if="selectedColumn.ux_type=='lookup'"
+      <q-select v-if="selectedColumn.ux_type=='lookup'" class="q-mt-md"
           label="Tipo de Join (*)" placeholder="Seleccione el tipo de join" emit-value map-options filled
           :options="[{value: 'INNER JOIN', label: 'INNER JOIN'}
                     ,{value: 'LEFT JOIN', label: 'LEFT JOIN'}
@@ -188,7 +198,7 @@
           v-model="selectedColumn.lookup_is_company_filtered" color="positive" label="Filtrado por compañía?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
           />
       </div>
-      <q-select
+      <q-select class="q-mt-xl"
           label="Tipo de Celda usada en Interface (*)" placeholder="Seleccione el tipo de celda en interface" emit-value map-options filled
           :options="[{value: 'div', label: 'div'}
                     ,{value: 'estado', label: 'estado'}
@@ -324,6 +334,7 @@ export default ({
                 ,db_type: x.data_type
                 ,default_is_visible: true
                 ,default_min_width: 120
+                ,default_max_width: 120
                 ,default_position: contador
                 ,icon: ""
                 ,isOpenButton: contador==1?true:false

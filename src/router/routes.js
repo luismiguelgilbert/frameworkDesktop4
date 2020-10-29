@@ -103,6 +103,10 @@ const routes = [
       ,{ path: 'RootCases/casTasksTypesEdit', component: () => import('pages/RootCases/casTasksTypes/casTasksTypesEdit.vue') }
       ,{ path: 'RootCases/casLocations', component: () => import('pages/RootCases/casLocations/casLocations.vue') }
       ,{ path: 'RootCases/casLocationsEdit', component: () => import('pages/RootCases/casLocations/casLocationsEdit.vue') }
+      ,{ path: 'RootCases/casContracts', component: () => import('pages/RootCases/casContracts/casContracts.vue') }
+      ,{ path: 'RootCases/casContractsEdit', component: () => import('pages/RootCases/casContracts/casContractsEdit.vue') }
+      ,{ path: 'RootCases/casInvoices', component: () => import('pages/RootCases/casInvoices/casInvoices.vue') }
+      ,{ path: 'RootCases/casInvoicesEdit', component: () => import('pages/RootCases/casInvoices/casInvoicesEdit.vue') }
       //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/Employees.vue') }
       //SCHOENSTATT

@@ -3,6 +3,19 @@
     <q-bar class="bg-primary text-white q-pl-none q-pr-none">
         <q-btn label="Columnas" flat stretch color="white" />
         <q-space />
+        <q-select title="Estilo de Tabla"
+            v-model="userTableLines" dense borderless emit-value map-options 
+            :dark="userColor=='blackDark'?undefined:true"
+            :options-dark="userColor=='blackDark'?true:false"
+            :options="[
+                    { label: 'Horizontal', value: 'horizontal' },
+                    { label: 'Vertical', value: 'vertical' },
+                    { label: 'Celdas', value: 'cell' },
+                    { label: 'Ninguno', value: 'none' },
+                ]"
+            >
+            <template v-slot:prepend> <q-icon name="fas fa-border-all" size="xs" color="white" /> </template>
+        </q-select>
         <q-btn color="white" icon="fas fa-times" flat stretch title="Ocultar panel" @click="isColumnsDrawerVisible = false" />
     </q-bar>
     <q-separator />
@@ -72,6 +85,8 @@ export default({
             get () { return this.$store.state[this.moduleName].columnsUser }, 
             set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'columnsUser', value: val}) }  
         },
+        userColor: { get () { return this.$store.state.main.userColor }  },
+        userTableLines: { get () { return this.$store.state.main.userTableLines }, set (val) { this.$store.commit('main/updateState', {key: 'userTableLines', value: val}) } },
         isColumnsDrawerVisible: { 
             get () { return this.$store.state[this.moduleName].isColumnsDrawerVisible }, 
             set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'isColumnsDrawerVisible', value: val}) }  

@@ -27,6 +27,7 @@
       >
       <template v-slot:body-cell="props" >
         <q-td :props="props" class="text-weight-medium ellipsis no-padding" :title="props.value" >
+          
           <q-menu touch-position context-menu :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'">
             <q-list separator style="min-width: 100px">
               <q-item clickable v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir">
@@ -43,13 +44,19 @@
               </q-item>
             </q-list>
           </q-menu>
-          <div v-if="props.col.cellComponent=='estado'" class="q-pl-xs">
+          <q-btn 
+            v-if="props.col.is_key" flat color="primary" dense size="sm" 
+            @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}"
+            >
+            <u>{{props.value}}</u>
+          </q-btn>
+          <div v-if="!props.col.is_key&&props.col.cellComponent=='estado'" class="q-pl-xs">
             <q-item dense class="no-padding" style="min-height: 20px !important;">
               <q-item-section side class="q-pl-none q-pr-xs" ><q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" /></q-item-section>
               <q-item-section><q-item-label>{{props.value}}</q-item-label></q-item-section>
             </q-item>
           </div>
-          <div v-if="props.col.cellComponent=='image'" >
+          <div v-if="!props.col.is_key&&props.col.cellComponent=='image'" >
             <q-avatar size="20px">
                 <q-icon v-if="props.value == null" name="fas fa-camera" :color="userColor=='blackDark'?'white':'grey-7'" />
                 <q-img v-if="props.value != null" :src="$q.sessionStorage.getItem('serverFilesPath') + props.value">
@@ -59,15 +66,22 @@
                 </q-img>
             </q-avatar>
           </div>
-          <div v-if="props.col.cellComponent=='div'" class="q-pl-xs q-pr-sm">{{props.value}}</div>
-          <div v-if="props.col.cellComponent=='bool'" ><q-toggle class="no-padding" style="min-height: 20px !important;" :color="props.col.name=='voided'?'red':'primary'" :icon="props.col.name=='voided'?'fas fa-disable':undefined" size="xs"  :value="props.value"  /></div>
-          <div v-if="props.col.ux_type=='open'&&shouldHideTableButtons==false" style="max-width: 60px;">
+          <div v-if="!props.col.is_key&&props.col.cellComponent=='div'" class="q-pl-xs q-pr-sm">{{props.value}}</div>
+          <div v-if="!props.col.is_key&&props.col.cellComponent=='bool'" >
+            <q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" />
+          </div>
+          <div v-if="!props.col.is_key&&props.col.ux_type=='open'&&shouldHideTableButtons==false" style="max-width: 60px;">
             <q-btn flat size="xs" round icon="fas fa-external-link-alt"  color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir" />
             <q-btn v-if="allow_insert" flat round size="xs" icon="fas fa-copy" class="cursor-pointer" color="primary" @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar" />
           </div>
         </q-td>
       </template>
+      <template v-slot:bottom-row >
+        <q-tr></q-tr>
+        <!--<q-separator class="q-ml-xl" />-->
+      </template>
     </q-table>
+    
 </div>
 </template>
 <style lang="sass">
