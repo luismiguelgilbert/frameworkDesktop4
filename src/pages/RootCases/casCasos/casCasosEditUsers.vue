@@ -3,37 +3,38 @@
     <q-table
           :data="users"
           :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-          table-style="min-height: 150px; max-height: calc(100vh - 225px)"
+          table-style="min-height: calc(100vh - 265px); max-height: calc(100vh - 265px)"
           row-key="sys_user_code"
-          virtual-scroll
           :rows-per-page-options="[0]"
-          hide-bottom dense
+          dense
+          :virtual-scroll="users.length>25"
           :filter="filterString"
           :columns="[
             { name: 'sys_user_code', required: true, label: 'Nombre del Usuario', align: 'left', field: row => row.sys_user_code, sortable: true },
             { name: 'isDefault', required: true, label: 'Principal?', align: 'center', field: row => row.isDefault, sortable: true },
             { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
           ]"
-
-
     >
       <template v-slot:body="props">
             <q-tr :props="props">
               <q-td key="sys_user_code" :props="props">
                 {{ props.row.sys_user_fullname }}
               </q-td>
-             <q-td key="isDefault" :props="props">
-                <q-checkbox :value="props.row.isDefault" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.isDefault,'isDefault',props.row)" />
+              <q-td key="isDefault" :props="props">
+                <q-checkbox :value="props.row.isDefault" color="primary" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.isDefault,'isDefault',props.row)" />
               </q-td>
               <q-td key="estado" :props="props">
-                <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+                <q-checkbox :value="props.row.estado" color="positive" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.estado,'estado',props.row)" />
               </q-td>
             </q-tr>
       </template>
-        <template v-slot:top>
-            <q-btn label="Agregar Usuario" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
-            <q-space />
-        </template>
+      <template v-slot:top>
+        <q-btn label="Agregar Usuario" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
+        <q-space />
+      </template>
+      <template v-slot:bottom-row >
+        <q-tr></q-tr>
+      </template>
     </q-table>
 
     <q-dialog v-model="prompt">

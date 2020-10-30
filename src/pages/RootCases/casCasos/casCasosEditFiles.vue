@@ -45,7 +45,7 @@
             </q-td>
 
             <q-td key="estado" :props="props">
-              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+              <q-checkbox :value="props.row.estado" color="positive" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.estado,'estado',props.row)" />
             </q-td>
 
 

@@ -1,49 +1,15 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
-    <div class="row">
-      <q-toggle class="col-4"
-        v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        />
-    </div>
-
-    <!--caseID-->
     <q-input
-        ref="caseName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione el Caso (*)" label="Caso (*)" filled
-        :value="caseName"
-        @keyup.keyCodes.113="openSearchCase('caseID','caseName',caseID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-folder-open" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchCase('caseID','caseName',caseID)"/></template>
-    </q-input>
-    
-    <!--taskType-->
-    <q-input
-        ref="taskTypeName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione el Tipo de Actividad (*)" label="Tipo de Actividad (*)" filled
-        :value="taskTypeName"
-        @keyup.keyCodes.113="openSearchTaskType('taskTypeID','taskTypeName',taskTypeID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-tasks" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchTaskType('taskTypeID','taskTypeName',taskTypeID)"/></template>
-    </q-input>
-
-    <q-input
-        ref="taskDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="nextDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         mask="date" :rules="['date']"
-        placeholder="Ingrese la Fecha de la Actividad" label="Fecha de Actividad" filled
-        v-model="taskDate"
+        placeholder="Ingrese la Fecha de la Próxima Actividad" label="Próxima Actividad" filled
+        v-model="nextDate" 
         >
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
-            <q-popup-proxy ref="qDateProxy_taskDate" transition-show="scale" transition-hide="scale">
-              <q-date v-model="taskDate">
+            <q-popup-proxy ref="qDateProxy_nextDate" transition-show="scale" transition-hide="scale">
+              <q-date v-model="nextDate">
                 <div class="row items-center justify-end">
                   <q-btn v-close-popup label="Seleccionar" color="primary" flat />
                 </div>
@@ -55,64 +21,14 @@
     </q-input>
 
     <q-editor
-        v-model="comments" placeholder="Ingrese sus Comentarios de la actividad que realizó"
+        v-model="nextDateComments" placeholder="Comentarios de la Próxima Actividad"
         :toolbar="[['bold', 'italic', 'strike', 'underline'],['quote', 'unordered', 'ordered', 'outdent', 'indent'],]"
         />
-
-    <q-input
-        ref="taskLength" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba la Duración de la Actividad en Horas o fracción (*)" label="Duración en Horas (*)" filled
-        v-model="taskLength" type="number" :min=0
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-clock" /></template>
-    </q-input>
-
-    <div class="row q-mt-none q-mb-md" >
-      <q-toggle 
-        v-model="taskBillable" icon="fas fa-check" color="positive" label="Facturable?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        />
-    </div>
+    
+   
 
     <br><br>
 
-    <!--Dialog Casos-->
-    <q-dialog v-model="isSearchDialog">
-        <mainLookup 
-            titleBar="Buscar Caso"
-            :data="this.lookup_cases"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                    ,{ name: 'label', required: true, label: 'Nombre del Caso', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
-                    ,{ name: 'caseTypeName', required: true, label: 'Tipo de Caso', align: 'left', field: row => row.caseTypeName , sortable: false, style: 'min-width: 200px; max-width: 200px;' }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            @onCancel="isSearchDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        />
-    </q-dialog>
-
-    <!--Dialog Casos-->
-    <q-dialog v-model="isSearchTaskTypeDialog">
-        <mainLookup 
-            titleBar="Buscar Caso"
-            :data="this.lookup_taskTypes"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                    ,{ name: 'label', required: true, label: 'Nombre del Caso', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
-                    ,{ name: 'caseTypeName', required: true, label: 'Tipo de Caso', align: 'left', field: row => row.caseTypeName , sortable: false, style: 'min-width: 200px; max-width: 200px;' }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            @onCancel="isSearchTaskTypeDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        />
-    </q-dialog>
 </q-form>
 </template>
 <script>

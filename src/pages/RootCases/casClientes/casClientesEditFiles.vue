@@ -3,11 +3,11 @@
   <q-table
       :data="files"
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-      table-style="min-height: 150px; max-height: calc(100vh - 225px)"
+      table-style="min-height: calc(100vh - 265px); max-height: calc(100vh - 265px)"
       row-key="attach_id"
-      virtual-scroll
       :rows-per-page-options="[0]"
-      hide-bottom dense
+      dense
+      :virtual-scroll="files.length>25"
       :filter="filterString"
       :columns="[
         //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
@@ -20,8 +20,6 @@
         { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
 
       ]"
-
-
     >
     <template v-slot:body="props">
           <q-tr :props="props">
@@ -45,7 +43,7 @@
             </q-td>
 
             <q-td key="estado" :props="props">
-              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+              <q-checkbox :value="props.row.estado" color="positive" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.estado,'estado',props.row)" />
             </q-td>
 
 
@@ -59,6 +57,9 @@
             <q-icon name="fas fa-search" />
           </template>
         </q-input>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
     </template>
   </q-table>
   <q-dialog v-model="dialogVisible">

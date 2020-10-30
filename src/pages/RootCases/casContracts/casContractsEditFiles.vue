@@ -122,7 +122,7 @@ import { date } from 'quasar';
 export default ({
     data () {
         return {
-            moduleName: "casContracts", row_id: 32	/*32=casClientes*/, filterString: '', dialogVisible: false
+            moduleName: "casContracts", row_id: 38	/*38=casContracts*/, filterString: '', dialogVisible: false
         }
     },
     methods:{

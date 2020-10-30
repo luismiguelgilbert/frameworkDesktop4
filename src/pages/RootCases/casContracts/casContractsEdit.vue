@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Cliente':'Editar Cliente: '+editRecord.value}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Contrato':'Editar Contrato: '+editRecord.value}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -26,26 +26,15 @@
                         </q-item-section>
                     </q-item>
                     
-                    <q-item clickable @click="tab='contacts'" :active="tab=='contacts'" active-class="bg-primary text-white" >
+                    <q-item clickable @click="tab='clientes'" :active="tab=='clientes'" active-class="bg-primary text-white" >
                         <q-item-section side>
-                            <q-icon name="fas fa-address-book"  :color="tab=='contacts'?'white':'grey-7'" />
+                            <q-icon name="fas fa-handshake"  :color="tab=='clientes'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='contacts'?'text-white':'text-grey-7')">Contactos del Cliente</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='clientes'?'text-white':'text-grey-7')">Cliente Cubiertos</q-item-label>
                         </q-item-section>
                     </q-item>
 
-                    <q-item clickable @click="tab='cases'" :active="tab=='cases'" active-class="bg-primary text-white" >
-                        <q-item-section side>
-                            <q-icon name="fas fa-folder-open"  :color="tab=='cases'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='cases'?'text-white':'text-grey-7')">Casos del Cliente ({{cases.length}})</q-item-label>
-                        </q-item-section>
-                    </q-item>
-
-                    
-                   
                     <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
@@ -75,8 +64,7 @@
                     >
 
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
-                    <q-tab-panel name="contacts"> <contactsComponent ref="contactsComponent" /> </q-tab-panel>
-                    <q-tab-panel name="cases"> <casesComponent ref="casesComponent" /> </q-tab-panel>
+                    <q-tab-panel name="clientes"> <clientesComponent ref="clientesComponent" /> </q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
                     <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
 
@@ -97,8 +85,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './casContractsEditBasic'
-import contactsComponent from './casContractsEditContacts'
-import casesComponent from './casContractsEditCases'
+import clientesComponent from './casContractsEditClientes'
 import filesComponent from './casContractsEditFiles'
 import historyComponent from './casContractsEditHistory'
 
@@ -107,8 +94,7 @@ import historyComponent from './casContractsEditHistory'
 export default ({
   components:{
      basicComponent: basicComponent
-    ,contactsComponent: contactsComponent
-    ,casesComponent: casesComponent
+    ,clientesComponent: clientesComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
@@ -140,13 +126,13 @@ export default ({
         this.loadingData = true
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spCasClientesSelectEdit',
+            url: this.apiURL + 'spCasContractsSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
                 userCompany: this.userCompany,
                 userLanguage: 'es',
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.customerID_ux?this.editRecord.row.customerID_ux:0,
+                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.contractID_ux?this.editRecord.row.contractID_ux:0,
                 editMode: this.editMode
             }
         }).then((response) => {
@@ -186,16 +172,16 @@ export default ({
 
                 let newEditData = {
                      basic: this.editData.basic
-                    ,contacts: this.editData.contacts
+                    ,clientes: this.editData.clientes.filter(x=>x.is_allowed).map(x=>x.customerID)
                     ,files: this.editData.files
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spCasClientesUpdate', {
+                this.$axios.post( this.apiURL + 'spCasContratosUpdate', {
                         userCode: this.userCode,
                         userCompany: this.userCompany,
                         //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                        row_id: this.editMode?0:this.editRecord.row.customerID_ux,
+                        row_id: this.editMode?0:this.editRecord.row.contractID_ux,
                         "editRecord": JSON.stringify(newEditData),
                     }
                 , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }

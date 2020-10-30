@@ -78,7 +78,6 @@
       </template>
       <template v-slot:bottom-row >
         <q-tr></q-tr>
-        <!--<q-separator class="q-ml-xl" />-->
       </template>
     </q-table>
     

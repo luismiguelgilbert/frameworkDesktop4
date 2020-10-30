@@ -22,7 +22,16 @@
                             <q-icon name="fas fa-info-circle" :color="tab=='basic'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Información del Socio</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Información de la Actividad</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                    
+                    <q-item clickable @click="tab='next'" :active="tab=='next'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-calendar" :color="tab=='next'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='next'?'text-white':'text-grey-7')">Próxima Actividad</q-item-label>
                         </q-item-section>
                     </q-item>
                     
@@ -46,6 +55,7 @@
                     transition-next="jump-up"
                     >
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
+                    <q-tab-panel name="next"> <nextComponent ref="nextComponent" /> </q-tab-panel>
                     <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
 
                 </q-tab-panels>
@@ -65,7 +75,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './casTasksEditBasic'
-import contactsComponent from './casTasksEditContacts'
+import nextComponent from './casTasksEditNext'
 import filesComponent from './casTasksEditFiles'
 import historyComponent from './casTasksEditHistory'
 
@@ -74,7 +84,7 @@ import historyComponent from './casTasksEditHistory'
 export default ({
   components:{
      basicComponent: basicComponent
-    ,contactsComponent: contactsComponent
+    ,nextComponent: nextComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
@@ -112,11 +122,7 @@ export default ({
                 userCode: this.userCode,
                 userCompany: this.userCompany,
                 userLanguage: 'es',
-                //row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.ux_pk_ux?this.editRecord.row.ux_pk_ux:0,
-                //al ser un caso especial (es un PK compuesto),se envía los 2 códigos
-                //Notar que caseID es un campo LOOKUP, entonces se envía el value
-                caseID: this.editRecord&&this.editRecord.row&&this.editRecord.row.caseID_ux_val?this.editRecord.row.caseID_ux_val:0,
-                lineID: this.editRecord&&this.editRecord.row&&this.editRecord.row.lineID_ux?this.editRecord.row.lineID_ux:0,
+                row_id: this.editMode?0:this.editRecord.row.activityID_ux,
                 editMode: this.editMode
             }
         }).then((response) => {
@@ -162,12 +168,7 @@ export default ({
                 this.$axios.post( this.apiURL + 'spCasCasesTasksUpdate', {
                         userCode: this.userCode,
                         userCompany: this.userCompany,
-                        //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                        //al ser un caso especial (es un PK compuesto),se envía los 2 códigos
-                        //Notar que caseID es un campo LOOKUP, entonces se envía el value
-                        
-                        caseID: this.editMode?newEditData.basic.caseID:this.editRecord.row.caseID_ux_val,
-                        lineID: this.editMode?0:this.editRecord.row.lineID_ux,
+                        row_id: this.editMode?0:this.editRecord.row.activityID_ux,
                         "editRecord": JSON.stringify(newEditData),
                     }
                 , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }

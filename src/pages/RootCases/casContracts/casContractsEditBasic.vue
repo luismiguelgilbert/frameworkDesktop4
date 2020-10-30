@@ -8,53 +8,66 @@
 
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba la Razón Social del socio (*)" label="Razón Social (*)" filled
+        placeholder="Escriba Nombre Descriptivo del Contrato (*)" label="Nombre del Contrato (*)" filled
         v-model="name_es"
         :rules="[
                 val => !!val || '* Requerido',
                 val => val.length > 0 || 'Campo debe tener al menos 1 carateres',
         ]"
         >
-        <template v-slot:prepend><q-icon name="fas fa-id-card" /></template>
+        <template v-slot:prepend><q-icon name="fas fa-file-contract" /></template>
     </q-input>
+
     <q-input
-        ref="partner_ruc" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba el Número de Identificación / RUC del socio (*)" label="Número de Identificación / RUC (*)" filled
-        v-model="partner_ruc"
+        ref="startDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        mask="date" :rules="['date']"
+        placeholder="Ingrese la fecha de inicio" label="Fecha de Inicio" filled
+        v-model="startDate"
+        >
+        <template v-slot:append>
+          <q-icon name="event" class="cursor-pointer">
+            <q-popup-proxy ref="qDateProxy_startDate" transition-show="scale" transition-hide="scale">
+              <q-date v-model="startDate">
+                <div class="row items-center justify-end">
+                  <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                </div>
+              </q-date>
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+        <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+    </q-input>
+    
+    
+    <q-select
+        label="Frecuencia de Facturación (*)" placeholder="Seleccione Frecuencia de Facturación (*)" emit-value map-options filled
+        :options="[{value: 1, label: 'Mensual'},{value: 2, label: 'Anual'}]" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        v-model="frequency"
+        ref="frequency"
         :rules="[
-                val => !!val || '* Requerido',
-                val => val.length > 0 || 'Campo debe tener al menos 1 carateres',
+                val => val!= null || '* Requerido',
         ]"
         >
-        <template v-slot:prepend><q-icon name="fas fa-passport" /></template>
-    </q-input>
-
-    <q-input class="q-mb-md"
-        ref="short_name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba el Nombre Comercial del socio (*)" label="Nombre Comercial" filled
-        v-model="short_name_es"
-        >
-        <template v-slot:prepend><q-icon name="far fa-id-card" /></template>
-    </q-input>
-
-    <q-input class="q-mb-md"
-        ref="billing_address" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba la dirección para uso en facturas del socio (*)" label="Dirección para Facturas" filled
-        v-model="billing_address"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-map-marked" /></template>
-    </q-input>
-
-    <q-input class="q-mb-md"
-        ref="billing_phone" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba el teléfono para uso en facturas del socio (*)" label="Teléfono para Facturas" filled
-        v-model="billing_phone"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-phone" /></template>
-    </q-input>
+        <template v-slot:prepend><q-icon name="fas fa-undo" /></template>
+    </q-select>
 
     <q-input
-        label="Comentarios" placeholder="Ingrese comentarios sobre este Socio" filled
+        ref="amount" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Escriba el valor a facturar periódicamente (*)" label="Monto a Facturar (*)" filled
+        v-model="amount" type="number" :min="0"
+        :rules="[
+                val => !!val || '* Requerido',
+                val => val > 0 || 'Campo debe tener al menos 1 carateres',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
+    </q-input>
+    
+
+    
+
+    <q-input
+        label="Comentarios" placeholder="Ingrese comentarios sobre este Contrato" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="comments"
         />
@@ -106,21 +119,17 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.name_es },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'name_es', value: val}) }
         },
-        partner_ruc: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_ruc },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_ruc', value: val}) }
+        startDate: {
+            get () { return this.$store.state[this.moduleName].editData.basic.startDate },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'startDate', value: val}) }
         },
-        short_name_es: {
-            get () { return this.$store.state[this.moduleName].editData.basic.short_name_es },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'short_name_es', value: val}) }
+        frequency: {
+            get () { return this.$store.state[this.moduleName].editData.basic.frequency },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'frequency', value: val}) }
         },
-        billing_address: {
-            get () { return this.$store.state[this.moduleName].editData.basic.billing_address },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'billing_address', value: val}) }
-        },
-        billing_phone: {
-            get () { return this.$store.state[this.moduleName].editData.basic.billing_phone },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'billing_phone', value: val}) }
+        amount: {
+            get () { return this.$store.state[this.moduleName].editData.basic.amount },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'amount', value: val}) }
         },
         comments:  {
             get () { return this.$store.state[this.moduleName].editData.basic.comments },

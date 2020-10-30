@@ -3,11 +3,11 @@
     <q-table
           :data="locations"
           :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-          table-style="min-height: 150px; max-height: calc(100vh - 225px)"
+          table-style="min-height: calc(100vh - 265px); max-height: calc(100vh - 265px)"
           row-key="value"
-          virtual-scroll
+          dense
+          :virtual-scroll="locations.length>25"
           :rows-per-page-options="[0]"
-          hide-bottom dense
           :filter="filterString"
           :columns="[
             { name: 'label', required: true, label: 'Nombre de Localidad', align: 'left', field: row => row.label, sortable: true },
@@ -23,10 +23,10 @@
                 {{ props.row.label }}
               </q-td>
              <q-td key="isDefault" :props="props">
-                <q-checkbox :value="props.row.isDefault" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.isDefault,'isDefault',props.row)" />
+                <q-checkbox :value="props.row.isDefault" color="primary" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.isDefault,'isDefault',props.row)" />
               </q-td>
               <q-td key="estado" :props="props">
-                <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+                <q-checkbox :value="props.row.estado" color="positive" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.estado,'estado',props.row)" />
               </q-td>
             </q-tr>
       </template>

@@ -2,11 +2,11 @@
 <q-table
       :data="cases"
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-      table-style="min-height: 150px; max-height: calc(100vh - 225px)"
+      table-style="min-height: calc(100vh - 265px); max-height: calc(100vh - 265px)"
       row-key="caseID"
-      virtual-scroll
       :rows-per-page-options="[0]"
-      hide-bottom dense
+      dense
+      :virtual-scroll="cases.length>25"
       :filter="filterString"
       :columns="[
         //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
@@ -30,7 +30,7 @@
             {{ props.row.startDate }}
         </q-td>
           <q-td key="estado" :props="props">
-            <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense /> <!--@input="updateRow(!props.row.estado,'estado',props.row)"-->
+            <q-checkbox :value="props.row.estado" color="positive" icon="fas fa-check" class="no-padding" dense size="30px"  />
           </q-td>
         </q-tr>
   </template>
@@ -42,6 +42,9 @@
           <q-icon name="fas fa-search" />
         </template>
       </q-input>
+  </template>
+  <template v-slot:bottom-row >
+    <q-tr></q-tr>
   </template>
 </q-table>
 
