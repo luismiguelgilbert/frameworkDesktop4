@@ -19,6 +19,10 @@ export const updateEditDataLocations = (state, value) => {
   state.editData.locations = value
 }
 
+export const updateEditDataPayterms = (state, value) => {
+    state.editData.payterms = value
+}
+
 export const resetToDefaultState = (state) => {
     Object.keys(index.intialState).map(x=>{
         state[x] = index.intialState[x]

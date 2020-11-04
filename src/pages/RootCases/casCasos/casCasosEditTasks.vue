@@ -10,20 +10,16 @@
       :filter="filterString"
       :columns="[
         //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
-        { name: 'contactName', required: true, label: 'Nombre Completo', align: 'left', field: row => row.contactName, sortable: true },
-        { name: 'mobile', required: true, label: 'Teléfono', align: 'left', field: row => row.mobile, sortable: true },
-        { name: 'mail', required: true, label: 'Correo Electrónico', align: 'left', field: row => row.mail, sortable: true },
-        { name: 'sendPO', required: true, label: 'Enviar Órdenes de Compra?', align: 'center', field: row => row.sendPO, sortable: true },
-        { name: 'sendSO', required: true, label: 'Órdenes de Venta?', align: 'center', field: row => row.sendSO, sortable: true },
-        { name: 'sendRET', required: true, label: 'Retenciones?', align: 'center', field: row => row.sendRET, sortable: true },
-        { name: 'sendBILL', required: true, label: 'Facturas?', align: 'center', field: row => row.sendBILL, sortable: true },
-        { name: 'sendINV', required: true, label: 'Guías?', align: 'center', field: row => row.sendINV, sortable: true },
-        { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
+        { name: 'taskDate', required: true, label: 'Fecha', align: 'left', field: row => row.taskDate, sortable: false },
+        { name: 'taskTypeName', required: true, label: 'Actividad', align: 'left', field: row => row.taskTypeName, sortable: true },
+        { name: 'taskLength', required: true, label: 'Duración', align: 'right', field: row => row.taskLength, sortable: true },
+        { name: 'sys_user_fullname', required: true, label: 'Usuario', align: 'left', field: row => row.sys_user_fullname, sortable: true },
+        { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, style: 'min-width: 300px;' },
       ]"
 
 
 >
-  <template v-slot:body="props">
+  <!--<template v-slot:body="props">
         <q-tr :props="props">
           <q-td key="contactName" :props="props">
             {{ props.row.contactName }}
@@ -64,7 +60,7 @@
             <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
           </q-td>
         </q-tr>
-  </template>
+  </template>-->
     <template v-slot:top>
         <!--<q-btn label="Agregar Actividad" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
         <q-space />

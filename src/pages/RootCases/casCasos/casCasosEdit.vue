@@ -64,16 +64,6 @@
 
                     
 
-                    <q-item clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" >
-                        <q-item-section side>
-                            <q-icon name="fas fa-cash-register"  :color="tab=='payments'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='payments'?'text-white':'text-grey-7')">Pagos Realizados</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                    
-                   
                     <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
@@ -106,7 +96,6 @@
                     <q-tab-panel name="locations"> <locationsComponent ref="locationsComponent" /> </q-tab-panel>
                     <q-tab-panel name="tasks"> <tasksComponent ref="tasksComponent" /> </q-tab-panel>
                     <q-tab-panel name="payterms"> <paytermsComponent ref="paytermsComponent" /> </q-tab-panel>
-                    <q-tab-panel name="payments"> <paymentsComponent ref="paymentsComponent" /> </q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
                     <q-tab-panel name="history">
                         <historyComponent />
@@ -133,7 +122,6 @@ import usersComponent from './casCasosEditUsers'
 import locationsComponent from './casCasosEditLocations'
 import tasksComponent from './casCasosEditTasks'
 import paytermsComponent from './casCasosEditPayterms'
-import paymentsComponent from './casCasosEditPayments'
 import filesComponent from './casCasosEditFiles'
 import historyComponent from './casCasosEditHistory'
 
@@ -146,7 +134,6 @@ export default ({
     ,locationsComponent: locationsComponent
     ,tasksComponent: tasksComponent
     ,paytermsComponent: paytermsComponent
-    ,paymentsComponent: paymentsComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
@@ -226,6 +213,7 @@ export default ({
                      basic: this.editData.basic
                     ,users: this.editData.users
                     ,locations: this.editData.locations
+                    ,payterms: this.editData.payterms
                     ,files: this.editData.files
                 }
                 //console.dir(this.editData)

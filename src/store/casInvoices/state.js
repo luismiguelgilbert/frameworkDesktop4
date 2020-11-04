@@ -22,8 +22,9 @@ export default function () {
      ,editMode: false //false = edit || new = new
      ,editData: {
         basic: {}
-       ,contacts: []
-       ,cases: []
+       ,payterms: []
+       ,payments: []
+       ,lookup_payterms: []
        ,files: []
        ,history: []
      }
