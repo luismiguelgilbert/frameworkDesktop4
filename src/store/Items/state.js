@@ -27,6 +27,7 @@ export default function () {
        ,partners: []
        ,pricelists: []
        ,bins: []
+       ,lots: []
        ,files: []
        ,history: []
      }

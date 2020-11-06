@@ -91,7 +91,8 @@
                         </q-item>
                     </div>
                     <div v-if="props.col.name=='open'" >
-                        <q-btn flat dense round size="xs" icon="fas fa-external-link-alt" class="cursor-pointer" color="primary" @click="openKardex(props)" title="Ver Kardex" />
+                        <q-btn flat dense round size="xs" icon="fas fa-external-link-alt" color="primary" @click="openKardex(props)" title="Ver Kardex" />
+                        <q-btn flat dense round size="xs" v-if="props.row.systemType==4" icon="fas fa-barcode" class="q-ml-md" color="primary" @click="openLots(props)" title="Ver Stock por Lote" />
                     </div>
                 </q-td>
             </template>
@@ -156,6 +157,39 @@
                             <div v-if="props.col.name=='partnerName'" >{{props.value}}</div>
                             <div v-if="props.col.name=='invDocName'" >{{props.value}}</div>
                             <div v-if="props.col.name=='invDocNumber'" >{{props.value}}</div>
+                        </q-td>
+                    </template>
+                </q-table>
+            </q-card-section>
+        </q-card>
+        <q-inner-loading :showing="loadingKardexData" style="z-index: 999;">
+            <q-spinner-ios size="50px" color="primary" />
+        </q-inner-loading>
+    </q-dialog>
+
+    <q-dialog v-model="isLotsDialog" v-if="kardexItemRow">
+        <q-card style="min-width: 550px;">
+            <q-bar class="bg-primary text-white">
+                Lotes de: {{kardexItemRow.invName}} ({{kardexItemRow.internal_code}})
+                <q-space />
+                <q-btn icon="fas fa-times" dense flat round color="white" sixe="xs" @click="isLotsDialog=false" class="no-padding" />
+            </q-bar>
+            <q-card-section class="no-padding">
+                <q-table
+                    :dense="userTableDense"
+                    :data="kardexDataRows"
+                    table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
+                    no-data-label="No hay registros"
+                    no-results-label="No se encontraron registros"
+                    loading-label="Cargando datos"
+                    virtual-scroll :rows-per-page-options="[0]" :pagination.sync="kardexPagination"
+                    :columns="lotsColumns"
+                    >
+                    <template v-slot:body-cell="props" >
+                        <q-td :props="props" >
+                            <div v-if="props.col.name=='quantity'" >{{props.value}}</div>
+                            <div v-if="props.col.name=='lotName'" >{{props.value}}</div>
+                            <div v-if="props.col.name=='RunningQTY'" >{{props.value}}</div>
                         </q-td>
                     </template>
                 </q-table>
@@ -278,6 +312,7 @@ export default ({
         isWHDialog: false,
         dataRows: [],
         isKardexDialog: false, kardexItemRow: null, loadingKardexData: false, kardexDataRows: [], kardexPagination: { rowsPerPage: 0 },
+        isLotsDialog: false,
         kardexColumns:[
                  {name:"moveDate",db_column:"moveDate",label:"Fecha",field:"moveDate",is_required:true,align:"left"}
                 ,{name:"directionName",db_column:"directionName",label:"Movimiento",field:"directionName",is_required:true,align:"left"}
@@ -289,6 +324,17 @@ export default ({
                 ,{name:"partnerName",db_column:"partnerName",label:"Proveedor",field:"partnerName",is_required:true,align:"left"}
                 ,{name:"invDocName",db_column:"invDocName",label:"Documento",field:"invDocName",is_required:true,align:"left"}
                 ,{name:"invDocNumber",db_column:"invDocNumber",label:"# Documento",field:"invDocNumber",is_required:true,align:"left"}
+            ]
+        ,
+        lotsColumns:[
+                 /*{name:"moveDate",db_column:"moveDate",label:"Fecha",field:"moveDate",is_required:true,align:"left"}
+                ,{name:"directionName",db_column:"directionName",label:"Movimiento",field:"directionName",is_required:true,align:"left"}
+                ,{name:"quantity",db_column:"quantity",label:"Cantidad",field:"quantity",is_required:true,align:"right"}*/
+                ,{name:"lotName",db_column:"lotName",label:"# Lote",field:"lotName",is_required:true,align:"left"}
+                ,{name:"RunningQTY",db_column:"RunningQTY",label:"Stock",field:"RunningQTY",is_required:true,align:"right"}
+                /*,{name:"partnerName",db_column:"partnerName",label:"Proveedor",field:"partnerName",is_required:true,align:"left"}
+                ,{name:"invDocName",db_column:"invDocName",label:"Documento",field:"invDocName",is_required:true,align:"left"}
+                ,{name:"invDocNumber",db_column:"invDocNumber",label:"# Documento",field:"invDocNumber",is_required:true,align:"left"}*/
             ]
     }
   },
@@ -401,6 +447,40 @@ export default ({
         this.$axios({
             method: 'GET',
             url: this.apiURL + 'spInvQueryWhIDInvIDGetData',
+            headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+            params: {
+                userCode: this.userCode,
+                userCompany: this.userCompany,
+                userLanguage: 'es',
+                whID: this.whID,
+                invID: this.kardexItemRow.invID,
+            }
+        }).then((response) => {
+            this.kardexDataRows = []
+            this.kardexDataRows = response.data
+            this.loadingKardexData = false
+        }).catch((error) => {
+            console.dir(error)
+            let mensaje = ''
+            if(error.message){ mensaje = error.message }
+            if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+            if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+            this.$q.notify({ html: true, multiLine: false, color: 'red'
+                ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+            })
+            this.loadingKardexData = false
+        })
+        
+    },
+    openLots(props){
+        this.kardexItemRow = props.row;
+        this.isLotsDialog = true;
+        this.loadingKardexData = true;
+        this.$axios({
+            method: 'GET',
+            url: this.apiURL + 'spInvQueryWhIDInvIDGetLotData',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,

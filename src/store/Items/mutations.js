@@ -23,6 +23,10 @@ export const updateEditDataBins = (state, value) => {
   state.editData.bins = value
 }
 
+export const updateEditDataLots = (state, value) => {
+  state.editData.lots = value
+}
+
 export const updateEditDataTaxes = (state, value) => {
   state.editData.taxes = value
 }

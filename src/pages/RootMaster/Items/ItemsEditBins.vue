@@ -2,7 +2,7 @@
 <q-table
       :data="bins"
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-      table-style="min-height: 150px; max-height: calc(100vh - 225px)"
+      table-style="min-height: calc(100vh - 225px); max-height: calc(100vh - 225px)"
       row-key="combinedID"
       virtual-scroll
       :rows-per-page-options="[0]"

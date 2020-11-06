@@ -137,7 +137,22 @@ export default ({
                         editMode: this.editMode
                     }
                 }).then((response) => {
-                    this.lines = response.data
+                    this.lines = JSON.parse(response.data[0].lines)
+                    this.lookup_lots = JSON.parse(response.data[0].lookup_lots)
+                    this.lots = [];
+                    //Build New lots
+                    /*let newRows = [];
+                    this.lines.filter(x=>x.systemType==4).map(x=>{
+                        newRows.push({
+                             lineID: x.lineID
+                            ,invID: x.invID
+                            ,invName: x.invName
+                            ,whID: x.whID
+                            ,maxQuantity: x.quantity
+                            ,quantity: 0
+                        })
+                    })
+                    this.lots = newRows;*/
                     this.$q.loading.hide()
                 }).catch((error) => {
                     console.dir(error)
@@ -206,6 +221,14 @@ export default ({
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+        },
+        lots: {
+            get () { return this.$store.state[this.moduleName].editData.lots },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLots', val) }
+        },
+        lookup_lots: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_lots },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLookupLots', val) }
         },
     },
 })

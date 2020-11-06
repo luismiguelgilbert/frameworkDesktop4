@@ -77,7 +77,7 @@
               :value="props.row.newQuantity" type="number" :min="0" :max="props.row.quantityOpen"
               dense item-aligned borderless :input-class="props.row.newQuantity>0?'text-right text-white':'text-right text-white'"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'newQuantity',props.row)}"
+              debounce="1000" @input="(value)=>{updateRow(value,'newQuantity',props.row)}"
               :readonly="!editMode"
               />
         </q-td>

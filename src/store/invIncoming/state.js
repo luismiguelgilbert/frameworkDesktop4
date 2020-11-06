@@ -23,6 +23,7 @@ export default function () {
      ,editData: {
         basic: {}
        ,lines: []
+       ,lookup_lots: []
        ,accountLines: []
        ,files: []
        ,history: []

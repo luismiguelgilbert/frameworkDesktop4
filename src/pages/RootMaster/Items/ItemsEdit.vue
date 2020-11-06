@@ -66,6 +66,14 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='vendors'?'text-white':'text-grey-7')">Proveedores Sugeridos</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item :disable="systemType!=4" clickable @click="tab='lots'" :active="tab=='lots'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-barcode"  :color="tab=='lots'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='lots'?'text-white':'text-grey-7')">Lotes y Series</q-item-label>
+                        </q-item-section>
+                    </q-item>
                     <q-item clickable @click="tab='bins'" :active="tab=='bins'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-warehouse"  :color="tab=='bins'?'white':'grey-7'" />
@@ -106,6 +114,7 @@
                     <q-tab-panel name="bom"> <bomComponent ref="bomComponent" /> </q-tab-panel>
                     <q-tab-panel name="vendors"> <vendorsComponent ref="vendorsComponent" /> </q-tab-panel>
                     <q-tab-panel name="pricelists"> <pricelistsComponent ref="pricelistsComponent" /> </q-tab-panel>
+                    <q-tab-panel name="lots"> <lotsComponent ref="lotsComponent" /> </q-tab-panel>
                     <q-tab-panel name="bins"> <binsComponent ref="binsComponent" /> </q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
                     <q-tab-panel name="picture"> <pictureComponent /> </q-tab-panel>
@@ -134,6 +143,7 @@ import vendorsComponent from './ItemsEditVendors'
 import filesComponent from './ItemsEditFiles'
 import pricelistsComponent from './ItemsEditPricelists'
 import binsComponent from './ItemsEditBins'
+import lotsComponent from './ItemsEditLots'
 import historyComponent from './ItemsEditHistory'
 
 
@@ -147,6 +157,7 @@ export default ({
     ,vendorsComponent: vendorsComponent
     ,filesComponent: filesComponent
     ,pricelistsComponent: pricelistsComponent
+    ,lotsComponent: lotsComponent
     ,binsComponent: binsComponent
     ,historyComponent: historyComponent
   },
@@ -228,6 +239,7 @@ export default ({
                     ,taxes: this.editData.taxes
                     ,partners: this.editData.partners
                     ,pricelists: this.editData.pricelists
+                    ,lots: this.editData.lots
                     ,bins: this.editData.bins
                     ,files: this.editData.files
                 }

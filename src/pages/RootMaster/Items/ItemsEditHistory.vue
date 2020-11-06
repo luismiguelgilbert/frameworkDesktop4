@@ -3,7 +3,7 @@
   <q-table
     :data="history"
     :class="userColor=='blackDark'?'my-sticky-header-history-dark bg-grey-10 ':'my-sticky-header-history'"
-    table-style="min-height: 150px; max-height: calc(100vh - 175px)"
+    table-style="min-height: calc(100vh - 175px); max-height: calc(100vh - 175px)"
     row-key="record_id"
     :columns="[
         { name: 'icon', label: 'Acción', field: 'icon', sortable: true, align: 'left', style: 'width: 30px', },

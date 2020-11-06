@@ -28,7 +28,7 @@
             </q-tr>
       </template>
         <template v-slot:top>
-            <q-btn label="Agregar Contacto" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
+            <q-btn label="Agregar Vendedor" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
             <q-space />
             <q-input borderless dense v-model="filterString" placeholder="Buscar...">
               <template v-slot:append>
