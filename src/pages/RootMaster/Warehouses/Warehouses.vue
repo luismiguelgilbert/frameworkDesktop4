@@ -187,6 +187,10 @@ export default ({
     userCode: { get () { return this.$store.state.main.userCode } },
     userCompany: { get () { return this.$store.state.main.userCompany } },
     apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
+    selectedRows: {
+        get () { return this.$store.state[this.moduleName].selectedRows },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'selectedRows', value: val}) }
+    },
   },
   watch: {
     userCode: function (val) {
@@ -195,7 +199,10 @@ export default ({
       }
     },
     userCompany: function (val) {
-      this.$refs.mainTableComponent.loadData();
+      if(this.$refs.mainTableComponent){
+          this.selectedRows=[];
+          this.$refs.mainTableComponent.loadData();
+      }
     },
 
   }

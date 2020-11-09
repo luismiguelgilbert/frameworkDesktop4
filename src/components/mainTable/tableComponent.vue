@@ -42,6 +42,22 @@
                 </q-item-section>
                 <q-item-section>Copiar Registro {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
               </q-item>
+              <!--Addition Modules Options-->
+              <q-item v-if="tableContextMenu" 
+                clickable v-ripple
+                @click="()=>{ 
+                    let newProps = JSON.parse(JSON.stringify(props)); 
+                    newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; 
+                    runContextCommand(menu.menuAction, newProps)
+                  }"
+                :title="menu.menuTitle"
+                v-for="menu in tableContextMenu" :key="menu.id">
+                <q-item-section avatar>
+                  <q-icon color="primary" :name="menu.menuIcon" />
+                </q-item-section>
+                <q-item-section>{{menu.menuText}} {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
+              </q-item>
+              
             </q-list>
           </q-menu>
           <q-btn 
@@ -227,6 +243,9 @@ export default({
       get () { return this.$store.state[this.moduleName].editMode },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editMode', value: val}) }
     },
+    tableContextMenu: {
+      get () { return this.$store.state[this.moduleName].tableContextMenu },
+    }
   },
   mounted(){
     this.loadData();
@@ -323,6 +342,13 @@ export default({
       this.editRecord = selectedRow
       this.editMode = editMode //false = edit || true  = new
       this.router.push(this.moduleEditName);
+    },
+    runContextCommand(menuAction, data){
+      let action = {
+         name: menuAction
+        ,dataProp: data
+      }
+      this.$emit('onContextMenuClicked', action)
     }
   }
 })

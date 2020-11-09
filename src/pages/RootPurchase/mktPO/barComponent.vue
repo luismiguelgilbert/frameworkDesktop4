@@ -93,14 +93,14 @@
                         </q-list>
                     </q-menu>
                 </q-item>
-                <q-item clickable class="q-pr-xs"
+                <!--<q-item clickable class="q-pr-xs"
                     :disable="selectedRows.length!=1"  
                     @click="downloadReportForm"
                     :title="selectedRows.length!=1?'Debe tener 1 sola fila seleccionada':'Genera documento para exportar o imprimir'"
                     >
                     <q-item-section side><q-icon name="fas fa-print" color="primary" /></q-item-section>
                     <q-item-section > <q-item-label>Documento</q-item-label> </q-item-section>
-                </q-item>
+                </q-item>-->
                 <q-item
                     clickable v-close-popup class="q-pr-xs"
                     title="Reorganice las columnas según sus preferencias"
@@ -387,8 +387,6 @@ export default ({
         set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'selectedRows', value: val}) }
     },
     currentReportData: {
-        /*get () { return this.$store.state[this.moduleName].currentReportData },
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'currentReportData', value: val}) }  */
         get () { return this.$store.statemain.currentReportData },
         set (val) { this.$store.commit('main/updateState', {key: 'currentReportData', value: val}) }
     },

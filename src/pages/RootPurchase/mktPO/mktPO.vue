@@ -14,6 +14,7 @@
         <tableComponent
             :moduleName="moduleName.toString()" ref="mainTableComponent"
             :moduleEditName="moduleEditName.toString()"
+            @onContextMenuClicked="contextMenuClicked"
             />
     </q-page-container>
 
@@ -116,6 +117,39 @@ export default ({
         this.currentFilter = [];
         this.$refs.mainTableComponent.loadData();
     },
+    contextMenuClicked(data)
+    {
+        //console.dir('contextMenuClicked')
+        //console.dir(data)
+        this[data.name](data.dataProp)
+    },
+    //custom
+    downloadReportForm(currentRow){
+        console.dir('downloadReportForm')
+        console.dir(currentRow)
+        console.dir(currentRow.cols.find(x=>x.is_key).field)
+        let newReportData = {
+            report: {
+                 comment_es: "Orden de Compra"
+                ,icon: "fas fa-file"
+                ,is_paginated_rpt: true
+                ,link_name: "mktPO" + '_' + this.userCompany
+                ,name_es: "Órden de Compra"
+                ,position: 1
+                ,report_type: "ssrs"
+                ,sys_report_id: 1
+            }
+            ,parameters: {
+                row_id: currentRow.row[currentRow.cols.find(x=>x.is_key).field]
+            }
+        }
+        console.dir(newReportData)
+        this.currentReportData = newReportData
+        this.router.push('/mainReport');
+    },
+    sendMail(currentRow){
+        alert('Enviar Mail')
+    }
   },
   computed:{
     loadingData: {
@@ -144,7 +178,6 @@ export default ({
       get () { return this.$store.state[this.moduleName].pagination },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }
     },
-
     columnsSystem: {
         get () { return this.$store.state[this.moduleName].columnsSystem },
         set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'columnsSystem', value: val}) }
@@ -186,6 +219,15 @@ export default ({
     userCode: { get () { return this.$store.state.main.userCode } },
     userCompany: { get () { return this.$store.state.main.userCompany } },
     apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
+    currentReportData: {
+        get () { return this.$store.statemain.currentReportData },
+        set (val) { this.$store.commit('main/updateState', {key: 'currentReportData', value: val}) }
+    },
+    selectedRows: {
+        get () { return this.$store.state[this.moduleName].selectedRows },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'selectedRows', value: val}) }
+    },
+    
   },
   watch: {
     userCode: function (val) {
@@ -194,7 +236,10 @@ export default ({
       }
     },
     userCompany: function (val) {
-      this.$refs.mainTableComponent.loadData();
+      if(this.$refs.mainTableComponent){
+          this.selectedRows=[];
+          this.$refs.mainTableComponent.loadData();
+      }
     },
 
   }

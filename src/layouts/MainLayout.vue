@@ -276,8 +276,7 @@ export default {
         this.computedDataLoaded=true;//para que se cargue el router-view IF computedData is loaded
         this.userColor = this.userColor//force theme to be applied
         this.$q.dark.set(this.userDarkMode)//force darkMode to be applied
-        //this.loadNotifications();//Forza 1 llamada inicial
-        //this.poolNotifications();//inicia intervalo de lectura de notificaciones
+
         //navigate to user default init module, if exists
         try{
           if(this.userLinkID){
@@ -288,21 +287,17 @@ export default {
                 this.router.push('/'+this.menuData.find(x=>x.sys_link_id==this.userLinkID).link_name)
               }
             }
-          //}else{ this.router.push({ path: '/RootHome' }) }
-          }//else{ this.router.push({ path: '/' }) }
-        }catch(ex){console.dir(ex)}
-
-        
-        /*try{//para cuando se duplica el tab (no funciona porque se queda cargando todo)
-          if(this.router.currentRoute&&this.router.currentRoute.path&&this.router.currentRoute.path.length>1){
-            let routes = this.router.currentRoute.path.split('/')
-            if(routes.length==3){
-              this.currentPath = routes[1]
-              this.currentPathModule = routes[1] + '/' + routes[2]
+          }else{
+            if(this.router.currentRoute&&this.router.currentRoute.path&&this.router.currentRoute.path.length>1){
+              let routes = this.router.currentRoute.path.split('/')
+              if(routes.length==3){
+                //this.currentPath = routes[1]
+                //this.currentPathModule = routes[1] + '/' + routes[2]
+                this.router.push({ path: '/' })//es mejor enviarlo al Root, para evitar datos pendientes de Vuex
+              }
             }
           }
-        }catch(ex){}*/
-        
+        }catch(ex){console.dir(ex)}
       }
       this.$q.loading.hide()
     }).catch((error) => {

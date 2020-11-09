@@ -633,6 +633,7 @@ export default ({
     },
     userCompany: function (val) {
       //this.$refs.mainTableComponent.loadData();
+      this.selectedRows=[];
       this.loadUserWarehouses();
     },
 

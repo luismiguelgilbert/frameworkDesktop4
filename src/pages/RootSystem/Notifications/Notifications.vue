@@ -194,7 +194,9 @@ export default ({
       }
     },
     userCompany: function (val) {
-      this.$refs.mainTableComponent.loadData();
+      if(this.$refs.mainTableComponent){
+          this.$refs.mainTableComponent.loadData();
+      }
     },
     
   }
