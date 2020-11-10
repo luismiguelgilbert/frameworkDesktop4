@@ -29,7 +29,7 @@
             </q-tr>
       </template>
       <template v-slot:top>
-        <q-btn label="Agregar Usuario" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
+        <q-btn label="Agregar Consultor" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
         <q-space />
       </template>
       <template v-slot:bottom-row >
@@ -39,7 +39,7 @@
 
     <q-dialog v-model="prompt">
         <mainLookup 
-            titleBar="Buscar Usuario"
+            titleBar="Buscar Consultor"
             :data="this.lookup_users"
             :dataRowKey="'value'"
             :selectionMode="'single'"

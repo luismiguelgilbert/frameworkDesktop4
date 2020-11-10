@@ -36,14 +36,14 @@ export default function () {
        ,menuTitle: 'Ver Documento'
        ,menuAction: 'downloadReportForm'
        ,menuIcon: 'fas fa-print'
-      }/*,
+      },
       {
         id: 2
        ,menuText: 'Enviar Documento'
        ,menuTitle: 'Enviar por Correo'
        ,menuAction: 'sendMail'
        ,menuIcon: 'fas fa-envelope'
-      }*/
+      }
     ]
   }
 }

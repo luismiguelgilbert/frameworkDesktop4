@@ -31,7 +31,7 @@
                             <q-icon name="fas fa-users"  :color="tab=='users'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='users'?'text-white':'text-grey-7')">Usarios Asignados</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='users'?'text-white':'text-grey-7')">Consultores Asignados</q-item-label>
                         </q-item-section>
                     </q-item>
 

@@ -33,6 +33,17 @@
         <q-spinner-ios size="50px" color="primary" />
     </q-inner-loading>
 
+    <q-dialog v-if="mailDialog" v-model="mailDialog">
+        <q-card>
+            Contenido:
+            {{this.mailSender}}
+            {{this.mailDestinations}}
+            {{this.mailSubject}}
+            {{this.mailBody}}
+            {{this.mailAttachments}}
+        </q-card>
+    </q-dialog>
+
 </q-layout>
 </template>
 <script>
@@ -63,6 +74,7 @@ export default ({
         moduleEditName: "mktPOEdit",
         maindataLoaded: false,
         router: this.$router,
+        mailDialog: false, mailSender: null, mailDestinations: null, mailSubject: null, mailBody: null
     }
   },
   methods:{
@@ -125,9 +137,9 @@ export default ({
     },
     //custom
     downloadReportForm(currentRow){
-        console.dir('downloadReportForm')
+        /*console.dir('downloadReportForm')
         console.dir(currentRow)
-        console.dir(currentRow.cols.find(x=>x.is_key).field)
+        console.dir(currentRow.cols.find(x=>x.is_key).field)*/
         let newReportData = {
             report: {
                  comment_es: "Orden de Compra"
@@ -143,12 +155,45 @@ export default ({
                 row_id: currentRow.row[currentRow.cols.find(x=>x.is_key).field]
             }
         }
-        console.dir(newReportData)
+        //console.dir(newReportData)
         this.currentReportData = newReportData
         this.router.push('/mainReport');
     },
     sendMail(currentRow){
-        alert('Enviar Mail')
+        /*alert('Enviar Mail')
+        this.mailSender = 'luismiguelgilbert@gmail.com'
+        this.mailDestinations = 'lgilbert@bitt.com.ec'
+        this.mailSubject = 'Orden de Compra'
+        this.mailBody = 'El mensaje debe ser enviado de esta forma:'
+        this.mailAttachments = []
+        this.mailDialog=true
+        //obtener datos de mails, subject, cuerpo de mail*/
+        this.loadingData = true
+        this.$axios({
+            method: 'GET',
+            url: this.apiURL + 'spMktPOSendMail',
+            headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+            params: {
+                sys_user_code: this.userCode,
+                link_name: this.moduleName,
+            }
+        }).then((response) => {
+            this.loadingData = false
+            alert(JSON.stringify(response))
+        }).catch((error) => {
+            console.dir(error)
+            let mensaje = ''
+            if(error.message){ mensaje = error.message }
+            if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+            if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+            this.$q.notify({ html: true, multiLine: false, color: 'red'
+                ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+            })
+            this.loadingData = false
+        })
+    
     }
   },
   computed:{
