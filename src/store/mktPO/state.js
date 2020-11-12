@@ -41,7 +41,7 @@ export default function () {
         id: 2
        ,menuText: 'Enviar Documento'
        ,menuTitle: 'Enviar por Correo'
-       ,menuAction: 'sendMail'
+       ,menuAction: 'openSendMail'
        ,menuIcon: 'fas fa-envelope'
       }
     ]

@@ -30,13 +30,13 @@
           
           <q-menu touch-position context-menu :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'">
             <q-list separator style="min-width: 100px">
-              <q-item clickable v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir">
+              <q-item clickable v-close-popup  v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir">
                 <q-item-section avatar>
                   <q-icon color="primary" name="fas fa-external-link-alt" />
                 </q-item-section>
                 <q-item-section>Abrir Registro {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
               </q-item>
-              <q-item v-if="allow_insert" clickable v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar">
+              <q-item v-if="allow_insert" clickable v-close-popup  v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar">
                 <q-item-section avatar>
                   <q-icon color="primary" name="fas fa-copy" />
                 </q-item-section>
@@ -44,7 +44,7 @@
               </q-item>
               <!--Addition Modules Options-->
               <q-item v-if="tableContextMenu" 
-                clickable v-ripple
+                clickable v-close-popup v-ripple
                 @click="()=>{ 
                     let newProps = JSON.parse(JSON.stringify(props)); 
                     newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; 

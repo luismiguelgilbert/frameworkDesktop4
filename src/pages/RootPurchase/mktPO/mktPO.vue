@@ -34,14 +34,12 @@
     </q-inner-loading>
 
     <q-dialog v-if="mailDialog" v-model="mailDialog">
-        <q-card>
-            Contenido:
-            {{this.mailSender}}
-            {{this.mailDestinations}}
-            {{this.mailSubject}}
-            {{this.mailBody}}
-            {{this.mailAttachments}}
-        </q-card>
+        <mailForm 
+            :moduleName="moduleName" 
+            :moduleRow="mailRow"
+            :moduleReportURL="mailReportURL"
+            @onSent="mailSent"
+            />
     </q-dialog>
 
 </q-layout>
@@ -52,6 +50,7 @@ import Vuex from 'vuex';
 import columnsLayoutComponent from '../../../components/mainTable/columnsLayoutComponent.vue'
 import tableComponent from '../../../components/mainTable/tableComponent.vue'
 import filtersLayoutComponent from '../../../components/mainTable/filtersLayoutComponent.vue'
+import mailForm from '../../../components/mailForm/mailForm.vue'
 /*Specific*/
 import headerBar from './barComponent.vue'
 
@@ -61,6 +60,7 @@ export default ({
     ,tableComponent: tableComponent
     ,filtersLayoutComponent: filtersLayoutComponent
     ,headerBar: headerBar
+    ,mailForm: mailForm
   },
   mounted(){
     //si userCode existe, entonces carga datos básicos del módulo (eg. page refresh puede hacer que userCode se cargue luego, y ese dato es indispensable para la lectura)
@@ -74,7 +74,7 @@ export default ({
         moduleEditName: "mktPOEdit",
         maindataLoaded: false,
         router: this.$router,
-        mailDialog: false, mailSender: null, mailDestinations: null, mailSubject: null, mailBody: null
+        mailDialog: false, mailRow: null, mailReportURL: null
     }
   },
   methods:{
@@ -159,41 +159,25 @@ export default ({
         this.currentReportData = newReportData
         this.router.push('/mainReport');
     },
-    sendMail(currentRow){
-        /*alert('Enviar Mail')
-        this.mailSender = 'luismiguelgilbert@gmail.com'
-        this.mailDestinations = 'lgilbert@bitt.com.ec'
-        this.mailSubject = 'Orden de Compra'
-        this.mailBody = 'El mensaje debe ser enviado de esta forma:'
-        this.mailAttachments = []
-        this.mailDialog=true
-        //obtener datos de mails, subject, cuerpo de mail*/
-        this.loadingData = true
-        this.$axios({
-            method: 'GET',
-            url: this.apiURL + 'spMktPOSendMail',
-            headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-            params: {
-                sys_user_code: this.userCode,
-                link_name: this.moduleName,
-            }
-        }).then((response) => {
-            this.loadingData = false
-            alert(JSON.stringify(response))
-        }).catch((error) => {
-            console.dir(error)
-            let mensaje = ''
-            if(error.message){ mensaje = error.message }
-            if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-            if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-            this.$q.notify({ html: true, multiLine: false, color: 'red'
-                ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-            })
-            this.loadingData = false
+    openSendMail(currentRow){
+        this.mailRow = currentRow
+        //Construye el URL para descargar el reporte a exportar (en formato PDF)
+        this.mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
+        this.mailReportURL += 'mktPO' + '_' + this.userCompany; //reporte es x compañía, entonces se agrega
+        this.mailReportURL += '&rs:format=PDF'; //formato PDF
+        this.mailReportURL += '&sys_user_code=' + this.userCode; //Parámetro Usuario
+        this.mailReportURL += '&sys_user_language=es' ; //Parámetro Language
+        this.mailReportURL += '&sys_user_company=' + this.userCompany; //Parámetro Compañía
+        this.mailReportURL += '&row_id=' + currentRow.value; //Parámetro RowID
+        //Open Dialog
+        this.mailDialog = true
+    },
+    mailSent(respuesta){
+        this.mailDialog = false;
+        this.$q.notify({ html: true, multiLine: true, color: 'positive'
+            ,message: "Mensaje puesto en cola correctamente.<br/>" + respuesta.data.response + '<br/>' + respuesta.data.accepted.map(x=>x).join('<br/>')
+            ,timeout: 1500, progress: true
         })
-    
     }
   },
   computed:{
