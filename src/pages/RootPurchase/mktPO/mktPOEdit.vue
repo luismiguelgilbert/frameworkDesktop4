@@ -30,7 +30,7 @@
                             <q-icon name="fas fa-list-ol" :color="tab=='lines'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Pedido ({{lines.length}})</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle de la Orden ({{lines.length}})</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='warehouse'" :active="tab=='warehouse'" active-class="bg-primary text-white" >

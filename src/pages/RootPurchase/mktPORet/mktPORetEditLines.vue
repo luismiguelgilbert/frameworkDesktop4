@@ -470,7 +470,6 @@ export default ({
         let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
         if(this.requisicionesDialogSelected.length>0){
           this.requisicionesDialogSelected.map(row => {
-            console.dir(row)
             max_id = parseInt(max_id) + parseInt(1);
             //líneas
             newRows.push({

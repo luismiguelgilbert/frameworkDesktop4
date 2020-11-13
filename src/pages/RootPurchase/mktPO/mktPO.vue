@@ -42,6 +42,15 @@
             />
     </q-dialog>
 
+    <q-dialog v-if="emlMailDialog" v-model="emlMailDialog">
+        <emlMailForm 
+            :moduleName="moduleName" 
+            :moduleRow="mailRow"
+            :moduleReportURL="mailReportURL"
+            />
+    </q-dialog>
+
+
 </q-layout>
 </template>
 <script>
@@ -51,6 +60,7 @@ import columnsLayoutComponent from '../../../components/mainTable/columnsLayoutC
 import tableComponent from '../../../components/mainTable/tableComponent.vue'
 import filtersLayoutComponent from '../../../components/mainTable/filtersLayoutComponent.vue'
 import mailForm from '../../../components/mailForm/mailForm.vue'
+import emlMailForm from '../../../components/mailForm/emlMailForm.vue'
 /*Specific*/
 import headerBar from './barComponent.vue'
 
@@ -61,6 +71,7 @@ export default ({
     ,filtersLayoutComponent: filtersLayoutComponent
     ,headerBar: headerBar
     ,mailForm: mailForm
+    ,emlMailForm: emlMailForm
   },
   mounted(){
     //si userCode existe, entonces carga datos básicos del módulo (eg. page refresh puede hacer que userCode se cargue luego, y ese dato es indispensable para la lectura)
@@ -74,7 +85,8 @@ export default ({
         moduleEditName: "mktPOEdit",
         maindataLoaded: false,
         router: this.$router,
-        mailDialog: false, mailRow: null, mailReportURL: null
+        mailDialog: false, mailRow: null, mailReportURL: null,
+        emlMailDialog: false
     }
   },
   methods:{
@@ -178,7 +190,21 @@ export default ({
             ,message: "Mensaje puesto en cola correctamente.<br/>" + respuesta.data.response + '<br/>' + respuesta.data.accepted.map(x=>x).join('<br/>')
             ,timeout: 1500, progress: true
         })
+    },
+    downloadEML(currentRow){
+        this.mailRow = currentRow
+        //Construye el URL para descargar el reporte a exportar (en formato PDF)
+        this.mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
+        this.mailReportURL += 'mktPO' + '_' + this.userCompany; //reporte es x compañía, entonces se agrega
+        this.mailReportURL += '&rs:format=PDF'; //formato PDF
+        this.mailReportURL += '&sys_user_code=' + this.userCode; //Parámetro Usuario
+        this.mailReportURL += '&sys_user_language=es' ; //Parámetro Language
+        this.mailReportURL += '&sys_user_company=' + this.userCompany; //Parámetro Compañía
+        this.mailReportURL += '&row_id=' + currentRow.value; //Parámetro RowID
+        //Open Dialog
+        this.emlMailDialog = true
     }
+    //emlDownload
   },
   computed:{
     loadingData: {

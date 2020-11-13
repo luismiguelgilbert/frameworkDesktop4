@@ -30,14 +30,14 @@
     </q-select>
 
     <q-input filled v-model="moveDate" mask="date" :rules="['date']" 
-        placeholder="Fecha del Ingreso (*)" label="Fecha del Ingreso (*)" readonly>
+        placeholder="Fecha del Egreso (*)" label="Fecha del Egreso (*)" readonly>
       <template v-slot:prepend>
         <q-icon name="fas fa-calendar" class="cursor-pointer" />
       </template>
     </q-input>
 
     <q-select
-        label="Tipo de Documento del Proveedor(*)" placeholder="Seleccione el Tipo de Documento del Proveedor (*)" emit-value map-options filled
+        label="Tipo de Documento de Entrega(*)" placeholder="Seleccione el Tipo de Documento con el que se entrega (*)" emit-value map-options filled
         :options="lookup_invDocTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         :option-disable="opt => !opt.estado" 
         v-model="invDocTypeID"
@@ -162,7 +162,9 @@ export default ({
                         editMode: this.editMode
                     }
                 }).then((response) => {
-                    this.lines = response.data
+                    this.lines = JSON.parse(response.data[0].lines)
+                    this.lookup_lots = JSON.parse(response.data[0].lookup_lots)
+                    this.lots = [];
                     this.$q.loading.hide()
                 }).catch((error) => {
                     console.dir(error)
@@ -245,6 +247,14 @@ export default ({
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+        },
+        lots: {
+            get () { return this.$store.state[this.moduleName].editData.lots },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLots', val) }
+        },
+        lookup_lots: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_lots },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLookupLots', val) }
         },
     },
 })

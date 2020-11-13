@@ -43,6 +43,13 @@ export default function () {
        ,menuTitle: 'Enviar por Correo'
        ,menuAction: 'openSendMail'
        ,menuIcon: 'fas fa-envelope'
+      },
+      {
+        id: 3
+       ,menuText: 'Descargar Mail'
+       ,menuTitle: 'Generar EML para enviar usando su cliente de correo'
+       ,menuAction: 'downloadEML'
+       ,menuIcon: 'fas fa-envelope'
       }
     ]
   }

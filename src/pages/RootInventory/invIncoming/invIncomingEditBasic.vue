@@ -36,7 +36,7 @@
     </q-input>
 
     <q-select
-        label="Tipo de Documento del Proveedor(*)" placeholder="Seleccione el Tipo de Documento del Proveedor (*)" emit-value map-options filled
+        label="Tipo de Documento de Recepción (*)" placeholder="Seleccione el Tipo de Documento de Recepción (*)" emit-value map-options filled
         :options="lookup_invDocTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         :option-disable="opt => !opt.estado" 
         v-model="invDocTypeID"

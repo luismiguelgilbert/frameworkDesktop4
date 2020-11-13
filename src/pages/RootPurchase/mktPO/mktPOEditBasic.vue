@@ -10,7 +10,7 @@
     <q-input
         ref="partnerName" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
-        :value="partnerName" 
+        :value="partnerName"
         @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
         :rules="[
                 val => !!val || '* Requerido',
@@ -114,7 +114,7 @@ export default ({
     data () {
         return {
             moduleName: "mktPO"
-            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null, 
         }
     },
     mounted(){

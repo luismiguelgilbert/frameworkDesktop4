@@ -22,7 +22,7 @@
                             <q-icon name="fas fa-info-circle" :color="tab=='basic'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Documento de Ingreso</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Documento de Egreso</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='items'" :active="tab=='items'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0)" >
@@ -31,6 +31,15 @@
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
                             <q-item-label :class="'text-subtitle2 '+(tab=='items'?'text-white':'text-grey-7')">Items Entregados ({{lines.filter(x=>x.newQuantity>0).length}})</q-item-label>
+                        </q-item-section>
+                    </q-item>
+
+                    <q-item clickable @click="tab='lots'" :active="tab=='lots'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0 && lines.some(x=>x.systemType==4))" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-barcode"  :color="tab=='lots'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='lots'?'text-white':'text-grey-7')">Lotes y Series ({{lines.filter(x=>x.newQuantity>0&&x.systemType==4).length}})</q-item-label>
                         </q-item-section>
                     </q-item>
 
@@ -75,6 +84,7 @@
 
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="items"> <itemsComponent ref="itemsComponent" /> </q-tab-panel>
+                    <q-tab-panel name="lots"> <lotsComponent ref="lotsComponent" /> </q-tab-panel>
                     <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" /> </q-tab-panel>
                     <q-tab-panel name="cases"> <casesComponent ref="casesComponent" /> </q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
@@ -98,6 +108,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './invOutgoingEditBasic'
 import itemsComponent from './invOutgoingEditLines'
+import lotsComponent from './invOutgoingEditLots'
 import accountingComponent from './invOutgoingEditAccounting'
 import filesComponent from './invOutgoingEditFiles'
 import historyComponent from './invOutgoingEditHistory'
@@ -108,6 +119,7 @@ export default ({
   components:{
      basicComponent: basicComponent
     ,itemsComponent: itemsComponent
+    ,lotsComponent: lotsComponent
     ,accountingComponent: accountingComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
@@ -189,6 +201,7 @@ export default ({
                      basic: this.editData.basic
                     ,lines: this.editData.lines.filter(x=>x.newQuantity>0)
                     ,accountLines: this.editData.accountLines
+                    ,lots: this.editData.lots
                     ,files: this.editData.files
                 }
                 this.$axios.post( this.apiURL + 'spInvKardexOutgoingUpdate', {

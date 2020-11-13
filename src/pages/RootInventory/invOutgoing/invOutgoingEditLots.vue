@@ -10,7 +10,7 @@
                 <q-item-section>
                     <q-item-label>{{line.invName}}</q-item-label>
                     <q-item-label caption>
-                        Recibir: {{line.newQuantity}}
+                        Entregar: {{line.newQuantity}}
                         // Lotes: {{lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
                     </q-item-label>
                 </q-item-section>
@@ -28,8 +28,7 @@
         <q-card flat style="height: calc(100vh - 180px)" class="q-pa-sm" v-if="selectedColumn">
             <q-toolbar>
                 <q-space />
-                <q-btn v-if="editMode" color="primary" icon="fas fa-barcode" label="Nuevo Lote" no-caps class="q-mr-md" title="Registrar Nuevo Lote" @click="addNewLot" />
-                <q-btn v-if="editMode" color="primary" icon="fas fa-plus" label="Recepción" no-caps title="Agregar Recepción" @click="newLineDialog=true" />
+                <q-btn v-if="editMode" color="primary" icon="fas fa-plus" label="Entrega" no-caps title="Agregar Entrega" @click="newLineDialog=true" />
             </q-toolbar>
             <q-card-section>
                 <q-list bordered separator class="scroll" style="height: calc(100vh - 255px);" >
@@ -68,7 +67,7 @@
                     { name: 'name_es', required: true, label: '# Lote', align: 'left', field: row => row.name_es, sortable: false,    }
                     ,{ name: 'expirationDate', required: true, label: 'Fecha Expiración', align: 'left', field: row => row.expirationDate, sortable: false}
                     //{ name: 'warrantyDate', required: true, label: 'Fecha Garantía', align: 'left', field: row => row.warrantyDate, sortable: false,    }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
+                    ,{ name: 'quantityAvailable', required: true, label: 'Cantidad Disponible', align: 'right', field: row => row.quantityAvailable, sortable: false, style: 'max-width: 75px;', }
                     ]"
             @onCancel="newLineDialog=false"
             @onSelect="(selectedRows)=>{addRow(selectedRows)}"
@@ -87,7 +86,7 @@ export default ({
     },
     data () {
         return {
-            moduleName: "invIncoming", selectedColumn: null, newLineDialog: false
+            moduleName: "invOutgoing", selectedColumn: null, newLineDialog: false
             //: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
@@ -119,10 +118,9 @@ export default ({
                     ,invID: this.selectedColumn.invID
                     ,lotID: x.lotID
                     ,name_es: x.name_es
-                    ,quantity: this.selectedColumn.newQuantity
+                    ,quantity: x.quantityAvailable
                 })
             })
-
             this.lots = newRows
             this.newLineDialog = false
             
@@ -137,86 +135,6 @@ export default ({
                 console.error(ex)
             }
         },
-        addNewLot(){
-            this.$q.dialog({
-                title: 'Nuevo Lote',
-                message: 'Escriba el número del nuevo lote',
-                prompt: { model: '', type: 'text'},
-                cancel: true,
-                persistent: false
-            }).onOk(data => {
-                if(data.length>0){
-                    if(!(this.lookup_lots.filter(t=>t.invID==this.selectedColumn.invID).some(x=>x.name_es.toUpperCase()==data.toUpperCase()))){
-                        if(!(this.lots.filter(t=>t.invID==this.selectedColumn.invID).some(x=>x.name_es.toUpperCase()==data.toUpperCase()))){
-                            this.addRow([{
-                                 lotID: 0
-                                ,name_es: data.toUpperCase()
-                            }])
-                        }
-                    }else{
-                        this.$q.notify({message: 'Número ya existe', color: 'red'})
-                    }
-                    console.dir(this.lots)
-                    console.dir(this.lookup_lots)
-                    console.dir(data)
-                }
-                
-                // console.log('>>>> OK, received', data)
-            })
-        },
-
-        /*openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            if(this.editMode){
-                this.mainLookupUpdateFieldValueName = UpdateFieldValueName
-                this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
-                this.mainLookupPredefinedValue = predefinedValue
-                this.isPartnerDialog = true
-            }
-        },
-        updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
-            this.isPartnerDialog = false
-            this.lines = []
-            this.loadPendingInv()
-        },
-        loadPendingInv(){
-            if(this.whID>0&&this.partnerID>0){
-                this.$q.loading.show()
-                this.$axios({
-                    method: 'GET',
-                    url: this.apiURL + 'spInvKardexSelectPending',
-                    headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-                    params: {
-                        userCode: this.userCode,
-                        userCompany: this.userCompany,
-                        userLanguage: 'es',
-                        partnerID: this.partnerID,
-                        whID: this.whID,
-                        direction: 1,//1=Incoming || 0==Outgoing
-                        editMode: this.editMode
-                    }
-                }).then((response) => {
-                    //this.lines = response.data[0].lines
-                    this.lines = JSON.parse(response.data[0].lines)
-                    this.lots = [];
-                    this.lookup_lots = JSON.parse(response.data[0].lookup_lots)
-                    this.$q.loading.hide()
-                }).catch((error) => {
-                    console.dir(error)
-                    let mensaje = ''
-                    if(error.message){ mensaje = error.message }
-                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                    })
-                    this.$q.loading.hide()
-                })
-            }
-        }*/
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },

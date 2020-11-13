@@ -94,7 +94,7 @@
       </q-tr>
     </template>
     <template v-slot:top >
-      <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Recibir Todo':''" title="Recibir todas líneas seleccionadas" color="primary" no-caps  
+      <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Entregar Todo':''" title="Entregar todas líneas seleccionadas" color="primary" no-caps  
         icon="fas fa-people-carry" @click="receiveAll"
         :disable="selected.length<=0" />
       <q-btn v-if="editMode" :label="$q.screen.gt.sm?'Limpiar Todo':''" title="Limpiar todas líneas seleccionadas" color="primary" no-caps  class="q-ml-sm" 
@@ -270,16 +270,16 @@ export default ({
                 { name: 'quantityRcvd', required: true, label: 'Entregado', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
                 { name: 'quantityCancel', required: true, label: 'Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true , style: 'max-width: 70px;' },
                 { name: 'quantityOpen', required: true, label: 'Por Entregar', align: 'right', field: row => row.quantityOpen, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
-                { name: 'newQuantity', required: true, label: 'Recibir', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
-                { name: 'expectedDate', required: true, label: 'Esperado', align: 'left', field: row => row.expectedDate, sortable: true, style: 'max-width: 90px;' },
+                { name: 'newQuantity', required: true, label: 'Entregar', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+                //{ name: 'expectedDate', required: true, label: 'Esperado', align: 'left', field: row => row.expectedDate, sortable: true, style: 'max-width: 90px;' },
               ]
             }else{
               columnas = [
                 { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 85px; max-width: 85px;' },
                 { name: 'headerDate', required: true, label: 'Pedido El', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 100px;' },
                 { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
-                { name: 'newQuantity', required: true, label: 'Recibido', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
-                { name: 'moveDate', required: true, label: 'Fecha de Ingreso ', align: 'right', field: row => row.moveDate, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'newQuantity', required: true, label: 'Entregado', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+                { name: 'moveDate', required: true, label: 'Fecha de Egreso ', align: 'right', field: row => row.moveDate, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
               ]
             }
             return columnas

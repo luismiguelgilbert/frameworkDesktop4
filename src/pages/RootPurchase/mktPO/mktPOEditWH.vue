@@ -18,6 +18,7 @@
           { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;',  },
           { name: 'quantityInvoiced', required: true, label: 'Facturado', align: 'right', field: row => row.quantityInvoiced, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityCancel', required: true, label: 'Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
+          { name: 'quantityCancelNew', required: true, label: 'Cancelar', align: 'right', field: row => row.quantityCancelNew, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true, style: 'max-width: 100px;',  },
           { name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true },
           { name: 'expectedDate', required: true, label: 'Esperado el', align: 'left', field: row => row.expectedDate, sortable: true, style: 'min-width: 100px;' },
@@ -37,14 +38,14 @@
         <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
         <q-td key="quantityRcvd" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityRcvd }}</q-td>
         <q-td key="quantityInvoiced" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityInvoiced }}</q-td>
-        <q-td key="quantityCancel" :props="props" :tabindex="(props.key*10)+2">
+        <q-td key="quantityCancel" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityCancel }}</q-td>
+        <q-td key="quantityCancelNew" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantityCancel" type="number" :min="0" :readonly="(editMode==true)" :max="props.row.quantityOpen"
+              :value="props.row.quantityCancelNew" type="number" :min="0" :readonly="(editMode==true)" :max="props.row.quantityOpen"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @input="(value)=>{updateRow(value,'quantityCancel',props.row)}" />
+              @input="(value)=>{updateRow(value,'quantityCancelNew',props.row)}" />
         </q-td>
-        
         <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>
         <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
 
@@ -326,7 +327,11 @@ export default ({
         try{
           //Actualiza las líneas
           let newRows = JSON.parse(JSON.stringify(this.lines))
-          newRows.find(x=>x.lineID==row.lineID)[colName] = newVal;
+          if(colName=="quantityCancelNew"){
+            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
+          }else{
+            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
+          }
           let whID = newRows.find(x=>x.lineID==row.lineID).whID
           let whName = whID?this.lookup_wh.find(x => x.value == whID).label:''
           let prjID = newRows.find(x=>x.lineID==row.lineID).prjID
@@ -410,7 +415,7 @@ export default ({
       cancelRows(){
         this.selected.forEach(rowToUpdate=>{
           //pone en columna quantityCancel el valor de las cantidades pendientes (open / por recibir)
-          this.updateRow(rowToUpdate.quantityOpen, 'quantityCancel', rowToUpdate)
+          this.updateRow(rowToUpdate.quantityOpen, 'quantityCancelNew', rowToUpdate)
         })
       },
       prjDialogSelectAction(){
