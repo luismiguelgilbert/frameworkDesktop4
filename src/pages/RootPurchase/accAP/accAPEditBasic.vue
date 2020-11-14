@@ -2,7 +2,7 @@
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <div class="row">
         <q-toggle class="col-12 col-md-4"
-            v-model="estado" icon="fas fa-check" color="positive" label="Estado" readonly
+            v-model="estado" icon="fas fa-check" color="positive" label="Estado" disable
             />
         <q-toggle class="col-12 col-md-4"
             v-model="voided" icon="fas fa-ban" color="red" label="Anulado?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -16,32 +16,44 @@
     </div>
 
     <!--partnerID-->
-    <q-input
-        ref="partnerName" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
-        placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
-        :value="partnerName" 
-        @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
-    </q-input>
-
-    <q-select
-        label="Tipo de Comprobante - ATS (*)" placeholder="Seleccione el Tipo de Comprobante (*)" emit-value map-options filled
-        :options="lookup_SRI_Tabla_Tipo_Comprobante" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
-        :option-disable="opt => !opt.estado"
-        v-model="tipoComprobanteID"
-        ref="tipoComprobanteID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-file" /></template>
-    </q-select>
+    <selectSearchable 
+        prependIcon="fas fa-handshake"
+        labelText="Proveedor (*)" labelSearchText="Buscar Proveedor"
+        :optionsList="this.lookup_partners"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :initialValue="partnerID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.partnerID=row.value;
+                this.partnerName=row.label;
+                this.partner_account_id=row.account_id
+            }"
+        />
     
+    <!--tipoComprobanteID-->
+    <selectSearchable 
+        prependIcon="fas fa-file"
+        labelText="Tipo de Comprobante - ATS (*)" labelSearchText="Buscar Tipo de Comprobante"
+        :optionsList="this.lookup_SRI_Tabla_Tipo_Comprobante"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="tipoComprobanteID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Tipo de Comprobante', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.tipoComprobanteID=row.value;
+            }"
+        />
+
     <q-input
         ref="headerDate" 
         mask="date" :rules="['date']"
@@ -51,7 +63,7 @@
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
             <q-popup-proxy ref="qDateProxy_headerDate" transition-show="scale" transition-hide="scale">
-              <q-date v-model="headerDate" >
+              <q-date :locale="myQDateLocale" minimal v-model="headerDate" >
                 <div class="row items-center justify-end">
                   <q-btn v-close-popup label="Seleccionar" color="primary" flat />
                 </div>
@@ -86,18 +98,22 @@
         <template v-slot:prepend><q-icon name="fas fa-check" /></template>
     </q-input>
     
-    <q-select
-        label="Forma de Pago - ATS/Documento Electrónico (*)" placeholder="Seleccione la Forma de Pago - ATS/Documento Electrónico (*)" emit-value map-options filled
-        :options="lookup_SRI_Tabla_FormaPago" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
-        :option-disable="opt => !opt.estado"
-        v-model="formaPagoID"
-        ref="formaPagoID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-money-check" /></template>
-    </q-select>
+    <selectSearchable 
+        prependIcon="fas fa-money-check"
+        labelText="Forma de Pago - ATS/Documento Electrónico (*)" labelSearchText="Buscar Forma de Pago"
+        :optionsList="this.lookup_SRI_Tabla_FormaPago"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="formaPagoID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Forma de Pago', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.formaPagoID=row.value;
+            }"
+        />
 
     <!--<q-select
         label="Usuario que Registra Documento (*)" placeholder="Usuario que Registraó Documento (*)" emit-value map-options filled
@@ -140,18 +156,28 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import xml2js from 'xml2js'
 
 export default ({
     components: {
         mainLookup: mainLookup
+        ,selectSearchable: selectSearchable
     },
     data () {
         return {
             moduleName: "accAP"
             ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
             ,xmlFile: null
+            ,myQDateLocale: {
+                /* starting with Sunday */
+                days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
+                daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
+                months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+                monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
+                firstDayOfWeek: 1
+            }
         }
     },
     mounted(){

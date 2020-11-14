@@ -284,6 +284,7 @@ export default {
               this.currentPath = this.menuData.find(x=>x.sys_link_id==this.menuData.find(x=>x.sys_link_id==this.userLinkID).parent).link_name
               this.currentPathModule = this.menuData.find(x=>x.sys_link_id==this.userLinkID).link_name
               if(this.router.currentRoute.path != '/'+this.menuData.find(x=>x.sys_link_id==this.userLinkID).link_name){
+                this.leftDrawerOpen = false;//hide menu when autoOpen exists
                 this.router.push('/'+this.menuData.find(x=>x.sys_link_id==this.userLinkID).link_name)
               }
             }

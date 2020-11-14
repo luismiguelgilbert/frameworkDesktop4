@@ -49,6 +49,14 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='accounting'?'text-white':'text-grey-7')">Asiento Contable</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" :disable="!(partnerID>0)" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-money-bill-alt"  :color="tab=='payments'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='payments'?'text-white':'text-grey-7')">Pagos Realizados</q-item-label>
+                        </q-item-section>
+                    </q-item>
                     <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
