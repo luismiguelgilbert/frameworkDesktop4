@@ -4,11 +4,14 @@
             filled use-input hide-dropdown-icon input-debounce="500"
             v-model="componentValue"
             :label="labelText"
-            :options="optionsListFiltered"
+            :options="optionsListFiltered" map-options
             :disable="isDisable" 
             :readonly="isReadonly"
+            :option-label="optionLabelField"
+            :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
             @keyup.keyCodes.113="openSearch"
             @filter="filterList"
+            :clearable="!isRequired"
             :rules="isRequired?[ val => !!val || '* Requerido', ]:undefined"
             @input="(itemSelected)=>{this.itemSelected(itemSelected)}"
             >
@@ -56,8 +59,18 @@
                         no-results-label= "No se encontraron registros"
                         loading-label= "Cargando datos"
                         :columns="tableSearchColumns"
-                        @row-click="(evt, row, index)=>{itemSelected(row)}"
-                        />
+                        >
+                        <template v-slot:body="props">
+                            <q-tr :props="props"        
+                                :class="optionDisableField&&!(props.row[optionDisableField])?'text-grey':'cursor-pointer'"
+                                >
+                                <q-td v-for="col in props.cols" :key="col.name" :props="props"
+                                    @click="itemSelected(props.row)" >
+                                    {{ col.value }}
+                                </q-td>
+                            </q-tr>
+                        </template>
+                    </q-table>
                 </q-card-section>
             </q-card>
         </q-dialog>
@@ -73,6 +86,8 @@ export default({
         appendIcon: { type: String, required: false, default: 'fas fa-search' },
         labelText: { type: String, required: true, default: 'Buscar' },
         labelSearchText: { type: String, required: true, default: 'Buscar' },
+        optionLabelField: { type: String, required: false, default: 'label' },
+        optionDisableField: { type: String, required: false },
         optionsList: { type: Array, required: true, default: [] },
         isRequired: { type: Boolean, required: true, default: false },
         isReadonly: { type: Boolean, required: false, default: false },
@@ -110,9 +125,24 @@ export default({
             }
         },
         itemSelected(row){
-            this.$emit('onItemSelected',row)
-            this.componentValue=row
-            this.isDialogOpen = false
+            if(this.optionDisableField){//desactivar filas NO permitidas
+                if(row[this.optionDisableField]){
+                    this.$emit('onItemSelected',row)
+                    this.componentValue=row
+                    this.isDialogOpen = false
+                }else{
+                    this.$q.notify({ html: false, multiLine: false, color: 'red'
+                        ,message: "No puede seleccionar ese registro"
+                        ,timeout: 500, progress: false , icon: "fas fa-exclamation-circle"
+                    })
+                }
+            }else{//como NO hay que desactivar nada, simplemente envía el dato
+                this.$emit('onItemSelected',row)
+                this.componentValue=row
+                this.isDialogOpen = false
+            }
+            
+            
         },
         filterList (val, update) {
             if (val === '') {
@@ -135,6 +165,11 @@ export default({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
+    },
+    watch: { 
+        initialValue: function(newVal, oldVal) { // update component display value when changed happend from outside component (e.g. programatically)
+            this.componentValue=newVal
+        }
     }
 })
 </script>

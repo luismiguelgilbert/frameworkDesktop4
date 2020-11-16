@@ -23,7 +23,25 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-link" /></template>
     </q-input>
-    <q-select
+
+    <selectSearchable 
+        prependIcon="fas fa-table"
+        labelText="Tabla Principal (*)" labelSearchText="Buscar Tabla"
+        :optionsList="this.lookup_tables"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="db_table"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Tabla', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.db_table=row.value;
+            }"
+        />
+
+    <!--<q-select
         label="Tabla Principal (*)" placeholder="Ingrese el nombre de la tabla principal (*)" emit-value map-options filled
         :options="lookup_tables"
         :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -33,8 +51,25 @@
           val => !!val || '* Requerido'
         ]">
         <template v-slot:prepend><q-icon name="fas fa-table" /></template>
-    </q-select>
-    <q-select
+    </q-select>-->
+
+    <selectSearchable 
+        prependIcon="fas fa-key"
+        labelText="Campo Primario (*)" labelSearchText="Buscar nombre de la columna principal"
+        :optionsList="this.lookup_cols.filter(x=>x.table_name==db_table)"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="primary_key"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Columna', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.primary_key=row.value;
+            }"
+        />
+    <!--<q-select
         label="Campo Primario (*)" placeholder="Ingrese el nombre de la columna principal (*)" emit-value map-options filled
         :options="lookup_cols.filter(x=>x.table_name==db_table)"
         :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -44,11 +79,28 @@
           val => !!val || '* Requerido'
         ]">
         <template v-slot:prepend><q-icon name="fas fa-key" /></template>
-    </q-select>
+    </q-select>-->
     <q-toggle
         v-model="is_company_filtered" color="positive" label="La tabla se filtra por compañía?"
         />
-    <q-select
+
+    <selectSearchable 
+        prependIcon="fas fa-sort"
+        labelText="Orden Inicial (*)" labelSearchText="Buscar nombre de la columna inicial para ordenar"
+        :optionsList="this.lookup_cols.filter(x=>x.table_name==db_table)"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="sortBy"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Columna', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.sortBy=row.value;
+            }"
+        />
+    <!--<q-select
         label="Orden Inicial (*)" placeholder="Ingrese el nombre de la columna inicial para ordenar datos (*)" emit-value map-options filled
         :options="lookup_cols.filter(x=>x.table_name==db_table)"
         :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -58,7 +110,7 @@
           val => !!val || '* Requerido'
         ]">
         <template v-slot:prepend><q-icon name="fas fa-sort" /></template>
-    </q-select>
+    </q-select>-->
     <q-select
         label="Sentido" placeholder="Seleccione el sentido para ordenar datos" emit-value map-options filled
         :options="[{value: 'asc', label: 'ascendente'},{value: 'desc', label: 'descendente'}]"
@@ -81,9 +133,12 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
             moduleName: "Modules"

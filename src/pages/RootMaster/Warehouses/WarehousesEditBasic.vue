@@ -28,23 +28,39 @@
         <template v-slot:prepend><q-icon name="fas fa-sort-amount-up-alt" /></template>
     </q-input>
 
-    <q-select class="q-mb-lg"
-        label="País" placeholder="Seleccione el País donde se encuentra la Bodega" emit-value map-options filled
-        :options="lookup_countries" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="country_id"
-        ref="country_id"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-globe" /></template>
-    </q-select>
+    <selectSearchable 
+        prependIcon="fas fa-globe"
+        labelText="País (*)" labelSearchText="Buscar País"
+        :optionsList="this.lookup_countries"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false"  class="q-pb-md"
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="country_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'País', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.country_id=row.value;
+            }"
+        />
 
-    <q-select class="q-mb-lg"
-        label="Ciudad" placeholder="Seleccione la Ciudad donde se encuentra la Bodega" emit-value map-options filled
-        :options="lookup_cities" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="city_id"
-        ref="city_id"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-city" /></template>
-    </q-select>
+    <selectSearchable 
+        prependIcon="fas fa-city"
+        labelText="Ciudad" labelSearchText="Buscar Ciudad"
+        :optionsList="this.lookup_cities"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false"  class="q-pb-md"
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="city_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'País', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.city_id=row.value;
+            }"
+        />
 
     <q-input class="q-mb-lg"
         ref="address" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -67,9 +83,12 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
             moduleName: "Warehouses"

@@ -73,16 +73,48 @@
         <template v-slot:prepend><q-icon name="fas fa-phone" /></template>
     </q-input>
 
-    <q-select class="q-mb-md"
+    <selectSearchable 
+        prependIcon="fas fa-globe"
+        labelText="País (*)" labelSearchText="Buscar País"
+        :optionsList="this.lookup_countries"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="country_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'País', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.country_id=row.value;
+            }"
+        />
+    <!--<q-select class="q-mb-md"
         label="País" placeholder="Seleccione el país de origen del socio (*)" emit-value map-options filled
         :options="lookup_countries" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="country_id"
         ref="country_id" @input="changeMonth"
         >
         <template v-slot:prepend><q-icon name="fas fa-globe" /></template>
-    </q-select>
+    </q-select>-->
 
-    <q-select class="q-mb-md"
+    <selectSearchable 
+        prependIcon="fas fa-city"
+        labelText="Ciudad" labelSearchText="Buscar Ciudad"
+        :optionsList="this.lookup_cities"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="city_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'País', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.city_id=row.value;
+            }"
+        />
+    <!--<q-select class="q-mb-md"
         label="Ciudad" placeholder="Seleccione la ciudad de origen del socio (*)" emit-value map-options filled
         :options="lookup_cities" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         :option-disable="opt => !opt.estado"
@@ -90,7 +122,7 @@
         ref="city_id" @input="changeMonth"
         >
         <template v-slot:prepend><q-icon name="fas fa-city" /></template>
-    </q-select>
+    </q-select>-->
 
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Socio" filled
@@ -104,9 +136,12 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
             moduleName: "Partners"

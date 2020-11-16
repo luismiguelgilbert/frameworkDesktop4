@@ -133,7 +133,7 @@
         />
     <br><br>
 
-    <q-dialog v-model="isPartnerDialog">
+    <!--<q-dialog v-model="isPartnerDialog">
         <mainLookup 
             titleBar="Buscar Proveedor"
             :data="this.lookup_partners"
@@ -148,8 +148,8 @@
             
             @onCancel="isPartnerDialog=false"
             @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        /><!--boldIfChildrenFielname="account_has_children"-->
-    </q-dialog>
+        />
+    </q-dialog>-->
 </q-form>
 </template>
 <script>

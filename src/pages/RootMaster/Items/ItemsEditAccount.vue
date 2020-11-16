@@ -13,130 +13,192 @@
     </q-select>
 
     <!--accInventory-->
-    <q-input
-        ref="accInventoryName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Inventario (*)" label="Cuenta de Inventario (*)" filled
-        :value="accInventoryName" title="Por ejemplo, va al DEBE cuando Ingresa Inventario por Compra"
-        @keyup.keyCodes.113="openSearchAccount('accInventory','accInventoryName',accInventory)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-boxes" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accInventory','accInventoryName',accInventory)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-boxes"
+        labelText="Cuenta de Inventario (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al DEBE cuando Ingresa Inventario por Compra"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accInventory"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accInventory=row.value;
+            }"
+        />
 
     <!--accAllocation-->
-    <q-input
-        ref="accAllocationName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Liquidación de Documentos de Inventario (*)" label="Cuenta de Liquidación de Documentos de Inventario (*)" filled
-        :value="accAllocationName" title="Por ejemplo, va al HABER cuando Ingresa Inventario por Compra || va al DEBE cuando se Contabiliza Factura de Compra"
-        @keyup.keyCodes.113="openSearchAccount('accAllocation','accAllocationName',accAllocation)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-file-invoice" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accAllocation','accAllocationName',accAllocation)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-file-invoice"
+        labelText="Cuenta de Liquidación de Documentos de Inventario (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al HABER cuando Ingresa Inventario por Compra || va al DEBE cuando se Contabiliza Factura de Compra"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accAllocation"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accAllocation=row.value;
+            }"
+        />
 
     <!--accCOGS-->
-    <q-input
-        ref="accCOGSName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Costo de Ventas Inventario (*)" label="Cuenta de Costo de Ventas de Inventario (*)" filled
-        :value="accCOGSName" title="Por ejemplo, va al DEBE cuando Egresa Inventario por Venta"
-        @keyup.keyCodes.113="openSearchAccount('accCOGS','accCOGSName',accCOGS)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-tags" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accCOGS','accCOGSName',accCOGS)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-tags"
+        labelText="Cuenta de Costo de Ventas de Inventario (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al DEBE cuando Egresa Inventario por Venta"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accCOGS"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accCOGS=row.value;
+            }"
+        />
 
     <!--accCOGSprj-->
-    <q-input
-        ref="accCOGSprjName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Costo de Inventario en Obras (*)" label="Cuenta de Costo de Ventas de Inventario que sale x Obras/Proyecto (*)" filled
-        :value="accCOGSprjName" title="Por ejemplo, va al DEBE cuando Egresa Inventario para una Obra/Proyecto"
-        @keyup.keyCodes.113="openSearchAccount('accCOGSprj','accCOGSprjName',accCOGSprj)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-pencil-ruler" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accCOGSprj','accCOGSprjName',accCOGSprj)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-pencil-ruler"
+        labelText="Cuenta de Costo de Ventas de Inventario que sale x Obras/Proyecto (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al DEBE cuando Egresa Inventario para una Obra/Proyecto"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accCOGSprj"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accCOGSprj=row.value;
+            }"
+        />
 
     <!--accRevenue-->
-    <q-input
-        ref="accRevenueName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Ingresos x Venta (*)" label="Cuenta de Ingresos (*)" filled
-        :value="accRevenueName" title="Por ejemplo, va al HABER cuando se emite Factura de Venta de Inventario"
-        @keyup.keyCodes.113="openSearchAccount('accRevenue','accRevenueName',accRevenue)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-file-invoice-dollar" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accRevenue','accRevenueName',accRevenue)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-file-invoice-dollar"
+        labelText="Cuenta de Ingresos (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al HABER cuando se emite Factura de Venta de Inventario"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accRevenue"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accRevenue=row.value;
+            }"
+        />
 
     <!--accInventoryIncrease-->
-    <q-input
-        ref="accInventoryIncreaseName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Ajuste de Inventario Sobrante (*)" label="Cuenta de Ajuste de Inventario Sobrante (*)" filled
-        :value="accInventoryIncreaseName" title="Por ejemplo, va al HABER cuando se registra Ajuste de Inventario Sobrante"
-        @keyup.keyCodes.113="openSearchAccount('accInventoryIncrease','accInventoryIncreaseName',accInventoryIncrease)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-box" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accInventoryIncrease','accInventoryIncreaseName',accInventoryIncrease)"/></template>
-    </q-input>
-
+    <selectSearchable 
+        prependIcon="fas fa-box"
+        labelText="Cuenta de Ajuste de Inventario Sobrante (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al HABER cuando se registra Ajuste de Inventario Sobrante"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accInventoryIncrease"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accInventoryIncrease=row.value;
+            }"
+        />
+    
     <!--accInventoryDecrease-->
-    <q-input
-        ref="accInventoryDecreaseName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Ajuste de Inventario Faltante (*)" label="Cuenta de Ajuste de Inventario Faltante (*)" filled
-        :value="accInventoryDecreaseName" title="Por ejemplo, va al DEBE cuando se registra Ajuste de Inventario Faltante"
-        @keyup.keyCodes.113="openSearchAccount('accInventoryDecrease','accInventoryDecreaseName',accInventoryDecrease)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-box-open" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accInventoryDecrease','accInventoryDecreaseName',accInventoryDecrease)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-box-open"
+        labelText="Cuenta de Ajuste de Inventario Faltante (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al DEBE cuando se registra Ajuste de Inventario Faltante"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accInventoryDecrease"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accInventoryDecrease=row.value;
+            }"
+        />
 
     <!--accMfg-->
-    <q-input
-        ref="accMfgName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Consumo de Inventario x Producción (*)" label="Cuenta de Consumo de Inventario x Producción (*)" filled
-        :value="accMfgName" title="Por ejemplo, va al DEBE cuando se registra Ajuste de Inventario Faltante"
-        @keyup.keyCodes.113="openSearchAccount('accMfg','accMfgName',accMfg)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-industry" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accMfg','accMfgName',accMfg)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-industry"
+        labelText="Cuenta de Consumo de Inventario x Producción (*)" labelSearchText="Buscar Cuenta Contable"
+        title="Por ejemplo, va al DEBE cuando se registra Consumo de Insumos en Producción"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accMfg"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accMfg=row.value;
+            }"
+        />
 
     <!--sri_sustento-->
-    <q-input
-        ref="sri_sustentoName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione el Sustento Tributario al que pertenece el Item (*)" label="Sustento Tributario (*)" filled
-        :value="sri_sustentoName" title="Por ejemplo, va al DEBE cuando se registra Ajuste de Inventario Faltante"
-        @keyup.keyCodes.113="isSustentosDialog=true"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-balance-scale" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="isSustentosDialog=true"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-balance-scale"
+        labelText="Sustento Tributario (*)" labelSearchText="Buscar Sustento Tributario"
+        title="Por ejemplo, va al DEBE cuando se registra Consumo de Insumos en Producción"
+        :optionsList="this.lookup_sri_sustentos"
+        rowValueField="value" optionsListLabel="label" 
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="sri_sustento"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.sri_sustento=row.value;
+            }"
+        />
+
     
     <div>
         <q-toolbar class="bg-primary text-white shadow-2">
@@ -222,10 +284,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
+        ,selectSearchable:selectSearchable
     },
     data () {
         return {

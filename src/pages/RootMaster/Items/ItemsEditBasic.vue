@@ -11,17 +11,33 @@
         v-model="is_purchase" icon="fas fa-shopping-cart" color="light-blue-6" label="Se Compra?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     </div>
-    <q-select class="col-4"
-        label="Tipo de Item (*)" placeholder="Seleccione el Tipo de Item al que corresponde el Item (*)" emit-value map-options filled
-        :options="lookup_systemTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="systemType"
+    <selectSearchable 
+        prependIcon="fas fa-cog"
+        labelText="Tipo de Item (*)" labelSearchText="Buscar el Tipo de Item"
+        :optionsList="this.lookup_systemTypes"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="systemType"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.systemType=row.value;
+            }"
+        />
+    <!--<q-select class="col-4"
+        label=" (*)" placeholder="Seleccione el Tipo de Item al que corresponde el Item (*)" emit-value map-options filled
+        :options="" :readonly=""
+        v-model=""
         ref="systemType"
         :rules="[
                 val => val!= null || '* Requerido',
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-cog" /></template>
-    </q-select>
+    </q-select>-->
    
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -45,18 +61,30 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-barcode" /></template>
     </q-input>
-    <q-select class="col-4"
-        label="Clasificación (*)" placeholder="Seleccione la Clasificación al que pertenece el Item (*)" emit-value map-options filled
-        :options="lookup_types" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        :option-disable="opt => opt.estado"
-        v-model="typeID"
-        ref="typeID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-layer-group" /></template>
-    </q-select>
+
+    <selectSearchable
+        prependIcon="fas fa-layer-group"
+        labelText="Clasificación (*)" labelSearchText="Buscar Clasificación"
+        title="Por ejemplo, va al DEBE cuando Ingresa Inventario por Compra"
+        :optionsList="this.lookup_types"
+        rowValueField="value" optionsListLabel="label" 
+        optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="typeID"
+        :tableSearchColumns="[
+                 //{ name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                { name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.typeID=row.value;
+                //this.accSalesInvoiceName=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
 
     <q-input class="q-mb-md"
         ref="bar_code" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -66,30 +94,42 @@
         <template v-slot:prepend><q-icon name="fas fa-qrcode" /></template>
     </q-input>
 
-    <q-select class="col-4"
-        label="Unidad de Medida (*)" placeholder="Seleccione la Unidad de Medida del Item (*)" emit-value map-options filled
-        :options="lookup_UoM" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="uomID"
-        ref="uomID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-weight" /></template>
-    </q-select>
-
-    <q-select class="col-4"
-        label="Marca" placeholder="Seleccione la Marca del Item (*)" emit-value map-options filled
-        :options="lookup_brands" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="brandID"
-        ref="brandID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-sticky-note" /></template>
-    </q-select>
-
+    <selectSearchable
+        prependIcon="fas fa-weight"
+        labelText="Unidad de Medida (*)" labelSearchText="Buscar Unidad de Medida"
+        :optionsList="this.lookup_UoM"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="short_name_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="uomID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                ,{ name: 'short_name_es', label: 'Abreviado', field: 'short_name_es', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.uomID=row.value;
+            }"
+        />
+    
+    <selectSearchable
+        prependIcon="fas fa-sticky-note"
+        labelText="Marca" labelSearchText="Buscar Marca"
+        :optionsList="this.lookup_brands"
+        rowValueField="value" optionsListLabel="label"
+        optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="brandID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.brandID=row.value;
+            }"
+        />
 
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Socio" filled
@@ -103,9 +143,12 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    components: {
+        selectSearchable:selectSearchable
+    },
     data () {
         return {
             moduleName: "Items"

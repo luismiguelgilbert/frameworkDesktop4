@@ -1,7 +1,29 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <!--partnerID-->
-    <q-input
+    <selectSearchable 
+        prependIcon="fas fa-handshake"
+        labelText="Proveedor/Cliente (*)" labelSearchText="Buscar Proveedor/Cliente"
+        :optionsList="this.lookup_partners"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :initialValue="partnerID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+                ,{ name: 'pendingOrders', label: 'Órdenes Pendientes', field: 'pendingOrders', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.partnerID=row.value;
+                this.lines = []
+                this.loadPendingInv()
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
+    <!--<q-input
         ref="partnerName" :readonly="!editMode"
         placeholder="Seleccione el Proveedor/Cliente (*)" label="Proveedor/Cliente (*)" filled
         :value="partnerName" 
@@ -12,7 +34,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
         <template v-if="editMode" v-slot:append><q-icon name="fas fa-search"  @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
-    </q-input>
+    </q-input>-->
 
     
     <q-select
@@ -115,10 +137,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
+        ,selectSearchable:selectSearchable
     },
     data () {
         return {

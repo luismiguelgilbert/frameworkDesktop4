@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm" >
     <q-toggle
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
@@ -53,23 +53,60 @@
         <template v-slot:prepend><q-icon name="fas fa-map-marker-alt" /></template>
     </q-input>
 
-    <q-select class="q-mb-md q-pt-md"
+    <selectSearchable 
+        prependIcon="fas fa-globe"
+        labelText="País predeterminado para nuevos socios" labelSearchText="Buscar País Predeterminado"
+        :optionsList="this.lookup_countries"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" class="q-mb-md q-mt-md"
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="default_country_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'País', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.default_country_id=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
+
+    <!--<q-select class="q-mb-md q-pt-md"
         label="País predeterminado para nuevos socios" placeholder="Seleccione el país de origen predeterminado para nuevos socios (*)" emit-value map-options filled
         :options="lookup_countries" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="default_country_id"
         ref="default_country_id"
         >
         <template v-slot:prepend><q-icon name="fas fa-globe" /></template>
-    </q-select>
+    </q-select>-->
 
-    <q-select class="q-mb-md q-pt-md"
+    <selectSearchable 
+        prependIcon="fas fa-city"
+        labelText="Ciudad predeterminado para nuevos socios" labelSearchText="Buscar Ciudad Predeterminada"
+        :optionsList="this.lookup_cities"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="default_city_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'País', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.default_city_id=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
+    <!--<q-select class="q-mb-md q-pt-md"
         label="Ciudad predeterminada para nuevos socios" placeholder="Seleccione la ciudad de origen predeterminada para nuevos socios (*)" emit-value map-options filled
         :options="lookup_cities" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="default_city_id"
         ref="default_city_id"
         >
         <template v-slot:prepend><q-icon name="fas fa-city" /></template>
-    </q-select>
+    </q-select>-->
 
      <q-select class="q-mb-md q-pt-md"
         label="Grupo Contable predeterminado para nuevos Socios" placeholder="Seleccione el Grupo Contable predeterminado para nuevos socios (*)" emit-value map-options filled
@@ -97,9 +134,13 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 
 export default ({
+    components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
             moduleName: "Companies"

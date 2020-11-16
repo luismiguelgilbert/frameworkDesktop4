@@ -10,14 +10,47 @@
         v-model="group_by_partner" color="positive" label="Asiento Apertura (Agrupar x Socio)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     </div>
-    <q-select clearable
-        label="Pertenece al Grupo" placeholder="Seleccione la cuenta contable a la que pertenece" emit-value map-options filled
-        :options="lookup_accounts" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="parent_id"
-        ref="parent_id" @input="changeParent"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-folder-open" /></template>
-    </q-select>
+    <selectSearchable 
+        prependIcon="fas fa-folder-open"
+        labelText="Pertenece al Grupo (*)" labelSearchText="Buscar Cuenta Contable"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="parent_id"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                if(row){
+                    this.parent_id=row.value;
+                    let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id);
+                    this.account_type_root = temporal.account_type_root
+                    this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
+                    //autocalcula el próximo número
+                    let temp = this.lookup_accounts.filter(x=>x.parent_id == this.parent_id)
+                    let nuevo = 0
+                    if(temp){
+                        if(temp.length>0){
+                            nuevo = temp.slice(-1)[0].code_es.replace(this.lookup_accounts.find(x=>x.value == this.parent_id).code_es,'').match(/[0-9]/g).join('')
+                        }
+                        nuevo++
+                        this.code_es = temporal.code_es + '.' + nuevo
+                    }else{
+                        this.code_es = temporal.code_es + '.XX'
+                    }                    
+                }else{
+                    this.code_es = ''
+                    this.account_type_root = 1
+                    this.account_level = 0
+                }
+
+            }"
+        />
     <q-select class="q-pt-md"
         label="Tipo de Cuenta" placeholder="Seleccione el tipo de cuenta a la que pertenece" emit-value map-options filled
         :options="lookup_accountsTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -68,12 +101,15 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
-            moduleName: "ChartAccount"
+            moduleName: "ChartAccount", temp: null
         }
     },
     mounted(){

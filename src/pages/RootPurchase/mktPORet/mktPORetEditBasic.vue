@@ -7,7 +7,26 @@
     </div>
 
     <!--partnerID-->
-    <q-input
+    <selectSearchable 
+        prependIcon="fas fa-handshake"
+        labelText="Proveedor/Cliente (*)" labelSearchText="Buscar Proveedor/Cliente"
+        :optionsList="this.lookup_partners"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :initialValue="partnerID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+                ,{ name: 'pendingOrders', label: 'Órdenes Pendientes', field: 'pendingOrders', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.partnerID=row.value;
+                this.lines = []
+            }"
+        />
+    <!--<q-input
         ref="partnerName" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
         :value="partnerName" 
@@ -18,7 +37,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
         <template v-slot:append><q-icon name="fas fa-search" @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
-    </q-input>
+    </q-input>-->
 
     <!--<q-select
         label="Bodega (*)" placeholder="Seleccione la Bodega de Origen que está devolviendo los Items (*)" emit-value map-options filled
@@ -95,10 +114,12 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
+        ,selectSearchable:selectSearchable
     },
     data () {
         return {

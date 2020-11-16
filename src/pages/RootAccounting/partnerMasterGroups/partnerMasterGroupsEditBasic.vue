@@ -19,60 +19,104 @@
     </q-input>
 
     <!--accSalesInvoice-->
-    <q-input
-        ref="accSalesInvoiceName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta Contable por Cobrar una Venta (*)" label="Cuenta x Cobrar al Cliente(*)" filled
-        :value="accSalesInvoiceName" title="Por ejemplo, va al DEBE cuando se emite una Factura de Venta"
-        @keyup.keyCodes.113="openSearchAccount('accSalesInvoice','accSalesInvoiceName',accSalesInvoice)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-tags" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accSalesInvoice','accSalesInvoiceName',accSalesInvoice)"/></template>
-    </q-input>
+    
+    <selectSearchable 
+        prependIcon="fas fa-tags"
+        labelText="Cuenta x Cobrar al Cliente (*)" labelSearchText="Buscar Cuenta Contable"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accSalesInvoice"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accSalesInvoice=row.value;
+                //this.accSalesInvoiceName=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
+        
 
     <!--accPaymentIncomeAdvance-->
-    <q-input
-        ref="accPaymentIncomeAdvanceName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Anticipos Recibidos del Cliente (*)" label="Cuenta de Anticipos Recibidos del Cliente (*)" filled
-        :value="accPaymentIncomeAdvanceName" title="Por ejemplo, va al HABER cuando Ingresa un Cobro del Cliente"
-        @keyup.keyCodes.113="openSearchAccount('accPaymentIncomeAdvance','accPaymentIncomeAdvanceName',accPaymentIncomeAdvance)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-hand-holding-usd" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accPaymentIncomeAdvance','accPaymentIncomeAdvanceName',accPaymentIncomeAdvance)"/></template>
-    </q-input>
+    <selectSearchable 
+        prependIcon="fas fa-hand-holding-usd"
+        labelText="Cuenta de Anticipos Recibidos del Cliente (*)" labelSearchText="Buscar Cuenta Contable"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accPaymentIncomeAdvance"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accPaymentIncomeAdvance=row.value;
+                //this.accSalesInvoiceName=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
+    
 
     <!--accPurchaseInvoiceName-->
-    <q-input
-        ref="accPurchaseInvoiceName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta x Pagar del Proveedor (*)" label="Cuenta x Pagar del Proveedor (*)" filled
-        :value="accPurchaseInvoiceName" title="Por ejemplo, va al DEBE cuando registra una Factura de Compra"
-        @keyup.keyCodes.113="openSearchAccount('accPurchaseInvoice','accPurchaseInvoiceName',accPurchaseInvoice)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-shopping-cart" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accPurchaseInvoice','accPurchaseInvoiceName',accPurchaseInvoice)"/></template>
-    </q-input>
+     <selectSearchable 
+        prependIcon="fas fa-money-check-alt"
+        labelText="Cuenta de Anticipos Entregados al Proveedor (*)" labelSearchText="Buscar Cuenta Contable"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accPaymentOutcomeAdvance"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accPaymentOutcomeAdvance=row.value;
+                //this.accSalesInvoiceName=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
+    
 
     <!--accPaymentOutcomeAdvance-->
-    <q-input
-        ref="accPaymentOutcomeAdvanceName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione la Cuenta de Anticipos Entregados al Proveedor (*)" label="Cuenta de Anticipos Entregados al Proveedor (*)" filled
-        :value="accPaymentOutcomeAdvanceName" title="Por ejemplo, va al DEBE cuando se realiza un Cheque o Transferencia como anticipo"
-        @keyup.keyCodes.113="openSearchAccount('accPaymentOutcomeAdvance','accPaymentOutcomeAdvanceName',accPaymentOutcomeAdvance)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-money-check-alt" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchAccount('accPaymentOutcomeAdvance','accPaymentOutcomeAdvanceName',accPaymentOutcomeAdvance)"/></template>
-    </q-input>
+     <selectSearchable 
+        prependIcon="fas fa-money-check-alt"
+        labelText="Cuenta de Anticipos Entregados al Proveedor (*)" labelSearchText="Buscar Cuenta Contable"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
+        optionLabelField="fullLabel" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="accPaymentOutcomeAdvance"
+        :tableSearchColumns="[
+                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.accPaymentOutcomeAdvance=row.value;
+                //this.accSalesInvoiceName=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
 
     <!--sri_compras-->
     <q-select
@@ -220,10 +264,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
+        ,selectSearchable:selectSearchable
     },
     data () {
         return {

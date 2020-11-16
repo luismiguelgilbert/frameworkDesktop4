@@ -145,8 +145,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+  components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
             moduleName: "accAP"

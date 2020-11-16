@@ -36,17 +36,27 @@
         >
         <template v-slot:prepend><q-icon name="far fa-user" /></template>
     </q-input>
-    <q-select 
-        label="Perfil del Usuario (*)" placeholder="Seleccione el estado del pedido" emit-value map-options filled
-        :options="lookup_profiles" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="sys_profile_id"
-        ref="pruebas"
-        :rules="[
-          val => !!val || '* Requerido',
-          val => val > 0 || 'Debe escoger un perfil',
-        ]">
-        <template v-slot:prepend><q-icon name="fas fa-user-shield" /></template>
-    </q-select>
+    
+    <selectSearchable 
+        prependIcon="fas fa-user-shield"
+        labelText="Perfil de Usuario (*)" labelSearchText="Buscar Perfil"
+        :optionsList="this.lookup_profiles"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="sys_profile_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Perfil', field: 'label', align: 'left'}
+                ,{ name: 'estado', label: 'Estado', field: 'estado', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.sys_profile_id=row.value;
+                //this.partnerName=row.label;
+                //this.partner_account_id=row.account_id
+            }"
+        />
+
     <q-input 
         label="Correo Electrónico" placeholder="Ingrese los apellidos del usuario"  filled class="q-mb-lg"
         v-model="sys_user_mail" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -94,9 +104,12 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
             moduleName: "Users"
