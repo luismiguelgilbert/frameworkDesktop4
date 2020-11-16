@@ -19,7 +19,6 @@
     </q-input>
 
     <!--accSalesInvoice-->
-    
     <selectSearchable 
         prependIcon="fas fa-tags"
         labelText="Cuenta x Cobrar al Cliente (*)" labelSearchText="Buscar Cuenta Contable"
@@ -42,7 +41,6 @@
                 //this.partner_account_id=row.account_id
             }"
         />
-        
 
     <!--accPaymentIncomeAdvance-->
     <selectSearchable 
@@ -67,35 +65,33 @@
                 //this.partner_account_id=row.account_id
             }"
         />
-    
 
-    <!--accPurchaseInvoiceName-->
-     <selectSearchable 
-        prependIcon="fas fa-money-check-alt"
-        labelText="Cuenta de Anticipos Entregados al Proveedor (*)" labelSearchText="Buscar Cuenta Contable"
+    <!--accPurchaseInvoice-->
+    <selectSearchable 
+        prependIcon="fas fa-shopping-cart"
+        labelText="Cuenta x Pagar del Proveedor (*)" labelSearchText="Buscar Cuenta Contable"
         :optionsList="this.lookup_accounts"
         rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 
         optionLabelField="fullLabel" optionDisableField="estado"
         :isRequired="true" 
         :isDisable="false" 
         :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        :initialValue="accPaymentOutcomeAdvance"
+        :initialValue="accPurchaseInvoice"
         :tableSearchColumns="[
                  { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
                 ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
                 //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
             ]"
         @onItemSelected="(row)=>{
-                this.accPaymentOutcomeAdvance=row.value;
+                this.accPurchaseInvoice=row.value;
                 //this.accSalesInvoiceName=row.value;
                 //this.partnerName=row.label;
                 //this.partner_account_id=row.account_id
             }"
         />
     
-
     <!--accPaymentOutcomeAdvance-->
-     <selectSearchable 
+    <selectSearchable 
         prependIcon="fas fa-money-check-alt"
         labelText="Cuenta de Anticipos Entregados al Proveedor (*)" labelSearchText="Buscar Cuenta Contable"
         :optionsList="this.lookup_accounts"
