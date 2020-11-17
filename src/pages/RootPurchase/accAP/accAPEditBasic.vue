@@ -213,39 +213,70 @@ export default ({
             reader.addEventListener('load', (event) => {
                 parser.parseString(event.target.result, (err, result)=>{//lee XML
                     if(err){ console.error(err); return;}
-                    try{ this.autorizacionDoc = result.autorizacion.numeroAutorizacion[0] }catch(ex){}
-                        parser.parseString(result.autorizacion.comprobante[0], (errA, resultA)=>{//lee Comprobante dentro del resultado
-                            if(errA){console.error(errA);return;}
-                            try{ //arma numero de documento
-                                let numerodocumento = resultA.factura.infoTributaria[0].estab[0]
-                                numerodocumento += resultA.factura.infoTributaria[0].ptoEmi[0]
-                                numerodocumento += resultA.factura.infoTributaria[0].secuencial[0]
-                                this.numeroDoc = numerodocumento 
-                            }catch(ex){}
-                            try{ //arma fecha
-                                let fechaemision = resultA.factura.infoFactura[0].fechaEmision[0].substring(6,11) + '/'
-                                fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(3,5) + '/'
-                                fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(0,2)
-                                this.headerDate = fechaemision
-                            }catch(ex){}
-                            try{ //aplica Proveedor
-                                let ruc = resultA.factura.infoTributaria[0].ruc[0].trim()
-                                if(this.lookup_partners.some(x=>x.partner_ruc==ruc)){
-                                    let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
-                                    this.partnerID = partner.value
-                                    this.partnerName = partner.label
-                                    this.partner_account_id = partner.account_id;//usado para calcular el asiento contable
+                        try{
+                            parser.parseString(result.autorizacion.comprobante[0], (errA, resultA)=>{//lee Comprobante dentro del resultado
+                                console.dir('bandera 1')
+                                console.dir('errA')
+                                console.dir(errA)
+                                console.dir('resultA')
+                                console.dir(resultA)
+                                if(errA){
+                                    console.dir('flag 01')
+                                    this.$q.notify({ html: true, multiLine: false, color: 'red'
+                                        ,message: "No se pudo obtener datos de factura del XML.<br/>"
+                                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                                    })
+                                    console.error(errA);return;
+                                }else{
+                                    console.dir('flag 02')
+                                    let facturaPara = resultA.factura.infoFactura[0].identificacionComprador[0]
+                                    let currentRUC = this.userCompanies.find(x=>x.companyID==this.userCompany).companyNumber
+                                    if(facturaPara!=currentRUC){//valida que RUC de Factura y Compañía coincidan
+                                        this.$q.notify({ html: true, multiLine: false, color: 'red'
+                                            ,message: "El XML NO pertenece a la compañía actual.<br/>Factura para: " + facturaPara + "<br/>Compañía Actual: " + currentRUC
+                                            ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                                            ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                                        })
+                                    }else{
+                                        //arma numero de documento
+                                        let numerodocumento = resultA.factura.infoTributaria[0].estab[0]
+                                        numerodocumento += resultA.factura.infoTributaria[0].ptoEmi[0]
+                                        numerodocumento += resultA.factura.infoTributaria[0].secuencial[0]
+                                        this.numeroDoc = numerodocumento 
+                                        //arma numero de autorizacion
+                                        this.autorizacionDoc = result.autorizacion.numeroAutorizacion[0]
+                                        //arma fecha
+                                        let fechaemision = resultA.factura.infoFactura[0].fechaEmision[0].substring(6,11) + '/'
+                                        fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(3,5) + '/'
+                                        fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(0,2)
+                                        this.headerDate = fechaemision
+                                        //aplica Proveedor
+                                        let ruc = resultA.factura.infoTributaria[0].ruc[0].trim()
+                                        if(this.lookup_partners.some(x=>x.partner_ruc==ruc)){
+                                            let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
+                                            this.partnerID = partner.value
+                                            this.partnerName = partner.label
+                                            this.partner_account_id = partner.account_id;//usado para calcular el asiento contable
+                                        }
+                                        //arma comentarios
+                                        let resultado = ''
+                                        resultA.factura.infoAdicional[0].campoAdicional.map(x=>{
+                                            resultado += x.$.nombre + ': ' + x._ + '  ||  '
+                                        })
+                                        this.comments = resultado
+                                    }
                                 }
-                            }catch(ex){}
-                            try{ //arma comentarios
-                                let resultado = ''
-                                resultA.factura.infoAdicional[0].campoAdicional.map(x=>{
-                                    resultado += x.$.nombre + ': ' + x._ + '  ||  '
-                                })
-                                this.comments = resultado
-                            }catch(ex){}
-                            
-                        })
+                            })
+                        }catch(ex){
+                            console.dir('flag 07')
+                            this.xmlFile = null
+                            this.$q.notify({ html: true, multiLine: false, color: 'red'
+                                ,message: "No se pudo obtener datos del archivo.<br/>Verifique que corresponda a un XML de una factura."
+                                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                            })
+                        }
                 });
             });
             reader.readAsText(file);
@@ -253,6 +284,8 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
+        userCompanies: { get () { return this.$store.state.main.userCompanies } },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
