@@ -53,6 +53,7 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="fas fa-folder-open" color="primary" no-caps :disable="selected.length<=0"/>
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Cuenta Contable':''" title="Cambiar Cuenta Contable a líneas seleccionadas" @click="isAccDialog=true" icon="fas fa-book" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0"/>
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Sustento':''" title="Cambiar Sustento Tributario a líneas seleccionadas" @click="isSustentoDialog=true" icon="fas fa-percent" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0"/>
+        <q-btn :label="$q.screen.gt.sm?'Cuenta Pasivo':''" title="Cambiar Cuenta Contable del Pasivo" icon="fas fa-handshake" color="primary" no-caps class="q-ml-sm" @click="isPartnerAccountDialog=true" />
         <!--<q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" class="q-ml-sm" no-caps   :disable="selected.length<=0" />-->
         <q-space />
     </template>
@@ -160,6 +161,33 @@
         />
   </q-dialog>
 
+  <q-dialog v-model="isPartnerAccountDialog" >
+    <q-card style="minWidth: 900px;">
+      <selectSearchable class="col-12"
+            prependIcon="fas fa-cash-register"
+            labelText="Cuenta del Pasivo (*)" labelSearchText="Buscar Cuenta Contable"
+            :optionsList="lookup_accounts"
+            rowValueField="value" optionLabelField="fullLabel" 
+            optionsListLabel="label" optionsListCaption="code_es" 
+            optionDisableField="estado"
+            :isRequired="true" 
+            :isDisable="false" 
+            :isReadonly="false"
+            :initialValue="partner_account_id"
+            :tableSearchColumns="[
+                   { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                  ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
+                ]"
+            @onItemSelected="(row)=>{
+                    this.partner_account_id=row.value;
+                    this.isPartnerAccountDialog=false;
+                    this.$emit('onAccMoveCompute');
+                }"
+            />
+    </q-card>
+  </q-dialog>
+  
+
 </div>
 
 </template>
@@ -203,10 +231,12 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
+        ,selectSearchable:selectSearchable
     },
     data () {
       return {
@@ -216,6 +246,7 @@ export default ({
         ,isSustentoDialog: false, sustentoDialogFilter: '', sustentoDialogSelected: [], sustentoDialogTableBusy: false
         ,isExpectedDialog: false, expectedDialogDate: ''
         ,mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+        ,isPartnerAccountDialog: false
         //,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
       }
     },
@@ -227,67 +258,6 @@ export default ({
                   max = arr[i];
           }
           return max;
-      },
-      calculateAccMove(){
-        this.$q.loading.show()
-        let newRowsAccount = [] //no necesito guardarlo, xq recalculo siempre JSON.parse(JSON.stringify(this.accountLines))
-        let newAccLineID = 0
-        //#region ITEM_LINES_debit
-        this.lines.map(row=>{
-          newAccLineID++;
-          newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: row.lineID
-            ,taxLineID: 0
-            ,accountID: row.account_id
-            ,partnerID: 0
-            ,debit: row.lineUntaxed
-            ,credit: 0
-            ,invID: row.invID
-            ,prjID: row.prjID
-            ,mktLineID: row.lineID
-            ,comments: row.invName
-          })
-        })
-        //#endregion ITEM_LINES_debit
-        //#region TAX_LINES_debit
-        this.linesTaxes.map(row=>{
-          newAccLineID++;
-          newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: row.lineID
-            ,taxLineID: row.taxLineID
-            ,accountID: row.account_id
-            ,partnerID: 0
-            ,debit: row.taxAmount
-            ,credit: 0
-            ,invID: row.invID
-            ,prjID: this.lines.find(x=>x.lineID==row.lineID).prjID
-            ,mktLineID: row.lineID
-            ,comments: row.taxName + ' (' + this.lines.find(x=>x.lineID==row.lineID).invName + ')'
-          })
-        })
-        //#endregion ITEM_LINES_debit
-        //#region PARTNER_Credit
-        newAccLineID++;
-        newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: 0
-            ,taxLineID: 0
-            ,accountID: this.partner_account_id
-            ,partnerID: this.partnerID
-            ,debit: 0
-            ,credit: partnerCredit
-            ,invID: 0
-            ,prjID: 0
-            ,mktLineID: 0
-            ,comments: this.partnerName
-          })
-        //#endregion PARTNER_Credit
-        //#region Finalize
-        this.accountLines = newRowsAccount
-        this.$q.loading.hide()
-        //#endregion Finalize
       },
       prjDialogSelectAction(){
         if(this.prjDialogSelected.length>0){
@@ -304,7 +274,7 @@ export default ({
             })
             this.isPrjDialog = false
           }
-          this.calculateAccMove();
+          this.$emit('onAccMoveCompute')
         }
       },
       updateValues(selectedRows, lookupValueField, lookupLabelField){
@@ -316,7 +286,7 @@ export default ({
           })
           this.lines = newRows
           this.isAccDialog = false
-          this.calculateAccMove();
+          this.$emit('onAccMoveCompute')
         }
       },
       updateSustentoValues(selectedRows, lookupValueField, lookupLabelField){
@@ -328,7 +298,7 @@ export default ({
           })
           this.lines = newRows
           this.isSustentoDialog = false
-          this.calculateAccMove();
+          this.$emit('onAccMoveCompute')
         }
       },
       updateRow(newVal, colName, row){
@@ -382,6 +352,7 @@ export default ({
         },
         partner_account_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_account_id', value: val}) }
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },

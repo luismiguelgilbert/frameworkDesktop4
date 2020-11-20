@@ -90,11 +90,11 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
-                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>
-                    <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" /> </q-tab-panel>
-                    <q-tab-panel name="prj"><prjComponent ref="prjComponent" /></q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
+                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
+                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
+                    <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
+                    <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent /></q-tab-panel>
 
                 </q-tab-panels>
@@ -259,6 +259,71 @@ export default ({
                 this.loadingData = false
             })
         })
+    },
+    //custom
+    updateAccountMove(){
+        this.$q.loading.show()
+        let newRowsAccount = []
+        let partnerCredit = 0
+        let newAccLineID = 0
+        //#region ITEM_LINES_debit
+        this.lines.map(row=>{
+          newAccLineID++;
+          partnerCredit += row.lineUntaxed
+          newRowsAccount.push({
+             accLineID: newAccLineID
+            ,lineID: row.lineID
+            ,taxLineID: 0
+            ,accountID: row.account_id
+            ,partnerID: 0
+            ,debit: row.lineUntaxed
+            ,credit: 0
+            ,invID: row.invID
+            ,prjID: row.prjID
+            ,mktLineID: row.lineID
+            ,comments: row.invName
+          })
+        })
+        //#endregion ITEM_LINES_debit
+        //#region TAX_LINES_debit
+        this.linesTaxes.map(row=>{
+          newAccLineID++;
+          partnerCredit += row.taxAmount
+          newRowsAccount.push({
+             accLineID: newAccLineID
+            ,lineID: row.lineID
+            ,taxLineID: row.taxLineID
+            ,accountID: row.account_id
+            ,partnerID: 0
+            ,debit: row.taxAmount
+            ,credit: 0
+            ,invID: row.invID
+            ,prjID: this.lines.find(x=>x.lineID==row.lineID).prjID
+            ,mktLineID: row.lineID
+            ,comments: row.taxName + ' (' + this.lines.find(x=>x.lineID==row.lineID).invName + ')'
+          })
+        })
+        //#endregion ITEM_LINES_debit
+        //#region PARTNER_Credit
+        newAccLineID++;
+        newRowsAccount.push({
+             accLineID: newAccLineID
+            ,lineID: 0
+            ,taxLineID: 0
+            ,accountID: this.partner_account_id
+            ,partnerID: this.partnerID
+            ,debit: 0
+            ,credit: partnerCredit
+            ,invID: 0
+            ,prjID: 0
+            ,mktLineID: 0
+            ,comments: this.partnerName
+          })
+        //#endregion PARTNER_Credit
+        //#region Finalize
+        this.accountLines = newRowsAccount
+        this.$q.loading.hide()
+        //#endregion Finalize
     }
   },
   computed:{
@@ -307,6 +372,19 @@ export default ({
     userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
     lines: {
         get () { return this.$store.state[this.moduleName].editData.lines },
+    },
+    linesTaxes: {
+            get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+    },
+    partner_account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
+    },
+    partnerName: {
+        get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
+    },
+    accountLines: {
+        get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
     },
   },
 })

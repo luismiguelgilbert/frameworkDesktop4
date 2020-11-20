@@ -82,6 +82,9 @@ const routes = [
       ,{ path: 'RootPurchase/mktPORetEdit', component: () => import('pages/RootPurchase/mktPORet/mktPORetEdit.vue') }
       ,{ path: 'RootPurchase/accAP', component: () => import('pages/RootPurchase/accAP/accAP.vue') }
       ,{ path: 'RootPurchase/accAPEdit', component: () => import('pages/RootPurchase/accAP/accAPEdit.vue') }
+      ,{ path: 'RootPurchase/accRet', component: () => import('pages/RootPurchase/accRet/accRet.vue') }
+      ,{ path: 'RootPurchase/accRetEdit', component: () => import('pages/RootPurchase/accRet/accRetEdit.vue') }
+      
       
       //INVENTORY
       ,{ path: 'RootInventory/invQuery', component: () => import('pages/RootInventory/invQuery/invQuery.vue') }

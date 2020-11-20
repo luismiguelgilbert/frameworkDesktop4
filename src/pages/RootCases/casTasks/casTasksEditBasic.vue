@@ -7,7 +7,26 @@
     </div>
 
     <!--caseID-->
-    <q-input
+    <selectSearchable 
+        prependIcon="fas fa-folder-open"
+        labelText="Caso (*)" labelSearchText="Buscar Caso"
+        :optionsList="this.lookup_cases"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="customerName"
+        optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="false"
+        :initialValue="caseID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Caso', field: 'label', align: 'left'}
+                ,{ name: 'customerName', label: 'Cliente', field: 'customerName', align: 'left'}
+                ,{ name: 'customerShortName', label: 'Nombre Comercial', field: 'customerShortName', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.caseID = row.value;
+            }"
+        />
+    <!--<q-input
         ref="caseName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Seleccione el Caso (*)" label="Caso (*)" filled
         :value="caseName"
@@ -18,10 +37,28 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-folder-open" /></template>
         <template v-slot:append><q-icon name="fas fa-search" @click="openSearchCase('caseID','caseName',caseID)"/></template>
-    </q-input>
+    </q-input>-->
     
     <!--taskType-->
-    <q-input
+    <selectSearchable 
+        prependIcon="fas fa-tasks"
+        labelText="Tipo de Actividad (*)" labelSearchText="Buscar Tipo de Actividad"
+        :optionsList="this.lookup_taskTypes"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="short_name_es"
+        optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="false"
+        :initialValue="taskTypeID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Tipo de Actividad', field: 'label', align: 'left'}
+                ,{ name: 'short_name_es', label: 'Abreviado', field: 'short_name_es', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.taskTypeID = row.value;
+            }"
+        />
+    <!--<q-input
         ref="taskTypeName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Seleccione el Tipo de Actividad (*)" label="Tipo de Actividad (*)" filled
         :value="taskTypeName"
@@ -32,7 +69,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-tasks" /></template>
         <template v-slot:append><q-icon name="fas fa-search" @click="openSearchTaskType('taskTypeID','taskTypeName',taskTypeID)"/></template>
-    </q-input>
+    </q-input>-->
 
     <q-input
         ref="taskDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -78,51 +115,18 @@
 
     <br><br>
 
-    <!--Dialog Casos-->
-    <q-dialog v-model="isSearchDialog">
-        <mainLookup 
-            titleBar="Buscar Caso"
-            :data="this.lookup_cases"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                    ,{ name: 'label', required: true, label: 'Nombre del Caso', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
-                    ,{ name: 'caseTypeName', required: true, label: 'Tipo de Caso', align: 'left', field: row => row.caseTypeName , sortable: false, style: 'min-width: 200px; max-width: 200px;' }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            @onCancel="isSearchDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        />
-    </q-dialog>
-
-    <!--Dialog Casos-->
-    <q-dialog v-model="isSearchTaskTypeDialog">
-        <mainLookup 
-            titleBar="Buscar Caso"
-            :data="this.lookup_taskTypes"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                    ,{ name: 'label', required: true, label: 'Nombre del Caso', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
-                    ,{ name: 'caseTypeName', required: true, label: 'Tipo de Caso', align: 'left', field: row => row.caseTypeName , sortable: false, style: 'min-width: 200px; max-width: 200px;' }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            @onCancel="isSearchTaskTypeDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        />
-    </q-dialog>
 </q-form>
 </template>
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 
 export default ({
     components: {
-        mainLookup: mainLookup
+        selectSearchable:selectSearchable
+        ,mainLookup: mainLookup
     },
     data () {
         return {

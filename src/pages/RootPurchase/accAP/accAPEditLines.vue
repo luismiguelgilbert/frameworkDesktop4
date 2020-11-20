@@ -448,78 +448,12 @@ export default ({
           this.isItemsBatchDialog=false;
           this.isRequisicionDialog=false;
           this.$q.loading.hide()
-          this.calculateAccMove();
+          this.$emit('onAccMoveCompute')
           //#endregion Finalize
         }catch(ex){
           console.dir(ex)
           this.$q.loading.hide()  
         }
-      },
-      calculateAccMove(){
-        this.$q.loading.show()
-        let newRowsAccount = [] //no necesito guardarlo, xq recalculo siempre JSON.parse(JSON.stringify(this.accountLines))
-        let partnerCredit = 0
-        let newAccLineID = 0
-        //#region ITEM_LINES_debit
-        this.lines.map(row=>{
-          newAccLineID++;
-          partnerCredit += row.lineUntaxed
-          newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: row.lineID
-            ,taxLineID: 0
-            ,accountID: row.account_id
-            ,partnerID: 0
-            ,debit: row.lineUntaxed
-            ,credit: 0
-            ,invID: row.invID
-            ,prjID: row.prjID
-            ,mktLineID: row.lineID
-            ,comments: row.invName
-          })
-        })
-        //#endregion ITEM_LINES_debit
-        //#region TAX_LINES_debit
-        this.linesTaxes.map(row=>{
-          newAccLineID++;
-          partnerCredit += row.taxAmount
-          newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: row.lineID
-            ,taxLineID: row.taxLineID
-            ,accountID: row.account_id
-            ,partnerID: 0
-            ,debit: row.taxAmount
-            ,credit: 0
-            ,invID: row.invID
-            ,prjID: this.lines.find(x=>x.lineID==row.lineID).prjID
-            ,mktLineID: row.lineID
-            ,comments: row.taxName + ' (' + this.lines.find(x=>x.lineID==row.lineID).invName + ')'
-          })
-        })
-        //#endregion ITEM_LINES_debit
-        
-        //#region PARTNER_Credit
-        newAccLineID++;
-        newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: 0
-            ,taxLineID: 0
-            ,accountID: this.partner_account_id
-            ,partnerID: this.partnerID
-            ,debit: 0
-            ,credit: partnerCredit
-            ,invID: 0
-            ,prjID: 0
-            ,mktLineID: 0
-            ,comments: this.partnerName
-          })
-        //#endregion PARTNER_Credit
-        
-        //#region Finalize
-        this.accountLines = newRowsAccount
-        this.$q.loading.hide()
-        //#endregion Finalize
       },
       removeRows(){
         if(this.selected.length > 0){
@@ -543,7 +477,7 @@ export default ({
             this.linesTaxes = newRowsTaxes
 
             this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
-            this.calculateAccMove();
+            this.$emit('onAccMoveCompute')
           })
         }
       },
@@ -597,7 +531,7 @@ export default ({
           this.lines = newRows;
           this.linesTaxes = newRowsTaxes;
           this.$q.loading.hide()
-          this.calculateAccMove();
+          this.$emit('onAccMoveCompute')
         }catch(ex){
           console.error(ex)
           this.$q.loading.hide()

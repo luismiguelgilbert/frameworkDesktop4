@@ -1,24 +1,24 @@
 <template>
     <div>
+        <!--
+            Este componente se usa en las líneas dentro de una tabla.
+            Emite el código del lookup (selectSearchable en cambio trabaja emitiendo la fila)
+        -->
         <q-select
-            filled use-input hide-dropdown-icon input-debounce="500"
-            v-model="componentValue"
-            :label="labelText"
-            :options="optionsListFiltered" map-options
+            borderless use-input input-debounce="500" hide-bottom-space
+            v-model="componentValue" style="height: 20px !important;"
+            :options="optionsListFiltered" map-options emit-value
             :disable="isDisable" 
             :readonly="isReadonly"
             :option-label="optionLabelField"
-            autofocus
-            :dense="isDense"
+            autofocus dense
+            :option-value="rowValueField"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
             @keyup.keyCodes.113="openSearch"
             @filter="filterList"
-            :clearable="!isRequired"
-            :rules="isRequired?[ val => !!val || '* Requerido', ]:undefined"
+            :clearable="isClearable"
             @input="(itemSelected)=>{this.itemSelected(itemSelected)}"
             >
-            <template v-slot:prepend><q-icon :name="prependIcon" /></template>
-            <template v-slot:append><q-btn :icon="appendIcon" flat dense @click="openSearch"  /> </template>
             <template v-slot:no-option> <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section>
           </q-item>
         </template>
@@ -67,7 +67,7 @@
                                 :class="rowStyle(props.row)"
                                 >
                                 <q-td v-for="col in props.cols" :key="col.name" :props="props"
-                                    @click="itemSelected(props.row)" >
+                                    @click="itemSelected(props.row[rowValueField])" >
                                     {{ col.value }}
                                 </q-td>
                             </q-tr>
@@ -83,16 +83,13 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 export default({
-    name: 'selectSearchable',
+    name: 'inlineSelectSearchable',
     props: {
-        prependIcon: { type: String, required: true, default: 'fas fa-search' },
-        appendIcon: { type: String, required: false, default: 'fas fa-search' },
-        labelText: { type: String, required: true, default: 'Buscar' },
         labelSearchText: { type: String, required: true, default: 'Buscar' },
         optionLabelField: { type: String, required: false, default: 'label' },
         optionDisableField: { type: String, required: false },
         optionsList: { type: Array, required: true, default: [] },
-        isRequired: { type: Boolean, required: true, default: false },
+        isClearable: { type: Boolean, required: true, default: false },
         isReadonly: { type: Boolean, required: false, default: false },
         isDisable: { type: Boolean, required: false, default: false },
         isDense: { type: Boolean, required: false, default: false },
@@ -113,7 +110,6 @@ export default({
     mounted(){
         try{//Backup Complete Data
             this.optionsListFiltered = JSON.parse(JSON.stringify(this.optionsList))
-            //this.optionsListFiltered = Object.freeze(JSON.parse(JSON.stringify(this.optionsList)))
         }catch(ex){}
         try{//Preselect Default Value
             if(this.initialValue){

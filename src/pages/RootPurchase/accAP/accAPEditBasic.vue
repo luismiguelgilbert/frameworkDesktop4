@@ -13,6 +13,7 @@
             >
             <template v-slot:prepend><q-icon name="fas fa-upload" /></template>
         </q-file>
+        <!--<q-btn label="pruebas" @click="openPartnerCreate" />-->
     </div>
 
     <!--partnerID-->
@@ -31,8 +32,9 @@
             ]"
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
-                this.partnerName=row.label;
+                this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
                 this.partner_account_id=row.account_id
+                this.$emit('onAccMoveCompute')
             }"
         />
     
@@ -57,7 +59,7 @@
     <q-input
         ref="headerDate" 
         mask="date" :rules="['date']"
-        placeholder="Ingrese la fecha de Pedido (aaaa/mm/dd)" label="Fecha de Pedido (aaaa/mm/dd) (*)" filled
+        placeholder="Ingrese la fecha de Factura (aaaa/mm/dd)" label="Fecha de Factura (aaaa/mm/dd) (*)" filled
         v-model="headerDate" :title="dateName(headerDate)"
         >
         <template v-slot:append>
@@ -133,23 +135,12 @@
         />
     <br><br>
 
-    <!--<q-dialog v-model="isPartnerDialog">
-        <mainLookup 
-            titleBar="Buscar Proveedor"
-            :data="this.lookup_partners"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                     { name: 'label', required: true, label: 'Proveedor', align: 'left', field: row => row.label , sortable: false, style: 'min-width: 300px;' }
-                    ,{ name: 'partner_ruc', required: true, label: 'Número de Identificación', align: 'left', field: row => row.partner_ruc , sortable: false, style: 'min-width: 100px;' }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            
-            @onCancel="isPartnerDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        />
-    </q-dialog>-->
+    <q-dialog v-model="isPartnerDialog">
+        <q-card style="minWidth: 1000px; width: 1000px;">
+            <partnersEdit />
+        </q-card>
+    </q-dialog>
+
 </q-form>
 </template>
 <script>
@@ -159,11 +150,14 @@ import { date } from 'quasar';
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import xml2js from 'xml2js'
+import computeFunctions from './computeFunctions.js'
 
 export default ({
     components: {
         mainLookup: mainLookup
         ,selectSearchable: selectSearchable
+        ,computeFunctions: computeFunctions
+        ,partnersEdit: () => import('../../../pages/RootMaster/Partners/PartnersEdit.vue')
     },
     data () {
         return {
@@ -191,22 +185,22 @@ export default ({
             }
             )
         },
-        openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            if(this.editMode==true){                
-                this.mainLookupUpdateFieldValueName = UpdateFieldValueName
-                this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
-                this.mainLookupPredefinedValue = predefinedValue
-                this.isPartnerDialog = true
-            }
+        openPartnerCreate(){
+            let editRecord = {value: 0, row: null};
+            let editMode = true;
+            this.$store.commit('Partners/updateState', {key: 'editMode', value: editMode})
+            this.$store.commit('Partners/updateState', {key: 'editRecord', value: editRecord})
             
+            
+            
+            let security = JSON.parse('[{"label":"allow_view","value":true},{"label":"allow_edit","value":true},{"label":"allow_insert","value":true},{"label":"allow_report","value":true},{"label":"allow_disable","value":true},{"label":"allow_accounting","value":true}]')
+            //this.security = JSON.parse(response.data[0].security)
+            this.$store.commit('Partners/updateState', {key: 'security', value: security})
+
+            this.isPartnerDialog = true
         },
-        updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
-            this.partner_account_id = selectedRows[0].account_id;//usado para calcular el asiento contable
-            //this.lines = []//encera líneas
-            this.isPartnerDialog = false
-        },
+        
+        
         readXmlFile(file){
             const reader = new FileReader();
             var parser = new xml2js.Parser();
@@ -215,13 +209,8 @@ export default ({
                     if(err){ console.error(err); return;}
                         try{
                             parser.parseString(result.autorizacion.comprobante[0], (errA, resultA)=>{//lee Comprobante dentro del resultado
-                                console.dir('bandera 1')
-                                console.dir('errA')
-                                console.dir(errA)
-                                console.dir('resultA')
                                 console.dir(resultA)
                                 if(errA){
-                                    console.dir('flag 01')
                                     this.$q.notify({ html: true, multiLine: false, color: 'red'
                                         ,message: "No se pudo obtener datos de factura del XML.<br/>"
                                         ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -229,47 +218,64 @@ export default ({
                                     })
                                     console.error(errA);return;
                                 }else{
-                                    console.dir('flag 02')
-                                    let facturaPara = resultA.factura.infoFactura[0].identificacionComprador[0]
-                                    let currentRUC = this.userCompanies.find(x=>x.companyID==this.userCompany).companyNumber
+                                    let facturaPara = resultA.factura.infoFactura[0].identificacionComprador[0].trim()
+                                    let razonSocialComprador = resultA.factura.infoFactura[0].razonSocialComprador[0].trim()
+                                    let currentRUC = this.userCompanies.find(x=>x.companyID==this.userCompany).companyNumber.trim()
+                                    let currentRUCname = this.userCompanies.find(x=>x.companyID==this.userCompany).companyShortName.trim()
+                                    
                                     if(facturaPara!=currentRUC){//valida que RUC de Factura y Compañía coincidan
+                                        this.xmlFile = null
                                         this.$q.notify({ html: true, multiLine: false, color: 'red'
-                                            ,message: "El XML NO pertenece a la compañía actual.<br/>Factura para: " + facturaPara + "<br/>Compañía Actual: " + currentRUC
+                                            ,message: "<b>El XML NO pertenece a la compañía actual.</b><br/>Factura para: " + razonSocialComprador + " (" + facturaPara + ")" + "<br/>Compañía Actual: " + currentRUCname + " (" + currentRUC +")"
                                             ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
                                             ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
                                         })
                                     }else{
-                                        //arma numero de documento
-                                        let numerodocumento = resultA.factura.infoTributaria[0].estab[0]
-                                        numerodocumento += resultA.factura.infoTributaria[0].ptoEmi[0]
-                                        numerodocumento += resultA.factura.infoTributaria[0].secuencial[0]
-                                        this.numeroDoc = numerodocumento 
-                                        //arma numero de autorizacion
-                                        this.autorizacionDoc = result.autorizacion.numeroAutorizacion[0]
-                                        //arma fecha
-                                        let fechaemision = resultA.factura.infoFactura[0].fechaEmision[0].substring(6,11) + '/'
-                                        fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(3,5) + '/'
-                                        fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(0,2)
-                                        this.headerDate = fechaemision
-                                        //aplica Proveedor
                                         let ruc = resultA.factura.infoTributaria[0].ruc[0].trim()
-                                        if(this.lookup_partners.some(x=>x.partner_ruc==ruc)){
-                                            let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
-                                            this.partnerID = partner.value
-                                            this.partnerName = partner.label
-                                            this.partner_account_id = partner.account_id;//usado para calcular el asiento contable
+                                        let razonSocial = resultA.factura.infoTributaria[0].razonSocial[0].trim()
+                                        let nombreComercial = resultA.factura.infoTributaria[0].nombreComercial[0].trim()
+                                        //let nombre = resultA.factura.infoTributaria[0].ruc[0].trim()
+                                        
+                                        if(!(this.lookup_partners.some(x=>x.partner_ruc==ruc))){
+                                            this.xmlFile = null
+                                            this.$q.notify({ html: true, multiLine: false, color: 'red'
+                                                ,message: "<b>No existe el proveedor!</b><br/>" + "Nombre Comercial: " + nombreComercial + "<br>" + "Razón Social: " + razonSocial + "<br>"+ "Ruc: " + ruc
+                                                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                                                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                                            })
+                                        }else{
+                                            //arma numero de documento
+                                            let numerodocumento = resultA.factura.infoTributaria[0].estab[0]
+                                            numerodocumento += resultA.factura.infoTributaria[0].ptoEmi[0]
+                                            numerodocumento += resultA.factura.infoTributaria[0].secuencial[0]
+                                            this.numeroDoc = numerodocumento 
+                                            //arma numero de autorizacion
+                                            this.autorizacionDoc = result.autorizacion.numeroAutorizacion[0]
+                                            //arma fecha
+                                            let fechaemision = resultA.factura.infoFactura[0].fechaEmision[0].substring(6,11) + '/'
+                                            fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(3,5) + '/'
+                                            fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(0,2)
+                                            this.headerDate = fechaemision
+                                            //aplica Proveedor
+                                            if(this.lookup_partners.some(x=>x.partner_ruc==ruc)){
+                                                let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
+                                                this.partnerID = partner.value
+                                                this.partnerName = partner.label
+                                                this.partner_account_id = partner.account_id;//usado para calcular el asiento contable
+                                                this.$emit('onAccMoveCompute')
+                                            }
+                                            //arma comentarios
+                                            let resultado = ''
+                                            resultA.factura.infoAdicional[0].campoAdicional.map(x=>{
+                                                resultado += x.$.nombre + ': ' + x._ + '  ||  '
+                                            })
+                                            this.comments = resultado
                                         }
-                                        //arma comentarios
-                                        let resultado = ''
-                                        resultA.factura.infoAdicional[0].campoAdicional.map(x=>{
-                                            resultado += x.$.nombre + ': ' + x._ + '  ||  '
-                                        })
-                                        this.comments = resultado
+                                        
                                     }
                                 }
                             })
                         }catch(ex){
-                            console.dir('flag 07')
                             this.xmlFile = null
                             this.$q.notify({ html: true, multiLine: false, color: 'red'
                                 ,message: "No se pudo obtener datos del archivo.<br/>Verifique que corresponda a un XML de una factura."
@@ -295,7 +301,6 @@ export default ({
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
         headerUser: {
             get () { return this.$store.state[this.moduleName].editData.basic.headerUser },

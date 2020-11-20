@@ -153,7 +153,7 @@ export default ({
     },
     data () {
         return {
-            moduleName: "accAP"
+            moduleName: "accRet"
             ,selected: []
             ,row_id: 32	/*32=casClientes*/, filterString: '', dialogVisible: false
             ,accMoveGrouped: true
@@ -286,10 +286,6 @@ export default ({
         partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
-        },
-        partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_account_id', value: val}) }
         },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },

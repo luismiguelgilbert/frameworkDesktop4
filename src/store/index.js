@@ -51,7 +51,8 @@ import Payterms from './Payterms' //Payterms
 import partnerMasterGroups from './partnerMasterGroups' //partnerMasterGroups
 import invMasterGroups from './invMasterGroups' //invMasterGroups
 import Locations from './Locations' //Locations
-import accAP from './accAP' //Locations
+import accAP from './accAP' //Cuentas x Pagar
+import accRet from './accRet' //Retenciones en Compra
 
 Vue.use(Vuex)
 
@@ -105,6 +106,7 @@ export default function (/* { ssrContext } */) {
       ,mktPO
       ,mktPORet
       ,accAP
+      ,accRet
       //Inventory
       ,invIncoming
       ,invOutgoing
