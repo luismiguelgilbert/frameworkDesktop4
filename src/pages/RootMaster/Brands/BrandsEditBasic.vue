@@ -7,7 +7,7 @@
     </div>
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba el nombre de la Unidad de Medida (*)" label="Nombre de la Unidad de Medida (*)" filled
+        placeholder="Escriba el nombre de la Marca (*)" label="Nombre de la Marca (*)" filled
         v-model="name_es"
         :rules="[
                 val => !!val || '* Requerido',
@@ -18,7 +18,7 @@
     </q-input>
     <q-input
         ref="short_name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba la abreviatura de la Unidad de Medida (*)" label="Abreviatura (*)" filled
+        placeholder="Escriba la abreviatura de la Marca (*)" label="Abreviatura (*)" filled
         v-model="short_name_es"
         :rules="[
                 val => !!val || '* Requerido',
