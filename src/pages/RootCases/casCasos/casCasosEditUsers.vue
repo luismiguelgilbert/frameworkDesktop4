@@ -42,7 +42,7 @@
             titleBar="Buscar Consultor"
             :data="this.lookup_users"
             :dataRowKey="'value'"
-            :selectionMode="'single'"
+            :selectionMode="'multiple'"
             :columns="[
                     //{ name: 'value', required: true, label: 'Código', align: 'left', field: row => row.short_name_es , sortable: true }
                     { name: 'label', required: true, label: 'Usuario', align: 'left', field: row => row.label, sortable: false,    }
@@ -122,19 +122,29 @@ export default ({
       showPrompt(){
         this.prompt=true
       },
-      addRow(newRecord){
-        if(newRecord && newRecord.length>0 && !(this.users.find(x=>x.sys_user_code==newRecord[0].value)) ){
-          let newRows = JSON.parse(JSON.stringify(this.users))
-          newRows.push({
-             sys_user_code: newRecord[0].value
-            ,sys_user_fullname: this.lookup_users.find(t=>t.value==newRecord[0].value).label
-            ,isDefault: true
-            ,estado: true
+      //addRow(newRecord){
+      addRow(records){
+        console.dir(records)
+        //if(records && records.length>0 && !(this.users.find(x=>x.sys_user_code==records[0].value)) ){
+        if(records && records.length>0){
+          records.map(x=>{
+            if(!(this.users.find(y=>y.sys_user_code==x.value)) ){
+              let newRows = JSON.parse(JSON.stringify(this.users))
+              newRows.push({
+                //sys_user_code: records[0].value
+                sys_user_code: x.value
+                //,sys_user_fullname: this.lookup_users.find(t=>t.value==records[0].value).label
+                ,sys_user_fullname: this.lookup_users.find(t=>t.value==x.value).label
+                ,isDefault: true
+                ,estado: true
+              })
+              this.users = newRows
+            }
+            else{
+              this.$q.notify({ message: 'Ya existe usuario ' + x.label, color: 'primary', progress: true, })
+            }
           })
-          this.users = newRows
           this.prompt = false
-        }else{
-          this.$q.notify({ message: 'Ya existe ese usuario', color: 'primary', progress: true, })
         }
       },
       getAge(fecha){
