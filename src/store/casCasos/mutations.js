@@ -19,6 +19,10 @@ export const updateEditDataLocations = (state, value) => {
   state.editData.locations = value
 }
 
+export const updateEditDataContacts = (state, value) => {
+    state.editData.contacts = value
+}
+
 export const updateEditDataPayterms = (state, value) => {
     state.editData.payterms = value
 }

@@ -44,6 +44,15 @@
                         </q-item-section>
                     </q-item>
 
+                    <q-item clickable @click="tab='contacts'" :active="tab=='contacts'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-address-book"  :color="tab=='contacts'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='contacts'?'text-white':'text-grey-7')">Contactos del Caso</q-item-label>
+                        </q-item-section>
+                    </q-item>
+
                     <q-item clickable @click="tab='payterms'" :active="tab=='payterms'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-money-check-alt"  :color="tab=='payterms'?'white':'grey-7'" />
@@ -94,6 +103,8 @@
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="users"> <usersComponent ref="usersComponent" /> </q-tab-panel>
                     <q-tab-panel name="locations"> <locationsComponent ref="locationsComponent" /> </q-tab-panel>
+                    <q-tab-panel name="contacts"> <contactsComponent ref="contactsComponent" /> </q-tab-panel>
+                    
                     <q-tab-panel name="tasks"> <tasksComponent ref="tasksComponent" /> </q-tab-panel>
                     <q-tab-panel name="payterms"> <paytermsComponent ref="paytermsComponent" /> </q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
@@ -124,6 +135,7 @@ import tasksComponent from './casCasosEditTasks'
 import paytermsComponent from './casCasosEditPayterms'
 import filesComponent from './casCasosEditFiles'
 import historyComponent from './casCasosEditHistory'
+import contactsComponent from './casCasosEditContacts'
 
 
 
@@ -134,6 +146,7 @@ export default ({
     ,locationsComponent: locationsComponent
     ,tasksComponent: tasksComponent
     ,paytermsComponent: paytermsComponent
+    ,contactsComponent: contactsComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
@@ -214,6 +227,7 @@ export default ({
                     ,users: this.editData.users
                     ,locations: this.editData.locations
                     ,payterms: this.editData.payterms
+                    ,contacts: this.editData.contacts
                     ,files: this.editData.files
                 }
                 //console.dir(this.editData)

@@ -22,11 +22,11 @@ export default function () {
      ,editMode: false //false = edit || new = new
      ,editData: {
         basic: {}
-       ,taxes: []
-       ,bom: []
-       ,partners: []
-       ,pricelists: []
-       ,bins: []
+       ,tasks: []
+       ,users: []
+       ,locations: []
+       ,contacts: []
+       ,payterms: []
        ,files: []
        ,history: []
      }
