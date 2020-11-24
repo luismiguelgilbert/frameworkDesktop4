@@ -4,14 +4,14 @@
       Los porcentajes no deberían modificarse. Si necesita un nuevo porcentaje, debe crear otro impuesto
     </q-banner>
 
-    <div class="col-sm-12 col-md-6">
-      <q-toggle
+    <div class="row">
+      <q-toggle class="col-12 col-md-4"
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
       />
-      <q-toggle
+      <q-toggle class="col-12 col-md-4"
         v-model="es_retencion" color="positive" label="Retención?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
       />
-      <q-toggle
+      <q-toggle class="col-12 col-md-4"
         v-model="isPercent" color="positive" :label="isPercent?'Porcentaje':'Valor Fijo'" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
       />
       
@@ -30,36 +30,98 @@
         <template v-slot:prepend><q-icon name="fas fa-id-card" /></template>
     </q-input>
 
-    <q-input
+    
+    <q-input class="q-pb-md"
+        ref="factor_base" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Factor para calcular la base imponible del impuesto (*)" label="Base (*)" filled type="number"
+        v-model="factor_base"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-calculator" /></template>
+    </q-input>
+
+    <q-input class="q-pb-md"
         ref="factor" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Factor para calcular impuesto (*)" label="Factor (*)" filled type="number"
         v-model="factor"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
         >
-        <template v-slot:prepend><q-icon name="fas fa-user" /></template>
+        <template v-slot:prepend><q-icon name="fas fa-percent" /></template>
     </q-input>
-    <q-input
-        ref="factor_base" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Factor para calcular la base del impuesto (*)" label="Base (*)" filled type="number"
-        v-model="factor_base"
-        :rules="[
-                val => !!val || '* Requerido',
-                val => val >= 0 || 'Campo debe ser mayor o igual a 0',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-user" /></template>
-    </q-input>
+    
+    
+
+    <q-card-section>
+        <div class="text-h6 text-primary">Configuración para ATS:</div>
+    </q-card-section>
+
+    <selectSearchable 
+        prependIcon="fas fa-code" class="q-pb-md"
+        labelText="Tipo de Impuesto en ATS (IVA o Retención de IVA)" labelSearchText="Buscar Tipo de Impuesto en ATS (IVA o Retención de IVA)"
+        :optionsList="lookup_atsTipoImpuesto.filter(x=>x.esRetencion==this.es_retencion)"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="atsName"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="atsTipoImpuesto"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Tipo de Impuesto', field: 'label', align: 'left'}
+                ,{ name: 'atsName', label: 'Nombre del campo en ATS', field: 'atsName', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.atsTipoImpuesto=row.value;
+            }"
+        />
+
+    <q-card-section>
+        <div class="text-h6 text-primary">Configuración para Documentos Electrónicos:</div>
+    </q-card-section>
+
+     <selectSearchable 
+        prependIcon="fas fa-file-code"
+        labelText="Tipo de Impuesto en Documentos Electrónicos (*)" labelSearchText="Buscar Tipo de Impuesto en Documentos Electrónicos"
+        :optionsList="lookup_docElecTipo.filter(x=>x.esRetencion==this.es_retencion)"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="tipoCodigo"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="electronicoCodigoTipo"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Tipo de Impuesto', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.electronicoCodigoTipo=row.value;
+            }"
+        />
+
+    <selectSearchable 
+        prependIcon="fas fa-file-code"
+        labelText="Código del Impuesto en Documentos Electrónicos (*)" labelSearchText="Buscar Código del Impuesto en Documentos Electrónicos"
+        :optionsList="electronicoCodigoTipo?lookup_docElecCodigo.filter(x=>x.tipoID==electronicoCodigoTipo):[]"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="codigo"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="electronicoCodigoImpuesto"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Tipo de Impuesto', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.electronicoCodigoImpuesto=row.value;
+            }"
+        />
+    
+    
     <br><br>
 </q-form>
 </template>
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    components: {
+        selectSearchable: selectSearchable
+    },
     data () {
         return {
             moduleName: "TaxesMaster"
@@ -120,6 +182,28 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.factor_base },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'factor_base', value: val}) }
         },
+        atsTipoImpuesto: {
+            get () { return this.$store.state[this.moduleName].editData.basic.atsTipoImpuesto },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'atsTipoImpuesto', value: val}) }
+        },
+        electronicoCodigoTipo: {
+            get () { return this.$store.state[this.moduleName].editData.basic.electronicoCodigoTipo },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'electronicoCodigoTipo', value: val}) }
+        },
+        electronicoCodigoImpuesto: {
+            get () { return this.$store.state[this.moduleName].editData.basic.electronicoCodigoImpuesto },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'electronicoCodigoImpuesto', value: val}) }
+        },
+        lookup_atsTipoImpuesto: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_atsTipoImpuesto },
+        },
+        lookup_docElecTipo: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_docElecTipo },
+        },
+        lookup_docElecCodigo: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_docElecCodigo },
+        },
+        
     },
 })
 </script>

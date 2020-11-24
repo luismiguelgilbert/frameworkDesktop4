@@ -159,24 +159,32 @@ export default({
             }catch(ex){this.isTableBusy = false}
         },
         itemSelected(row){
-            if(this.optionDisableField){//desactivar filas NO permitidas
-                if(row[this.optionDisableField]){
+            if(row){
+                if(this.optionDisableField){//desactivar filas NO permitidas
+                    if(row[this.optionDisableField]){
+                        this.$emit('onItemSelected',row)
+                        this.componentValue=row
+                        this.isDialogOpen = false
+                    }else{
+                        this.$q.notify({ html: false, multiLine: false, color: 'red'
+                            ,message: "No puede seleccionar ese registro"
+                            ,timeout: 500, progress: false , icon: "fas fa-exclamation-circle"
+                        })
+                    }
+                }else{//como NO hay que desactivar nada, simplemente envía el dato
                     this.$emit('onItemSelected',row)
                     this.componentValue=row
                     this.isDialogOpen = false
-                }else{
-                    this.$q.notify({ html: false, multiLine: false, color: 'red'
-                        ,message: "No puede seleccionar ese registro"
-                        ,timeout: 500, progress: false , icon: "fas fa-exclamation-circle"
-                    })
                 }
-            }else{//como NO hay que desactivar nada, simplemente envía el dato
-                this.$emit('onItemSelected',row)
+            }else{
+                let resultado = {
+                     value: null
+                    ,label: ''
+                }
+                this.$emit('onItemSelected',resultado)
                 this.componentValue=row
                 this.isDialogOpen = false
             }
-            
-            
         },
         filterList (val, update) {
             if (val === '') {

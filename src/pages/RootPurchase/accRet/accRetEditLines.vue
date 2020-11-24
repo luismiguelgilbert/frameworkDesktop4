@@ -493,13 +493,23 @@ export default ({
       },
       updateRow(newVal, colName, row){
         console.dir('updateRow')
+        console.dir('newVal')
         console.dir(newVal)
+        console.dir('colName')
         console.dir(colName)
         console.dir(row)
+        console.dir(this.lookup_taxes)
+        
         try{
           this.$q.loading.show()
           //Actualiza las líneas
           let newRows = JSON.parse(JSON.stringify(this.lines))
+          if(colName=="taxID"){
+            console.dir('taxID selected!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
+            
+            console.dir(this.lookup_taxes.find(x=>x.taxID==newVal))
+          }
           if(colName=="lineSubtotal"){
             newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
           }else{//comentario, CódigoCentroCosto, CódigoCuentaContable, CódigoSustento
