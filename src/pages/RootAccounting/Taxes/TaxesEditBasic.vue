@@ -9,7 +9,7 @@
         prependIcon="fas fa-percent"
         labelText="Impuesto" labelSearchText="Buscar Impuesto"
         :optionsList="this.lookup_taxes"
-        rowValueField="value" optionsListLabel="label"
+        rowValueField="value" optionsListLabel="label" optionDisableField="estado"
         :isRequired="true"
         :isDisable="false" 
         :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"

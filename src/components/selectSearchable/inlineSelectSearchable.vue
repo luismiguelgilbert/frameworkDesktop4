@@ -7,7 +7,7 @@
         <q-select
             borderless use-input input-debounce="500" hide-bottom-space
             v-model="componentValue" style="height: 20px !important;"
-            :options="optionsListFiltered" map-options emit-value
+            :options="optionsListFiltered" map-options
             :disable="isDisable" 
             :readonly="isReadonly"
             :option-label="optionLabelField"
@@ -67,7 +67,7 @@
                                 :class="rowStyle(props.row)"
                                 >
                                 <q-td v-for="col in props.cols" :key="col.name" :props="props"
-                                    @click="itemSelected(props.row[rowValueField])" >
+                                    @click="itemSelected(props.row)" >
                                     {{ col.value }}
                                 </q-td>
                             </q-tr>
@@ -155,11 +155,12 @@ export default({
             }catch(ex){this.isTableBusy = false}
         },
         itemSelected(row){
+            const resultado = row[this.rowValueField]//get value (instead of complete object)
             if(this.optionDisableField){//desactivar filas NO permitidas
                 if(row[this.optionDisableField]){
-                    this.$emit('onItemSelected',row)
                     this.componentValue=row
                     this.isDialogOpen = false
+                    this.$emit('onItemSelected',resultado)//emit value only
                 }else{
                     this.$q.notify({ html: false, multiLine: false, color: 'red'
                         ,message: "No puede seleccionar ese registro"
@@ -167,12 +168,10 @@ export default({
                     })
                 }
             }else{//como NO hay que desactivar nada, simplemente envía el dato
-                this.$emit('onItemSelected',row)
                 this.componentValue=row
                 this.isDialogOpen = false
+                this.$emit('onItemSelected',resultado)//emit value only
             }
-            
-            
         },
         filterList (val, update) {
             if (val === '') {

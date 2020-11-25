@@ -632,7 +632,7 @@ export default ({
       },
       batchUpdateDiscount(){
         this.$q.dialog({
-          title: 'Aplicar el siguiente descuento a todo el documento',
+          title: 'Aplicar el siguiente descuento a líneas seleccionadas',
           //message: 'Des?',
           prompt: {
             model: 0,

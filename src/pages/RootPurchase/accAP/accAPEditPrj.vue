@@ -127,21 +127,29 @@
   </q-dialog>
 
   <q-dialog v-model="isAccDialog" >
-    <mainLookup 
-            titleBar="Buscar Cuenta Contable"
-            :data="this.lookup_accounts"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                     { name: 'code_es', required: true, label: 'Código', align: 'left', field: row => row.code_es , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    ,{ name: 'label', required: true, label: 'Cuenta Contable', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            boldIfChildrenFielname="account_has_children"
-            @onCancel="isAccDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'fullLabel')}"
-        />
+    <q-card style="minWidth: 900px;">
+      <selectSearchable class="col-12"
+          prependIcon="fas fa-cash-register"
+          labelText="Cuenta de Liquidación de Compra del Item (*)" labelSearchText="Buscar Cuenta Contable"
+          :optionsList="lookup_accounts"
+          rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" 
+          optionDisableField="estado"
+          :isRequired="true" 
+          :isDisable="false" 
+          :isReadonly="false"
+          
+          :tableSearchColumns="[
+              { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+              ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
+              ]"
+          @onItemSelected="(row)=>{
+                  if(row){
+                      this.selected.forEach(line => this.updateRow(row.value, 'account_id', line) );
+                  }
+                  this.isAccDialog = false
+              }"
+          />
+    </q-card>
   </q-dialog>
 
   <q-dialog v-model="isSustentoDialog" >
@@ -152,9 +160,9 @@
             :selectionMode="'single'"
             :predefinedValue="mainLookupPredefinedValue"
             :columns="[
-                     { name: 'code_es', required: true, label: 'Código', align: 'left', field: row => row.code_es , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    ,{ name: 'label', required: true, label: 'Cuenta Contable', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
+                     { name: 'value', required: true, label: 'Código', align: 'left', field: row => row.value , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
+                    ,{ name: 'label', required: true, label: 'Sustento Tributario', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
+                    ,{ name: 'short_name_es', required: true, label: 'Nombre Corto', align: 'left', field: row => row.short_name_es, sortable: false, style: 'max-width: 75px;', }
                     ]"
             @onCancel="isSustentoDialog=false"
             @onSelect="(selectedRows)=>{updateSustentoValues(selectedRows, 'sri_sustento', 'label')}"
@@ -167,8 +175,7 @@
             prependIcon="fas fa-cash-register"
             labelText="Cuenta del Pasivo (*)" labelSearchText="Buscar Cuenta Contable"
             :optionsList="lookup_accounts"
-            rowValueField="value" optionLabelField="fullLabel" 
-            optionsListLabel="label" optionsListCaption="code_es" 
+            rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" 
             optionDisableField="estado"
             :isRequired="true" 
             :isDisable="false" 
@@ -294,7 +301,8 @@ export default ({
           let newRows = JSON.parse(JSON.stringify(this.lines))
           newRows.filter(x=>this.selected.some(y=>y.lineID==x.lineID)).map(row=>{
             row.sri_sustento = selectedRows[0].value;
-            row.sri_sustentoName = selectedRows[0].label;
+            //row.sri_sustentoName = selectedRows[0].label;
+            row.sri_sustentoName = selectedRows[0].short_name_es;
           })
           this.lines = newRows
           this.isSustentoDialog = false
@@ -305,6 +313,7 @@ export default ({
         let newRows = JSON.parse(JSON.stringify(this.lines))
         newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
         this.lines = newRows
+        this.$emit('onAccMoveCompute')
       },
       rowTitleInventory(fila){
         let resultado = 'Seleccionar...'

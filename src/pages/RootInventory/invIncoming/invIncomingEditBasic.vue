@@ -18,23 +18,10 @@
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
                 this.lines = []
+                this.$emit('onAccMoveCompute')
                 this.loadPendingInv()
-                //this.partnerName=row.label;
-                //this.partner_account_id=row.account_id
             }"
         />
-    <!--<q-input
-        ref="partnerName" :readonly="!editMode"
-        placeholder="Seleccione el Proveedor/Cliente (*)" label="Proveedor/Cliente (*)" filled
-        :value="partnerName" 
-        @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
-        <template v-if="editMode" v-slot:append><q-icon name="fas fa-search"  @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
-    </q-input>-->
 
     
     <q-select
@@ -164,19 +151,7 @@ export default ({
                     this.lines = JSON.parse(response.data[0].lines)
                     this.lookup_lots = JSON.parse(response.data[0].lookup_lots)
                     this.lots = [];
-                    //Build New lots
-                    /*let newRows = [];
-                    this.lines.filter(x=>x.systemType==4).map(x=>{
-                        newRows.push({
-                             lineID: x.lineID
-                            ,invID: x.invID
-                            ,invName: x.invName
-                            ,whID: x.whID
-                            ,maxQuantity: x.quantity
-                            ,quantity: 0
-                        })
-                    })
-                    this.lots = newRows;*/
+                    this.$emit('onAccMoveCompute')
                     this.$q.loading.hide()
                 }).catch((error) => {
                     console.dir(error)

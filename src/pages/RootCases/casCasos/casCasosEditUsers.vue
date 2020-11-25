@@ -21,7 +21,8 @@
                 {{ props.row.sys_user_fullname }}
               </q-td>
               <q-td key="isDefault" :props="props">
-                <q-checkbox :value="props.row.isDefault" color="primary" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.isDefault,'isDefault',props.row)" />
+                <q-checkbox :value="props.row.isDefault" color="primary" icon="fas fa-check" class="no-padding" dense size="30px" 
+                  @input="updateRow(!props.row.isDefault,'isDefault',props.row)" />
               </q-td>
               <q-td key="estado" :props="props">
                 <q-checkbox :value="props.row.estado" color="positive" icon="fas fa-check" class="no-padding" dense size="30px" @input="updateRow(!props.row.estado,'estado',props.row)" />
@@ -29,7 +30,7 @@
             </q-tr>
       </template>
       <template v-slot:top>
-        <q-btn label="Agregar Consultor" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
+        <q-btn :disable="!editMode&&!allow_users" label="Agregar Consultor" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
         <q-space />
       </template>
       <template v-slot:bottom-row >
@@ -115,9 +116,11 @@ export default ({
           return max;
       },
       updateRow(newVal, colName, row){
-        let newRows = JSON.parse(JSON.stringify(this.users))
-        newRows.find(x=>x.sys_user_code==row.sys_user_code)[colName] = newVal
-        this.users = newRows
+        if(this.editMode || (!this.editMode&&this.allow_users)){
+          let newRows = JSON.parse(JSON.stringify(this.users))
+          newRows.find(x=>x.sys_user_code==row.sys_user_code)[colName] = newVal
+          this.users = newRows
+        }
       },
       showPrompt(){
         this.prompt=true
@@ -158,6 +161,9 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        //custom security
+        allow_users: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_users').value }, },
+        //custom security end
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         users: {
             get () { return this.$store.state[this.moduleName].editData.users },

@@ -199,6 +199,7 @@ export default ({
           let newRows = JSON.parse(JSON.stringify(this.lines))
           newRows.find(x=>x.stockID==row.stockID)[colName] = newVal;
           this.lines = newRows
+          this.$emit('onAccMoveCompute')
         }catch(ex){
           console.error(ex)
         }

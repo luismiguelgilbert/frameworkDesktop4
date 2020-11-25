@@ -1,8 +1,9 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+    
     <div class="row">
       <q-toggle class="col-12 col-md-4"
-        v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)||(!editMode&&!allow_basic)"
         />
     </div>
 
@@ -15,7 +16,7 @@
         optionDisableField="estado"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="false"
+        :isReadonly="(!editMode&&!allow_basic)"
         :initialValue="customerID"
         :tableSearchColumns="[
                  { name: 'label', label: 'Cliente', field: 'label', align: 'left'}
@@ -25,21 +26,10 @@
                 this.customerID = row.value;
             }"
         />
-    <!--<q-input
-        ref="customerName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione el Cliente (*)" label="Cliente (*)" filled
-        :value="customerName"
-        @keyup.keyCodes.113="openSearchCustomer('customerID','customerName',customerID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchCustomer('customerID','customerName',customerID)"/></template>
-    </q-input>-->
     
     <q-input
-        ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="name_es" 
+        :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)||(!editMode&&!allow_basic)"
         placeholder="Escriba el Nombre del Caso (*)" label="Nombre del Caso (*)" filled
         v-model="name_es"
         :rules="[
@@ -59,7 +49,7 @@
         optionDisableField="estado"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="false"
+        :isReadonly="(!editMode&&!allow_basic)"
         :initialValue="caseTypeID"
         :tableSearchColumns="[
                  { name: 'label', label: 'Tipo de Caso', field: 'label', align: 'left'}
@@ -68,22 +58,12 @@
                 this.caseTypeID = row.value;
             }"
         />
-    <!--<q-input
-        ref="caseTypeName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione el Tipo de Caso (*)" label="Tipo de Caso (*)" filled
-        :value="caseTypeName"
-        @keyup.keyCodes.113="openSearch('caseTypeID','caseTypeName',caseTypeID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-file-invoice" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearch('caseTypeID','caseTypeName',caseTypeID)"/></template>
-    </q-input>-->
+    
 
 
     <q-input
-        ref="startDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="startDate" 
+        :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)||(!editMode&&!allow_basic)"
         mask="date" :rules="['date']"
         placeholder="Ingrese la Fecha de Inicio" label="Fecha de Inicio" filled
         v-model="startDate"
@@ -91,7 +71,7 @@
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
             <q-popup-proxy ref="qDateProxy_startDate" transition-show="scale" transition-hide="scale">
-              <q-date v-model="startDate">
+              <q-date v-model="startDate" :readonly="!editMode&&!allow_basic">
                 <div class="row items-center justify-end">
                   <q-btn v-close-popup label="Seleccionar" color="primary" flat />
                 </div>
@@ -103,7 +83,8 @@
     </q-input>
 
     <q-input class="q-pb-md"
-        ref="referenceNumber" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="referenceNumber" 
+        :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)||(!editMode&&!allow_basic)"
         placeholder="Escriba el Número de Referencia del Caso" label="Número de Referencia" filled
         v-model="referenceNumber"
         >
@@ -112,7 +93,8 @@
 
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Socio" filled
-        type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        type="textarea" 
+        :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)||(!editMode&&!allow_basic)"
         v-model="comments"
         />
 
@@ -166,6 +148,9 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        //custom security
+        allow_basic: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_basic').value }, },
+        //custom security end
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         estado: {
             get () { return this.$store.state[this.moduleName].editData.basic.estado },
@@ -209,11 +194,6 @@ export default ({
         lookup_customers: {
             get () { return this.$store.state[this.moduleName].editData.lookup_customers },
         },
-
-
-
-        
-        
     },
 })
 </script>

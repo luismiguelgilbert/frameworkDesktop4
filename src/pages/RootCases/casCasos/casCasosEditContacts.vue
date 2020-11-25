@@ -22,19 +22,19 @@
         <q-tr :props="props">
           <q-td key="contactName" :props="props">
             {{ props.row.contactName }}
-            <q-popup-edit :value="props.row.contactName" >
+            <q-popup-edit :value="props.row.contactName" :disable="!editMode&&!allow_contacts">
               <q-input :value="props.row.contactName" dense autofocus counter @input="(value)=>{updateRow(value,'contactName',props.row)}" />
             </q-popup-edit>
           </q-td>
           <q-td key="mobile" :props="props">
             {{ props.row.mobile }}
-            <q-popup-edit :value="props.row.mobile" >
+            <q-popup-edit :value="props.row.mobile" :disable="!editMode&&!allow_contacts">
               <q-input :value="props.row.mobile" dense autofocus counter @input="(value)=>{updateRow(value,'mobile',props.row)}" />
             </q-popup-edit>
           </q-td>
           <q-td key="mail" :props="props">
             {{ props.row.mail }}
-            <q-popup-edit :value="props.row.mail" >
+            <q-popup-edit :value="props.row.mail" :disable="!editMode&&!allow_contacts" >
               <q-input :value="props.row.mail" dense autofocus counter @input="(value)=>{updateRow(value,'mail',props.row)}" />
             </q-popup-edit>
           </q-td>
@@ -45,7 +45,7 @@
         </q-tr>
   </template>
   <template v-slot:top>
-      <q-btn label="Agregar Contacto" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+      <q-btn :disable="!editMode&&!allow_contacts" label="Agregar Contacto" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
       <q-space />
       <q-input borderless dense v-model="filterString" placeholder="Buscar...">
         <template v-slot:append>
@@ -115,9 +115,11 @@ export default ({
           return max;
       },
       updateRow(newVal, colName, row){
-        let newRows = JSON.parse(JSON.stringify(this.contacts))
-        newRows.find(x=>x.contactID==row.contactID)[colName] = newVal
-        this.contacts = newRows
+        if(this.editMode || (!this.editMode&&this.allow_contacts)){
+          let newRows = JSON.parse(JSON.stringify(this.contacts))
+          newRows.find(x=>x.contactID==row.contactID)[colName] = newVal
+          this.contacts = newRows
+        }
       },
       addRow(){
         let max_id = 1
@@ -146,6 +148,9 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        //custom security
+        allow_contacts: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_contacts').value }, },
+        //custom security end
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         contacts: {
             get () { return this.$store.state[this.moduleName].editData.contacts },

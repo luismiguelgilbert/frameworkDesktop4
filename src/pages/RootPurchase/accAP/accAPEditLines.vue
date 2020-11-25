@@ -402,7 +402,8 @@ export default ({
             let nuevaFila = {
               lineID: newLineID
               ,sri_sustento: row.sri_sustento
-              ,sri_sustentoName: this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==row.sri_sustento).label
+              //,sri_sustentoName: this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==row.sri_sustento).label
+              ,sri_sustentoName: this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==row.sri_sustento).short_name_es
               ,systemType: row.systemType
               ,invID: row.value&&row.value>0?row.value:row.invID
               ,invName: row.invName&&row.invName.length>0?row.invName:this.lookup_items.find(x=>x.value==row.value).label
@@ -497,14 +498,8 @@ export default ({
             if(colName=="account_id"){
               newRows.find(x=>x.lineID==row.lineID).account_name = this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==newVal).label
             }
-            /*if(colName=="prjID"){
-              console.dir('actualiza Sustento')
-              console.dir(this.lookup_accounts.find(t=>t.value==newVal).label)
-              newRows.find(x=>x.lineID==row.lineID).sri_sustentoName = this.lookup_accounts.find(t=>t.value==newVal).label
-            }*/
+          
           }
-          //let invID = newRows.find(x=>x.lineID==row.lineID).invID
-          //let itemFound = this.lookup_items.find(x => x.value == invID)
           
           //Actualiza Campos de Dinero
           let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
@@ -513,13 +508,6 @@ export default ({
           newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
           newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
           newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineUntaxed
-
-          //newRows.find(x=>x.lineID==row.lineID).invName = itemFound.label
-          //newRows.find(x=>x.lineID==row.lineID).systemType = itemFound.systemType
-          //newRows.find(x=>x.lineID==row.lineID).sri_sustento = itemFound.sri_sustento
-          //newRows.find(x=>x.lineID==row.lineID).account_id = itemFound.account_id
-          //newRows.find(x=>x.lineID==row.lineID).account_name = this.lookup_accounts.find(t=>t.value==itemFound.account_id).fullLabel
-          
 
           //Actualiza todas las taxLines correspondientes a la línea modificada
           let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
@@ -627,25 +615,6 @@ export default ({
         })
     
       },
-
-      /*openSearchItems(currentRow){
-        if(this.editMode==true){
-          this.itemsDialogRowToUpdate = currentRow
-          this.isItemsDialog = true
-          if(currentRow&&currentRow.invID&&currentRow.invID>0){
-            this.itemsDialogTableBusy = true
-            try{
-              this.itemsDialogSelected = []
-              this.itemsDialogSelected.push(this.lookup_items.find(x => x.value == currentRow.invID))
-              this.itemsDialogTableBusy = false
-            }catch(ex){
-              this.itemsDialogTableBusy = false
-            }
-          }
-        }
-        
-        
-      },*/
       
       rowTitleInventory(fila){
         let resultado = 'Seleccionar...'
@@ -660,7 +629,7 @@ export default ({
       },
       batchUpdateDiscount(){
         this.$q.dialog({
-          title: 'Aplicar el siguiente descuento a todo el documento',
+          title: 'Aplicar el siguiente descuento a líneas seleccionadas',
           //message: 'Des?',
           prompt: {
             model: 0,

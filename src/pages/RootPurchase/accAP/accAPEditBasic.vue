@@ -117,17 +117,7 @@
             }"
         />
 
-    <!--<q-select
-        label="Usuario que Registra Documento (*)" placeholder="Usuario que Registraó Documento (*)" emit-value map-options filled
-        :options="lookup_users" :readonly="true"
-        v-model="headerUser"
-        ref="headerUser"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="far fa-user" /></template>
-    </q-select>-->
+    
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Pedido" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"

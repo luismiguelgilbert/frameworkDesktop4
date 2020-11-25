@@ -33,6 +33,15 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Documento ({{lines.length}})</q-item-label>
                         </q-item-section>
                     </q-item>
+
+                    <q-item clickable @click="tab='prj'" :active="tab=='prj'" active-class="bg-primary text-white" :disable="!(partnerID>0 && allow_accounting)">
+                        <q-item-section side>
+                            <q-icon name="fas fa-folder-open" :color="tab=='prj'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='prj'?'text-white':'text-grey-7')">Cuentas y Centro de Costo</q-item-label>
+                        </q-item-section>
+                    </q-item>
                     
                     <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>0 && allow_accounting)" >
                         <q-item-section side>
@@ -86,6 +95,7 @@
                     <q-tab-panel name="basic"><basicComponent ref="basicComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
+                    <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent /></q-tab-panel>
 
@@ -108,6 +118,7 @@ import Vuex from 'vuex';
 import basicComponent from './accRetEditBasic'
 import linesComponent from './accRetEditLines'
 import accountingComponent from './accRetEditAccounting'
+import prjComponent from './accRETEditPrj'
 import filesComponent from './accRetEditFiles'
 import historyComponent from './accRetEditHistory'
 
@@ -116,6 +127,7 @@ export default ({
   components:{
      basicComponent: basicComponent
     ,linesComponent: linesComponent
+    ,prjComponent: prjComponent
     ,accountingComponent: accountingComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
@@ -218,8 +230,6 @@ export default ({
                     ,files: this.editData.files
                     //,address: this.editData.address.filter(x=>x.is_allowed).map(x=>x.headerID_ux)
                 }
-                //console.dir(this.editData)
-                //console.dir(newEditData)
                 this.$axios.post( this.apiURL + 'spAccAPUpdate', {
                     userCode: this.userCode,
                     userCompany: this.userCompany,
@@ -252,32 +262,30 @@ export default ({
     },
     //custom
     updateAccountMove(){
-        console.dir('updating Account Move on Master')
         this.$q.loading.show()
         let newRowsAccount = []
-        let partnerCredit = 0
+        let partnerAmount = 0
         let newAccLineID = 0
-        console.dir('FLAG 01')
-        //#region ITEM_LINES_debit
+        //#region LINES_credit
         this.lines.map(row=>{
           newAccLineID++;
-          partnerCredit += row.lineUntaxed
+          partnerAmount += row.valorRetenido
           newRowsAccount.push({
              accLineID: newAccLineID
             ,lineID: row.lineID
             ,taxLineID: 0
-            ,accountID: row.account_id
-            ,partnerID: 0
-            ,debit: row.lineUntaxed
-            ,credit: 0
-            ,invID: row.invID
-            ,prjID: row.prjID
-            ,mktLineID: row.lineID
-            ,comments: row.invName
+            ,accountID: row.tax_account_id//la cuenta del impuesto
+            ,partnerID: this.partnerID
+            ,debit: 0
+            ,credit: row.valorRetenido//va al HABER
+            ,invID: 0//
+            ,prjID: 0//row.prjID
+            ,mktHeaderID: row.accAPheaderID
+            ,mktLineID: row.sustentoID
+            ,comments: row.sustentoName
           })
         })
         //#endregion ITEM_LINES_debit
-        console.dir('FLAG 02')
         //#region PARTNER_Credit
         newAccLineID++;
         newRowsAccount.push({
@@ -286,15 +294,14 @@ export default ({
             ,taxLineID: 0
             ,accountID: this.partner_account_id
             ,partnerID: this.partnerID
-            ,debit: 0
-            ,credit: partnerCredit
+            ,debit: partnerAmount
+            ,credit: 0
             ,invID: 0
             ,prjID: 0
             ,mktLineID: 0
-            ,comments: this.partnerName
+            ,comments: this.lookup_partners.some(x=>x.value==this.partnerID)?this.lookup_partners.find(x=>x.value==this.partnerID).label:''
           })
         //#endregion PARTNER_Credit
-        console.dir('FLAG 03')
         //#region Finalize
         this.accountLines = newRowsAccount
         this.$q.loading.hide()
@@ -329,7 +336,9 @@ export default ({
     },
     partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
+        },
+    partner_account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
         },
     editMode: {
         get () { return this.$store.state[this.moduleName].editMode },
@@ -347,6 +356,13 @@ export default ({
     userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
     lines: {
         get () { return this.$store.state[this.moduleName].editData.lines },
+    },
+    accountLines: {
+        get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
+    },
+    lookup_partners: {
+        get () { return this.$store.state[this.moduleName].editData.lookup_partners },
     },
   },
 })

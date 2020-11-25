@@ -31,7 +31,7 @@
             </q-tr>
       </template>
         <template v-slot:top>
-            <q-btn label="Agregar Localidad" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
+            <q-btn :disable="!editMode&&!allow_locations" label="Agregar Localidad" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
             <q-space />
         </template>
     </q-table>
@@ -114,9 +114,11 @@ export default ({
           return max;
       },
       updateRow(newVal, colName, row){
-        let newRows = JSON.parse(JSON.stringify(this.locations))
-        newRows.find(x=>x.value==row.value)[colName] = newVal
-        this.locations = newRows
+        if(this.editMode || (!this.editMode&&this.allow_locations)){
+          let newRows = JSON.parse(JSON.stringify(this.locations))
+          newRows.find(x=>x.value==row.value)[colName] = newVal
+          this.locations = newRows
+        }
       },
       showPrompt(){
         this.prompt=true
@@ -148,6 +150,9 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        //custom security
+        allow_locations: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_locations').value }, },
+        //custom security end
         locations: {
             get () { return this.$store.state[this.moduleName].editData.locations },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLocations', val) }

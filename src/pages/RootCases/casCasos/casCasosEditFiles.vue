@@ -52,7 +52,7 @@
           </q-tr>
     </template>
     <template v-slot:top>
-        <q-btn label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" no-caps />
+        <q-btn :disable="!editMode&&!allow_files" label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" no-caps />
         <q-space />
         <q-input borderless dense v-model="filterString" placeholder="Buscar...">
           <template v-slot:append>
@@ -135,9 +135,11 @@ export default ({
           return max;
       },
       updateRow(newVal, colName, row){
-        let newRows = JSON.parse(JSON.stringify(this.files))
-        newRows.find(x=>x.attach_id==row.attach_id)[colName] = newVal
-        this.files = newRows
+        if(this.editMode || (!this.editMode&&this.allow_files)){
+          let newRows = JSON.parse(JSON.stringify(this.files))
+          newRows.find(x=>x.attach_id==row.attach_id)[colName] = newVal
+          this.files = newRows
+        }
       },
       addRow(){
         this.dialogVisible = true
@@ -259,6 +261,9 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        //custom security
+        allow_files: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_files').value }, },
+        //custom security end
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         serverFilesPath: { get () { return this.$q.sessionStorage.getItem('serverFilesPath') } },

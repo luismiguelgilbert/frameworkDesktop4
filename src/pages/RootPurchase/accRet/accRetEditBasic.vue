@@ -26,6 +26,7 @@
             ]"
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
+                this.partner_account_id=row.account_id;//se usa en asiento contable
                 this.partnerName=row.label;
                 this.lines = [];
                 this.$emit('onAccMoveCompute')
