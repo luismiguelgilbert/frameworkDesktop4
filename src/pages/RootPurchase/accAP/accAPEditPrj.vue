@@ -341,14 +341,14 @@ export default ({
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
-        linesTaxes: {
+        /*linesTaxes: {
             get () { return this.$store.state[this.moduleName].editData.linesTaxes },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLinesTaxes', val) }
         },
         accountLines: {
-            get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+            get () { return this.$store.state[this.moduleName].editData.accountLines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
-        },
+        },*/
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },

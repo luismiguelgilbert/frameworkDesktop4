@@ -116,9 +116,10 @@
                     <q-tab-panel name="pricelists"> <pricelistsComponent ref="pricelistsComponent" /> </q-tab-panel>
                     <q-tab-panel name="lots"> <lotsComponent ref="lotsComponent" /> </q-tab-panel>
                     <q-tab-panel name="bins"> <binsComponent ref="binsComponent" /> </q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
                     <q-tab-panel name="picture"> <pictureComponent /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
+
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
                 </q-tab-panels>
 
             </template>
@@ -140,12 +141,12 @@ import accountComponent from './ItemsEditAccount'
 import bomComponent from './ItemsEditBom'
 import pictureComponent from './ItemsEditPicture'
 import vendorsComponent from './ItemsEditVendors'
-import filesComponent from './ItemsEditFiles'
 import pricelistsComponent from './ItemsEditPricelists'
 import binsComponent from './ItemsEditBins'
 import lotsComponent from './ItemsEditLots'
-import historyComponent from './ItemsEditHistory'
-
+//
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

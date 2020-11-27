@@ -65,8 +65,8 @@
 
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="clientes"> <clientesComponent ref="clientesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -86,9 +86,8 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './casContractsEditBasic'
 import clientesComponent from './casContractsEditClientes'
-import filesComponent from './casContractsEditFiles'
-import historyComponent from './casContractsEditHistory'
-
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

@@ -66,7 +66,7 @@
                     <linksComponent v-show="tab=='system'" ref="linksComponent" />
                     <linksmobileComponent v-show="tab=='mobile'" ref="linksmobileComponent" />
                     <usersComponent v-show="tab=='users'" ref="usersComponent" />
-                    <historyComponent v-show="tab=='history'" ref="historyComponent" />
+                    <historyComponent v-show="tab=='history'" ref="historyComponent" :moduleName="moduleName"/>
                 </div>
             </template>
 
@@ -86,8 +86,8 @@ import basicComponent from './RolesEditBasic'
 import linksComponent from './RolesEditLinks'
 import linksmobileComponent from './RolesEditLinksMobile'
 import usersComponent from './RolesEditUsers'
-import historyComponent from './RolesEditHistory'
-
+//import historyComponent from './RolesEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

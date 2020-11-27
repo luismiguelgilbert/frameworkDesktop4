@@ -55,9 +55,8 @@
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="lines"> <linesComponent ref="linesComponent" /> </q-tab-panel>
 
-                    <q-tab-panel name="history">
-                        <historyComponent />
-                    </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
+
 
                 </q-tab-panels>
 
@@ -77,7 +76,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './AccMovesEditBasic'
 import linesComponent from './AccMovesEditLines'
-import historyComponent from './AccMovesEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 
 export default ({
   components:{

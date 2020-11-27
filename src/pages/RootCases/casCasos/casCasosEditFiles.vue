@@ -166,7 +166,8 @@ export default ({
                   original_file_name: files[0].name,
                   file_type: files[0].type,
                   file_size: files[0].size,
-                  row_id: this.row_id
+                  //row_id: this.row_id
+                  moduleName: this.moduleName
                 }
             , {headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
             ).then((response) => {

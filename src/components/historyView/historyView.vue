@@ -97,11 +97,13 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-
 export default ({
+    props: {
+        moduleName: { type: String, required: true },
+    },
     data () {
         return {
-            moduleName: "accRet", pagination: { rowsPerPage: 0 },
+            pagination: { rowsPerPage: 0 },
         }
     },
     methods:{

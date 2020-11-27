@@ -44,13 +44,9 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic">
-                        <basicComponent ref="basicComponent" />
-                    </q-tab-panel>
+                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
 
-                    <q-tab-panel name="history">
-                        <historyComponent />
-                    </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -69,8 +65,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './UoMEditBasic'
-import historyComponent from './UoMEditHistory'
-
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

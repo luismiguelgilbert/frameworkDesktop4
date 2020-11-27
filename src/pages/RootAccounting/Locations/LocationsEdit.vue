@@ -63,7 +63,7 @@
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="details"> <detailsComponent ref="detailsComponent" /> </q-tab-panel>
                     <q-tab-panel name="users"> <usersComponent ref="usersComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -84,7 +84,7 @@ import Vuex from 'vuex';
 import basicComponent from './LocationsEditBasic'
 import detailsComponent from './LocationsEditDetails'
 import usersComponent from './LocationsEditUsers'
-import historyComponent from './LocationsEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 
 export default ({
   components:{

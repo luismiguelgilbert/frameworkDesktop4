@@ -120,9 +120,14 @@ import Vuex from 'vuex';
 import { date } from 'quasar';
 
 export default ({
+    props: {
+        moduleName: { type: String, required: true }
+        //row_id: { type: Number, required: true },
+    },
     data () {
         return {
-            moduleName: "accRet", row_id: 40/*=accRet*/, filterString: '', dialogVisible: false
+            //row_id: 31/*=31mktPR*/, 
+            filterString: '', dialogVisible: false
         }
     },
     methods:{
@@ -164,7 +169,8 @@ export default ({
                   original_file_name: files[0].name,
                   file_type: files[0].type,
                   file_size: files[0].size,
-                  row_id: this.row_id
+                  //row_id: this.row_id
+                  moduleName: this.moduleName
                 }
             , {headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
             ).then((response) => {
@@ -267,12 +273,11 @@ export default ({
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataFiles', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
+        /*
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
         },
-        lookup_sexo: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_sexo },
-        },
+        */
     }
 })
 </script>

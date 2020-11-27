@@ -88,9 +88,9 @@
                     <q-tab-panel name="account"> <accountComponent ref="accountComponent" /> </q-tab-panel>
                     <q-tab-panel name="contacts"> <contactsComponent ref="contactsComponent" /> </q-tab-panel>
                     <q-tab-panel name="owners"> <ownersComponent ref="ownersComponent" /> </q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
                     <q-tab-panel name="picture"> <pictureComponent /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
 
                 </q-tab-panels>
 
@@ -112,9 +112,10 @@ import basicComponent from './PartnersEditBasic'
 import accountComponent from './PartnersEditAccount'
 import pictureComponent from './PartnersEditPicture'
 import contactsComponent from './PartnersEditContacts'
-import filesComponent from './PartnersEditFiles'
 import ownersComponent from './PartnersEditSales'
-import historyComponent from './PartnersEditHistory'
+//
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 

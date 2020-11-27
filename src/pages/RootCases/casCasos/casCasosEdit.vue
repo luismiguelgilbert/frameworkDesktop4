@@ -108,9 +108,7 @@
                     <q-tab-panel name="tasks"> <tasksComponent ref="tasksComponent" /> </q-tab-panel>
                     <q-tab-panel name="payterms"> <paytermsComponent ref="paytermsComponent" /> </q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history">
-                        <historyComponent />
-                    </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -134,7 +132,7 @@ import locationsComponent from './casCasosEditLocations'
 import tasksComponent from './casCasosEditTasks'
 import paytermsComponent from './casCasosEditPayterms'
 import filesComponent from './casCasosEditFiles'
-import historyComponent from './casCasosEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 import contactsComponent from './casCasosEditContacts'
 
 

@@ -66,7 +66,7 @@
                     <systemComponent v-show="tab=='system'" ref="systemComponent" />
                     <usersComponent v-show="tab=='users'" ref="usersComponent" />
                     <rucComponent v-show="tab=='rucLength'" ref="rucComponent" />
-                    <historyComponent v-show="tab=='history'" ref="historyComponent" />
+                    <historyComponent v-show="tab=='history'" ref="historyComponent" :moduleName="moduleName" />
                 </div>
             </template>
 
@@ -86,7 +86,8 @@ import basicComponent from './CompaniesEditBasic'
 import usersComponent from './CompaniesEditUsers'
 import systemComponent from './CompaniesEditSystem'
 import rucComponent from './CompaniesEditRucLength'
-import historyComponent from './CompaniesEditHistory'
+//import historyComponent from './CompaniesEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 
 export default ({
   components:{

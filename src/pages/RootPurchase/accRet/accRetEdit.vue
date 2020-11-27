@@ -96,8 +96,9 @@
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
                     <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
-                    <q-tab-panel name="history"><historyComponent /></q-tab-panel>
+
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -119,8 +120,11 @@ import basicComponent from './accRetEditBasic'
 import linesComponent from './accRetEditLines'
 import accountingComponent from './accRetEditAccounting'
 import prjComponent from './accRETEditPrj'
-import filesComponent from './accRetEditFiles'
-import historyComponent from './accRetEditHistory'
+
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
+                    
+
 
 
 export default ({
@@ -264,12 +268,11 @@ export default ({
     updateAccountMove(){
         this.$q.loading.show()
         let newRowsAccount = []
-        let partnerAmount = 0
         let newAccLineID = 0
         //#region LINES_credit
         this.lines.map(row=>{
           newAccLineID++;
-          partnerAmount += row.valorRetenido
+          //Línea del Impuesto
           newRowsAccount.push({
              accLineID: newAccLineID
             ,lineID: row.lineID
@@ -278,6 +281,22 @@ export default ({
             ,partnerID: this.partnerID
             ,debit: 0
             ,credit: row.valorRetenido//va al HABER
+            ,invID: 0//
+            ,prjID: 0//row.prjID
+            ,mktHeaderID: row.accAPheaderID
+            ,mktLineID: row.sustentoID
+            ,comments: row.sustentoName
+          })
+          //Línea del Documento
+          newAccLineID++;
+          newRowsAccount.push({
+             accLineID: newAccLineID
+            ,lineID: row.lineID
+            ,taxLineID: 0
+            ,accountID: row.accAP_account_id//la cuenta del documento
+            ,partnerID: this.partnerID
+            ,debit: row.valorRetenido//va al DEBE
+            ,credit: 0
             ,invID: 0//
             ,prjID: 0//row.prjID
             ,mktHeaderID: row.accAPheaderID

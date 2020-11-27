@@ -1,44 +1,41 @@
 <template>
-<q-form>
+<div>
     <div class="row q-col-gutter-xs">
-      <q-input v-if="!editMode" class="col-sm-12 col-md-4"
-          label="Asiento Contable #"  filled readonly
-          v-model="accMoveID"
-          >
-          <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
-      </q-input>
-       <q-input v-if="!editMode" class="col-sm-12 col-md-4"
-          label="Fecha del Asiento"  filled readonly
-          v-model="moveDate"
-          >
-          <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
-      </q-input>
-      <q-input v-if="!editMode" class="col-sm-12 col-md-4"
+        <q-input class="col-sm-12 col-md-4"
+            label="Asiento Contable #"  filled readonly
+            :value="accountHeader.accMoveID"
+            >
+                <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
+        </q-input>
+        <q-input class="col-sm-12 col-md-4" 
+            label="Fecha del Asiento (aaaa/mm/dd)"  filled readonly
+            :value="accountHeader.accMoveDateNew" :title="showDateName(accountHeader.accMoveDateNew)"
+            >
+                <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+                <template v-slot:append v-if="accountHeader.accMoveDate&&accountHeader.accMoveDateNew!=accountHeader.accMoveDate"><q-icon name="fas fa-edit" color="red" :title="`Modificado \n Fecha Original: ${accountHeader.accMoveDate}`" /></template>
+        </q-input>
+      <q-input class="col-sm-12 col-md-4"
           label="Tipo de Diario"  filled readonly
-          v-model="journalName"
+          v-model="accountHeader.journalName"
           >
-          <template v-slot:prepend><q-icon name="fas fa-book" /></template>
+            <template v-slot:prepend><q-icon name="fas fa-book" /></template>
       </q-input>
-      
-      
     </div>
     <br />
-    
     <q-table
         ref="mainTable"
         :data="accMoveGrouped?accountLinesGrouped:accountLines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        :table-style="editMode?'min-height: calc(100vh - 255px); max-height: calc(100vh - 255px)':'min-height: calc(100vh - 335px); max-height: calc(100vh - 335px)'"
-        row-key="accLineID"
+        table-style="min-height: calc(100vh - 305px); max-height: calc(100vh - 305px)"
+        row-key="lineID"
         hide-bottom
         :rows-per-page-options="[0]"
         dense
-        selection="none" :selected.sync="selected"
         :filter="filterString"
         :columns="[
           //{ name: 'stockID', required: true, label: 'ID', align: 'left', field: row => row.stockID, sortable: true },
           //{ name: 'lineID', required: true, label: 'línea', align: 'right', field: row => row.lineID, sortable: false, style: 'min-width: 150px;' },
-          { name: 'accountID', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.accountID, sortable: true, style: 'min-width: 100px;' },
+          { name: 'account_id', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.account_id, sortable: true, style: 'min-width: 100px;' },
           { name: 'debit', required: true, label: 'DEBE', align: 'right', field: row => row.debit, sortable: true, style: 'min-width: 200px;' },
           { name: 'credit', required: true, label: 'HABER', align: 'right', field: row => row.credit, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
           { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, headerStyle: 'padding-right: 20px;' },
@@ -55,9 +52,9 @@
     </template>
 
     <template v-slot:body="props">
-      <q-tr :props="props" v-if="props.row.accountID>0" >
-        <q-td key="accountID" :props="props" :tabindex="(props.key*10)+1" >
-          {{lookup_accounts.find(x=>x.value==props.row.accountID).code_es}} - {{lookup_accounts.find(x=>x.value==props.row.accountID).label}}
+      <q-tr :props="props" v-if="props.row.account_id>0" >
+        <q-td key="account_id" :props="props" :tabindex="(props.key*10)+1" >
+          {{lookup_accounts.find(x=>x.value==props.row.account_id).code_es}} - {{lookup_accounts.find(x=>x.value==props.row.account_id).label}}
         </q-td>
         <q-td key="debit" :props="props" >
           {{ props.row.debit.toFixed(userMoneyFormat) }}
@@ -86,18 +83,10 @@
           
         </q-tr>
     </template>
-
-    <!--<template v-slot:top >
-      <q-space />
-      <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-        <template v-slot:append>
-          <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString?filterString='':undefined" />
-        </template>
-      </q-input>
-    </template>
-    -->
   </q-table>
-</q-form>
+
+  
+</div>
 
 </template>
 <style lang="sass">
@@ -145,22 +134,39 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
-import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
-  components: {
-        selectSearchable: selectSearchable
+    props: {
+        moduleName: { type: String, required: true },
+        accountHeader: { type: Object, required: true },
+        accountLines: { type: Array, required: true },
     },
     data () {
         return {
-            moduleName: "accAP"
-            ,selected: []
-            ,row_id: 32	/*32=casClientes*/, filterString: '', dialogVisible: false
-            ,accMoveGrouped: true
+            filterString: '', accMoveGrouped: true
         }
     },
     methods:{
-      rowTitleInventory(fila){
+        showDateName(value){
+            let resultado = '...'
+            try{
+                resultado = date.formatDate(value, this.userDateFormat,
+                    {
+                    days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                    daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
+                    months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    }
+                )
+            }catch(ex){console.dir(ex)}
+            return resultado;
+        },
+        accountLinesComputed(){
+            let resultado = []
+            console.dir('calcular accountLinesComputed con ' + this.accMoveGrouped)
+            return this.accMoveGrouped?this.accountLines:this.accountLinesGrouped
+        }
+      /*rowTitleInventory(fila){
         let resultado = 'Seleccionar...'
         let target = null
         if(fila&&fila.invID&&fila.invID>0){
@@ -199,35 +205,45 @@ export default ({
           console.error(ex)
         }
       },
-      showDateName(value){
-        let resultado = '...'
-        try{
-          resultado = date.formatDate(value, this.userDateFormat,
-            {
-              days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-              daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
-              months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-              monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            }
-          )
-        }catch(ex){console.dir(ex)}
-        return resultado;
-      }
-
+      */
     },
     computed:{
-        userCode: { get () { return this.$store.state.main.userCode } },
-        userCompany: { get () { return this.$store.state.main.userCompany } },
-        userColor: { get () { return this.$store.state.main.userColor }  },
-        userColor: { get () { return this.$store.state.main.userColor }  },
+        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
+        userColor: { get () { return this.$store.state.main.userColor }  },
+        lookup_accounts: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+        },
+        accountLinesGrouped:{
+            get () { 
+              let resultado = [];
+              this.accountLines.map(x=>{
+                if(resultado.some(y=>y.account_id==x.account_id)){
+                  resultado.find(y=>y.account_id==x.account_id).debit += x.debit
+                  resultado.find(y=>y.account_id==x.account_id).credit += x.credit
+                }else{
+                  resultado.push({
+                     account_id: x.account_id
+                    ,debit: x.debit
+                    ,credit: x.credit 
+                  })
+                }
+              })
+              return resultado;
+            }
+        },
+        /*
+        userCode: { get () { return this.$store.state.main.userCode } },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
+        
+        
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
-        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         serverFilesPath: { get () { return this.$q.sessionStorage.getItem('serverFilesPath') } },
         lines: {
@@ -237,24 +253,6 @@ export default ({
         accountLines: {
             get () { return this.$store.state[this.moduleName].editData.accountLines },
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-        },
-        accountLinesGrouped:{
-            get () { 
-              let resultado = [];
-              this.accountLines.map(x=>{
-                if(resultado.some(y=>y.accountID==x.accountID)){
-                  resultado.find(y=>y.accountID==x.accountID).debit += x.debit
-                  resultado.find(y=>y.accountID==x.accountID).credit += x.credit
-                }else{
-                  resultado.push({
-                     accountID: x.accountID
-                    ,debit: x.debit
-                    ,credit: x.credit 
-                  })
-                }
-              })
-              return resultado;
-            }
         },
         accMoveID: {
             get () { 
@@ -274,6 +272,7 @@ export default ({
               return resultado;
             }
         },
+        
         journalName: {
             get () { 
               let resultado = '';
@@ -294,9 +293,13 @@ export default ({
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
         },
-        lookup_accounts: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
-        },
-    }
+        */
+    },
+    /*watch: { 
+        accountMove: function(newVal, oldVal) { // update component display value when changed happend from outside component (e.g. programatically)
+            console.dir('component data has changed')
+            this.componentData=newVal
+        }
+    }*/
 })
 </script>

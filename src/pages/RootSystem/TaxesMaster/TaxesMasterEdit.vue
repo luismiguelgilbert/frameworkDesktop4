@@ -39,7 +39,7 @@
             <template v-slot:after>
                 <div class="q-mt-md q-ml-md q-mr-md">
                     <basicComponent v-show="tab=='basic'" ref="basicComponent" />
-                    <historyComponent v-show="tab=='history'" ref="historyComponent" />
+                    <historyComponent v-show="tab=='history'" ref="historyComponent" :moduleName="moduleName"/>
                 </div>
             </template>
 
@@ -56,7 +56,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './TaxesMasterEditBasic'
-import historyComponent from './TaxesMasterEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

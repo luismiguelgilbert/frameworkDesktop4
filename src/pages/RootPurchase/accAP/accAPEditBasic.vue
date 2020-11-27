@@ -9,7 +9,7 @@
             />
         <q-file class="col-12 col-md-4"
             v-model="xmlFile" label="Cargar XML" filled @input="readXmlFile" dense
-            accept=".xml"
+            accept=".xml" :disable="!editMode"
             >
             <template v-slot:prepend><q-icon name="fas fa-upload" /></template>
         </q-file>
@@ -140,13 +140,13 @@ import { date } from 'quasar';
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import xml2js from 'xml2js'
-import computeFunctions from './computeFunctions.js'
+//import computeFunctions from './computeFunctions.js'
 
 export default ({
     components: {
         mainLookup: mainLookup
         ,selectSearchable: selectSearchable
-        ,computeFunctions: computeFunctions
+        //,computeFunctions: computeFunctions
         ,partnersEdit: () => import('../../../pages/RootMaster/Partners/PartnersEdit.vue')
     },
     data () {
@@ -334,7 +334,11 @@ export default ({
         },
         headerDate: {
             get () { return this.$store.state[this.moduleName].editData.basic.headerDate },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerDate', value: val}) }
+            set (val) { 
+                this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerDate', value: val}) //actualiza campo
+                this.$store.commit((this.moduleName)+'/updateEditData', {section: 'accountHeader', key: 'accMoveDateNew', value: val}) //actualiza también nueva fecha de asiento
+                this.$emit('onAccMoveCompute')
+            }
         },
         comments:  {
             get () { return this.$store.state[this.moduleName].editData.basic.comments },

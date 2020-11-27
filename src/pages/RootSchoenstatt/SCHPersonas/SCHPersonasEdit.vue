@@ -145,11 +145,7 @@
                         <trabajoComponent ref="trabajoComponent" />
                     </q-tab-panel>
 
-
-
-                    <q-tab-panel name="history">
-                        <historyComponent />
-                    </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -177,7 +173,7 @@ import apostoladosComponent from './SchPersonasEditApostolados'
 import formacionesComponent from './SchPersonasEditFormaciones'
 import trabajoComponent from './SchPersonasEditTrabajo'
 
-import historyComponent from './SchPersonasEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

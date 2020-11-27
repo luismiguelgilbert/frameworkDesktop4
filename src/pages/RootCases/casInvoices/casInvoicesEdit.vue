@@ -77,8 +77,8 @@
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
                     <q-tab-panel name="payterms"> <paytermsComponent ref="paytermsComponent" /> </q-tab-panel>
                     <q-tab-panel name="payments"> <paymentsComponent ref="paymentsComponent" /> </q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -99,9 +99,8 @@ import Vuex from 'vuex';
 import basicComponent from './casInvoicesEditBasic'
 import paytermsComponent from './casInvoicesEditPayterms'
 import paymentsComponent from './casInvoicesEditPayments'
-import filesComponent from './casInvoicesEditFiles'
-import historyComponent from './casInvoicesEditHistory'
-
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

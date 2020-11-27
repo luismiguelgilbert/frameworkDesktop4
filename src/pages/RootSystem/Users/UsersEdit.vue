@@ -75,7 +75,7 @@
                     <passwordComponent v-show="tab=='password'" ref="passwordComponent" />
                     <companyComponent v-show="tab=='companies'" ref="companyComponent" />
                     <pictureComponent v-show="tab=='picture'" ref="pictureComponent" />
-                    <historyComponent v-show="tab=='history'" ref="historyComponent" />
+                    <historyComponent  v-show="tab=='history'" ref="historyComponent" :moduleName="moduleName" />
                 </div>
             </template>
 
@@ -96,7 +96,9 @@ import systemComponent from './UsersEditSystem'
 import passwordComponent from './UsersEditPassword'
 import companyComponent from './UsersEditCompany'
 import pictureComponent from './UsersEditPicture'
-import historyComponent from './UsersEditHistory'
+//import historyComponent from './UsersEditHistory'
+//import historyComponent from '../../../components/historyView/historyView'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

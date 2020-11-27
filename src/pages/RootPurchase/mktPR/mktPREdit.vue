@@ -77,8 +77,9 @@
                     <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>
                     <q-tab-panel name="warehouse"><whComponent ref="whComponent" /></q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history"><historyComponent /></q-tab-panel>
+
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -99,8 +100,8 @@ import Vuex from 'vuex';
 import basicComponent from './mktPREditBasic'
 import whComponent from './mktPREditWH'
 import linesComponent from './mktPREditLines'
-import filesComponent from './mktPREditFiles'
-import historyComponent from './mktPREditHistory'
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({

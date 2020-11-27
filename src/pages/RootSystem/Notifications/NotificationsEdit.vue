@@ -58,7 +58,7 @@
                     <basicComponent v-show="tab=='basic'" ref="basicComponent" />
                     <usersComponent v-show="tab=='users'" ref="usersComponent" />
                     <channelsComponent v-show="tab=='channels'" ref="channelsComponent" />
-                    <historyComponent v-show="tab=='history'" ref="historyComponent" />
+                    <historyComponent v-show="tab=='history'" ref="historyComponent" :moduleName="moduleName" />
                 </div>
             </template>
         </q-splitter>
@@ -76,7 +76,8 @@ import Vuex from 'vuex';
 import basicComponent from './NotificationsEditBasic'
 import usersComponent from './NotificationsEditUsers'
 import channelsComponent from './NotificationsEditChannels'
-import historyComponent from './NotificationsEditHistory'
+//import historyComponent from './NotificationsEditHistory'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 

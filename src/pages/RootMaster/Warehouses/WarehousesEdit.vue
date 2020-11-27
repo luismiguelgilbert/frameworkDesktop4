@@ -72,7 +72,8 @@
                     <q-tab-panel name="bins"> <binsComponent ref="binsComponent" /> </q-tab-panel>
                     <q-tab-panel name="users"> <usersComponent ref="usersComponent" /> </q-tab-panel>
                     <q-tab-panel name="picture"> <pictureComponent /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
+
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -94,8 +95,8 @@ import basicComponent from './WarehousesEditBasic'
 import pictureComponent from './WarehousesEditPicture'
 import binsComponent from './WarehousesEditBins'
 import usersComponent from './WarehousesEditUsers'
-import historyComponent from './WarehousesEditHistory'
-
+//
+import historyComponent from '../../../components/historyView/historyView'
 
 
 export default ({
