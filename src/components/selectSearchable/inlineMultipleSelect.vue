@@ -1,98 +1,42 @@
 <template>
-    <div>
-        <!--
-            Este componente se usa en las líneas dentro de una tabla.
-            Emite el código del lookup (selectSearchable en cambio trabaja emitiendo la fila)
-        -->
-        <q-select
-            borderless :use-input="!isReadonly" input-debounce="650" hide-bottom-space
-            v-model="componentValue" style="height: 20px !important;"  input-style="maxWidth: 50px !important;"
-            :options="optionsListFiltered" map-options  
-            :disable="isDisable" 
-            :readonly="isReadonly"
-            :option-label="optionLabelField"
-             dense
-            :option-value="rowValueField"
-            :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
-            @keyup.keyCodes.113="openSearch"
-            @filter="filterList"
-            :clearable="isClearable" 
-            @input="(itemSelected)=>{this.itemSelected(itemSelected)}"
-            >
-            <template v-slot:no-option> 
-                <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section> </q-item>
-            </template>
-            <template v-slot:selected-item="scope"> 
-                <div style="display: inline-block; margin-top: 5px;"> {{`${scope.opt[optionLabelField]}`}} </div>
-            </template>
-            <template v-slot:option="scope">
-                <q-item v-bind="scope.itemProps" v-on="scope.itemEvents" >
-                    <q-item-section>
-                        <q-item-label v-html="scope.opt[optionsListLabel]" />
-                        <q-item-label v-if="optionsListCaption" caption>{{ scope.opt[optionsListCaption] }}</q-item-label>
-                    </q-item-section>
-                </q-item>
-            </template>
-        </q-select>
-        
-        <q-dialog v-model="isDialogOpen" @show="tryScroll"  square>
-            <q-card style="min-width: 850px;">
-                <q-bar class="bg-primary text-white">
-                    {{labelSearchText}}
-                    <q-space />
-                    <q-input 
-                        ref="inputSearch"
-                        input-class="text-white" borderless dense debounce="300" autofocus v-model="filterString" placeholder="Buscar"
-                        @keydown.native.keyCodes.115="emitSelect">
-                        <template v-slot:append>
-                            <q-icon v-if="!filterString" name="fas fa-search" flat round size="xs" color="white" />
-                            <q-btn v-if="filterString" @click="filterString=''" flat round icon="fas fa-times" size="xs" color="white" />
-                        </template>
-                    </q-input>
-                </q-bar>
-                <q-card-section class="no-padding">
-                    <q-table
-                        ref="searchTable"
-                        :data="optionsList"
-                        :row-key="rowValueField"
-                        :filter="filterString"
-                        hide-bottom dense square flat
-                        virtual-scroll :rows-per-page-options="[0]"
-                        :class="userColor=='blackDark'?'my-sticky-header-table-dark bg-grey-10 ':'my-sticky-header-table '"
-                        table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-                        no-data-label= "No hay registros"
-                        no-results-label= "No se encontraron registros"
-                        loading-label= "Cargando datos"
-                        :columns="tableSearchColumns"
-                        >
-                        <template v-slot:body="props">
-                            <q-tr :props="props"        
-                                :class="rowStyle(props.row)"
-                                >
-                                <q-td v-for="col in props.cols" :key="col.name" :props="props"
-                                    @click="itemSelected(props.row)" >
-                                    {{ col.value }}
-                                </q-td>
-                            </q-tr>
-                        </template>
-                    </q-table>
-                </q-card-section>
-            </q-card>
-        </q-dialog>
-    </div>
+    <q-select
+        borderless :use-input="!isReadonly" input-debounce="650" hide-bottom-space
+        v-model="componentValue" style="height: 20px !important;"  input-style="maxWidth: 50px !important;"
+        :options="optionsListFiltered" map-options  multiple
+        :disable="isDisable" 
+        :readonly="isReadonly"
+        :option-label="optionLabelField"
+            dense
+        :option-value="rowValueField"
+        :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
+        @keyup.keyCodes.113="openSearch"
+        @filter="filterList"
+        :clearable="isClearable" 
+        @input="(itemSelected)=>{this.itemSelected(itemSelected)}"
+        >
+        <template v-slot:no-option> 
+            <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section> </q-item>
+        </template>
+        <template v-slot:selected-item="scope"> 
+            <div style="display: inline-block; margin-top: 5px;"> {{`${scope.opt[optionLabelField]}`}} </div>
+        </template>
+        <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps" v-on="scope.itemEvents" >
+                <q-item-section>
+                    <q-item-label v-html="scope.opt[optionsListLabel]" />
+                    <q-item-label v-if="optionsListCaption" caption>{{ scope.opt[optionsListCaption] }}</q-item-label>
+                </q-item-section>
+            </q-item>
+        </template>
+    </q-select>
 </template>
-
-<style lang="sass">
-    .q-field__native
-        display: inline-block
-</style>
 
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
 
 export default({
-    name: 'inlineSelectSearchable',
+    name: 'inlineMultipleSelect',
     props: {
         labelSearchText: { type: String, required: true, default: 'Buscar' },
         optionLabelField: { type: String, required: false, default: 'label' },

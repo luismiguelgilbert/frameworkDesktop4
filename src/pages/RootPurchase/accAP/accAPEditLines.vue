@@ -18,7 +18,7 @@
           { name: 'price', required: true, label: 'Precio', align: 'right', field: row => row.price, sortable: true , style: 'max-width: 100px;' , headerStyle: 'padding-right: 20px;' },
           { name: 'lineSubtotal', required: true, label: 'Suman', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
           { name: 'lineDiscntPrcnt', required: true, label: 'Descuento %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true , style: 'max-width: 60px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true , style: 'max-width: 100px;' },
+          { name: 'lineUntaxed', required: true, label: 'Subtotal $', align: 'right', field: row => row.lineUntaxed, sortable: true , style: 'max-width: 100px;' },
           //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
           //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
           //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
@@ -162,10 +162,10 @@
           <!--Sección Impuestos, que están en [calculatedSumOfTaxes] :key="fila.value"-->
           <q-item clickable dense v-for="lines in calculatedSumOfTaxes" :key="lines.index">
               <q-item-section >
-                  <q-item-label class="text-grey-7">{{lines.label}}:</q-item-label>
+                  <q-item-label class="text-grey-7">{{lines.taxName}}:</q-item-label>
               </q-item-section>
               <q-item-section side>
-                {{lines.value.toFixed(userMoneyFormat)}}
+                {{lines.taxAmount.toFixed(userMoneyFormat)}}
               </q-item-section>
           </q-item>
         </q-list>
@@ -182,7 +182,8 @@
               (
                 lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0)
                 +
-                linesTaxes.reduce(function(sum, d) { return sum + d.taxAmount; }, 0)
+                calculatedSumOfTaxes.reduce(function(sum, d) { return sum + d.taxAmount; }, 0)
+                //linesTaxes.reduce(function(sum, d) { return sum + d.taxAmount; }, 0)
               ).toFixed(userMoneyFormat)
             }}
           </q-item-section>
@@ -279,7 +280,7 @@
       </q-card-section>
       <q-card-actions align="around">
         <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
-        :disable="requisicionesDialogSelected.length<=0" @click="addRows(requisicionesDialogSelected)" ></q-btn>
+        :disable="requisicionesDialogSelected.length<=0" @click="addRowsFromPO(requisicionesDialogSelected)" ></q-btn>
       </q-card-actions>
       <q-inner-loading :showing="isRequisicionDialogLoading" style="z-index: 10" >
         <q-spinner-gears size="50px" color="primary" />
@@ -374,83 +375,69 @@ export default ({
           }
           return max;
       },
+      addRowsFromPO(rows){
+        let result = JSON.parse(JSON.stringify(rows))
+        result.map(row=>{
+          row.taxes=JSON.parse(row.taxes)
+          return row
+        })
+        this.addRows(result)
+      },
       addRows(rows){
         try{
           this.$q.loading.show()
-          //#region NextIDs
           let newLineID = 0
           if(this.lines.length > 0){
             let temp = this.getMax(this.lines, "lineID");
             newLineID = parseInt(temp.lineID);
           }
-          let newTaxLineID = 0
-          if(this.linesTaxes.length > 0){
-            let taxTemp = this.getMax(this.linesTaxes, "taxLineID");
-            newTaxLineID = parseInt(taxTemp.taxLineID);
-          }
-          //#endregion NextIDs
-
-          //#region BackupData
           let newRows = JSON.parse(JSON.stringify(this.lines))
-          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-          //#endregion BackupData
-          
-          //#region RowAndTaxes
           rows.map(row=>{
-            //addLine
             newLineID++;
             let nuevaFila = {
-              lineID: newLineID
-              ,sri_sustento: row.sri_sustento
-              //,sri_sustentoName: this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==row.sri_sustento).label
-              ,sri_sustentoName: this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==row.sri_sustento).short_name_es
-              ,systemType: row.systemType
-              ,invID: row.value&&row.value>0?row.value:row.invID
-              ,invName: row.invName&&row.invName.length>0?row.invName:this.lookup_items.find(x=>x.value==row.value).label
-              ,account_id: row.account_id
-              ,account_name: this.lookup_accounts.find(t=>t.value==row.account_id).fullLabel
-              ,quantity: row.quantityInvoiceOpen&&row.quantityInvoiceOpen>=0?row.quantityInvoiceOpen:1
-              ,price: row.price&&row.price>=0?row.price:0
-              ,lineSubtotal: row.lineSubtotal&&row.lineSubtotal>=0?row.lineSubtotal:0
-              ,lineDiscntPrcnt: row.lineDiscntPrcnt&&row.lineDiscntPrcnt>=0?row.lineDiscntPrcnt:0
-              ,lineDiscntAmount: row.lineDiscntAmount&&row.lineDiscntAmount>=0?row.lineDiscntAmount:0
-              ,lineUntaxed: row.lineUntaxed&&row.lineUntaxed>=0?row.lineUntaxed:0
-              ,prjID: row.prjID&&row.prjID>0?row.prjID:0
-              ,prjName: row.prjName&&row.prjName.length>0?row.prjName:''
-              ,comments: row.comments&&row.comments.length>0?row.comments:''
-              ,mktPOHeader: row.mktPOHeader&&row.mktPOHeader>0?row.mktPOHeader:0
-              ,mktPOlineID: row.mktPOlineID&&row.mktPOlineID>0?row.mktPOlineID:0
-          }
-            newRows.push(nuevaFila)
-            //addTaxes
-            this.lookup_items_taxes.filter(x=>x.invID==nuevaFila.invID).forEach(impuesto=>{
-              newTaxLineID++;
-              newRowsTaxes.push({
-                  lineID: newLineID
-                ,taxLineID: newTaxLineID
-                ,account_id: impuesto.account_id
-                ,invID: nuevaFila.invID
-                ,comments: impuesto.taxName
-                ,taxID: impuesto.taxID
-                ,taxName: impuesto.shortLabel
-                ,taxAmount: impuesto.isPercent?( parseFloat( (nuevaFila.lineUntaxed) * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
-                ,isPercent: impuesto.isPercent
-                ,factor: impuesto.factor
-                ,factor_base: impuesto.factor_base
-                ,lineUntaxed: nuevaFila.lineUntaxed
+              lineID: newLineID//
+              ,sri_sustento: row.sri_sustento//
+              ,systemType: row.systemType//
+              ,invID: row.value&&row.value>0?row.value:row.invID//
+              ,invName: row.invName&&row.invName.length>0?row.invName:this.lookup_items.find(x=>x.value==row.value).label//
+              ,account_id: row.account_id//
+              ,quantity: row.quantityInvoiceOpen&&row.quantityInvoiceOpen>=0?row.quantityInvoiceOpen:1//
+              ,price: row.price&&row.price>=0?row.price:0//
+              ,lineSubtotal: row.lineSubtotal&&row.lineSubtotal>=0?row.lineSubtotal:0//
+              ,lineDiscntPrcnt: row.lineDiscntPrcnt&&row.lineDiscntPrcnt>=0?row.lineDiscntPrcnt:0//
+              ,lineDiscntAmount: row.lineDiscntAmount&&row.lineDiscntAmount>=0?row.lineDiscntAmount:0//
+              ,lineUntaxed: row.lineUntaxed&&row.lineUntaxed>=0?row.lineUntaxed:0//
+              ,taxes: row.taxes.map(impuesto=>{
+                const currentTax = this.lookup_taxes.find(t=>t.taxID==impuesto.taxID)
+                if(!currentTax.es_retencion){
+                  return { 
+                     taxID: impuesto.taxID
+                    ,estado: currentTax.estado
+                    ,es_retencion: currentTax.es_retencion
+                    ,isPercent: currentTax.isPercent
+                    ,factor_base: currentTax.factor_base
+                    ,factor: currentTax.factor
+                    ,name_es: currentTax.name_es
+                    ,short_name_es: currentTax.short_name_es
+                    ,account_id: currentTax.account_id
+                    ,taxAmount: row.lineUntaxed&&row.lineUntaxed>=0 ? (currentTax.isPercent?row.lineUntaxed*currentTax.factor*currentTax.factor_base:currentTax.factor):0
+                  }
+                }
               })
-            })
-          })
-          //#endregion RowAndTaxes
+              ,prjID: row.prjID&&row.prjID>0?row.prjID:0//
+              ,prjName: row.prjName&&row.prjName.length>0?row.prjName:''//
+              ,comments: row.comments&&row.comments.length>0?row.comments:''//
+              ,mktPOHeader: row.mktPOHeader&&row.mktPOHeader>0?row.mktPOHeader:0//
+              ,mktPOlineID: row.mktPOlineID&&row.mktPOlineID>0?row.mktPOlineID:0//
+          }
+          newRows.push(nuevaFila)
+        })
           
-          //#region Finalize
           this.lines = newRows
-          this.linesTaxes = newRowsTaxes
           this.isItemsBatchDialog=false;
           this.isRequisicionDialog=false;
           this.$q.loading.hide()
           this.$emit('onAccMoveCompute')
-          //#endregion Finalize
         }catch(ex){
           console.dir(ex)
           this.$q.loading.hide()  
@@ -472,11 +459,6 @@ export default ({
             })
             this.lines = newRows
 
-            //Impuestos
-            let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-            newRowsTaxes = newRowsTaxes.filter(x=>newRows.some(y=>y.lineID==x.lineID))
-            this.linesTaxes = newRowsTaxes
-
             this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
             this.$emit('onAccMoveCompute')
           })
@@ -485,39 +467,24 @@ export default ({
       updateRow(newVal, colName, row){
         try{
           this.$q.loading.show()
-          //Actualiza las líneas
           let newRows = JSON.parse(JSON.stringify(this.lines))
-          if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
-            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
-          }else{//comentario, CódigoCentroCosto, CódigoCuentaContable, CódigoSustento
-            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
-            //si es campo de tipo Lookup, entonces para mejorar rendimiento SOLO busca nuevo campo si es necesario
-            if(colName=="sri_sustento"){
-              newRows.find(x=>x.lineID==row.lineID).sri_sustentoName = this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==newVal).label
+          newRows.filter(x=>x.lineID==row.lineID).map(result=>{
+            if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
+              result[colName] = parseFloat(newVal);
+            }else{
+              result[colName] = newVal;
             }
-            if(colName=="account_id"){
-              newRows.find(x=>x.lineID==row.lineID).account_name = this.lookup_SRI_Tabla_Tipo_Sustento.find(t=>t.value==newVal).label
-            }
-          
-          }
-          
-          //Actualiza Campos de Dinero
-          let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
-          let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
-          let lineUntaxed = lineSubtotal - lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
-          newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineUntaxed
-
-          //Actualiza todas las taxLines correspondientes a la línea modificada
-          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-          newRowsTaxes.filter(x=>x.lineID==row.lineID).map(lineaImpuesto=>{
-            lineaImpuesto.lineUntaxed = lineUntaxed;
-            lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor);
-            return lineaImpuesto
+            result.lineSubtotal = result.price * result.quantity;
+            result.lineDiscntAmount = (result.price * result.quantity) * (result.lineDiscntPrcnt / 100);
+            result.lineUntaxed = (result.price * result.quantity) - (result.price * result.quantity) * (result.lineDiscntPrcnt / 100);
+            //taxes Section
+            result.taxes.map(taxLine=>{
+              taxLine.taxAmount = taxLine.isPercent?( parseFloat(result.lineUntaxed * taxLine.factor_base) * parseFloat(taxLine.factor) )  :  parseFloat(lineaImpuesto.factor);
+              return taxLine
+            })
+            return result
           })
           this.lines = newRows;
-          this.linesTaxes = newRowsTaxes;
           this.$q.loading.hide()
           this.$emit('onAccMoveCompute')
         }catch(ex){
@@ -525,7 +492,8 @@ export default ({
           this.$q.loading.hide()
         }
       },
-      mktPOBatchDialogSelectAction(){
+      
+      mktPOBatchDialogSelectAction(){//volver a validar
         let max_id = 0
         let temp = null
         if(this.lines.length > 0){
@@ -534,7 +502,7 @@ export default ({
           max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
         }
         let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
-        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
+        //let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
         if(this.requisicionesDialogSelected.length>0){
           this.requisicionesDialogSelected.map(row => {
             max_id = parseInt(max_id) + parseInt(1);
@@ -565,7 +533,7 @@ export default ({
             })
 
             //Impuestos de la línea
-            this.lookup_items_taxes.filter(x=>x.invID==row.invID).forEach(impuesto=>{
+            /*this.lookup_items_taxes.filter(x=>x.invID==row.invID).forEach(impuesto=>{
                 newRowsTaxes.push({
                    lineID: max_id
                   ,taxID: impuesto.taxID
@@ -576,11 +544,12 @@ export default ({
                   ,factor_base: impuesto.factor_base
                   ,lineUntaxed: row.lineUntaxed
                 })
-              })
+              })*/
           })
           this.lines = newRows
-          this.linesTaxes = newRowsTaxes
+          //this.linesTaxes = newRowsTaxes
           this.isItemsBatchDialog = false
+          this.$emit('onAccMoveCompute')
         }
 
         this.isRequisicionDialog = false;
@@ -615,7 +584,6 @@ export default ({
         })
     
       },
-      
       rowTitleInventory(fila){
         let resultado = 'Seleccionar...'
         let target = null
@@ -681,14 +649,10 @@ export default ({
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataRequisiciones', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
-        linesTaxes: {
+        /*linesTaxes: {
             get () { return this.$store.state[this.moduleName].editData.linesTaxes },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLinesTaxes', val) }
-        },
-        accountLines: {
-            get () { return this.$store.state[this.moduleName].editData.linesTaxes },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
-        },
+        },*/
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
@@ -714,9 +678,12 @@ export default ({
         lookup_paytermsDetails: {
             get () { return this.$store.state[this.moduleName].editData.lookup_paytermsDetails },
         },
-        lookup_items_taxes: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },
+        lookup_taxes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_taxes },
         },
+        /*lookup_items_taxes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },
+        },*/
         lookup_SRI_Tabla_Tipo_Sustento: {
             get () { return this.$store.state[this.moduleName].editData.lookup_SRI_Tabla_Tipo_Sustento },
         },
@@ -748,40 +715,21 @@ export default ({
         },
         calculatedSumOfTaxes: {
           get () {
-            //Sección Subtotales
-            //acc = acumulador  ||  it = fila
-            const resultadoSubtotales = this.linesTaxes.reduce((acc, it) => {
-              //crea en el acumulador el atributo con el nombre del impuesto, ej: acc[IVA 12%]
-              //luego, suma el valor del acumulador cuando coincida el nombre (ej: acc[IVA 12%] debe ser igual a it.taxName que sería 'IVA 12%')
-              //y luego toma el valor y le suma el campo taxAmount
-              acc[it.taxName] = ((acc[it.taxName]?acc[it.taxName]:0) + it.lineUntaxed);
-              return acc;
-            }, {});
-            //sección Impuestos
-            const resultado = this.linesTaxes.reduce((acc, it) => {
-              //crea en el acumulador el atributo con el nombre del impuesto, ej: acc[IVA 12%]
-              //luego, suma el valor del acumulador cuando coincida el nombre (ej: acc[IVA 12%] debe ser igual a it.taxName que sería 'IVA 12%')
-              //y luego toma el valor y le suma el campo taxAmount
-              acc[it.taxName] = ((acc[it.taxName]?acc[it.taxName]:0) + it.taxAmount);
-              return acc;
-            }, {});
-            //resultado es un objeto, entonces se convierte a Array object a Array
-            var result = [];
-            for(var i in resultadoSubtotales){
-              result.push({
-                 label: 'Subtotal ' + i
-                ,value: resultadoSubtotales[i]
-                }
-              )
-            }
-            for(var i in resultado){
-              result.push({
-                 label: i
-                ,value: resultado[i]
-                }
-              )
-            }
-            return result
+            let resultado = []
+            this.lines.map(x=>{
+              x.taxes.map(y=>{
+                resultado.some(t=>t.taxName==y.short_name_es)?
+                  resultado.filter(n=>n.taxName==y.short_name_es).map(result=>{
+                    result.taxAmount += y.taxAmount
+                  })
+                :
+                  resultado.push({
+                    taxName: y.short_name_es
+                    ,taxAmount: y.taxAmount
+                  })
+              })
+            })
+            return resultado
           }
         }
     }

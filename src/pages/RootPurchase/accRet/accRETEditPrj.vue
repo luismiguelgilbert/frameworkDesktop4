@@ -13,14 +13,11 @@
         :filter="filterString"
         :columns="[
            //{ name: 'tipoComprobanteName', required: true, label: 'Documento', align: 'left', field: row => row.tipoComprobanteName, sortable: true, style: 'min-width: 50px;' },
-           { name: 'accAPnumeroDoc', required: true, label: '# Documento', align: 'left', field: row => row.accAPnumeroDoc, sortable: true, style: 'min-width: 100px;' },
-          ,{ name: 'sustentoName', required: true, label: 'Sustento', align: 'left', field: row => row.sustentoName, sortable: true, style: 'min-width: 100px;' },
-          ,{ name: 'lineSubtotal', required: true, label: 'Subtotal', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
-          //,{ name: 'accAP_account_id', required: true, label: 'accAP_account_id', align: 'right', field: row => row.accAP_account_id, sortable: true , style: 'max-width: 100px;' },
-          //,{ name: 'tax_account_id', required: true, label: 'tax_account_id', align: 'right', field: row => row.tax_account_id, sortable: true , style: 'max-width: 100px;' },
-          ,{ name: 'taxID', required: true, label: 'Retención', align: 'left', field: row => row.taxID, sortable: true },
-          ,{ name: 'baseImponible', required: true, label: 'Base Imponible', align: 'right', field: row => row.baseImponible, sortable: true , style: 'max-width: 100px;' },
-          ,{ name: 'valorRetenido', required: true, label: 'Valor Retenido', align: 'right', field: row => row.valorRetenido, sortable: true , style: 'max-width: 100px;' },
+           { name: 'accAPnumeroDoc', label: '# Documento', align: 'left', field: row => row.accAPnumeroDoc, sortable: true },
+          ,{ name: 'sustentoName', label: 'Sustento', align: 'left', field: row => row.sustentoName, sortable: false },
+          //,{ name: 'lineSubtotal', required: true, label: 'Subtotal', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
+          ,{ name: 'accAP_account_id', label: 'CxP Documento', align: 'left', field: row => row.accAP_account_id, sortable: false },
+          ,{ name: 'tax_account_id', label: 'Cuenta Retención', align: 'left', field: row => row.tax_account_id, sortable: false },
         ]"
     >
 
@@ -29,54 +26,65 @@
         <q-td auto-width>
           <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
         </q-td>
-
-        <q-td key="tipoComprobanteName" :props="props">
-          {{ props.row.tipoComprobanteName }}
-        </q-td>
         <q-td key="accAPnumeroDoc" :props="props">
           {{ props.row.accAPnumeroDoc }}
         </q-td>
         <q-td key="sustentoName" :props="props">
           {{ props.row.sustentoName }}
         </q-td>
-        <q-td key="lineSubtotal" :props="props" :tabindex="(props.key*10)+2">
-          {{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}
+        <q-td key="accAP_account_id" :props="props">
+          <div>
+            <inlineSelectSearchable 
+              labelSearchText="Buscar Cuenta" style="inline"
+              :optionsList="lookup_accounts"
+              rowValueField="value" 
+              optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
+              optionLabelField="label"
+              :isClearable="false"
+              :isDense="true"
+              :isDisable="false" 
+              :isReadonly="false"
+              :initialValue="props.row.accAP_account_id"
+              :tableSearchColumns="[
+                       { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                      ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
+                  ]"
+              @onItemSelected="(row)=>{
+                      updateRow(row,'accAP_account_id',props.row)
+                  }"
+              />
+          </div>
         </q-td>
-        <q-td key="taxID" :props="props" :tabindex="(props.key*10)+3">
-          <inlineSelectSearchable 
-            labelSearchText="Buscar Retención"
-            :optionsList="lookup_taxes"
-            rowValueField="taxID" 
-            optionsListLabel="short_name_es" optionsListCaption="name_es" optionDisableField="estado"
-            optionLabelField="short_name_es"
-            :isClearable="false"
-            :isDense="true"
-            :isDisable="false" 
-            :isReadonly="true"
-            :initialValue="props.row.taxID"
-            :tableSearchColumns="[
-                    { name: 'name_es', label: 'Retención', field: 'name_es', align: 'left'}
-                    //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
-                ]"
-            @onItemSelected="(row)=>{
-                    //let impuesto = lookup_taxes.find(x=>x.taxID==row.taxID)
-                    updateRow(row,'taxID',props.row)
-                }"
-            />
+        
+        <q-td key="tax_account_id" :props="props">
+          <div>
+            <inlineSelectSearchable 
+              labelSearchText="Buscar Cuenta" style="inline"
+              :optionsList="lookup_accounts"
+              rowValueField="value" 
+              optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
+              optionLabelField="label"
+              :isClearable="false"
+              :isDense="true"
+              :isDisable="false" 
+              :isReadonly="false"
+              :initialValue="props.row.tax_account_id"
+              :tableSearchColumns="[
+                       { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                      ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
+                  ]"
+              @onItemSelected="(row)=>{
+                      updateRow(row,'tax_account_id',props.row)
+                  }"
+              />
+          </div>
         </q-td>
-         <q-td key="baseImponible" :props="props" :tabindex="(props.key*10)+4">
-          <!--{{ props.row.baseImponible }}-->
-          {{ props.row.baseImponible.toFixed(userMoneyFormat) }}
-        </q-td>
-        <q-td key="valorRetenido" :props="props" :tabindex="(props.key*10)+5">
-          <!--{{ props.row.valorRetenido }}-->
-          {{ props.row.valorRetenido.toFixed(userMoneyFormat) }}
-        </q-td>
+        
       </q-tr>
     </template>
     <template v-slot:top >
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Cuenta Contable':''" title="Cambiar Cuenta Contable a líneas seleccionadas" @click="isAccDialog=true" icon="fas fa-book" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0"/>
-        <q-btn :label="$q.screen.gt.sm?'Cuenta Activo':''" title="Cambiar Cuenta Contable del Activo" icon="fas fa-handshake" color="primary" no-caps class="q-ml-sm" @click="isPartnerAccountDialog=true" />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'CxP Documento Contable':''" title="Cambiar Cuenta Contable del Documento x Pagar a líneas seleccionadas" @click="isAccAPDialog=true" icon="fas fa-book" color="primary" no-caps :disable="selected.length<=0"/>
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Cuenta Retención':''" title="Cambiar Cuenta Contable a Retenciones de líneas seleccionadas" @click="isTaxDialog=true" icon="fas fa-percent" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0"/>
         <!--<q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" class="q-ml-sm" no-caps   :disable="selected.length<=0" />-->
         <q-space />
     </template>
@@ -84,7 +92,33 @@
 
 
 
-    <q-dialog v-model="isAccDialog" >
+    <q-dialog v-model="isAccAPDialog" >
+        <q-card style="minWidth: 900px;">
+            <selectSearchable class="col-12"
+                    prependIcon="fas fa-cash-register"
+                    labelText="Cuenta del Impuesto (*)" labelSearchText="Buscar Cuenta Contable"
+                    :optionsList="lookup_accounts"
+                    rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" 
+                    optionDisableField="estado"
+                    :isRequired="true" 
+                    :isDisable="false" 
+                    :isReadonly="false"
+                    
+                    :tableSearchColumns="[
+                        { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                        ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
+                        ]"
+                    @onItemSelected="(row)=>{
+                            if(row){
+                                this.selected.forEach(line => this.updateRow(row.value, 'accAP_account_id', line) );
+                            }
+                            this.isAccAPDialog = false
+                        }"
+                    />
+        </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="isTaxDialog" >
         <q-card style="minWidth: 900px;">
             <selectSearchable class="col-12"
                     prependIcon="fas fa-cash-register"
@@ -104,38 +138,14 @@
                             if(row){
                                 this.selected.forEach(line => this.updateRow(row.value, 'tax_account_id', line) );
                             }
-                            this.isAccDialog = false
+                            this.isTaxDialog = false
                         }"
                     />
         </q-card>
     </q-dialog>
 
-    <q-dialog v-model="isPartnerAccountDialog" >
-        <q-card style="minWidth: 900px;">
-        <selectSearchable class="col-12"
-                prependIcon="fas fa-cash-register"
-                labelText="Cuenta del Activo (*)" labelSearchText="Buscar Cuenta Contable"
-                :optionsList="lookup_accounts"
-                rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" 
-                optionDisableField="estado"
-                :isRequired="true" 
-                :isDisable="false" 
-                :isReadonly="false"
-                :initialValue="partner_account_id"
-                :tableSearchColumns="[
-                    { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
-                    ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
-                    ]"
-                @onItemSelected="(row)=>{
-                        this.partner_account_id=row.value;
-                        this.isPartnerAccountDialog=false;
-                        this.$emit('onAccMoveCompute');
-                    }"
-                />
-        </q-card>
-    </q-dialog>
-    
 
+        
 </div>
 
 </template>
@@ -197,6 +207,7 @@ export default ({
         ,isExpectedDialog: false, expectedDialogDate: ''
         ,mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         ,isPartnerAccountDialog: false
+        ,isTaxDialog: false, isAccAPDialog: false
         //,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
       }
     },
@@ -301,10 +312,6 @@ export default ({
         },
         partnerName: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
-        },
-        partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_account_id', value: val}) }
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },

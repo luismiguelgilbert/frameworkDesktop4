@@ -38,7 +38,7 @@
                             <q-icon name="fas fa-money-bill-alt"  :color="tab=='payments'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='payments'?'text-white':'text-grey-7')">Pagos Realizados</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='payments'?'text-white':'text-grey-7')">Pagos Aplicados</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='prj'" :active="tab=='prj'" active-class="bg-primary text-white" :disable="!(partnerID>0 && allow_accounting)">
@@ -46,7 +46,7 @@
                             <q-icon name="fas fa-folder-open" :color="tab=='prj'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='prj'?'text-white':'text-grey-7')">Cuentas y Centro de Costo</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='prj'?'text-white':'text-grey-7')">Ajustes Contables</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>0 && allow_accounting)" >
@@ -94,6 +94,7 @@
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="payments"> <paymentsComponent ref="paymentsComponent" :moduleName="moduleName" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
                     <q-tab-panel name="accounting"><accountingComponent ref="accountingComponent"  :moduleName="moduleName" :accountHeader="accountHeader" :accountLines="accountLines" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
 
@@ -116,12 +117,11 @@ import Vuex from 'vuex';
 import basicComponent from './accAPEditBasic'
 import prjComponent from './accAPEditPrj'
 import linesComponent from './accAPEditLines'
-//import accountingComponent from './accAPEditAccounting'
 import accountingComponent from '../../../components/journalView/journalView'
-//import filesComponent from './accAPEditFiles'
 import filesComponent from '../../../components/filesView/filesView'
-//import historyComponent from './accAPEditHistory'
 import historyComponent from '../../../components/historyView/historyView'
+import paymentsComponent from '../../../components/paymentsView/paymentsView'
+
 
 
 export default ({
@@ -129,9 +129,11 @@ export default ({
      basicComponent: basicComponent
     ,linesComponent: linesComponent
     ,accountingComponent: accountingComponent
+    ,paymentsComponent: paymentsComponent
     ,prjComponent: prjComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
+    
   },
   data () {
     return {
@@ -265,73 +267,72 @@ export default ({
     },
     //custom
     updateAccountMove(){
+        //console.dir('updateAccountMove')
         this.$q.loading.show()
         let newRowsAccount = []
         let partnerCredit = 0
         let newAccLineID = 0
-        //#region ITEM_LINES_debit
-            this.lines.map(row=>{
-                newAccLineID++;
-                partnerCredit += row.lineUntaxed
-                newRowsAccount.push({
+        //#region DEBE
+        this.lines.map(row=>{
+            newAccLineID++;
+            partnerCredit += row.lineUntaxed
+            newRowsAccount.push({
                     accLineID: newAccLineID
+                ,lineID: row.lineID
+                ,taxLineID: 0
+                ,account_id: row.account_id
+                ,partnerID: this.partnerID
+                ,debit: row.lineUntaxed
+                ,credit: 0
+                ,invID: row.invID
+                ,prjID: row.prjID
+                ,mktHeaderID: this.editMode?0:this.editRecord.row.headerID_ux
+                ,mktLineID: row.lineID
+                ,mktTaxID: null//porque esta línea se calcula por item
+                ,comments: row.invName
+            })
+            row.taxes.map(taxLine=>{
+                newAccLineID++;
+                partnerCredit += taxLine.taxAmount
+                newRowsAccount.push({
+                        accLineID: newAccLineID
                     ,lineID: row.lineID
                     ,taxLineID: 0
-                    ,account_id: row.account_id
-                    ,partnerID: 0
-                    ,debit: row.lineUntaxed
+                    ,account_id: taxLine.account_id
+                    ,partnerID: this.partnerID
+                    ,debit: taxLine.taxAmount
                     ,credit: 0
                     ,invID: row.invID
                     ,prjID: row.prjID
                     ,mktHeaderID: this.editMode?0:this.editRecord.row.headerID_ux
                     ,mktLineID: row.lineID
-                    ,mktTaxID: null//porque esta línea se calcula por item
-                    ,comments: row.invName
+                    ,mktTaxID: taxLine.taxID//porque esta línea se calcula por item
+                    ,comments: taxLine.short_name_es
                 })
             })
-        //#endregion ITEM_LINES_debit
-        //#region TAX_LINES_debit
-            this.linesTaxes.map(row=>{
-                newAccLineID++;
-                partnerCredit += row.taxAmount
-                newRowsAccount.push({
-                     accLineID: newAccLineID
-                    ,lineID: row.lineID
-                    ,taxLineID: row.taxLineID
-                    ,account_id: row.account_id
-                    ,partnerID: 0
-                    ,debit: row.taxAmount
-                    ,credit: 0
-                    ,invID: row.invID
-                    ,prjID: this.lines.find(x=>x.lineID==row.lineID).prjID
-                    ,mktHeaderID: this.editMode?0:this.editRecord.row.headerID_ux
-                    ,mktLineID: row.lineID//porque UX calcula asiento y pone el mismo ID de la línea del item donde agrega la línea del impuesto en [linesTaxes]
-                    ,mktTaxID: row.taxID//porque esta línea se calcula por impuesto
-                    ,comments: row.taxName + ' (' + this.lines.find(x=>x.lineID==row.lineID).invName + ')'
-                })
-            })
-        //#endregion ITEM_LINES_debit
-        //#region PARTNER_Credit
-            newAccLineID++;
-            newRowsAccount.push({
-                accLineID: newAccLineID
-                ,lineID: 0
-                ,taxLineID: 0
-                ,account_id: this.partner_account_id
-                ,partnerID: this.partnerID
-                ,debit: 0
-                ,credit: partnerCredit
-                ,invID: 0
-                ,prjID: 0
-                ,mktLineID: 0
-                ,comments: this.partnerName
-            })
-        //#endregion PARTNER_Credit
-        //#region Finalize
-            this.accountLines = newRowsAccount
-            console.dir('Asiento actualizado')
-            this.$q.loading.hide()
-        //#endregion Finalize
+        })
+        //#endregion DEBE
+        
+        //#region HABER
+        newAccLineID++;
+        newRowsAccount.push({
+            accLineID: newAccLineID
+            ,lineID: 0
+            ,taxLineID: 0
+            ,account_id: this.partner_account_id
+            ,partnerID: this.partnerID
+            ,debit: 0
+            ,credit: partnerCredit
+            ,invID: 0
+            ,prjID: 0
+            ,mktLineID: 0
+            ,comments: this.partnerName
+        })
+        //#endregion HABER
+        
+        this.accountLines = newRowsAccount
+        this.$q.loading.hide()
+        //console.dir('Asiento actualizado')
     }
   },
   computed:{

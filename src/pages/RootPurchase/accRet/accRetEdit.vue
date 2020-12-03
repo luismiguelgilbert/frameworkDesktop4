@@ -33,13 +33,21 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Documento ({{lines.length}})</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" :disable="!(partnerID>0)" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-money-bill-alt"  :color="tab=='payments'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='payments'?'text-white':'text-grey-7')">Pagos Realizados</q-item-label>
+                        </q-item-section>
+                    </q-item>
 
                     <q-item clickable @click="tab='prj'" :active="tab=='prj'" active-class="bg-primary text-white" :disable="!(partnerID>0 && allow_accounting)">
                         <q-item-section side>
                             <q-icon name="fas fa-folder-open" :color="tab=='prj'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='prj'?'text-white':'text-grey-7')">Cuentas y Centro de Costo</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='prj'?'text-white':'text-grey-7')">Ajustes Contables</q-item-label>
                         </q-item-section>
                     </q-item>
                     
@@ -51,14 +59,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='accounting'?'text-white':'text-grey-7')">Asiento Contable</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" :disable="!(partnerID>0)" >
-                        <q-item-section side>
-                            <q-icon name="fas fa-money-bill-alt"  :color="tab=='payments'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='payments'?'text-white':'text-grey-7')">Pagos Realizados</q-item-label>
-                        </q-item-section>
-                    </q-item>
+                    
                     <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
@@ -94,7 +95,7 @@
                     >
                     <q-tab-panel name="basic"><basicComponent ref="basicComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
-                    <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
+                    <q-tab-panel name="accounting"><accountingComponent ref="accountingComponent"  :moduleName="moduleName" :accountHeader="accountHeader" :accountLines="accountLines" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
 
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
@@ -118,15 +119,12 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './accRetEditBasic'
 import linesComponent from './accRetEditLines'
-import accountingComponent from './accRetEditAccounting'
 import prjComponent from './accRETEditPrj'
-
+//import accountingComponent from './accRetEditAccounting'
+import accountingComponent from '../../../components/journalView/journalView'
 import filesComponent from '../../../components/filesView/filesView'
 import historyComponent from '../../../components/historyView/historyView'
                     
-
-
-
 export default ({
   components:{
      basicComponent: basicComponent
@@ -234,7 +232,7 @@ export default ({
                     ,files: this.editData.files
                     //,address: this.editData.address.filter(x=>x.is_allowed).map(x=>x.headerID_ux)
                 }
-                this.$axios.post( this.apiURL + 'spAccAPUpdate', {
+                this.$axios.post( this.apiURL + 'spAccRETUpdate', {
                     userCode: this.userCode,
                     userCompany: this.userCompany,
                     //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
@@ -269,62 +267,42 @@ export default ({
         this.$q.loading.show()
         let newRowsAccount = []
         let newAccLineID = 0
-        //#region LINES_credit
         this.lines.map(row=>{
-          newAccLineID++;
-          //Línea del Impuesto
-          newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: row.lineID
-            ,taxLineID: 0
-            ,accountID: row.tax_account_id//la cuenta del impuesto
-            ,partnerID: this.partnerID
-            ,debit: 0
-            ,credit: row.valorRetenido//va al HABER
-            ,invID: 0//
-            ,prjID: 0//row.prjID
-            ,mktHeaderID: row.accAPheaderID
-            ,mktLineID: row.sustentoID
-            ,comments: row.sustentoName
-          })
-          //Línea del Documento
-          newAccLineID++;
-          newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: row.lineID
-            ,taxLineID: 0
-            ,accountID: row.accAP_account_id//la cuenta del documento
-            ,partnerID: this.partnerID
-            ,debit: row.valorRetenido//va al DEBE
-            ,credit: 0
-            ,invID: 0//
-            ,prjID: 0//row.prjID
-            ,mktHeaderID: row.accAPheaderID
-            ,mktLineID: row.sustentoID
-            ,comments: row.sustentoName
-          })
+            //#region DEBE
+            newAccLineID++;
+            newRowsAccount.push({
+                accLineID: newAccLineID
+                ,lineID: newAccLineID
+                ,account_id: row.accAP_account_id//la cuenta DE LA FACTURA
+                ,partnerID: this.partnerID//el ID del partner
+                ,debit: row.valorRetenido//valor retenido
+                ,credit: 0
+                ,invID: 0//
+                ,prjID: 0//row.prjID
+                ,mktHeaderID: row.accAPheaderID
+                ,mktLineID: 0//el sustento es texto, entonces no aplica
+                ,comments: row.tipoComprobanteName + ' ' + row.accAPnumeroDoc + ' Sustento ' + row.sustentoName
+            })
+            //#endregion DEBE
+            //#region HABER
+            newAccLineID++;
+            newRowsAccount.push({
+                accLineID: newAccLineID
+                ,lineID: newAccLineID
+                ,account_id: row.tax_account_id//la cuenta de la retención
+                ,partnerID: this.partnerID//el ID del partner
+                ,debit: 0
+                ,credit: row.valorRetenido//monto retenido
+                ,invID: 0//
+                ,prjID: 0//row.prjID
+                ,mktHeaderID: row.accAPheaderID
+                ,mktLineID: 0//el sustento es texto, entonces no aplica
+                ,comments: row.tipoComprobanteName + ' ' + row.accAPnumeroDoc + ' - ' + row.taxName
+            })
+            //#endregion HABER
         })
-        //#endregion ITEM_LINES_debit
-        //#region PARTNER_Credit
-        newAccLineID++;
-        newRowsAccount.push({
-             accLineID: newAccLineID
-            ,lineID: 0
-            ,taxLineID: 0
-            ,accountID: this.partner_account_id
-            ,partnerID: this.partnerID
-            ,debit: partnerAmount
-            ,credit: 0
-            ,invID: 0
-            ,prjID: 0
-            ,mktLineID: 0
-            ,comments: this.lookup_partners.some(x=>x.value==this.partnerID)?this.lookup_partners.find(x=>x.value==this.partnerID).label:''
-          })
-        //#endregion PARTNER_Credit
-        //#region Finalize
         this.accountLines = newRowsAccount
         this.$q.loading.hide()
-        //#endregion Finalize
     }
   },
   computed:{
@@ -376,8 +354,12 @@ export default ({
     lines: {
         get () { return this.$store.state[this.moduleName].editData.lines },
     },
+    accountHeader: {
+        get () { return this.$store.state[this.moduleName].editData.accountHeader },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountHeader', val) }
+    },
     accountLines: {
-        get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+        get () { return this.$store.state[this.moduleName].editData.accountLines },
         set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
     },
     lookup_partners: {

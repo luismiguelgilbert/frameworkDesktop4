@@ -13,11 +13,12 @@
         :filter="filterString"
         :columns="[
           //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-          { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
+          { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true },
           //{ name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', },
-          { name: 'account_id', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.account_id, sortable: true },
-          { name: 'sri_sustento', required: true, label: 'Sustento Tributario', align: 'left', field: row => row.sri_sustento, sortable: true },
-          { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: true },
+          { name: 'account_id', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.account_id, sortable: false },
+          { name: 'sri_sustento', required: true, label: 'Sustento Tributario', align: 'left', field: row => row.sri_sustento, sortable: false },
+          { name: 'taxes', required: true, label: 'Impuestos', align: 'left', field: row => linesTaxes, sortable: false },
+          { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: false },
           { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true },
           { name: 'mktPOHeader', required: true, label: 'OC #', align: 'left', field: row => row.mktPOHeader, sortable: true },
           { name: 'mktPOlineID', required: true, label: 'OC Línea', align: 'left', field: row => row.mktPOlineID, sortable: true },
@@ -32,9 +33,69 @@
 
         <q-td key="invID" :props="props">{{ props.row.invName }}</q-td>
         <!--<q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>-->
-        <q-td key="account_id" :props="props">{{ props.row.account_name }}</q-td>
+        <q-td key="account_id" :props="props">
+          <div>
+            <inlineSelectSearchable 
+              labelSearchText="Buscar Cuenta" style="inline"
+              :optionsList="lookup_accounts"
+              rowValueField="value" 
+              optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
+              optionLabelField="label"
+              :isClearable="false"
+              :isDense="true"
+              :isDisable="false" 
+              :isReadonly="false"
+              :initialValue="props.row.account_id"
+              :tableSearchColumns="[
+                       { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                      ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
+                  ]"
+              @onItemSelected="(row)=>{
+                      updateRow(row,'account_id',props.row)
+                  }"
+              />
+          </div>
+        </q-td>
+        <q-td key="sri_sustento" :props="props">
+          <inlineSelectSearchable 
+              labelSearchText="Buscar Cuenta" style="inline"
+              :optionsList="lookup_SRI_Tabla_Tipo_Sustento"
+              rowValueField="value" 
+              optionsListLabel="label" optionsListCaption="value" optionDisableField="estado"
+              optionLabelField="short_name_es"
+              :isClearable="false"
+              :isDense="true"
+              :isDisable="false" 
+              :isReadonly="false"
+              :initialValue="props.row.sri_sustento"
+              :tableSearchColumns="[
+                       { name: 'value', label: 'Código', field: 'value', align: 'left'}
+                      ,{ name: 'label', label: 'Sustento Tributario', field: 'label', align: 'left'}
+                  ]"
+              @onItemSelected="(row)=>{
+                      updateRow(row,'sri_sustento',props.row)
+                  }"
+              />
+        </q-td>
 
-        <q-td key="sri_sustento" :props="props">{{ props.row.sri_sustentoName }}</q-td>
+        <q-td key="taxes" :props="props">
+          <q-select
+            dense borderless hide-bottom-space style="height: 20px !important;"  input-style="maxWidth: 50px !important;"
+            :options="lookup_taxes.filter(x=>!x.es_retencion)" 
+            :value="props.row.taxes"
+            multiple option-value="taxID" option-label="short_name_es"
+            @input="(row)=>{
+              updateRow(row,'taxes',props.row)
+            }"
+            >
+            <template v-slot:no-option> 
+                <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section> </q-item>
+            </template>
+            <template v-slot:selected-item="scope"> 
+                <div style="display: inline-block; margin-top: 5px;"> {{`${scope.opt.short_name_es}`}} </div>
+            </template>
+          </q-select>
+        </q-td>
 
         <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
         
@@ -48,14 +109,18 @@
         <q-td key="mktPOHeader" :props="props">{{ props.row.mktPOHeader }}</q-td>
         <q-td key="mktPOlineID" :props="props">{{ props.row.mktPOlineID }}</q-td>
       </q-tr>
+      <q-tr v-show="props.expand" :props="props">
+          <q-td colspan="100%">
+            <div class="text-left">This is expand slot for row above: {{ props.row }}.</div>
+          </q-td>
+      </q-tr>
     </template>
     <template v-slot:top >
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="fas fa-folder-open" color="primary" no-caps :disable="selected.length<=0"/>
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Cuenta Contable':''" title="Cambiar Cuenta Contable a líneas seleccionadas" @click="isAccDialog=true" icon="fas fa-book" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0"/>
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Sustento':''" title="Cambiar Sustento Tributario a líneas seleccionadas" @click="isSustentoDialog=true" icon="fas fa-percent" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0"/>
+        <q-btn :label="$q.screen.gt.sm?'Cuenta Contable':''" title="Cambiar Cuenta Contable a líneas seleccionadas" @click="isAccDialog=true" icon="account_tree" color="primary" no-caps :disable="selected.length<=0"/>
         <q-btn :label="$q.screen.gt.sm?'Cuenta Pasivo':''" title="Cambiar Cuenta Contable del Pasivo" icon="fas fa-handshake" color="primary" no-caps class="q-ml-sm" @click="isPartnerAccountDialog=true" />
-        <!--<q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" class="q-ml-sm" no-caps   :disable="selected.length<=0" />-->
         <q-space />
+        <q-btn :label="$q.screen.gt.lg?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="bookmarks" color="primary" flat no-caps :disable="selected.length<=0"/>
+        <q-btn :label="$q.screen.gt.lg?'Sustento':''" title="Cambiar Sustento Tributario a líneas seleccionadas" @click="isSustentoDialog=true" icon="fas fa-percent" color="primary" flat no-caps class="q-ml-sm" :disable="selected.length<=0"/>
     </template>
   </q-table>
 
@@ -81,7 +146,7 @@
             ref="rootPrjIDSelected"
             
             >
-            <template v-slot:prepend><q-icon name="fas fa-folder-open" /></template>
+            <template v-slot:prepend><q-icon name="bookmarks" /></template>
         </q-select>
         <q-separator />
         <q-table
@@ -239,11 +304,15 @@ import Vuex from 'vuex';
 import { date } from 'quasar';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
+import inlineSelectSearchable from '../../../components/selectSearchable/inlineSelectSearchable.vue'
+import inlineMultipleSelect from '../../../components/selectSearchable/inlineMultipleSelect.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
         ,selectSearchable:selectSearchable
+        ,inlineSelectSearchable: inlineSelectSearchable
+        ,inlineMultipleSelect: inlineMultipleSelect
     },
     data () {
       return {
@@ -310,12 +379,26 @@ export default ({
         }
       },
       updateRow(newVal, colName, row){
+        if(colName=='taxes'){
+          newVal.map(x=>{
+            x.taxAmount = x.isPercent?row.lineUntaxed*x.factor*x.factor_base:x.factor
+            return 
+          })
+        }
         let newRows = JSON.parse(JSON.stringify(this.lines))
         newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
         this.lines = newRows
         this.$emit('onAccMoveCompute')
       },
-      rowTitleInventory(fila){
+      getAccountName(account_id){
+        let resultado = ''
+        if(account_id&&this.lookup_accounts.some(x=>x.value==account_id)){
+          const temp = this.lookup_accounts.find(x=>x.value==account_id)
+          resultado = temp.code_es + ' ' + temp.label
+        }
+        return resultado
+      }
+      /*rowTitleInventory(fila){
         let resultado = 'Seleccionar...'
         let target = null
         if(fila&&fila.invID&&fila.invID>0){
@@ -325,7 +408,7 @@ export default ({
           }catch(ex){}
         }
         return resultado
-      },
+      },*/
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
@@ -341,10 +424,11 @@ export default ({
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
-        /*linesTaxes: {
+        linesTaxes: {
             get () { return this.$store.state[this.moduleName].editData.linesTaxes },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLinesTaxes', val) }
         },
+        /*
         accountLines: {
             get () { return this.$store.state[this.moduleName].editData.accountLines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
@@ -365,6 +449,9 @@ export default ({
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },
+        },
+        lookup_taxes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_taxes },
         },
         lookup_SRI_Tabla_Tipo_Sustento: {
             get () { return this.$store.state[this.moduleName].editData.lookup_SRI_Tabla_Tipo_Sustento },

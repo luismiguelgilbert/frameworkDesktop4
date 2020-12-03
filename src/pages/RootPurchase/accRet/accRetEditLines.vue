@@ -4,23 +4,22 @@
         ref="mainTable"
         :data="lines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
+        table-style="min-height: calc(100vh - 255px); max-height: calc(100vh - 255px)"
         row-key="lineID"
         virtual-scroll
         :rows-per-page-options="[0]"
-        hide-bottom dense
+        dense
         selection="multiple" :selected.sync="selected"
-        :filter="filterString"
         :columns="[
            //{ name: 'tipoComprobanteName', required: true, label: 'Documento', align: 'left', field: row => row.tipoComprobanteName, sortable: true, style: 'min-width: 50px;' },
-           { name: 'accAPnumeroDoc', required: true, label: '# Documento', align: 'left', field: row => row.accAPnumeroDoc, sortable: true, style: 'min-width: 100px;' },
-          ,{ name: 'sustentoName', required: true, label: 'Sustento', align: 'left', field: row => row.sustentoName, sortable: true, style: 'min-width: 100px;' },
-          ,{ name: 'lineSubtotal', required: true, label: 'Subtotal', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
+           { name: 'accAPnumeroDoc', label: '# Documento', align: 'left', field: row => row.accAPnumeroDoc, sortable: true, style: 'min-width: 100px;' },
+          ,{ name: 'sustentoName', label: 'Sustento', align: 'left', field: row => row.sustentoName, sortable: true, style: 'min-width: 100px;' },
+          ,{ name: 'lineSubtotal', label: 'Subtotal', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
           //,{ name: 'accAP_account_id', required: true, label: 'accAP_account_id', align: 'right', field: row => row.accAP_account_id, sortable: true , style: 'max-width: 100px;' },
           //,{ name: 'tax_account_id', required: true, label: 'tax_account_id', align: 'right', field: row => row.tax_account_id, sortable: true , style: 'max-width: 100px;' },
-          ,{ name: 'taxID', required: true, label: 'Retención', align: 'left', field: row => row.taxID, sortable: true },
-          ,{ name: 'baseImponible', required: true, label: 'Base Imponible', align: 'right', field: row => row.baseImponible, sortable: true , style: 'max-width: 100px;' },
-          ,{ name: 'valorRetenido', required: true, label: 'Valor Retenido', align: 'right', field: row => row.valorRetenido, sortable: true , style: 'max-width: 100px;' },
+          ,{ name: 'taxID', label: 'Retención', align: 'left', field: row => row.taxID, sortable: true },
+          ,{ name: 'baseImponible', label: 'Base Imponible', align: 'right', field: row => row.baseImponible, sortable: true , style: 'max-width: 100px;' },
+          ,{ name: 'valorRetenido', label: 'Valor Retenido', align: 'right', field: row => row.valorRetenido, sortable: true , style: 'max-width: 100px;' },
         ]"
     >
 
@@ -29,9 +28,9 @@
         <q-td auto-width>
           <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
         </q-td>
-        <q-td key="tipoComprobanteName" :props="props">
+        <!--<q-td key="tipoComprobanteName" :props="props">
           {{ props.row.tipoComprobanteName }}
-        </q-td>
+        </q-td>-->
         <q-td key="accAPnumeroDoc" :props="props">
           {{ props.row.accAPnumeroDoc }}
         </q-td>
@@ -91,6 +90,20 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo sustento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
+    </template>
+
+    <template v-slot:bottom>
+        <q-space />
+        <q-item clickable dense class="full-width">
+          <q-item-section >
+            <q-item-label class="text-subtitle2 text-primary"><b>TOTAL:</b></q-item-label>
+          </q-item-section>
+          <q-item-section side class="text-subtitle2 text-primary q-mr-md">
+            {{
+              (lines.reduce(function(sum, d) { return sum + d.valorRetenido; }, 0)).toFixed(userMoneyFormat)
+            }}
+          </q-item-section>
+        </q-item>
     </template>
   </q-table>
 
@@ -310,24 +323,21 @@ export default ({
           this.$q.loading.show()
           //Actualiza las líneas
           let newRows = JSON.parse(JSON.stringify(this.lines))
-          if(colName=="taxID" || colName=="lineSubtotal"){
-            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
-          }else{
-            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
-          }
-          //Re-calcula valores
-          newRows.map(x=>{
-            if(x.lineID==row.lineID){
-              let impuesto = this.lookup_taxes.find(y=>y.taxID==x.taxID)
-              console.dir('impuesto')
-              console.dir(impuesto)
-              x.tax_account_id = impuesto.accPurchase
-              x.baseImponible = parseFloat(x.lineSubtotal * impuesto.factor_base)
-              x.valorRetenido = parseFloat(x.lineSubtotal * impuesto.factor_base * impuesto.factor)
+          newRows.filter(x=>x.lineID==row.lineID).map(result=>{
+            if(colName=="taxID" || colName=="lineSubtotal"){
+              result[colName] = parseFloat(newVal)
+            }else{
+              result[colName] = newVal
             }
+            const impuesto = this.lookup_taxes.find(y=>y.taxID==result.taxID)
+            if(impuesto){
+              result.tax_account_id = impuesto.accPurchase;
+              result.taxName = impuesto.short_name_es;
+              result.baseImponible = parseFloat(result.lineSubtotal * impuesto.factor_base);
+              result.valorRetenido = parseFloat(result.lineSubtotal * impuesto.factor_base * impuesto.factor);
+            }
+            return result
           })
-
-          //Actualiza todas las taxLines correspondientes a la línea modificada
           this.lines = newRows;
           this.$q.loading.hide()
           this.$emit('onAccMoveCompute')
@@ -385,43 +395,7 @@ export default ({
         lookup_taxes: {
             get () { return this.$store.state[this.moduleName].editData.lookup_taxes },
         },
-        /*apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         
-        
-        partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
-        },
-        
-        accountLines: {
-            get () { return this.$store.state[this.moduleName].editData.linesTaxes },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
-        },
-        
-        lookup_items: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_items },
-        },
-        lookup_accounts: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
-        },
-        lookup_wh: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_wh },
-        },
-        lookup_prj: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_prj },
-        },
-        lookup_transports: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_transports },
-        },
-        lookup_payterms: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_payterms },
-        },
-        lookup_paytermsDetails: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_paytermsDetails },
-        },
-        lookup_SRI_Tabla_Tipo_Sustento: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_SRI_Tabla_Tipo_Sustento },
-        },
-        */
     }
 })
 </script>

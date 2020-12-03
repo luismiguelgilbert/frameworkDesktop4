@@ -60,8 +60,7 @@
               
             </q-list>
           </q-menu>
-          <q-btn 
-            v-if="props.col.is_key" flat color="primary" dense size="sm" 
+          <q-btn v-if="props.col.is_key" flat color="primary" dense size="sm" 
             @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}"
             >
             <u>{{props.value}}</u>
@@ -82,7 +81,7 @@
                 </q-img>
             </q-avatar>
           </div>
-          <div v-if="!props.col.is_key&&props.col.cellComponent=='div'" class="q-pl-xs q-pr-sm">{{props.value}}</div>
+          <div v-if="!props.col.is_key&&props.col.cellComponent=='div'" :style="shouldWrapCellText?'white-space: normal':undefined" class="q-pl-xs q-pr-sm">{{props.value}}</div>
           <div v-if="!props.col.is_key&&props.col.cellComponent=='bool'" >
             <q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" />
           </div>
@@ -191,6 +190,7 @@ export default({
     userTableLines: { get () { return this.$store.state.main.userTableLines } },
     userTableDense: { get () { return this.$store.state.main.userTableDense } },
     shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons } },
+    shouldWrapCellText: { get () { return this.$store.state.main.shouldWrapCellText } },
     pagination: {
       get () { return this.$store.state[this.moduleName].pagination },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }

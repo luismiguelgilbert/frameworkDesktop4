@@ -308,6 +308,15 @@
                         <q-toggle v-model="shouldHideTableButtons" color="primary" label="Ocultar Botones de Edición en Tablas Principales" />
                     </q-item-section>
                 </q-item>
+                <q-item>
+                    <q-item-section side>
+                        <q-icon name="fas fa-text-height" color="primary" />
+                    </q-item-section>
+                    <q-item-section>
+                        <q-toggle v-model="shouldWrapCellText" color="primary" label="Ajustar Alto de Celdas a Texto" />
+                    </q-item-section>
+                </q-item>
+                
                 <!--<q-item>
                     <q-item-section side>
                         <q-icon name="fas fa-bell" color="primary" />
@@ -376,6 +385,7 @@ methods: {
                         ,userCompany: this.userCompany
                         ,shouldHideMenu: this.shouldHideMenu
                         ,shouldHideTableButtons: this.shouldHideTableButtons
+                        ,shouldWrapCellText: this.shouldWrapCellText
                         ,notificationInterval: this.notificationInterval
                     }),
                 }
@@ -510,7 +520,7 @@ computed:{
     notificationInterval: { get () { return this.$store.state.main.notificationInterval }, set (val) { this.$store.commit('main/updateState', {key: 'notificationInterval', value: val}) } },
     shouldHideMenu: { get () { return this.$store.state.main.shouldHideMenu }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideMenu', value: val}) } },
     shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideTableButtons', value: val}) } },
-    
+    shouldWrapCellText: { get () { return this.$store.state.main.shouldWrapCellText }, set (val) { this.$store.commit('main/updateState', {key: 'shouldWrapCellText', value: val}) } },
     
 }
 

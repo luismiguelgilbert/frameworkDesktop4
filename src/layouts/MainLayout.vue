@@ -536,6 +536,7 @@ export default {
     wsConnection: { get () { return this.$store.state.main.wsConnection }, set (val) { this.$store.commit('main/updateState', {key: 'wsConnection', value: val}) } },
     shouldHideMenu: { get () { return this.$store.state.main.shouldHideMenu }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideMenu', value: val}) } },
     shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideTableButtons', value: val}) } },
+    shouldWrapCellText: { get () { return this.$store.state.main.shouldWrapCellText }, set (val) { this.$store.commit('main/updateState', {key: 'shouldWrapCellText', value: val}) } },
     disableCompanyChange:{ get() { 
       let result = false; 
       try{result = this.router.currentRoute.path.indexOf('Edit') > 0}catch(ex){} 

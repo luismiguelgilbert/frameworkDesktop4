@@ -27,6 +27,7 @@ export default function () {
     ,notificationInterval: 30000
     ,shouldHideMenu: false
     ,shouldHideTableButtons: false
+    ,shouldWrapCellText: false
     ,selectedContact: 0
     ,unreadNotifications: []
     ,wsConnection: null
