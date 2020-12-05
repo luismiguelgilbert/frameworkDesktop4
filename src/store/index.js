@@ -20,6 +20,7 @@ import ChartAccount from './ChartAccount' //ChartAccount
 import Taxes from './Taxes' //Taxes
 import TaxesMaster from './TaxesMaster' //TaxesMaster
 import AccPeriods from './AccPeriods' //AccPeriods
+import accPaymentMethods from './accPaymentMethods' //accPaymentMethods
 import AccMoves from './AccMoves' //AccMoves
 import SCHPersonas from './SCHPersonas' //SCHPersonas
 import SCHPersona from './SCHPersona' //SCHPersona
@@ -83,6 +84,7 @@ export default function (/* { ssrContext } */) {
       ,TaxesMaster
       ,AccPeriods
       ,AccMoves
+      ,accPaymentMethods
       ,partnerMasterGroups
       ,invMasterGroups
       ,Payterms

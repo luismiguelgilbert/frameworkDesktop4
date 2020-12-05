@@ -226,6 +226,7 @@ export default ({
                     ,locations: this.editData.locations
                     ,payterms: this.editData.payterms
                     ,contacts: this.editData.contacts
+                    ,tasks: this.editData.tasks.filter(x=>!(x.uploaded))
                     ,files: this.editData.files
                 }
                 //console.dir(this.editData)

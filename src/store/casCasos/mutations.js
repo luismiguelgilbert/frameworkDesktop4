@@ -23,6 +23,11 @@ export const updateEditDataContacts = (state, value) => {
     state.editData.contacts = value
 }
 
+export const updateEditDataTasks = (state, value) => {
+    state.editData.tasks = value
+}
+
+
 export const updateEditDataPayterms = (state, value) => {
     state.editData.payterms = value
 }
