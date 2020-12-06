@@ -5,7 +5,7 @@
           :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
           table-style="min-height: calc(100vh - 225px); max-height: calc(100vh - 225px)"
           row-key="partnerID"
-          virtual-scroll
+          :separator="userTableLines"
           :rows-per-page-options="[0]"
           hide-bottom dense
           :filter="filterString"
@@ -48,25 +48,23 @@
                     </q-popup-edit>
                 </q-td>
                 <q-td key="estado" :props="props">
-                    <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+                    <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense size="sm" @input="updateRow(!props.row.estado,'estado',props.row)" />
                 </q-td>
             </q-tr>
       </template>
-        <template v-slot:top>
-            <q-btn label="Agregar Lote" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
-            <q-space />
-            <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-              <template v-slot:append>
-                <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString=''" />
-              </template>
-            </q-input>
-        </template>
-        <!--<template v-slot:body-cell-is_profile="props">
-            <q-td :props="props">
-                <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeProfileforUser(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
-            </q-td>
-        </template>
-        -->
+      <template v-slot:top>
+          <q-btn label="Agregar Lote" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+          <q-space />
+          <q-input borderless dense v-model="filterString" placeholder="Buscar...">
+            <template v-slot:append>
+              <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString=''" />
+            </template>
+          </q-input>
+      </template>
+      <template v-slot:bottom-row >
+        <q-tr>
+        </q-tr>
+      </template>
     </q-table>
 
 </div>
@@ -149,12 +147,10 @@ export default ({
       addRow(){
         let max_id = 1
         let temp = null
-        console.dir('addRow')
         if(this.lots.length > 0){
           temp = this.getMax(this.lots, "lotID");
           max_id = parseInt(temp.lotID) + parseInt(1);
         }
-        console.dir('max_id: ' + max_id)
 
         let newRows = JSON.parse(JSON.stringify(this.lots))
         newRows.push({
@@ -175,6 +171,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         lots: {
             get () { return this.$store.state[this.moduleName].editData.lots },

@@ -6,7 +6,7 @@
       row-key="contactID"
       :rows-per-page-options="[0]"
       dense
-      :virtual-scroll="contacts.length>25"
+      :separator="userTableLines"
       :filter="filterString"
       :columns="[
         //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
@@ -148,6 +148,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         //custom security
         allow_contacts: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_contacts').value }, },
         //custom security end

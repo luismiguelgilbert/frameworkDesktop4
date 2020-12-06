@@ -6,6 +6,7 @@
       row-key="caseID"
       :rows-per-page-options="[0]"
       dense
+      :separator="userTableLines"
       :virtual-scroll="cases.length>25"
       :filter="filterString"
       :columns="[
@@ -142,6 +143,7 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         cases: {
             get () { return this.$store.state[this.moduleName].editData.cases },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataCases', val) }

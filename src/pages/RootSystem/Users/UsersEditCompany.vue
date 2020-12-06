@@ -4,8 +4,9 @@
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
       table-style="min-height: 150px; max-height: calc(100vh - 225px)"
       row-key="sys_company_id"
-      virtual-scroll
+      virtual-scroll dense
       :rows-per-page-options="[0]"
+      :separator="userTableLines"
       hide-bottom dense
       :filter="filterString"
       :columns="[
@@ -26,13 +27,17 @@
     </template>
     <template v-slot:body-cell-is_allowed="props">
         <q-td :props="props">
-            <q-checkbox size="sm" color="positive" :value="props.value" @input="changeCompanyAllowStatus(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
+            <q-checkbox size="sm" color="positive" dense :value="props.value" @input="changeCompanyAllowStatus(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
         </q-td>
     </template>
     <template v-slot:body-cell-is_default="props">
         <q-td :props="props">
             <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeCompanyDefaultStatus(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
         </q-td>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr>
+      </q-tr>
     </template>
 </q-table>
     
@@ -97,11 +102,12 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-       allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
+        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         lookup_companies: { 
             get () { return this.$store.state[this.moduleName].editData.lookup_companies }, 

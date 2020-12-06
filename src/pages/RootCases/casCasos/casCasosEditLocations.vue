@@ -6,7 +6,7 @@
           table-style="min-height: calc(100vh - 265px); max-height: calc(100vh - 265px)"
           row-key="value"
           dense
-          :virtual-scroll="locations.length>25"
+          :separator="userTableLines"
           :rows-per-page-options="[0]"
           :filter="filterString"
           :columns="[
@@ -30,10 +30,13 @@
               </q-td>
             </q-tr>
       </template>
-        <template v-slot:top>
-            <q-btn :disable="!editMode&&!allow_locations" label="Agregar Localidad" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
-            <q-space />
-        </template>
+      <template v-slot:top>
+          <q-btn :disable="!editMode&&!allow_locations" label="Agregar Localidad" @click="showPrompt" icon="fas fa-plus" color="primary" no-caps />
+          <q-space />
+      </template>
+      <template v-slot:bottom-row >
+        <q-tr></q-tr>
+      </template>
     </q-table>
 
     <q-dialog v-model="prompt">
@@ -149,6 +152,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         //custom security
         allow_locations: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_locations').value }, },

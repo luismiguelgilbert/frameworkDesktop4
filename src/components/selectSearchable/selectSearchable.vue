@@ -8,7 +8,7 @@
             :disable="isDisable" 
             :readonly="isReadonly"
             :option-label="optionLabelField"
-            autofocus
+            
             :dense="isDense"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
             @keyup.keyCodes.113="openSearch"

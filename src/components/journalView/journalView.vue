@@ -29,6 +29,7 @@
         table-style="min-height: calc(100vh - 305px); max-height: calc(100vh - 305px)"
         row-key="lineID"
         hide-bottom
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         dense
         :filter="filterString"
@@ -70,7 +71,6 @@
 
     <template v-slot:bottom-row>
         <q-tr>
-          
           <q-td class="text-right text-subtitle2 text-primary" >
             Suma:
           </q-td>
@@ -80,8 +80,10 @@
           <q-td class="text-right text-subtitle2 text-primary">
             {{accountLines.reduce((total,item)=>{return total + item.credit}, 0).toFixed(userMoneyFormat)}}
           </q-td>
-          
+          <q-td class="text-right text-subtitle2 text-primary">
+          </q-td>
         </q-tr>
+        <q-tr></q-tr>
     </template>
   </q-table>
 
@@ -212,6 +214,7 @@ export default ({
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         lookup_accounts: {
             get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
         },

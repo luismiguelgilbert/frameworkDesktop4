@@ -4,7 +4,8 @@
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
       table-style="min-height: 150px; max-height: calc(100vh - 225px)"
       row-key="contactID"
-      virtual-scroll
+      :separator="userTableLines"
+      :virtual-scroll="contacts.length>100?true:false"
       :rows-per-page-options="[0]"
       hide-bottom dense
       :filter="filterString"
@@ -45,41 +46,39 @@
           </q-td>
 
           <q-td key="sendPO" :props="props">
-            <q-checkbox :value="props.row.sendPO" dense @input="updateRow(!props.row.sendPO,'sendPO',props.row)" />
+            <q-checkbox :value="props.row.sendPO" size="sm" dense @input="updateRow(!props.row.sendPO,'sendPO',props.row)" />
           </q-td>
           <q-td key="sendSO" :props="props">
-            <q-checkbox :value="props.row.sendSO" dense @input="updateRow(!props.row.sendSO,'sendSO',props.row)" />
+            <q-checkbox :value="props.row.sendSO" size="sm"  dense @input="updateRow(!props.row.sendSO,'sendSO',props.row)" />
           </q-td>
           <q-td key="sendRET" :props="props">
             <q-checkbox :value="props.row.sendRET" dense @input="updateRow(!props.row.sendRET,'sendRET',props.row)" />
           </q-td>
           <q-td key="sendBILL" :props="props">
-            <q-checkbox :value="props.row.sendBILL" dense @input="updateRow(!props.row.sendBILL,'sendBILL',props.row)" />
+            <q-checkbox :value="props.row.sendBILL" size="sm" dense @input="updateRow(!props.row.sendBILL,'sendBILL',props.row)" />
           </q-td>
           <q-td key="sendINV" :props="props">
-            <q-checkbox :value="props.row.sendINV" dense @input="updateRow(!props.row.sendINV,'sendINV',props.row)" />
+            <q-checkbox :value="props.row.sendINV" size="sm" dense @input="updateRow(!props.row.sendINV,'sendINV',props.row)" />
           </q-td>
 
           <q-td key="estado" :props="props">
-            <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+            <q-toggle :value="props.row.estado" size="sm" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
           </q-td>
         </q-tr>
   </template>
-    <template v-slot:top>
-        <q-btn label="Agregar Contacto" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
-        <q-space />
-        <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-          <template v-slot:append>
-            <q-icon name="fas fa-search" />
-          </template>
-        </q-input>
-    </template>
-    <!--<template v-slot:body-cell-is_profile="props">
-        <q-td :props="props">
-            <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeProfileforUser(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
-        </q-td>
-    </template>
-    -->
+  <template v-slot:top>
+      <q-btn label="Agregar Contacto" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+      <q-space />
+      <q-input borderless dense v-model="filterString" placeholder="Buscar...">
+        <template v-slot:append>
+          <q-icon name="fas fa-search" />
+        </template>
+      </q-input>
+  </template>
+  <template v-slot:bottom-row >
+    <q-tr>
+    </q-tr>
+  </template>
 </q-table>
 
 </template>
@@ -175,6 +174,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         contacts: {
             get () { return this.$store.state[this.moduleName].editData.contacts },

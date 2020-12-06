@@ -2,11 +2,12 @@
 <q-table
       :data="users"
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-      table-style="min-height: 150px; max-height: calc(100vh - 225px)"
+      table-style="min-height: calc(100vh - 225px); max-height: calc(100vh - 225px)"
       row-key="sys_user_code"
-      virtual-scroll
+      :separator="userTableLines"
       :rows-per-page-options="[0]"
       hide-bottom dense
+      virtual-scroll
       :filter="filterString"
       :columns="[
         { name: 'sys_user_id', required: true, label: 'Login', align: 'left', field: row => row.sys_user_id, sortable: true },
@@ -14,7 +15,11 @@
         { name: 'sys_user_lastname', required: true, label: 'Apellidos', align: 'left', field: row => row.sys_user_lastname, sortable: true },
         { name: 'is_profile', required: true, label: 'Asignar Este Perfil?', align: 'left', field: row => row.is_profile, sortable: true },
       ]"
->
+  >
+    <template v-slot:bottom-row >
+      <q-tr>a
+      </q-tr>
+    </template>
     <template v-slot:top>
         <div :class="'text-h6 '+(userColor=='blackDark'?'ellipsis text-white':'ellipsis text-primary')" style="max-width: 70%;" >Marque los usuarios a quienes desee asignar este perfil ({{users.filter(x=>x.is_profile).length}})</div>
         <q-space />
@@ -29,43 +34,44 @@
             <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeProfileforUser(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
         </q-td>
     </template>
+   
 </q-table>
     
 </template>
 <style lang="sass">
-.q-table__bottom
-    padding: 0px
-.my-sticky-header-usercompany
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
+  .q-table__bottom
+      padding: 0px
+  .my-sticky-header-usercompany
+    /* max height is important */
+    .q-table__middle
+      max-height: 50px
 
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: white
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th /* bg color is important for th; just specify one */
+      background-color: white
 
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
+    thead tr:first-child th
+      position: sticky
+      top: 0
+      opacity: 1
+      z-index: 2
 
-.my-sticky-header-usercompany-dark
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
+  .my-sticky-header-usercompany-dark
+    /* max height is important */
+    .q-table__middle
+      max-height: 50px
 
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: $grey-10
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th /* bg color is important for th; just specify one */
+      background-color: $grey-10
 
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
+    thead tr:first-child th
+      position: sticky
+      top: 0
+      opacity: 1
+      z-index: 2
 </style>
 <script>
 import Vue from 'vue';
@@ -91,6 +97,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         users: { 
             get () { return this.$store.state[this.moduleName].editData.users }, 

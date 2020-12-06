@@ -6,7 +6,7 @@
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
         table-style="min-height: calc(100vh - 225px); max-height: calc(100vh - 225px)"
         row-key="lineID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         selection="multiple" :selected.sync="selected"
@@ -28,73 +28,37 @@
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+          <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
         </q-td>
 
         <q-td key="invID" :props="props">{{ props.row.invName }}</q-td>
         <!--<q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>-->
         <q-td key="account_id" :props="props">
-          <div>
-            <inlineSelectSearchable 
-              labelSearchText="Buscar Cuenta" style="inline"
-              :optionsList="lookup_accounts"
-              rowValueField="value" 
-              optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
-              optionLabelField="label"
-              :isClearable="false"
-              :isDense="true"
-              :isDisable="false" 
-              :isReadonly="false"
-              :initialValue="props.row.account_id"
-              :tableSearchColumns="[
-                       { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
-                      ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
-                  ]"
-              @onItemSelected="(row)=>{
-                      updateRow(row,'account_id',props.row)
-                  }"
-              />
-          </div>
+          {{lookup_accounts.filter(x=>x.value==props.row.account_id).map(y => {return y.code_es + " - " + y.label}).join("")}}
         </q-td>
-        <q-td key="sri_sustento" :props="props">
-          <inlineSelectSearchable 
-              labelSearchText="Buscar Cuenta" style="inline"
-              :optionsList="lookup_SRI_Tabla_Tipo_Sustento"
-              rowValueField="value" 
-              optionsListLabel="label" optionsListCaption="value" optionDisableField="estado"
-              optionLabelField="short_name_es"
-              :isClearable="false"
-              :isDense="true"
-              :isDisable="false" 
-              :isReadonly="false"
-              :initialValue="props.row.sri_sustento"
-              :tableSearchColumns="[
-                       { name: 'value', label: 'Código', field: 'value', align: 'left'}
-                      ,{ name: 'label', label: 'Sustento Tributario', field: 'label', align: 'left'}
-                  ]"
-              @onItemSelected="(row)=>{
-                      updateRow(row,'sri_sustento',props.row)
-                  }"
-              />
+        <q-td key="sri_sustento" :props="props" >
+          {{lookup_SRI_Tabla_Tipo_Sustento.filter(x=>x.value==props.row.sri_sustento).map(y => {return y.short_name_es}).join("")}}
         </q-td>
 
         <q-td key="taxes" :props="props">
-          <q-select
-            dense borderless hide-bottom-space style="height: 20px !important;"  input-style="maxWidth: 50px !important;"
-            :options="lookup_taxes.filter(x=>!x.es_retencion)" 
-            :value="props.row.taxes"
-            multiple option-value="taxID" option-label="short_name_es"
-            @input="(row)=>{
-              updateRow(row,'taxes',props.row)
-            }"
-            >
-            <template v-slot:no-option> 
-                <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section> </q-item>
-            </template>
-            <template v-slot:selected-item="scope"> 
-                <div style="display: inline-block; margin-top: 5px;"> {{`${scope.opt.short_name_es}`}} </div>
-            </template>
-          </q-select>
+          {{props.row.taxes.map(y => {return y.short_name_es}).join(" ; ")}}
+          <q-popup-edit :ref="'taxSelector'+props.row.lineID" v-model="props.row.taxes" auto-save>
+              <q-select class="q-ma-xs" use-chips
+                borderless dense
+                :options="lookup_taxes.filter(x=>!x.es_retencion)" 
+                :value="props.row.taxes"
+                multiple option-value="taxID" option-label="short_name_es"
+                @input="(row)=>{
+                  updateRow(row,'taxes',props.row)
+                }"
+                @popup-hide="(evento)=>{$refs['taxSelector'+props.row.lineID].hide()}"
+                >
+                <template v-slot:no-option> 
+                    <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section> </q-item>
+                </template>
+                
+              </q-select>
+            </q-popup-edit>
         </q-td>
 
         <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
@@ -109,11 +73,6 @@
         <q-td key="mktPOHeader" :props="props">{{ props.row.mktPOHeader }}</q-td>
         <q-td key="mktPOlineID" :props="props">{{ props.row.mktPOlineID }}</q-td>
       </q-tr>
-      <q-tr v-show="props.expand" :props="props">
-          <q-td colspan="100%">
-            <div class="text-left">This is expand slot for row above: {{ props.row }}.</div>
-          </q-td>
-      </q-tr>
     </template>
     <template v-slot:top >
         <q-btn :label="$q.screen.gt.sm?'Cuenta Contable':''" title="Cambiar Cuenta Contable a líneas seleccionadas" @click="isAccDialog=true" icon="account_tree" color="primary" no-caps :disable="selected.length<=0"/>
@@ -121,6 +80,10 @@
         <q-space />
         <q-btn :label="$q.screen.gt.lg?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="bookmarks" color="primary" flat no-caps :disable="selected.length<=0"/>
         <q-btn :label="$q.screen.gt.lg?'Sustento':''" title="Cambiar Sustento Tributario a líneas seleccionadas" @click="isSustentoDialog=true" icon="fas fa-percent" color="primary" flat no-caps class="q-ml-sm" :disable="selected.length<=0"/>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr>
+      </q-tr>
     </template>
   </q-table>
 
@@ -199,7 +162,7 @@
           :optionsList="lookup_accounts"
           rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" 
           optionDisableField="estado"
-          :isRequired="true" 
+          :isRequired="false" 
           :isDisable="false" 
           :isReadonly="false"
           
@@ -304,15 +267,11 @@ import Vuex from 'vuex';
 import { date } from 'quasar';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
-import inlineSelectSearchable from '../../../components/selectSearchable/inlineSelectSearchable.vue'
-import inlineMultipleSelect from '../../../components/selectSearchable/inlineMultipleSelect.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
         ,selectSearchable:selectSearchable
-        ,inlineSelectSearchable: inlineSelectSearchable
-        ,inlineMultipleSelect: inlineMultipleSelect
     },
     data () {
       return {
@@ -382,6 +341,7 @@ export default ({
         if(colName=='taxes'){
           newVal.map(x=>{
             x.taxAmount = x.isPercent?row.lineUntaxed*x.factor*x.factor_base:x.factor
+            //this.$refs.taxSelector.set()
             return 
           })
         }
@@ -397,22 +357,15 @@ export default ({
           resultado = temp.code_es + ' ' + temp.label
         }
         return resultado
+      },
+      closePopup(evento, refName){
+        this.$refs[refName].hide()
       }
-      /*rowTitleInventory(fila){
-        let resultado = 'Seleccionar...'
-        let target = null
-        if(fila&&fila.invID&&fila.invID>0){
-          try{
-            target = this.lookup_items.find(x=>x.value == fila.invID)
-            resultado = 'Código: ' + target.internal_code + ' || Tipo: ' + target.groupName + ' || Unidad: ' + target.uomName + ' || Marca: ' + target.brandName
-          }catch(ex){}
-        }
-        return resultado
-      },*/
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         allow_view: { get () { return true }, },
         allow_edit: { get () { return true }, },
         allow_insert: { get () { return true }, },

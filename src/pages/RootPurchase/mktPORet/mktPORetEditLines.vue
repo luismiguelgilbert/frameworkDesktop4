@@ -6,7 +6,7 @@
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
         table-style="min-height: calc(100vh - 400px); max-height: calc(100vh - 400px)"
         row-key="lineID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         selection="multiple" :selected.sync="selected"
@@ -82,6 +82,9 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
         <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
     </template>
   </q-table>
 
@@ -565,6 +568,7 @@ export default ({
         allow_disable: { get () { return true }, },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
         },

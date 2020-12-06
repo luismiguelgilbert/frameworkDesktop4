@@ -5,7 +5,7 @@
         :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
         table-style="min-height: 150px; max-height: calc(100vh - 225px)"
         row-key="contactID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         :filter="filterString"
@@ -56,6 +56,30 @@
           </template>
         </q-input>
     </template>
+    <template v-slot:bottom-row>
+        <q-tr>
+          <q-td class="text-right text-subtitle2 text-primary" >
+            
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+            
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+            Suma:
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+            {{payterms.reduce((total,item)=>{return parseFloat(total) + parseFloat(item.amount)}, 0).toFixed(userMoneyFormat)}}
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+          </q-td>
+          <q-td class="text-right text-subtitle2 text-primary">
+          </q-td>
+        </q-tr>
+        <q-tr></q-tr>
+    </template>
+
   </q-table>
 
   <q-dialog v-model="dialogOpen">
@@ -240,6 +264,8 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
+        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         //custom security
         allow_payterms: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_payterms').value }, },
         //custom security end

@@ -6,7 +6,7 @@
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
         table-style="min-height: calc(100vh - 225px); max-height: calc(100vh - 225px)"
         row-key="lineID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         selection="multiple" :selected.sync="selected"
@@ -78,6 +78,9 @@
         -->
         <q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" class="q-ml-sm" no-caps   :disable="selected.length<=0" />
         <q-space />
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
     </template>
   </q-table>
 
@@ -456,6 +459,7 @@ export default ({
         allow_report: { get () { return true }, },
         allow_disable: { get () { return true }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         defaultWhID: {
             get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultWhID', value: val}) }

@@ -6,7 +6,7 @@
       row-key="contactID"
       :rows-per-page-options="[0]"
       dense
-      :virtual-scroll="contacts.length>25"
+      :separator="userTableLines"
       :filter="filterString"
       :columns="[
         //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
@@ -56,6 +56,7 @@
   <template v-slot:bottom-row >
     <q-tr></q-tr>
   </template>
+  
 </q-table>
 
 </template>
@@ -147,6 +148,7 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         contacts: {
             get () { return this.$store.state[this.moduleName].editData.contacts },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataContacts', val) }

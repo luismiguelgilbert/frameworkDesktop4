@@ -6,7 +6,7 @@
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
         table-style="min-height: calc(100vh - 400px); max-height: calc(100vh - 400px)"
         row-key="lineID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         selection="multiple" :selected.sync="selected"
@@ -30,7 +30,7 @@
         <q-td auto-width>
           <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
         </q-td>
-        <q-td key="invID" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
+        <q-td key="invID" :props="props" :tabindex="(props.key*10)+1" >
           <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
               :value="props.row.invName" dense item-aligned borderless
               :rules="[val => !!val || 'Requerido']"
@@ -38,14 +38,14 @@
               >
           </q-input>
         </q-td>
-        <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
+        <q-td key="quantity" class="no-padding" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               debounce="1000" @input="(value)=>{updateRow(value,'quantity',props.row)}" />
         </q-td>
-        <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
+        <q-td key="price" class="no-padding" :props="props" :tabindex="(props.key*10)+3">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.price" type="number" :min="0" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
               dense item-aligned borderless input-class="text-right"
@@ -55,7 +55,7 @@
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" key="lineSubtotal" :props="props">
           {{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}
         </q-td>
-        <q-td key="lineDiscntPrcnt" :props="props" :tabindex="(props.key*10)+4">
+        <q-td key="lineDiscntPrcnt" class="no-padding" :props="props" :tabindex="(props.key*10)+4">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100" :readonly="(props.row.quantitymktPO>0 || props.row.estado==false)"
               dense item-aligned borderless input-class="text-right"
@@ -77,6 +77,9 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
     </template>
   </q-table>
 
@@ -465,6 +468,7 @@ export default ({
         allow_insert: { get () { return true }, },
         allow_report: { get () { return true }, },
         allow_disable: { get () { return true }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         defaultWhID: {
             get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },

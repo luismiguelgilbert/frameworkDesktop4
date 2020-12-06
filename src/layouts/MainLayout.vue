@@ -48,6 +48,7 @@
         <!--Universal Search A FUTURO-->
         <q-space />
 
+        
         <!--COMPANY-->
         <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps :disable="disableCompanyChange"  >
           <template v-slot:label>
@@ -76,7 +77,7 @@
         </q-btn-dropdown>
 
         <!--NOTIFICATION-->
-        <span>&ensp;</span>
+        <!--<span>&ensp;</span>
         <q-btn flat dense menu-anchor="bottom left" menu-self="top left" no-caps 
           :icon="isWebSocketConnected?'fas fa-bell':'fas fa-bell-slash'"
           :title="isWebSocketConnected?'Ustes está conectado al servicio de Notificaciones':'Haga click para conectarse al servicio de Notificaciones'"
@@ -124,7 +125,9 @@
             <q-item-label caption><q-btn icon="fas fa-external-link-alt" size="md" label="Abrir Notificaciones" no-caps class="full-width no-border-radius" color="primary"  @click="gotoNotifications(0)" /></q-item-label>
           </q-menu>
         </q-btn>
+        -->
 
+        <q-toggle v-model="userColor" title="Color Preferido" false-value="default" true-value="blackDark" checked-icon="fas fa-moon" unchecked-icon="fas fa-sun" size="sm" />
 
         <!--USER-->
         <span>&ensp;</span>
@@ -554,7 +557,7 @@ export default {
   watch: {
     userCode: function(val){
       console.dir('cambio en userCode')
-      this.openWebSocketConnection()
+      //this.openWebSocketConnection()
     }
     /*notificationInterval: function (val) {
       clearInterval(this.interval)

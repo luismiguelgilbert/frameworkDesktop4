@@ -114,8 +114,8 @@ module.exports = function (/* ctx */) {
       //'fadeOutRight', //no viene x default
       'fadeIn', //no viene x default
       'fadeOut', //no viene x default
-      'zoomIn', //no viene x default
-      'zoomOut', //no viene x default
+      //'zoomIn', //no viene x default
+      //'zoomOut', //no viene x default
       //'scale', //no viene x default
       'slideOutRight',//no viene x default
       'slideInLeft',//no viene x default

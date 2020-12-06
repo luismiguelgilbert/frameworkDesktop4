@@ -6,7 +6,7 @@
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
         table-style="min-height: calc(100vh - 225px); max-height: calc(100vh - 225px)"
         row-key="lineID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         selection="multiple" :selected.sync="selected"
@@ -24,7 +24,7 @@
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+          <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
         </q-td>
         <q-td key="accAPnumeroDoc" :props="props">
           {{ props.row.accAPnumeroDoc }}
@@ -33,51 +33,11 @@
           {{ props.row.sustentoName }}
         </q-td>
         <q-td key="accAP_account_id" :props="props">
-          <div>
-            <inlineSelectSearchable 
-              labelSearchText="Buscar Cuenta" style="inline"
-              :optionsList="lookup_accounts"
-              rowValueField="value" 
-              optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
-              optionLabelField="label"
-              :isClearable="false"
-              :isDense="true"
-              :isDisable="false" 
-              :isReadonly="false"
-              :initialValue="props.row.accAP_account_id"
-              :tableSearchColumns="[
-                       { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
-                      ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
-                  ]"
-              @onItemSelected="(row)=>{
-                      updateRow(row,'accAP_account_id',props.row)
-                  }"
-              />
-          </div>
+          {{lookup_accounts.filter(x=>x.value==props.row.accAP_account_id).map(y => {return y.code_es + " - " + y.label}).join("")}}
         </q-td>
         
         <q-td key="tax_account_id" :props="props">
-          <div>
-            <inlineSelectSearchable 
-              labelSearchText="Buscar Cuenta" style="inline"
-              :optionsList="lookup_accounts"
-              rowValueField="value" 
-              optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
-              optionLabelField="label"
-              :isClearable="false"
-              :isDense="true"
-              :isDisable="false" 
-              :isReadonly="false"
-              :initialValue="props.row.tax_account_id"
-              :tableSearchColumns="[
-                       { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
-                      ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
-                  ]"
-              @onItemSelected="(row)=>{
-                      updateRow(row,'tax_account_id',props.row)
-                  }"
-              />
-          </div>
+          {{lookup_accounts.filter(x=>x.value==props.row.tax_account_id).map(y => {return y.code_es + " - " + y.label}).join("")}}
         </q-td>
         
       </q-tr>
@@ -87,6 +47,10 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Cuenta Retención':''" title="Cambiar Cuenta Contable a Retenciones de líneas seleccionadas" @click="isTaxDialog=true" icon="fas fa-percent" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0"/>
         <!--<q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" class="q-ml-sm" no-caps   :disable="selected.length<=0" />-->
         <q-space />
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr>
+      </q-tr>
     </template>
   </q-table>
 
@@ -290,6 +254,7 @@ export default ({
         allow_report: { get () { return true }, },
         allow_disable: { get () { return true }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }

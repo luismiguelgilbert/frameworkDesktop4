@@ -5,7 +5,7 @@
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
       table-style="min-height: 150px; max-height: calc(100vh - 225px)"
       row-key="attach_id"
-      virtual-scroll
+      :separator="userTableLines"
       :rows-per-page-options="[0]"
       hide-bottom dense
       :filter="filterString"
@@ -59,6 +59,9 @@
             <q-icon name="fas fa-search" />
           </template>
         </q-input>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
     </template>
   </q-table>
   <q-dialog v-model="dialogVisible">
@@ -262,6 +265,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         //custom security
         allow_files: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_files').value }, },
         //custom security end

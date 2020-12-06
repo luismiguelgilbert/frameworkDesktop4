@@ -5,6 +5,7 @@
       table-style="min-height: 150px; max-height: calc(100vh - 225px)"
       row-key="sys_user_code"
       virtual-scroll
+      :separator="userTableLines"
       :rows-per-page-options="[0]"
       hide-bottom dense
       :filter="filterString"
@@ -27,6 +28,9 @@
         <q-td :props="props">
             <q-toggle size="sm" dense color="positive" :value="props.value" @input="changeProfileforUser(props)" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" />
         </q-td>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
     </template>
 </q-table>
     
@@ -91,6 +95,7 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         clientes: { 
             get () { return this.$store.state[this.moduleName].editData.clientes }, 
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataClientes', val) }

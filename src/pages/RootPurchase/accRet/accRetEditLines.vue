@@ -6,7 +6,7 @@
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
         table-style="min-height: calc(100vh - 255px); max-height: calc(100vh - 255px)"
         row-key="lineID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         dense
         selection="multiple" :selected.sync="selected"
@@ -26,7 +26,7 @@
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+          <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
         </q-td>
         <!--<q-td key="tipoComprobanteName" :props="props">
           {{ props.row.tipoComprobanteName }}
@@ -90,6 +90,10 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo sustento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
+    </template>
+
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
     </template>
 
     <template v-slot:bottom>
@@ -375,6 +379,7 @@ export default ({
         allow_disable: { get () { return true }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
         },

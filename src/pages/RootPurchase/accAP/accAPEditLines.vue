@@ -1,12 +1,13 @@
 <template>
 <div class="row ">
+  
   <q-table
         ref="mainTable"
         :data="lines"
         :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
         table-style="min-height: calc(100vh - 400px); max-height: calc(100vh - 400px)"
         row-key="lineID"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         selection="multiple" :selected.sync="selected"
@@ -28,9 +29,9 @@
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+          <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
         </q-td>
-        <q-td key="invID" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
+        <q-td key="invID" :props="props"  :tabindex="(props.key*10)+1" >
           <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
               :value="props.row.invName" dense item-aligned borderless
               :rules="[val => !!val || 'Requerido']" 
@@ -39,14 +40,14 @@
               >
           </q-input>
         </q-td>
-        <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
+        <q-td key="quantity" :props="props" class="no-padding" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               debounce="1000" @input="(value)=>{updateRow(value,'quantity',props.row)}" />
         </q-td>
-        <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
+        <q-td key="price" :props="props" class="no-padding" :tabindex="(props.key*10)+3">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.price" type="number" :min="0" :readonly="(props.row.quantityRcvd>0)"
               :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
@@ -54,10 +55,10 @@
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               debounce="1000" @input="(value)=>{updateRow(value,'price',props.row)}" />
         </q-td>
-        <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" key="lineSubtotal" :props="props">
+        <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'"  key="lineSubtotal" :props="props">
           {{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}
         </q-td>
-        <q-td key="lineDiscntPrcnt" :props="props" :tabindex="(props.key*10)+4">
+        <q-td key="lineDiscntPrcnt" :props="props" class="no-padding" :tabindex="(props.key*10)+4">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.lineDiscntPrcnt" type="number" :min="0" :max="100" :readonly="(props.row.quantityRcvd>0)"
               :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
@@ -84,18 +85,21 @@
         <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
     </template>
+    <template v-slot:bottom-row >
+      <q-tr></q-tr>
+    </template>
   </q-table>
 
   <div class="row col-12 q-pt-sm ">
-    <q-card class="col-md-6">
+    
+    <q-card v-if="$q.screen.gt.sm" class="col-md-6">
+      
       <q-bar class="bg-primary text-white">
-        <div v-if="$q.screen.gt.sm" class="text-subtitle2">Forma de Pago:</div>
-        <div v-else class="text-subtitle2">Resumen</div>
-        <q-space />
+        <q-icon name="fas fa-calendar-check" color="white" />
         <q-select
             emit-value map-options item-aligned dense borderless dark color="orange"
             :options="lookup_payterms" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-            :option-disable="opt => !opt.estado"
+            :option-disable="opt => !opt.estado" label="Plazo de Pago"
             v-model="paytermID"
             ref="paytermID"
             :rules="[
@@ -103,7 +107,6 @@
             ]"
             >
         </q-select>
-        <q-icon name="fas fa-money-check" color="white" />
       </q-bar>
       <q-card-section class="no-padding">
         <q-list class="scroll" style="height: 135px;">
@@ -125,7 +128,7 @@
         </q-list>
       </q-card-section>
     </q-card>
-    <q-card class="col-md-5 offset-md-1" >
+    <q-card :class="$q.screen.gt.sm?'col-md-5 offset-md-1':undefined" >
       <q-bar class="bg-primary text-white">
         <q-icon name="fas fa-dollar-sign" color="white" />
         <q-space />
@@ -211,7 +214,7 @@
           :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
           table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
           @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
-          :data="lookup_items.filter(x=>x.estado==true&&x.systemType==1/*1=Servicios porque Productos SOLO vinculados a mktPO*/)"
+          :data="lookup_items.filter(x=>x.estado==true&&x.systemType!=3/*1=Servicios porque Productos SOLO vinculados a mktPO*/)"
           :columns="[
             { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
             { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
@@ -619,6 +622,7 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userCode: { get () { return this.$store.state.main.userCode } },
         userCompany: { get () { return this.$store.state.main.userCompany } },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         allow_view: { get () { return true }, },
         allow_edit: { get () { return true }, },
         allow_insert: { get () { return true }, },

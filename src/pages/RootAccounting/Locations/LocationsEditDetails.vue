@@ -5,7 +5,7 @@
         :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
         table-style="min-height: 150px; max-height: calc(100vh - 225px)"
         row-key="longitud"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         :filter="filterString"
@@ -25,58 +25,63 @@
     <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="pos_code" :props="props" :title="props.row.sys_location_pos_id">
-              <q-input borderless
+              <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.pos_code" dense input-class="text-left" :min="0"
                 @input="(value)=>{updateRow(value,'pos_code',props.row)}"
                 />
             </q-td>
             
             <q-td key="esElectronica" :props="props">
-              <q-toggle :value="props.row.esElectronica" color="primary" icon="fas fa-plug" dense @input="updateRow(!props.row.esElectronica,'esElectronica',props.row)" />
+              <q-toggle :value="props.row.esElectronica" color="primary" dense size="sm" icon="fas fa-plug" dense @input="updateRow(!props.row.esElectronica,'esElectronica',props.row)" />
             </q-td>
 
             <q-td key="firstNumberAR" :props="props" title="Secuencia Inicial de Facturas" >
-              <q-input borderless
+              <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberAR" dense input-class="text-right" :min="0" type="number"
                 @input="(value)=>{updateRow(value,'firstNumberAR',props.row)}"
                 />
             </q-td>
             
             <q-td key="firstNumberDelivery" :props="props" title="Secuencia Inicial de Guias de Remisión" >
-              <q-input borderless
+              <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberDelivery" dense input-class="text-right" :min="0" type="number"
                 @input="(value)=>{updateRow(value,'firstNumberDelivery',props.row)}"
                 />
             </q-td>
 
             <q-td key="firstNumberNC" :props="props" title="Secuencia Inicial de Notas de Crédito" >
-              <q-input borderless
+              <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberNC" dense input-class="text-right" :min="0" type="number"
                 @input="(value)=>{updateRow(value,'firstNumberNC',props.row)}"
                 />
             </q-td>
 
             <q-td key="firstNumberRetencion" :props="props" title="Secuencia Inicial de Retenciones" >
-              <q-input borderless
+              <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberRetencion" dense input-class="text-right" :min="0" type="number"
                 @input="(value)=>{updateRow(value,'firstNumberRetencion',props.row)}"
                 />
             </q-td>
             
             <q-td key="estado" :props="props">
-              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" size="sm" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
             </q-td>
+            
           </q-tr>
     </template>
-      <template v-slot:top>
-          <q-btn label="Agregar Punto de Emisión" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
-          <q-space />
-          <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-            <template v-slot:append>
-              <q-icon name="fas fa-search" />
-            </template>
-          </q-input>
-      </template>
+    <template v-slot:top>
+        <q-btn label="Agregar Punto de Emisión" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+        <q-space />
+        <q-input borderless dense v-model="filterString" placeholder="Buscar...">
+          <template v-slot:append>
+            <q-icon name="fas fa-search" />
+          </template>
+        </q-input>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr>
+      </q-tr>
+    </template>
   </q-table>
   
 </div>
@@ -165,6 +170,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         details: {
             get () { return this.$store.state[this.moduleName].editData.details },

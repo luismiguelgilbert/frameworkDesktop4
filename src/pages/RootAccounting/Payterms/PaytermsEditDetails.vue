@@ -5,7 +5,7 @@
         :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
         table-style="min-height: 150px; max-height: calc(100vh - 225px)"
         row-key="longitud"
-        virtual-scroll
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
         hide-bottom dense
         :filter="filterString"
@@ -22,19 +22,19 @@
     <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="name_es" :props="props" :title="props.row.lineID">
-              <q-input borderless
+              <q-input borderless dense borderless lass="no-padding" style="height: 20px !important;"
                 :value="props.row.name_es" dense input-class="text-left" :min="0"
                 @input="(value)=>{updateRow(value,'name_es',props.row)}"
                 />
             </q-td>
             <q-td key="days" :props="props">
-              <q-input borderless
+              <q-input dense borderless lass="no-padding" style="height: 20px !important;"
                 :value="props.row.days" type="number" dense input-class="text-right" :min="0"
                 @input="(value)=>{updateRow(value,'days',props.row)}"
                 />
             </q-td>
             <q-td key="factor" :props="props">
-              <q-input borderless
+              <q-input dense borderless lass="no-padding" style="height: 20px !important;"
                 :value="props.row.factor" type="number" dense input-class="text-right" :min="0"
                 @input="(value)=>{updateRow(value,'factor',props.row)}"
                 />
@@ -45,15 +45,19 @@
             </q-td>
           </q-tr>
     </template>
-      <template v-slot:top>
-          <q-btn label="Agregar Cuota" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
-          <q-space />
-          <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-            <template v-slot:append>
-              <q-icon name="fas fa-search" />
-            </template>
-          </q-input>
-      </template>
+    <template v-slot:top>
+        <q-btn label="Agregar Cuota" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+        <q-space />
+        <q-input borderless dense v-model="filterString" placeholder="Buscar...">
+          <template v-slot:append>
+            <q-icon name="fas fa-search" />
+          </template>
+        </q-input>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr>
+      </q-tr>
+    </template>
   </q-table>
   
 </div>
@@ -142,6 +146,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         details: {
             get () { return this.$store.state[this.moduleName].editData.details },

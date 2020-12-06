@@ -92,7 +92,8 @@
         </q-td>
       </template>
       <template v-slot:bottom-row >
-        <q-tr></q-tr>
+        <q-tr>
+        </q-tr>
       </template>
     </q-table>
     

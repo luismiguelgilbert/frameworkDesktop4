@@ -5,13 +5,17 @@
             Emite el código del lookup (selectSearchable en cambio trabaja emitiendo la fila)
         -->
         <q-select
-            borderless :use-input="!isReadonly" input-debounce="650" hide-bottom-space
-            v-model="componentValue" style="height: 20px !important;"  input-style="maxWidth: 50px !important;"
+            ref="myInlineSelectSearchable"
+            borderless :use-input="!isReadonly" input-debounce="650" hide-bottom-space 
+            v-model="componentValue" 
+            input-class="bg-red q-ml-md float-right	vertical-top"
+            input-style="display: inline-block; maxWidth: 50px !important; minWidth: 50px !important;"
             :options="optionsListFiltered" map-options  
             :disable="isDisable" 
             :readonly="isReadonly"
+            dense
             :option-label="optionLabelField"
-             dense
+             table-colspan="12"
             :option-value="rowValueField"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
             @keyup.keyCodes.113="openSearch"
@@ -23,7 +27,8 @@
                 <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section> </q-item>
             </template>
             <template v-slot:selected-item="scope"> 
-                <div style="display: inline-block; margin-top: 5px;"> {{`${scope.opt[optionLabelField]}`}} </div>
+                <!--<div style="display: inline-block; "> {{`${scope.opt[optionLabelField]}`}} </div>-->
+                <div > {{`${scope.opt[optionLabelField]}`}} </div>
             </template>
             <template v-slot:option="scope">
                 <q-item v-bind="scope.itemProps" v-on="scope.itemEvents" >
@@ -82,10 +87,13 @@
     </div>
 </template>
 
-<style lang="sass">
-    .q-field__native
-        display: inline-block
-</style>
+<!--<style >
+    .q-field__native {
+        display: inline-block !important;
+        white-space: nowrap !important;
+        color: brown !important;
+    }
+</style>-->
 
 <script>
 import Vue from 'vue';
@@ -117,6 +125,20 @@ export default({
         }
     },
     mounted(){
+        //this.$refs.myInlineSelectSearchable.style = "white-space: nowrap; display: inline-block;";
+        console.dir(this.$refs)
+        console.dir(this.$refs.myInlineSelectSearchable)
+        console.dir(this.$refs.myInlineSelectSearchable.style)
+        //this.$refs.myInlineSelectSearchable.style.display = "inline-block";
+        /*
+            .myInlineSelectSearchable .q-field__native {
+            display: inline-block !important;
+            white-space: nowrap !important;
+            color: brown !important;
+        }*/
+        //this.$refs.myInlineSelectSearchable.style.white-space = "inline-block";
+        //this.$refs.myInlineSelectSearchable.style.display = "inline-block";
+
         try{//Backup Complete Data
             this.optionsListFiltered = JSON.parse(JSON.stringify(this.optionsList))
         }catch(ex){}

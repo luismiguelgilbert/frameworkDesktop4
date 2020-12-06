@@ -7,7 +7,7 @@
           row-key="sys_user_code"
           :rows-per-page-options="[0]"
           dense
-          :virtual-scroll="users.length>25"
+          :separator="userTableLines"
           :filter="filterString"
           :columns="[
             { name: 'sys_user_code', required: true, label: 'Nombre del Usuario', align: 'left', field: row => row.sys_user_code, sortable: true },
@@ -161,6 +161,7 @@ export default ({
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         //custom security
         allow_users: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_users').value }, },
         //custom security end

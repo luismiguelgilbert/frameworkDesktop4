@@ -5,7 +5,7 @@
       :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
       table-style="min-height: 150px; max-height: calc(100vh - 225px)"
       row-key="attach_id"
-      virtual-scroll
+      :separator="userTableLines"
       :rows-per-page-options="[0]"
       hide-bottom dense
       :filter="filterString"
@@ -45,7 +45,7 @@
             </q-td>
 
             <q-td key="estado" :props="props">
-              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
+              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" size="sm" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
             </q-td>
 
 
@@ -59,6 +59,10 @@
             <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString?filterString='':undefined" />
           </template>
         </q-input>
+    </template>
+    <template v-slot:bottom-row >
+      <q-tr>
+      </q-tr>
     </template>
   </q-table>
   <q-dialog v-model="dialogVisible">
@@ -260,6 +264,7 @@ export default ({
         userCode: { get () { return this.$store.state.main.userCode } },
         userCompany: { get () { return this.$store.state.main.userCompany } },
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },

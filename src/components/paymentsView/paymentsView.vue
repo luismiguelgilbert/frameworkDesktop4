@@ -2,11 +2,11 @@
 <div>
     <q-table
         :data="payments"
-        table-style="min-height: calc(100vh - 255px); max-height: calc(100vh - 255px)"
+        table-style="min-height: calc(100vh - 275px); max-height: calc(100vh - 275px)"
         row-key="lineID"
         dense
+        :separator="userTableLines"
         :rows-per-page-options="[0]"
-        hide-bottom
         :columns="[
           { name: 'accTypeName', required: true, label: 'Documento', align: 'left', field: row => row.accTypeName, sortable: true },
           { name: 'docNumber', required: true, label: 'Número', align: 'left', field: row => row.docNumber, sortable: true },
@@ -23,7 +23,6 @@
                 :options="lookup_status" borderless dense item-aligned
                 />
         </template>
-
         <template v-slot:body="props">
             <q-tr :props="props" >
                 <q-td key="accTypeName" :props="props" >
@@ -44,18 +43,28 @@
             </q-tr>
         </template>
 
-        <template v-slot:bottom-row>
-            <q-tr>
+        <template v-slot:bottom-row >
+            <q-tr></q-tr>
+        </template>
+
+        <template v-slot:bottom>
+            <div class="full-width row text-subtitle2 text-primary q-pl-sm q-pr-sm">
+                Pagos aplicados: {{payments.filter(x=>x.voided==false).length}}
+                <q-space />
+                Suma: {{payments.filter(x=>x.voided==false).reduce((total,item)=>{return total + item.amount}, 0).toFixed(userMoneyFormat)}}
+                
+            </div>
+            <!--<q-tr>
                 <q-td class="text-subtitle2 text-primary" >
                     Pagos aplicados: {{payments.filter(x=>x.voided==false).length}}
                 </q-td>
-                <q-td> </q-td>
-                <q-td> </q-td>
-                <q-td> </q-td>
+                <q-td>1</q-td>
+                <q-td>2</q-td>
+                <q-td>3</q-td>
                 <q-td class="text-right text-subtitle2 text-primary">
                     Suma: {{payments.filter(x=>x.voided==false).reduce((total,item)=>{return total + item.amount}, 0).toFixed(userMoneyFormat)}}
                 </q-td>
-            </q-tr>
+            </q-tr>-->
         </template>
     </q-table>
 </div>
@@ -96,6 +105,7 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
         payments: {
           get () { return this.$store.state[this.moduleName].editData.payments },
         },
