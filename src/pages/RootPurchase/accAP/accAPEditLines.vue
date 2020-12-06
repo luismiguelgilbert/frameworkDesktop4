@@ -214,7 +214,7 @@
           :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
           table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
           @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
-          :data="lookup_items.filter(x=>x.estado==true&&x.systemType!=3/*1=Servicios porque Productos SOLO vinculados a mktPO*/)"
+          :data="lookup_items.filter(x=>x.estado==true&&x.systemType==1/*1=Servicios porque Productos SOLO vinculados a mktPO*/)"
           :columns="[
             { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
             { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
