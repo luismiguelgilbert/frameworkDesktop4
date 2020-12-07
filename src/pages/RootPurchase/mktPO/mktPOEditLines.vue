@@ -77,8 +77,8 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Requisiciones':''" title="Agregar Ítems de Requisiciones Pendientes" @click="addRequisiciones" icon="far fa-file-alt" color="primary" no-caps  class="q-ml-sm"/>
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
-        <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.lg?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-percent" color="primary" flat no-caps   :disable="selected.length<=0" />
+        <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps title="Calcula datos de líneas seleccionadas" class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-tag" color="primary" flat no-caps   :disable="selected.length<=0" />
     </template>
     <template v-slot:bottom-row >
       <q-tr></q-tr>

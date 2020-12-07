@@ -16,14 +16,38 @@
           { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true },
           //{ name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', },
           { name: 'account_id', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.account_id, sortable: false },
-          { name: 'sri_sustento', required: true, label: 'Sustento Tributario', align: 'left', field: row => row.sri_sustento, sortable: false },
           { name: 'taxes', required: true, label: 'Impuestos', align: 'left', field: row => linesTaxes, sortable: false },
+          { name: 'sri_sustento', required: true, label: 'Sustento Tributario', align: 'left', field: row => row.sri_sustento, sortable: false },
           { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: false },
           { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true },
           { name: 'mktPOHeader', required: true, label: 'OC #', align: 'left', field: row => row.mktPOHeader, sortable: true },
           { name: 'mktPOlineID', required: true, label: 'OC Línea', align: 'left', field: row => row.mktPOlineID, sortable: true },
         ]"
     >
+    <template v-slot:header-cell-account_id="props">
+      <q-th :props="props">
+        <q-icon name="account_tree" size="1em" />
+        {{ props.col.label }}
+      </q-th>
+    </template>
+    <template v-slot:header-cell-taxes="props">
+      <q-th :props="props">
+        <q-icon name="fas fa-percent" size="1em" />
+        {{ props.col.label }}
+      </q-th>
+    </template>
+    <template v-slot:header-cell-sri_sustento="props">
+      <q-th :props="props">
+        <q-icon name="fas fa-balance-scale" size="1em" />
+        {{ props.col.label }}
+      </q-th>
+    </template>
+    <template v-slot:header-cell-prjID="props">
+      <q-th :props="props">
+        <q-icon name="bookmarks" size="1em" />
+        {{ props.col.label }}
+      </q-th>
+    </template>
 
     <template v-slot:body="props">
       <q-tr :props="props" >
@@ -35,9 +59,6 @@
         <!--<q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>-->
         <q-td key="account_id" :props="props">
           {{lookup_accounts.filter(x=>x.value==props.row.account_id).map(y => {return y.code_es + " - " + y.label}).join("")}}
-        </q-td>
-        <q-td key="sri_sustento" :props="props" >
-          {{lookup_SRI_Tabla_Tipo_Sustento.filter(x=>x.value==props.row.sri_sustento).map(y => {return y.short_name_es}).join("")}}
         </q-td>
 
         <q-td key="taxes" :props="props">
@@ -61,6 +82,10 @@
             </q-popup-edit>
         </q-td>
 
+        <q-td key="sri_sustento" :props="props" >
+          {{lookup_SRI_Tabla_Tipo_Sustento.filter(x=>x.value==props.row.sri_sustento).map(y => {return y.short_name_es}).join("")}}
+        </q-td>      
+
         <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
         
         <q-td key="comments" :props="props">
@@ -74,12 +99,14 @@
         <q-td key="mktPOlineID" :props="props">{{ props.row.mktPOlineID }}</q-td>
       </q-tr>
     </template>
+
+
     <template v-slot:top >
         <q-btn :label="$q.screen.gt.sm?'Cuenta Contable':''" title="Cambiar Cuenta Contable a líneas seleccionadas" @click="isAccDialog=true" icon="account_tree" color="primary" no-caps :disable="selected.length<=0"/>
+        <q-btn :label="$q.screen.gt.sm?'Impuestos':''" title="Cambiar Impuestos a líneas seleccionadas" icon="fas fa-percent" color="primary" no-caps class="q-ml-sm" @click="isTaxesDialog=true" :disable="selected.length<=0"/>
+        <q-btn :label="$q.screen.gt.sm?'Sustento':''" title="Cambiar Sustento Tributario a líneas seleccionadas" icon="fas fa-balance-scale" color="primary" no-caps class="q-ml-sm" @click="isSustentoDialog=true" :disable="selected.length<=0"/>
+        <q-btn :label="$q.screen.gt.sm?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" icon="bookmarks" color="primary" no-caps class="q-ml-sm" @click="isPrjDialog=true" :disable="selected.length<=0"/>
         <q-btn :label="$q.screen.gt.sm?'Cuenta Pasivo':''" title="Cambiar Cuenta Contable del Pasivo" icon="fas fa-handshake" color="primary" no-caps class="q-ml-sm" @click="isPartnerAccountDialog=true" />
-        <q-space />
-        <q-btn :label="$q.screen.gt.lg?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="bookmarks" color="primary" flat no-caps :disable="selected.length<=0"/>
-        <q-btn :label="$q.screen.gt.lg?'Sustento':''" title="Cambiar Sustento Tributario a líneas seleccionadas" @click="isSustentoDialog=true" icon="fas fa-percent" color="primary" flat no-caps class="q-ml-sm" :disable="selected.length<=0"/>
     </template>
     <template v-slot:bottom-row >
       <q-tr>
@@ -175,6 +202,32 @@
                       this.selected.forEach(line => this.updateRow(row.value, 'account_id', line) );
                   }
                   this.isAccDialog = false
+              }"
+          />
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="isTaxesDialog" >
+    <q-card style="minWidth: 900px;">
+      <selectSearchable class="col-12"
+          prependIcon="fas fa-cash-register"
+          labelText="Reemplazar Impuestos a Líneas Seleccionadas (*)" labelSearchText="Buscar Impuesto"
+          :optionsList="lookup_taxes.filter(x=>!x.es_retencion)"
+          rowValueField="taxID" optionLabelField="short_name_es" optionsListCaption="name_es" optionsListLabel="short_name_es" 
+          optionDisableField="estado"
+          :isRequired="false" 
+          :isDisable="false" 
+          :isReadonly="false"
+          
+          :tableSearchColumns="[
+              { name: 'short_name_es', label: 'Impuesto', field: 'short_name_es', align: 'left'}
+              ,{ name: 'short_name_es', label: 'Descripción', field: 'short_name_es', align: 'left'}
+              ]"
+          @onItemSelected="(row)=>{
+                  if(row){
+                      this.selected.forEach(line => this.updateTaxRows(row, 'taxes', line) );
+                  }
+                  this.isTaxesDialog = false
               }"
           />
     </q-card>
@@ -280,6 +333,7 @@ export default ({
         ,isPrjDialog: false, prjDialogFilter: '', prjDialogSelected: [], prjDialogTableBusy: false, rootPrjIDSelected: null, prjIDSelected: null
         ,isSustentoDialog: false, sustentoDialogFilter: '', sustentoDialogSelected: [], sustentoDialogTableBusy: false
         ,isExpectedDialog: false, expectedDialogDate: ''
+        ,isTaxesDialog: false
         ,mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         ,isPartnerAccountDialog: false
         //,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
@@ -338,6 +392,10 @@ export default ({
         }
       },
       updateRow(newVal, colName, row){
+        console.dir('updateRow')
+        console.dir(newVal)
+        console.dir(colName)
+        console.dir(row)
         if(colName=='taxes'){
           newVal.map(x=>{
             x.taxAmount = x.isPercent?row.lineUntaxed*x.factor*x.factor_base:x.factor
@@ -345,8 +403,19 @@ export default ({
             return 
           })
         }
+        console.dir('flag 00')
         let newRows = JSON.parse(JSON.stringify(this.lines))
         newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
+        this.lines = newRows
+        this.$emit('onAccMoveCompute')
+      },
+      updateTaxRows(newVal, colName, row){
+        newVal.taxAmount = newVal.isPercent?row.lineUntaxed*newVal.factor*newVal.factor_base:newVal.factor
+        let newRows = JSON.parse(JSON.stringify(this.lines))
+        this.selected.map(x=>{
+          newRows.find(y=>y.lineID==x.lineID).taxes = []
+          newRows.find(y=>y.lineID==x.lineID).taxes.push(newVal)
+        })
         this.lines = newRows
         this.$emit('onAccMoveCompute')
       },

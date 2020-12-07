@@ -3,7 +3,7 @@
 
     <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nueva Cuenta Contable':'Editar Cuenta Contable: '+editRecord.value}}</q-toolbar-title>
+            <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Medio de Pago':'Editar Medio de Pago: '+editRecord.value}}</q-toolbar-title>
             <q-space />
             <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
             <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
@@ -100,13 +100,13 @@ export default ({
         this.loadingData = true
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spAccAccountsSelectEdit',
+            url: this.apiURL + 'spAccPaymentMethodsSelectEdit',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
                 userCompany: this.userCompany,
                 userLanguage: 'es',
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.account_id_ux?this.editRecord.row.account_id_ux:0,
+                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.methodID_ux?this.editRecord.row.methodID_ux:0,
                 editMode: this.editMode
             }
         }).then((response) => {
@@ -149,11 +149,11 @@ export default ({
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spAccAccountsUpdate', {
+                this.$axios.post( this.apiURL + 'spAccPaymentMethodsUpdate', {
                         userCode: this.userCode,
                         userCompany: this.userCompany,
                         //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                        row_id: this.editMode?0:this.editRecord.row.account_id_ux,
+                        row_id: this.editMode?0:this.editRecord.row.methodID_ux,
                         "editRecord": JSON.stringify(newEditData),
                     }
                 , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
