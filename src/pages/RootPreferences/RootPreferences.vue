@@ -110,7 +110,7 @@
                         <q-icon name="fas fa-key" color="primary" />
                     </q-item-section>
                     <q-item-section>
-                        <q-input dense v-model="user_password_1" label="Nueva Contraseña" type="password" />
+                        <q-input dense v-model="user_password_1" label="Nueva Contraseña" type="password" autocomplete="new-password" />
                     </q-item-section>
                 </q-item>
                 <q-item>
@@ -118,7 +118,7 @@
                         <q-icon name="fas fa-key" color="primary" />
                     </q-item-section>
                     <q-item-section>
-                        <q-input dense v-model="user_password_2" label="Confirme su Contraseña" type="password" />
+                        <q-input dense v-model="user_password_2" label="Confirme su Contraseña" type="password" autocomplete="new-password" />
                     </q-item-section>
                 </q-item>
             </q-card>

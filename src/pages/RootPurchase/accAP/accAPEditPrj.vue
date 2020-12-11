@@ -105,7 +105,7 @@
         <q-btn :label="$q.screen.gt.sm?'Cuenta Contable':''" title="Cambiar Cuenta Contable a líneas seleccionadas" @click="isAccDialog=true" icon="account_tree" color="primary" no-caps :disable="selected.length<=0"/>
         <q-btn :label="$q.screen.gt.sm?'Impuestos':''" title="Cambiar Impuestos a líneas seleccionadas" icon="fas fa-percent" color="primary" no-caps class="q-ml-sm" @click="isTaxesDialog=true" :disable="selected.length<=0"/>
         <q-btn :label="$q.screen.gt.sm?'Sustento':''" title="Cambiar Sustento Tributario a líneas seleccionadas" icon="fas fa-balance-scale" color="primary" no-caps class="q-ml-sm" @click="isSustentoDialog=true" :disable="selected.length<=0"/>
-        <q-btn :label="$q.screen.gt.sm?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" icon="bookmarks" color="primary" no-caps class="q-ml-sm" @click="isPrjDialog=true" :disable="selected.length<=0"/>
+        <q-btn :label="$q.screen.gt.sm?'Centro de Costo':''" title="Cambiar Centro de Costo a líneas seleccionadas" icon="bookmarks" color="primary" no-caps class="q-ml-sm" @click="isPrjDialog=true" :disable="selected.length<=0" />
         <q-btn :label="$q.screen.gt.sm?'Cuenta Pasivo':''" title="Cambiar Cuenta Contable del Pasivo" icon="fas fa-handshake" color="primary" no-caps class="q-ml-sm" @click="isPartnerAccountDialog=true" />
     </template>
     <template v-slot:bottom-row >
@@ -355,10 +355,11 @@ export default ({
             this.selected.forEach(rowToUpdate=>{
                 //Actualiza las líneas
                 let newRows = JSON.parse(JSON.stringify(this.lines))
-                newRows.find(x=>x.lineID==rowToUpdate.lineID).prjID = this.prjDialogSelected[0].value;
-                let prjID = newRows.find(x=>x.lineID==rowToUpdate.lineID).prjID
-                let prjName = prjID?this.lookup_prj.find(x => x.value == prjID).label:''
-                newRows.find(x=>x.lineID==rowToUpdate.lineID).prjName = prjName
+                newRows.filter(x=>x.lineID==rowToUpdate.lineID).map(y=>{
+                    y.prjID = this.prjDialogSelected[0].value;
+                    y.prjName = this.prjDialogSelected[0].label;
+                    return y
+                })
                 this.lines = newRows
             })
             this.isPrjDialog = false

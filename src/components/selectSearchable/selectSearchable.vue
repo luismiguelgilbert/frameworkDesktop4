@@ -1,6 +1,7 @@
 <template>
     <div>
         <q-select
+            ref="selectSearchableRef"
             filled use-input hide-dropdown-icon input-debounce="500"
             v-model="componentValue"
             :label="labelText"
@@ -8,6 +9,7 @@
             :disable="isDisable" 
             :readonly="isReadonly"
             :option-label="optionLabelField"
+            :autofocus="true"
             
             :dense="isDense"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
@@ -98,6 +100,8 @@ export default({
         isDense: { type: Boolean, required: false, default: false },
         initialValue: { required: false, default: null },
         rowValueField: { type: String, required: true, default: 'value' },
+        autofocus: { type: Boolean, required: false, default: false },
+        autoShowPopup: { type: Boolean, required: false, default: false },
         optionsListLabel: { type: String, required: true, default: 'label' },
         optionsListCaption: { type: String, required: false },
         tableSearchColumns: { type: Array, required: true, default: [
@@ -111,6 +115,9 @@ export default({
         }
     },
     mounted(){
+        if(this.autoShowPopup==true){
+            this.$refs.selectSearchableRef.showPopup ()
+        }
         try{//Backup Complete Data
             this.optionsListFiltered = JSON.parse(JSON.stringify(this.optionsList))
             //this.optionsListFiltered = Object.freeze(JSON.parse(JSON.stringify(this.optionsList)))
@@ -140,6 +147,9 @@ export default({
         },
         openSearch(){
             if(!(this.isReadonly||this.isDisable)){
+                console.dir(this.$refs)
+                this.$refs.selectSearchableRef.hidePopup()
+                
                 this.isDialogOpen = true
             }
         },
@@ -211,7 +221,12 @@ export default({
     watch: { 
         initialValue: function(newVal, oldVal) { // update component display value when changed happend from outside component (e.g. programatically)
             this.componentValue=newVal
+        },
+        isRequired: function(newVal, oldVal) { // update component display value when changed happend from outside component (e.g. programatically)
+            this.$refs.selectSearchableRef.resetValidation();
         }
+
+
     }
 })
 </script>

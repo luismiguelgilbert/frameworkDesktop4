@@ -50,6 +50,8 @@ import invOutgoing from './invOutgoing' //invOutgoing
 import invQuery from './invQuery' //invQuery
 import Payterms from './Payterms' //Payterms
 import partnerMasterGroups from './partnerMasterGroups' //partnerMasterGroups
+import accVoucherOut from './accVoucherOut' //partnerMasterGroups
+import accVoucherIn from './accVoucherIn' //partnerMasterGroups
 import invMasterGroups from './invMasterGroups' //invMasterGroups
 import Locations from './Locations' //Locations
 import accAP from './accAP' //Cuentas x Pagar
@@ -89,6 +91,9 @@ export default function (/* { ssrContext } */) {
       ,invMasterGroups
       ,Payterms
       ,Locations
+      //Bank
+      ,accVoucherIn
+      ,accVoucherOut
       //Schoenstatt
       ,SCHPersonas
       ,SCHPersona

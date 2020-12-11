@@ -1,0 +1,321 @@
+<template>
+<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+    <div class="row">
+        <q-toggle class="col-12 col-md-6 offset-col-md-2"
+            v-model="voided" icon="fas fa-ban" color="red" label="Anulado?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+            />
+        <!--<q-btn label="pruebas" @click="openPartnerCreate" />-->
+    </div>
+    
+    
+    <selectSearchable 
+        prependIcon="fas fa-hand-holding-usd"
+        labelText="Tipo de Pago (*)" labelSearchText="Buscar Tipo de Pago"
+        :optionsList="this.lookup_voucherInitialTypes"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="initialTypeID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Origen', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.initialTypeID = row.value
+            }"
+        />
+
+    <selectSearchable 
+        prependIcon="fas fa-money-check"
+        labelText="Medio de Pago (*)" labelSearchText="Buscar Medio de Pago"
+        :optionsList="this.lookup_accPaymentMethods"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="methodID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Origen', field: 'label', align: 'left'}
+                ,{ name: 'paymentTypeName', label: 'Medio de Pago', field: 'paymentTypeName', align: 'left'}
+                ,{ name: 'numberTypeName', label: 'Secuencial', field: 'numberTypeName', align: 'left'}
+                ,{ name: 'lastNumber', label: 'Último Documento', field: 'lastNumber', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.numberType = row.numberType
+                this.numeroDoc = isNaN(row.lastNumber)?0:(parseInt(row.lastNumber)+1);
+                this.account_id = row.account_id//asigna la cuenta contable asociada al [Medio de Pago]
+                this.methodID=row.value;
+            }"
+        />
+
+    <q-input
+        :disable="!(this.methodID)"
+        ref="numeroDoc" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        placeholder="Ingrese el Número del Documento (*)" label="Número del Documento (*)" filled
+        v-model="numeroDoc"
+        :type="numberType&&numberType==1?'number':undefined"
+        :rules="[
+                val => !!val || '* Requerido',
+        ]"
+        >
+        <!--counter mask="### - ### - #########" unmasked-value-->
+        <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
+    </q-input>
+
+    <!--partnerID-->
+    <selectSearchable 
+        prependIcon="fas fa-handshake"
+        :labelText="(initialTypeID==1||initialTypeID==2)?'Proveedor(*)':'Proveedor'" labelSearchText="Buscar Proveedor"
+        :optionsList="this.lookup_partners"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
+        :isRequired="(initialTypeID==1||initialTypeID==2)?true:false" 
+        :class="(initialTypeID==3)?'q-pb-md':undefined"
+        :isDisable="false" 
+        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :initialValue="partnerID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.partnerID=row.value;
+                this.printName=row.label;
+                this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
+                //this.partner_account_id=row.account_id
+                this.$emit('onAccMoveCompute')
+            }"
+        />
+
+    
+
+    <!--<q-input
+        disable class="q-pb-md"
+        ref="amount"
+        placeholder="Monto del Documento (*)" label="Monto del Documento (*)" filled
+        v-model="amount"
+        type="number"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
+    </q-input>-->
+    
+    
+    <q-input
+        ref="headerDate" 
+        mask="date" :rules="['date']"
+        placeholder="Ingrese la fecha del Documento usado para contabilizar asiento (aaaa/mm/dd)" label="Fecha de Documento (aaaa/mm/dd) (*)" filled
+        v-model="headerDate" :title="dateName(headerDate)"
+        >
+        <template v-slot:append>
+          <q-icon name="event" class="cursor-pointer">
+            <q-popup-proxy ref="qDateProxy_headerDate" transition-show="scale" transition-hide="scale">
+              <q-date :locale="myQDateLocale" minimal v-model="headerDate" >
+                <div class="row items-center justify-end">
+                  <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                </div>
+              </q-date>
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+        <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+    </q-input>
+
+    <q-input
+        label="Comentarios" placeholder="Ingrese comentarios sobre este Pedido" filled
+        type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        v-model="comments"
+        />
+
+    <!--<q-separator class="q-mb-lg" />-->
+    <br/>
+    <br/>
+    <div class="text-subtitle2 text-primary">Datos para Imprimir</div>
+
+    <q-input
+        class="q-pb-md"
+        ref="printName"
+        placeholder="Nombre para Imprimir" label="Nombre para Imprimir" filled
+        v-model="printName"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-print" /></template>
+    </q-input>
+
+    <q-input
+        ref="printDate" 
+        mask="date" :rules="['date']"
+        placeholder="Ingrese la fecha del Documento usado para imprimir (aaaa/mm/dd)" label="Fecha para Imprimir (aaaa/mm/dd) (*)" filled
+        v-model="printDate" :title="dateName(printDate)"
+        >
+        <template v-slot:append>
+          <q-icon name="event" class="cursor-pointer">
+            <q-popup-proxy ref="qDateProxy_printDate" transition-show="scale" transition-hide="scale">
+              <q-date :locale="myQDateLocale" minimal v-model="printDate" >
+                <div class="row items-center justify-end">
+                  <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                </div>
+              </q-date>
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+        <template v-slot:prepend><q-icon name="fas fa-calendar-day" /></template>
+    </q-input>
+
+    
+    <br><br>
+
+    <q-dialog v-model="isPartnerDialog">
+        <q-card style="minWidth: 1000px; width: 1000px;">
+            <partnersEdit />
+        </q-card>
+    </q-dialog>
+
+</q-form>
+</template>
+<script>
+import Vue from 'vue';
+import Vuex from 'vuex';
+import { date } from 'quasar';
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
+import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+import xml2js from 'xml2js'
+//import computeFunctions from './computeFunctions.js'
+
+export default ({
+    components: {
+        mainLookup: mainLookup
+        ,selectSearchable: selectSearchable
+        //,computeFunctions: computeFunctions
+        ,partnersEdit: () => import('../../../pages/RootMaster/Partners/PartnersEdit.vue')
+    },
+    data () {
+        return {
+            moduleName: "accVoucherOut"
+            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            ,xmlFile: null
+            ,myQDateLocale: {
+                /* starting with Sunday */
+                days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
+                daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
+                months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+                monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
+                firstDayOfWeek: 1
+            }
+        }
+    },
+    mounted(){
+        this.$refs.formulario.validate()
+    },
+    methods:{
+        dateName(fecha){
+            return date.formatDate(fecha, 'dddd, D-MMMM-YYYY', {
+                days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            }
+            )
+        },
+        openPartnerCreate(){
+            let editRecord = {value: 0, row: null};
+            let editMode = true;
+            this.$store.commit('Partners/updateState', {key: 'editMode', value: editMode})
+            this.$store.commit('Partners/updateState', {key: 'editRecord', value: editRecord})
+            
+            
+            
+            let security = JSON.parse('[{"label":"allow_view","value":true},{"label":"allow_edit","value":true},{"label":"allow_insert","value":true},{"label":"allow_report","value":true},{"label":"allow_disable","value":true},{"label":"allow_accounting","value":true}]')
+            //this.security = JSON.parse(response.data[0].security)
+            this.$store.commit('Partners/updateState', {key: 'security', value: security})
+
+            this.isPartnerDialog = true
+        },
+        
+        
+        
+    },
+    computed:{
+        userColor: { get () { return this.$store.state.main.userColor }  },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
+        userCompanies: { get () { return this.$store.state.main.userCompanies } },
+        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
+        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
+        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
+        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
+        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        lines: {
+            get () { return this.$store.state[this.moduleName].editData.lines },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+        },
+        headerUser: {
+            get () { return this.$store.state[this.moduleName].editData.basic.headerUser },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerUser', value: val}) }
+        },
+        partnerID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
+        },
+        account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id', value: val}) }
+        },
+        methodID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.methodID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'methodID', value: val}) }
+        },
+        numberType: {
+            get () { return this.$store.state[this.moduleName].editData.basic.numberType },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'numberType', value: val}) }
+        },
+        numeroDoc: {
+            get () { return this.$store.state[this.moduleName].editData.basic.numeroDoc },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'numeroDoc', value: val}) }
+        },
+        initialTypeID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.initialTypeID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'initialTypeID', value: val}) }
+        },
+        voided: {
+            get () { return this.$store.state[this.moduleName].editData.basic.voided },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'voided', value: val}) }
+        },
+        headerDate: {
+            get () { return this.$store.state[this.moduleName].editData.basic.headerDate },
+            set (val) { 
+                this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerDate', value: val}) //actualiza campo
+                this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printDate', value: val}) //actualiza campo de impresión (pero el de impresión NO cambia éste)
+                //this.$store.commit((this.moduleName)+'/updateEditData', {section: 'accountHeader', key: 'accMoveDateNew', value: val}) //actualiza también nueva fecha de asiento
+                //this.$emit('onAccMoveCompute')
+            }
+        },
+        printDate:  {
+            get () { return this.$store.state[this.moduleName].editData.basic.printDate },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printDate', value: val}) }
+        },
+        printName:  {
+            get () { return this.$store.state[this.moduleName].editData.basic.printName },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printName', value: val}) }
+        },
+        amount:  {
+            get () { return this.$store.state[this.moduleName].editData.basic.amount },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'amount', value: val}) }
+        },
+        comments:  {
+            get () { return this.$store.state[this.moduleName].editData.basic.comments },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'comments', value: val}) }
+        },
+        lookup_users: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_users },
+        },
+        lookup_partners: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_partners },
+        },
+        lookup_accTypes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accTypes },
+        },
+        lookup_accPaymentMethods: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accPaymentMethods },
+        },
+        lookup_voucherInitialTypes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_voucherInitialTypes },
+        },
+    },
+})
+</script>

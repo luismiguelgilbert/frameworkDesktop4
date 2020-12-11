@@ -86,6 +86,11 @@ const routes = [
       ,{ path: 'RootPurchase/accAPEdit', component: () => import('pages/RootPurchase/accAP/accAPEdit.vue') }
       ,{ path: 'RootPurchase/accRet', component: () => import('pages/RootPurchase/accRet/accRet.vue') }
       ,{ path: 'RootPurchase/accRetEdit', component: () => import('pages/RootPurchase/accRet/accRetEdit.vue') }
+      //BANK
+      ,{ path: 'RootBank/accVoucherOut', component: () => import('pages/RootBank/accVoucherOut/accVoucherOut.vue') }
+      ,{ path: 'RootBank/accVoucherOutEdit', component: () => import('pages/RootBank/accVoucherOut/accVoucherOutEdit.vue') }
+      ,{ path: 'RootBank/accVoucherIn', component: () => import('pages/RootBank/accVoucherIn/accVoucherIn.vue') }
+      ,{ path: 'RootBank/accVoucherInEdit', component: () => import('pages/RootBank/accVoucherIn/accVoucherInEdit.vue') }
       
       
       //INVENTORY

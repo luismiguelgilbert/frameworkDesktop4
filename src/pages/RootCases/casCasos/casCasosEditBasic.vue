@@ -12,7 +12,7 @@
         prependIcon="fas fa-handshake"
         labelText="Cliente (*)" labelSearchText="Buscar Cliente"
         :optionsList="this.lookup_customers"
-        rowValueField="value" optionsListLabel="label"
+        rowValueField="value" optionLabelField="label" optionsListCaption="partner_ruc" optionsListLabel="label" 
         optionDisableField="estado"
         :isRequired="true" 
         :isDisable="false" 
@@ -20,6 +20,7 @@
         :initialValue="customerID"
         :tableSearchColumns="[
                  { name: 'label', label: 'Cliente', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
                 ,{ name: 'short_name_es', label: 'Nombre Comercial', field: 'short_name_es', align: 'left'}
             ]"
         @onItemSelected="(row)=>{
