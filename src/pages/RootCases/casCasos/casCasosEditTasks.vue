@@ -39,11 +39,12 @@
               {{ props.row.sys_user_fullname }}
             </q-td>
             <q-td key="comments" :props="props">
-              {{ props.row.comments }}
+              <!--{{ props.row.comments }}-->
+              <span v-html="props.row.comments"></span>
             </q-td>
             
           </q-tr>
-    </template>-->
+    </template>
     <template v-slot:top>
         <!--SOLAMENTE cuando se está editando un caso, Y si perfil de usuario tiene permisos, entonces se pueden agregar actividades-->
         <q-btn v-if="!editMode&&allow_tasks" label="Agregar Actividad" @click="dialogOpen=true" icon="fas fa-plus" color="primary" no-caps />
