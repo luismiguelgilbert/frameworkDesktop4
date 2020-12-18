@@ -19,9 +19,19 @@ export const updateEditDataFiles = (state, value) => {
     state.editData.files = value
 }
 
+export const updateEditDataPayments = (state, value) => {
+    state.editData.payments = value
+}
+
+export const updateEditDataAccountHeader = (state, value) => {
+    state.editData.accountHeader = value
+}
+
 export const updateEditData_lookup_accAP = (state, value) => {
     state.editData.lookup_accAP = value
 }
+
+
 
 export const updateEditDataaccAP = (state, value) => {
     state.editData.accAP = value

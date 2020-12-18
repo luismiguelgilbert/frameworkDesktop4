@@ -25,7 +25,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Datos del Documento</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='lines'" :active="tab=='lines'" active-class="bg-primary text-white" >
+                    <q-item clickable @click="tab='lines'" :active="tab=='lines'" active-class="bg-primary text-white" :disable="!(partnerID>0)">
                         <q-item-section side>
                             <q-icon name="fas fa-list-ol" :color="tab=='lines'?'white':'grey-7'" />
                         </q-item-section>
@@ -33,7 +33,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Documento ({{lines.length}})</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" :disable="!(methodID>0)" >
+                    <q-item clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" :disable="!(methodID>0)||initialTypeID==2" >
                         <q-item-section side>
                             <q-icon name="fas fa-money-bill-alt"  :color="tab=='payments'?'white':'grey-7'" />
                         </q-item-section>
@@ -120,6 +120,7 @@ import accountingComponent from '../../../components/journalView/journalView'
 import filesComponent from '../../../components/filesView/filesView'
 import historyComponent from '../../../components/historyView/historyView'
 import paymentsComponent from '../../../components/paymentsView/paymentsView'
+import { date } from 'quasar';
 
 
 
@@ -228,11 +229,10 @@ export default ({
                      basic: this.editData.basic
                     ,lines: this.editData.lines
                     ,accountLines: this.editData.accountLines
+                    ,payments: this.editData.payments
                     ,files: this.editData.files
                     //,address: this.editData.address.filter(x=>x.is_allowed).map(x=>x.headerID_ux)
                 }
-                //console.dir(this.editData)
-                //console.dir(newEditData)
                 this.$axios.post( this.apiURL + 'spAccvoucherOutUpdate', {
                     userCode: this.userCode,
                     userCompany: this.userCompany,
@@ -264,51 +264,119 @@ export default ({
         })
     },
     //custom
+    getMax(arr, prop) {
+        var max;
+        for (var i=0 ; i<arr.length ; i++) {
+            if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
+                max = arr[i];
+        }
+        return max;
+    },
     updateAccountMove(){
-        //console.dir('updateAccountMove')
+        console.dir('updateAccountMove')//accMoveDateNew
         this.$q.loading.show()
-        let newRowsAccount = []
-        let totalAmount = 0
-        let newAccLineID = 0
-        //#region DEBE
-        this.lines.map(row=>{
-            newAccLineID++;
-            totalAmount += row.amount
-            newRowsAccount.push({
-                    accLineID: newAccLineID
-                ,lineID: row.lineID
-                ,account_id: row.account_id
-                ,partnerID: this.partnerID
-                ,debit: row.amount
-                ,credit: 0
-                ,invID: 0
-                ,prjID: row.prjID
-                ,mktHeaderID: 0
-                ,mktLineID: 0
-                ,mktTaxID: 0
-                ,comments: row.comments
+        let newAccountHeader = JSON.parse(JSON.stringify(this.accountHeader))
+        console.dir('this.accountHeader')//accMoveDateNew
+        console.dir(this.accountHeader)//accMoveDateNew
+        //console.dir(newAccountHeader)//accMoveDateNew
+        newAccountHeader.accMoveDateNew = this.headerDate
+        console.dir('newAccountHeader')//accMoveDateNew
+        console.dir(newAccountHeader)//accMoveDateNew
+        this.accountHeader = newAccountHeader
+        console.dir(this.accountHeader)//accMoveDateNew
+        //accMoveDateNew
+
+        //#region ACCOUNT_LINES
+            let newRowsAccount = []
+            let totalAmount = 0
+            let newAccLineID = 0
+            //#region DEBE
+            this.lines.map(row=>{
+                newAccLineID++;
+                totalAmount += row.amount
+                newRowsAccount.push({
+                        accLineID: newAccLineID
+                    ,lineID: row.lineID
+                    ,account_id: row.line_account_id
+                    ,partnerID: this.partnerID
+                    ,debit: row.amount
+                    ,credit: 0
+                    ,invID: 0
+                    ,prjID: row.prjID
+                    ,mktHeaderID: 0
+                    ,mktLineID: 0
+                    ,mktTaxID: 0
+                    ,comments: row.comments
+                })
             })
-        })
-        //#endregion DEBE
+            //#endregion DEBE
+            
+            //#region HABER
+            newAccLineID++;
+            newRowsAccount.push({
+                accLineID: newAccLineID
+                ,lineID: 0
+                ,taxLineID: 0
+                ,account_id: this.account_id
+                ,partnerID: this.partnerID
+                ,debit: 0
+                ,credit: totalAmount
+                ,invID: 0
+                ,prjID: 0
+                ,mktLineID: 0
+                ,comments: this.lookup_accPaymentMethods.filter(x=>x.value==this.methodID).map(y => {return y.label + " - Documento: " + this.numeroDoc + (this.printName?" - Nombre: " + this.printName:"") } ).join("")
+            })
+            //#endregion HABER
+            this.accountLines = newRowsAccount
+        //#endregion ACCOUNT_LINES
+
+
+        //#region PAYMENTS
+        console.dir('this.payments')
+        console.dir(this.payments)
+        let newLineID = 0
+        if(this.payments.length > 0){
+            let temp = this.getMax(this.payments, "lineID");
+            newLineID = parseInt(temp.lineID);
+        }
+        let newPayments = JSON.parse(JSON.stringify(this.payments.filter(x=>x.uploaded)))
+        console.dir('newPayments')
         
-        //#region HABER
-        newAccLineID++;
-        newRowsAccount.push({
-            accLineID: newAccLineID
-            ,lineID: 0
-            ,taxLineID: 0
-            ,account_id: this.account_id
-            ,partnerID: this.partnerID
-            ,debit: 0
-            ,credit: totalAmount
-            ,invID: 0
-            ,prjID: 0
-            ,mktLineID: 0
-            ,comments: this.lookup_accPaymentMethods.filter(x=>x.value==this.methodID).map(y => {return y.label + " - Documento: " + this.numeroDoc + (this.printName?" - Nombre: " + this.printName:"") } ).join("")
+        this.lines.map(x=>{
+            
+            console.dir(x)
+            //Build Date
+            let fecha = new Date()
+            let fechaTimeOffset = (fecha.getTimezoneOffset())
+            if(fechaTimeOffset>0){//positivo entonces resto
+                fecha = date.subtractFromDate(fecha, {minutes: fechaTimeOffset} )
+            }else{//negativo entonces sumo
+                fecha = date.addToDate(fecha, {minutes: (fechaTimeOffset*-1)} )
+            }
+            //console.dir(date.formatDate(fecha,'YYYY/MM/DD'))
+            if(x.initialAccHeaderID>0 && x.amount>0){
+                newLineID++;
+                newPayments.push({
+                     lineID: newLineID
+                    ,reconciliationHeaderID: null
+                    ,reconciliationMoveID: null
+                    ,voided: false
+                    ,reconciliationHeaderDate: date.formatDate(fecha,'YYYY/MM/DD')//get current date in user pc (exact date no matter timezone)
+                    ,accTypeID: x.docAccTypeID
+                    ,headerID: x.docHeaderID
+                    ,account_id: x.account_id//el ID de la CxP
+                    ,accTypeName: x.initialAccTypeName//el accType del Documento que se está pagando
+                    ,accHeaderNumeroDoc: x.comments
+                    ,amount: x.amount//monto pagando
+                    
+                    ,uploaded: false
+                })
+            }
         })
-        //#endregion HABER
-        
-        this.accountLines = newRowsAccount
+        console.dir('newPayments')
+        console.dir(newPayments)
+        this.payments = newPayments
+        //#endregion
         this.$q.loading.hide()
         //console.dir('Asiento actualizado')
     }
@@ -376,6 +444,16 @@ export default ({
     accountLines: {
         get () { return this.$store.state[this.moduleName].editData.accountLines },
         set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
+    },
+    payments: {
+        get () { return this.$store.state[this.moduleName].editData.payments },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataPayments', val) }
+    },
+    headerDate: {
+            get () { return this.$store.state[this.moduleName].editData.basic.headerDate },
+    },
+    initialTypeID: {
+        get () { return this.$store.state[this.moduleName].editData.basic.initialTypeID },
     },
     methodID: {
         get () { return this.$store.state[this.moduleName].editData.basic.methodID },

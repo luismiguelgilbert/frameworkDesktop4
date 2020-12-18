@@ -19,6 +19,10 @@ export const updateEditDataAccountLines = (state, value) => {
     state.editData.accountLines = value
 }
 
+export const updateEditDataAccountHeader = (state, value) => {
+    state.editData.accountHeader = value
+}
+
 export const updateEditDataFiles = (state, value) => {
     state.editData.files = value
 }

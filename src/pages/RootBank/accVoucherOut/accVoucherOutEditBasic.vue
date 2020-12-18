@@ -22,6 +22,7 @@
             ]"
         @onItemSelected="(row)=>{
                 this.initialTypeID = row.value
+                this.clearLines()
             }"
         />
 
@@ -80,7 +81,10 @@
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
                 this.printName=row.label;
+                this.account_id_invoice=row.account_id_invoice;
+                this.account_id_advance=row.account_id_advance;
                 this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
+
                 //this.partner_account_id=row.account_id
                 this.$emit('onAccMoveCompute')
             }"
@@ -212,23 +216,16 @@ export default ({
             }
             )
         },
-        openPartnerCreate(){
-            let editRecord = {value: 0, row: null};
-            let editMode = true;
-            this.$store.commit('Partners/updateState', {key: 'editMode', value: editMode})
-            this.$store.commit('Partners/updateState', {key: 'editRecord', value: editRecord})
+        clearLines(){
+            this.lines = []
+            //console.dir('this.initialTypeID')
+            //console.dir(this.initialTypeID)
+            if(this.initialTypeID==3){
+                this.paymenst = []
+            }
+            this.$emit('onAccMoveCompute')
             
-            
-            
-            let security = JSON.parse('[{"label":"allow_view","value":true},{"label":"allow_edit","value":true},{"label":"allow_insert","value":true},{"label":"allow_report","value":true},{"label":"allow_disable","value":true},{"label":"allow_accounting","value":true}]')
-            //this.security = JSON.parse(response.data[0].security)
-            this.$store.commit('Partners/updateState', {key: 'security', value: security})
-
-            this.isPartnerDialog = true
-        },
-        
-        
-        
+        }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
@@ -244,6 +241,10 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
         },
+        payments: {
+            get () { return this.$store.state[this.moduleName].editData.payments },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataPayments', val) }
+        },
         headerUser: {
             get () { return this.$store.state[this.moduleName].editData.basic.headerUser },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerUser', value: val}) }
@@ -251,6 +252,14 @@ export default ({
         partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
+        },
+        account_id_invoice: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id_invoice },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id_invoice', value: val}) }
+        },
+        account_id_advance: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id_advance },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id_advance', value: val}) }
         },
         account_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id },
@@ -281,8 +290,7 @@ export default ({
             set (val) { 
                 this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerDate', value: val}) //actualiza campo
                 this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printDate', value: val}) //actualiza campo de impresión (pero el de impresión NO cambia éste)
-                //this.$store.commit((this.moduleName)+'/updateEditData', {section: 'accountHeader', key: 'accMoveDateNew', value: val}) //actualiza también nueva fecha de asiento
-                //this.$emit('onAccMoveCompute')
+                this.$emit('onAccMoveCompute')
             }
         },
         printDate:  {

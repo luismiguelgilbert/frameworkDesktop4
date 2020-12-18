@@ -20,7 +20,10 @@
             @input="(itemSelected)=>{this.itemSelected(itemSelected)}"
             >
             <template v-slot:prepend><q-icon :name="prependIcon" /></template>
-            <template v-slot:append><q-btn :icon="appendIcon" flat dense @click="openSearch"  /> </template>
+            <template v-slot:append="props">
+                <q-btn v-if="showSelectButton" icon="fas fa-check" title="Seleccionar" flat dense @click="(props)=>{itemSelected(props)}"  /> 
+                <q-btn :icon="appendIcon" flat dense @click="openSearch"  /> 
+            </template>
             <template v-slot:no-option> <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section>
           </q-item>
         </template>
@@ -100,6 +103,7 @@ export default({
         isDense: { type: Boolean, required: false, default: false },
         initialValue: { required: false, default: null },
         rowValueField: { type: String, required: true, default: 'value' },
+        showSelectButton: { type: Boolean, required: false, default: false },
         autofocus: { type: Boolean, required: false, default: false },
         autoShowPopup: { type: Boolean, required: false, default: false },
         optionsListLabel: { type: String, required: true, default: 'label' },
@@ -147,9 +151,7 @@ export default({
         },
         openSearch(){
             if(!(this.isReadonly||this.isDisable)){
-                console.dir(this.$refs)
                 this.$refs.selectSearchableRef.hidePopup()
-                
                 this.isDialogOpen = true
             }
         },
@@ -170,6 +172,11 @@ export default({
         },
         itemSelected(row){
             if(row){
+                if(row.type=='click'){//cuando se permite botón para seleccionar cuenta predeterminada, se recibe "click" mouse event
+                    if(this.$refs.selectSearchableRef&&this.$refs.selectSearchableRef.value){
+                        row = this.$refs.selectSearchableRef.value
+                    }
+                }
                 if(this.optionDisableField){//desactivar filas NO permitidas
                     if(row[this.optionDisableField]){
                         this.$emit('onItemSelected',row)

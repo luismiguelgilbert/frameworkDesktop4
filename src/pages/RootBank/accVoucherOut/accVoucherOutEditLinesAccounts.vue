@@ -13,8 +13,8 @@
             :filter="filterString"
             :columns="[
             //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-            { name: 'account_id', required: true, label: 'Cuenta Conable', align: 'left', field: row => row.account_id, sortable: true, style: 'min-width: 300px;' },
-            { name: 'amount', required: true, label: 'Monto', align: 'right', field: row => row.amount, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
+            { name: 'account_id', required: true, label: 'Cuenta Conable', align: 'left', field: row => row.account_id, sortable: true, },
+            { name: 'amount', required: true, label: 'Monto', align: 'right', field: row => row.amount, sortable: true, },
             { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true },
             { name: 'prjID', required: true, label: 'Obra/Proyecto', align: 'left', field: row => row.prjID, sortable: true },
             //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
@@ -93,10 +93,6 @@
                     ]"
                 @onItemSelected="(row)=>{
                     this.addRow(row)
-                        /*if(row){
-                            this.selected.forEach(line => this.updateRow(row.value, 'account_id', line) );
-                        }
-                        this.isAccDialog = false*/
                     }"
             />
         </q-card>
@@ -210,24 +206,24 @@ export default ({
             )
         },
         updateRow(newVal, colName, row){
-        try{
-          this.$q.loading.show()
-          let newRows = JSON.parse(JSON.stringify(this.lines))
-          newRows.filter(x=>x.lineID==row.lineID).map(result=>{
-            if(colName=="amount"){
-              result[colName] = parseFloat(newVal);
-            }else{
-              result[colName] = newVal;
+            try{
+            this.$q.loading.show()
+            let newRows = JSON.parse(JSON.stringify(this.lines))
+            newRows.filter(x=>x.lineID==row.lineID).map(result=>{
+                if(colName=="amount"){
+                result[colName] = parseFloat(newVal);
+                }else{
+                result[colName] = newVal;
+                }
+                return result
+            })
+            this.lines = newRows;
+            this.$q.loading.hide()
+            this.$emit('onAccMoveCompute')
+            }catch(ex){
+            console.error(ex)
+            this.$q.loading.hide()
             }
-            return result
-          })
-          this.lines = newRows;
-          this.$q.loading.hide()
-          this.$emit('onAccMoveCompute')
-        }catch(ex){
-          console.error(ex)
-          this.$q.loading.hide()
-        }
         },
         getMax(arr, prop) {
             var max;
@@ -248,14 +244,21 @@ export default ({
                 let newRows = JSON.parse(JSON.stringify(this.lines))
                 newLineID++;
                 let nuevaFila = {
-                    lineID: newLineID//
-                    ,account_id: row.value//
-                    ,amount: 0//
-                    ,comments: ''//
-                    ,prjID: 0//
+                     lineID: newLineID
+                    ,account_id: row.value
+                    ,amount: 0
+                    ,comments: ''
+                    ,prjID: 0
+                    //dummy for informative docs
+                    ,docAccTypeID: null
+                    ,docHeaderID: null
+                    ,docAmountTotal: null
+                    ,docAmountUnpaid: null
+                    ,docDate: null
+                    ,docNum: null
+                    ,docComporbante: null
                 }
                 newRows.push(nuevaFila)
-                
                 this.lines = newRows
                 this.isItemsBatchDialog=false;
                 this.$q.loading.hide()
