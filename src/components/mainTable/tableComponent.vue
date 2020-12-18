@@ -81,7 +81,9 @@
                 </q-img>
             </q-avatar>
           </div>
-          <div v-if="!props.col.is_key&&props.col.cellComponent=='div'" :style="shouldWrapCellText?'white-space: normal':undefined" class="q-pl-xs q-pr-sm">{{props.value}}</div>
+          <div v-if="!props.col.is_key&&props.col.cellComponent=='div'" :style="shouldWrapCellText?'white-space: normal':undefined" class="q-pl-xs q-pr-sm">
+            <span v-html="props.value"></span>
+          </div>
           <div v-if="!props.col.is_key&&props.col.cellComponent=='bool'" >
             <q-icon :color="cellAttribute(props.col,'color', props.value)" name="fas fa-circle" size="0.8rem" />
           </div>
@@ -120,7 +122,7 @@
     z-index: 2
     padding-left: 5px
     font-weight: bolder
-    color: $grey-7
+    color: $primary
 
   td:last-child
     /* bg color is important for td; just specify one */
@@ -155,7 +157,7 @@
     z-index: 2
     padding-left: 5px
     font-weight: bolder
-    color: $grey-6
+    color: $primary
 
 
 </style>
