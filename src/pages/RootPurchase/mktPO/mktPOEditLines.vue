@@ -237,7 +237,7 @@
   </q-dialog>
 
   <q-dialog v-model="isRequisicionDialog" @show="loadRequisicionesPendientes">
-    <q-card style="min-width: 850px;">
+    <q-card style="min-width: 100%;">
       <q-bar class="bg-primary text-white">
         Requisiciones Pendientes
         <q-space />
