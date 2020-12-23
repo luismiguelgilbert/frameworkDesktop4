@@ -280,6 +280,9 @@ export default {
         this.userColor = this.userColor//force theme to be applied
         this.$q.dark.set(this.userDarkMode)//force darkMode to be applied
 
+        //check version
+        this.checkVersion();
+
         //navigate to user default init module, if exists
         try{
           if(this.userLinkID){
@@ -320,6 +323,11 @@ export default {
           ,multiLine: true, html: true
       })
     })
+  },
+
+  mounted(){
+    console.dir('mainLayout mounted')
+    this.checkVersion();
   },
   
   methods: {
@@ -458,6 +466,38 @@ export default {
       }else{//false, entonces desconectado
         this.closeWebSocketConnection()
       }
+    },
+    checkVersion(){
+      if(this.sysVersion&& this.sysVersion.length>0){
+        this.sysVersion.filter(x=>x.platformName=='desktop').map(y=>{
+          if(y.platformVersion==version){
+            console.dir('es la misma versión')
+            console.dir(version)
+            console.dir(this.sysVersion)
+          }else{
+            console.dir('es versión diferente!!!!!')
+            console.dir(version)
+            console.dir(this.sysVersion)
+            let nuevaVersion = ''
+            try{
+              nuevaVersion = this.sysVersion.find(x=>x.platformName=='desktop').platformVersion;
+            }catch(ex){}
+            
+            this.$q.notify({
+                color: 'red'
+                ,multiLine: false
+                ,html: true
+                ,message: 'Actualización '+ nuevaVersion +' disponible.<br/>Por favor presione "Control + F5"'
+                ,timeout: 0
+                ,icon: "fas fa-code-branch" 
+                ,actions: [
+                  { icon: 'fas fa-times', color: 'white', }
+                ]
+              });
+          }
+        })
+      }
+      //
     }
   },
 
@@ -483,7 +523,7 @@ export default {
         }
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
           console.dir('Branding Framework')
-          colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0
+          colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0 //389ffd
         }
 
         this.$q.dark.set(false)
@@ -525,6 +565,7 @@ export default {
     userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }, set (val) { this.$store.commit('main/updateState', {key: 'userMoneyFormat', value: val}) } },
     userUsersFormat: { get () { return this.$store.state.main.userUsersFormat }, set (val) { this.$store.commit('main/updateState', {key: 'userUsersFormat', value: val}) } },
     userCompanies: { get () { return this.$store.state.main.userCompanies }, set (val) { this.$store.commit('main/updateState', {key: 'userCompanies', value: val}) } },
+    sysVersion: { get () { return this.$store.state.main.sysVersion }, set (val) { this.$store.commit('main/updateState', {key: 'sysVersion', value: val}) } },
     userCompany: { get () { return this.$store.state.main.userCompany }, set (val) { this.$store.commit('main/updateState', {key: 'userCompany', value: val}) } },
     notificationInterval: { get () { return this.$store.state.main.notificationInterval }, set (val) { this.$store.commit('main/updateState', {key: 'notificationInterval', value: val}) } },
     apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },

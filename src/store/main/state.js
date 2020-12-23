@@ -31,5 +31,6 @@ export default function () {
     ,selectedContact: 0
     ,unreadNotifications: []
     ,wsConnection: null
+    ,sysVersion: []
   }
 }

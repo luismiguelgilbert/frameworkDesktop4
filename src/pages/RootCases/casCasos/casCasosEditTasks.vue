@@ -60,7 +60,7 @@
     </template>
   </q-table>
 
-  <q-dialog v-model="dialogOpen">
+  <q-dialog v-model="dialogOpen" @show="activityShow">
     <q-card  style="min-width: 900px;">
       <q-toolbar :class="'q-pr-none text-subtitle2 '+(sys_user_color=='blackDark'?'text-white':'text-primary')">
           <q-toolbar-title class="text-weight-bolder">Nueva Actividad</q-toolbar-title>
@@ -306,6 +306,21 @@ export default ({
         }
         
       },
+      activityShow(){
+        try{
+          this.taskTypeID = this.lookup_taskTypes[0].value
+        }catch(ex){}
+        try{
+          let fecha = new Date()
+          let fechaTimeOffset = (fecha.getTimezoneOffset())
+          if(fechaTimeOffset>0){//positivo entonces resto
+              fecha = date.subtractFromDate(fecha, {minutes: fechaTimeOffset} )
+          }else{//negativo entonces sumo
+              fecha = date.addToDate(fecha, {minutes: (fechaTimeOffset*-1)} )
+          }
+          this.taskDate = date.formatDate(fecha,'YYYY/MM/DD')//get current date in user pc (exact date no matter timezone)
+        }catch(ex){}
+      }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },

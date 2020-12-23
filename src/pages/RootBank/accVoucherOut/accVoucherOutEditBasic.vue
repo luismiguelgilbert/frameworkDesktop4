@@ -166,11 +166,11 @@
     
     <br><br>
 
-    <q-dialog v-model="isPartnerDialog">
+    <!--<q-dialog v-model="isPartnerDialog">
         <q-card style="minWidth: 1000px; width: 1000px;">
             <partnersEdit />
         </q-card>
-    </q-dialog>
+    </q-dialog>-->
 
 </q-form>
 </template>
@@ -218,13 +218,9 @@ export default ({
         },
         clearLines(){
             this.lines = []
-            //console.dir('this.initialTypeID')
-            //console.dir(this.initialTypeID)
-            if(this.initialTypeID==3){
-                this.paymenst = []
-            }
+            this.reconciliation = []
+            this.reconciliationLines = []
             this.$emit('onAccMoveCompute')
-            
         }
     },
     computed:{
@@ -240,6 +236,14 @@ export default ({
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+        },
+        reconciliation: {
+          get () { return this.$store.state[this.moduleName].editData.reconciliation },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliation', val) }
+        },
+        reconciliationLines: {
+          get () { return this.$store.state[this.moduleName].editData.reconciliationLines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliationLines', val) }
         },
         payments: {
             get () { return this.$store.state[this.moduleName].editData.payments },

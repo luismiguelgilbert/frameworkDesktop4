@@ -23,9 +23,9 @@ export default function () {
      ,editData: {
         basic: {}
        ,lines: []
-       ,linesTaxes: []
+       ,reconciliation: []
+       ,reconciliationLines: []
        ,accountLines: []
-       ,requisiciones: []
        ,files: []
        ,history: []
      }

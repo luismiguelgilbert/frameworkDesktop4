@@ -55,7 +55,7 @@
             <q-btn :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Cuenta" @click="()=>{isItemsBatchDialog=true}" icon="fas fa-plus" color="primary"  no-caps />
             <q-btn v-if="initialTypeID==1" :label="$q.screen.gt.sm?'Documentos':''" title="Agregar Documentos por Pagar" @click="()=>{isDialogDocs=true}" icon="fas fa-file-invoice-dollar" color="primary" class="q-ml-md"  no-caps />
             <q-btn :label="$q.screen.gt.sm?'Quitar':''" title="Quitar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" class="q-ml-md"  no-caps />
-            <q-btn :label="$q.screen.gt.sm?'Centro de Costos':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="bookmarks" color="primary" class="q-ml-md" no-caps :disable="selected.length<=0" />
+            <!--<q-btn :label="$q.screen.gt.sm?'Centro de Costos':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="bookmarks" color="primary" class="q-ml-md" no-caps :disable="selected.length<=0" />-->
             <!--<q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Servicios" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>-->
             
         </template>
@@ -132,7 +132,7 @@
                         //{ name: 'amountNew', required: true, label: 'Pagar', align: 'right', field: row => row.amountNew, sortable: true, style: 'min-width: 50px;'},
                     ]"
                     row-key="headerID"
-                    virtual-scroll :rows-per-page-options="[0]"
+                    :rows-per-page-options="[0]"
                     hide-bottom dense
                     selection="multiple" :selected.sync="documentsBatchDialogSelected"
                     :filter="isDialogDocsFilter"
@@ -160,6 +160,27 @@
                         </q-tr>
                     </template>
 
+                    <template v-slot:bottom-row>
+                        <q-tr>
+                            <q-td>
+                            </q-td>
+                            <q-td>
+                            </q-td>
+                            <q-td>
+                            </q-td>
+                            <q-td class="text-right text-subtitle2 text-primary" >
+                                Suma:
+                            </q-td>
+                            <q-td class="text-right text-subtitle2 text-primary">
+                                {{lookup_accAP.reduce((total,item)=>{return total + item.amountTotal}, 0).toFixed(userMoneyFormat)}}
+                            </q-td>
+                            <q-td class="text-right text-subtitle2 text-primary">
+                                {{lookup_accAP.reduce((total,item)=>{return total + item.amountUnpaid}, 0).toFixed(userMoneyFormat)}}
+                            </q-td>
+                        </q-tr>
+                        <q-tr></q-tr>
+                    </template>
+
                 </q-table>
             </q-card-section>
             <q-card-actions align="around">
@@ -174,7 +195,7 @@
         </q-card>
     </q-dialog>
 
-    <q-dialog v-model="isPrjDialog" >
+    <!--<q-dialog v-model="isPrjDialog" >
         <q-card style="min-width: 700px;" > 
         <q-bar class="bg-primary text-white">
             Centro de Costo
@@ -238,7 +259,7 @@
             />
         </q-card-actions>
         </q-card>
-    </q-dialog>
+    </q-dialog>-->
 </div>
 </template>
 <script>
@@ -339,6 +360,8 @@ export default ({
             try{
             this.$q.loading.show()
             let newRows = JSON.parse(JSON.stringify(this.lines))
+            let newReconciliation = JSON.parse(JSON.stringify(this.reconciliation))
+            let newReconciliationLines = JSON.parse(JSON.stringify(this.reconciliationLines))
             newRows.filter(x=>x.lineID==row.lineID).map(result=>{
                 if(colName=="amount"){
                 result[colName] = parseFloat(newVal);
@@ -347,7 +370,23 @@ export default ({
                 }
                 return result
             })
+            newReconciliation.filter(x=>x.detailsLineID==row.lineID).map(result=>{
+                if(colName=="amount"){
+                    result[colName] = parseFloat(newVal);
+                }else{
+                    result[colName] = newVal;
+                }
+                return result
+            })
+            newReconciliationLines.map(result=>{
+                result.amount = newReconciliation.find(m=>m.headerID==result.headerID).amount
+                return result
+            })
+            
             this.lines = newRows;
+            this.reconciliation = newReconciliation;
+            this.reconciliationLines = newReconciliationLines;
+
             this.$q.loading.hide()
             this.$emit('onAccMoveCompute')
             }catch(ex){
@@ -366,10 +405,18 @@ export default ({
                 ).onOk(() => {
                     //Líneas
                     let newRows = JSON.parse(JSON.stringify(this.lines))
+                    let newReconciliation = JSON.parse(JSON.stringify(this.reconciliation))
+                    let newReconciliationLines = JSON.parse(JSON.stringify(this.reconciliationLines))
                     this.selected.map(row=>{
                         newRows = newRows.filter(x=>x.lineID!=row.lineID);
+                        newReconciliation = newReconciliation.filter(x=>x.detailsLineID!=row.lineID)
                     })
-                    this.lines = newRows
+                    
+                    newReconciliationLines = newReconciliationLines.filter(x=> newReconciliation.some(y=>y.headerID==x.headerID))
+                    
+                    this.lines = newRows;
+                    this.reconciliation = newReconciliation;
+                    this.reconciliationLines = newReconciliationLines;
 
                     this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
                     this.$emit('onAccMoveCompute')
@@ -406,9 +453,6 @@ export default ({
             })
         },
         addInvoices(rows){
-            console.dir('addInvoices')
-            console.dir('rows')
-            console.dir(rows)
             try{
                 this.$q.loading.show()
                 let newLineID = 0
@@ -416,14 +460,21 @@ export default ({
                     let temp = this.getMax(this.lines, "lineID");
                     newLineID = parseInt(temp.lineID);
                 }
-                console.dir('newLineID')
-                console.dir(newLineID)
+                let newReconciliationID = 0
+                if(this.reconciliation.length > 0){
+                    let temp = this.getMax(this.reconciliation, "headerID");
+                    newReconciliationID = parseInt(temp.headerID);
+                }
                 let newRows = JSON.parse(JSON.stringify(this.lines))
+                let newReconciliations = JSON.parse(JSON.stringify(this.reconciliation))
+                let newReconciliationLines = JSON.parse(JSON.stringify(this.reconciliationLines))
                 rows.map(row=>{
                     if(!(newRows.some(x=>x.initialAccHeaderID==row.headerID&&x.initialAccTypeID==row.accTypeID))){//compara si ya existe la factura en este pago
                         newLineID++;
-                        console.dir('newLineID inside rows map')
-                        console.dir(newLineID)
+                        newReconciliationID++;
+                        console.dir('row')
+                        console.dir(row)
+                        //Agrega Líneas al Documento
                         let nuevaFila = {
                              lineID: newLineID
                             ,line_account_id: row.partner_account_id
@@ -434,20 +485,61 @@ export default ({
                             ,initialAccTypeName: row.accTypeName
                             ,initialAccHeaderID: row.headerID
                             ,maxValue: row.amountUnpaid
-                            //dummy for informative docs
-                            //,docAccTypeID: row.accTypeID
-                            //,docAccTypeName: row.accTypeName
-                            //,docHeaderID: row.headerID
-                            //,docAmountTotal: row.amountTotal
-                            //,docAmountUnpaid: row.amountUnpaid
-                            //,docDate: row.headerDate
-                            //,docNum: row.numeroDoc
-                            //,docComprobante: row.tipoComprobanteName
                         }
                         newRows.push(nuevaFila)
+
+                        //#region Agrega Conciliaciones
+                            //Build Date
+                            let fecha = new Date()
+                            let fechaTimeOffset = (fecha.getTimezoneOffset())
+                            if(fechaTimeOffset>0){//positivo entonces resto
+                                fecha = date.subtractFromDate(fecha, {minutes: fechaTimeOffset} )
+                            }else{//negativo entonces sumo
+                                fecha = date.addToDate(fecha, {minutes: (fechaTimeOffset*-1)} )
+                            }
+                            let nuevaConciliacion = {
+                                uploaded: false
+                                ,headerID: newReconciliationID
+                                ,headerDate: date.formatDate(fecha,'YYYY/MM/DD')//get current date in user pc (exact date no matter timezone)
+                                ,headerUser: this.userName + ' ' + this.userLastName
+                                ,amount: row.amountUnpaid
+                                ,voided: false
+                                ,detailsLineID: newLineID//para poder tener una sincronización entre las líneas y las conciliaciones
+                            }
+                            newReconciliations.push(nuevaConciliacion)
+
+                            let tempAccHeaderNumeroDoc = ''
+                            this.lookup_accPaymentMethods.filter(x=>x.value==this.methodID).map(y=> {
+                                tempAccHeaderNumeroDoc = y.label + ' - ' + this.numeroDoc;
+                            })
+                            //Agrega Detalle de Conciliaciones (Este Pago)
+                            newReconciliationLines.push({
+                                headerID: newReconciliationID
+                                ,lineID: 1//va quemado
+                                ,accTypeID: 3//va quemado 3=Pago
+                                ,accHeaderID: this.editRecord&&this.editRecord.row&&this.editRecord.row.headerID_ux?this.editRecord.row.headerID_ux:0//nuevo pago, pero debería ir el ID
+                                ,accHeaderNumeroDoc: tempAccHeaderNumeroDoc
+                                ,account_id: row.partner_account_id//aquí viene la cuenta del Documento que se está conciliando
+                                ,amount: row.amountUnpaid
+                                ,isDebit_isCredit: false//true=Debit, false=Credit > como es la línea del Pago (plata que sale)
+                            })
+                            //Agrega Detalle de Conciliaciones (Documento)
+                            newReconciliationLines.push({
+                                headerID: newReconciliationID
+                                ,lineID: 2
+                                ,accTypeID: row.accTypeID//accTypeID del documento de la Cuenta x Pagar
+                                ,accHeaderID: row.headerID//headerID del documento de la Cuenta x Pagar
+                                ,accHeaderNumeroDoc: row.tipoComprobanteName + ' ' + row.numeroDoc
+                                ,account_id: row.partner_account_id
+                                ,amount: row.amountUnpaid
+                                ,isDebit_isCredit: true//true=Debit, false=Credit > como es la línea del Documento (plata que entra)
+                            })
+                        //#endregion
                     }
                 })
-                this.lines = newRows
+                this.lines = newRows;
+                this.reconciliation = newReconciliations;
+                this.reconciliationLines = newReconciliationLines;
                 this.isDialogDocs=false;
                 this.$q.loading.hide()
                 this.selected = []
@@ -468,6 +560,8 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userCompany: { get () { return this.$store.state.main.userCompany } },
         userCompanies: { get () { return this.$store.state.main.userCompanies } },
+        userName: { get () { return this.$store.state.main.userName } },
+        userLastName: { get () { return this.$store.state.main.userLastName } },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
@@ -477,6 +571,9 @@ export default ({
         userTableLines: { get () { return this.$store.state.main.userTableLines } },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        editRecord: {
+            get () { return this.$store.state[this.moduleName].editRecord },
+        },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
@@ -494,15 +591,35 @@ export default ({
         account_id_advance: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id_advance },
         },
+        reconciliation: {
+          get () { return this.$store.state[this.moduleName].editData.reconciliation },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliation', val) }
+        },
+        reconciliationLines: {
+          get () { return this.$store.state[this.moduleName].editData.reconciliationLines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliationLines', val) }
+        },
         lookup_accAP: {
             get () { return this.$store.state[this.moduleName].editData.lookup_accAP },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData_lookup_accAP', val) }
+        },
+        numeroDoc: {
+            get () { return this.$store.state[this.moduleName].editData.basic.numeroDoc },
         },
         lookup_accounts: {
             get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
         },
         lookup_prj: {
             get () { return this.$store.state[this.moduleName].editData.lookup_prj },
+        },
+        lookup_accTypes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accTypes },
+        },
+        lookup_accPaymentMethods: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accPaymentMethods },
+        },
+        lookup_voucherInitialTypes: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_voucherInitialTypes },
         },
     },
 })

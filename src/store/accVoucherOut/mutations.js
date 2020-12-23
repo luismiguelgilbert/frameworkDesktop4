@@ -19,8 +19,12 @@ export const updateEditDataFiles = (state, value) => {
     state.editData.files = value
 }
 
-export const updateEditDataPayments = (state, value) => {
-    state.editData.payments = value
+export const updateEditDataReconciliation = (state, value) => {
+    state.editData.reconciliation = value
+}
+
+export const updateEditDataReconciliationLines = (state, value) => {
+    state.editData.reconciliationLines = value
 }
 
 export const updateEditDataAccountHeader = (state, value) => {

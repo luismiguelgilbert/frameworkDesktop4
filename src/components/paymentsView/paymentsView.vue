@@ -1,62 +1,56 @@
 <template>
 <div>
+    <div class="text-h6 text-primary q-pl-sm">Conciliaciones</div>
     <q-table
-        :data="payments"
-        table-style="min-height: calc(100vh - 250px); max-height: calc(100vh - 250px)"
-        row-key="lineID"
+        :data="reconciliation"
+        table-style="min-height: calc(100vh - 450px); max-height: calc(100vh - 450px)"
+        row-key="headerID"
         dense hide-bottom
+        selection="single"
+        :selected.sync="selectedRows"
         :separator="userTableLines"
         :rows-per-page-options="[0]"
         :columns="[
-          { name: 'uploaded', required: true, label: 'Anular', align: 'left', field: row => row.uploaded, sortable: true },
-          { name: 'accTypeName', required: true, label: 'Documento', align: 'left', field: row => row.accTypeName, sortable: true },
-          { name: 'accHeaderNumeroDoc', required: true, label: '# Documento', align: 'left', field: row => row.accHeaderNumeroDoc, sortable: true },
-          { name: 'reconciliationHeaderDate', required: true, label: 'Fecha Aplicación', align: 'left', field: row => row.reconciliationHeaderDate, sortable: true },
-          { name: 'reconciliationHeaderID', required: true, label: '# Conciliación', align: 'left', field: row => row.reconciliationHeaderID, sortable: true },
-          
-          { name: 'reconciliationMoveID', required: true, label: 'Asiento de Conciliación', align: 'left', field: row => row.reconciliationMoveID, sortable: true },
-          
-          //{ name: 'docDate', required: true, label: 'Fecha del Documento', align: 'left', field: row => row.docDate, sortable: true },
-          //{ name: 'accMoveDate', required: true, label: 'Fecha Contable', align: 'left', field: row => row.accMoveDate, sortable: true },
-          { name: 'amount', required: true, label: 'Monto Aplicado', align: 'right', field: row => row.amount, sortable: true },
+          { name: 'headerID', required: true, label: '# Conciliación', align: 'left', field: row => row.headerID, sortable: true, style: 'minWidth: 35px; maxWidth: 35px; width: 35px;' },
+          { name: 'headerDate', required: true, label: 'Fecha de Conciliación', align: 'left', field: row => row.headerDate, sortable: true, style: 'minWidth: 45px; maxWidth: 45px; width: 45px;' },
+          { name: 'headerUser', required: true, label: 'Responsable', align: 'left', field: row => row.headerUser, sortable: true },
+          { name: 'amount', required: true, label: 'Monto', align: 'right', field: row => row.amount, sortable: true },
+          { name: 'uploaded', required: true, label: 'Anular', align: 'center', field: row => row.uploaded, sortable: true , style: 'minWidth: 60px; maxWidth: 60px; width: 60px;' },
         ]"
     >
-        <template v-slot:top>
-            <div class="text-primary text-h5">Detalle de Pagos</div>
+        <!--<template v-slot:top>
+            <div class="text-primary text-h5">Historial de Conciliaciones</div>
             <q-space />
             <q-select 
                 v-model="initialLookupValue" map-options emit-value
                 :options="lookup_status" borderless dense item-aligned
                 />
-        </template>
+        </template>-->
         <template v-slot:body="props">
             <q-tr :props="props" >
-                <q-td key="uploaded" :props="props" >
-                    <!--Permitir Anular SI es que reconciliation está ya en la base-->
-                    <q-toggle :value="props.row.voided" v-if="props.row.uploaded" color="red" icon="fas fa-ban" flat dense size="sm" />
+                <q-td auto-width>
+                    <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
                 </q-td>
-                <q-td key="accTypeName" :props="props" >
-                    {{ props.row.accTypeName}}
+                <q-td key="headerID" :props="props" >
+                    {{ props.row.headerID}}
                 </q-td>
-                <q-td key="accHeaderNumeroDoc" :props="props" >
-                    {{ props.row.accHeaderNumeroDoc}}
-                </q-td>
-                <q-td key="reconciliationHeaderDate" :props="props" :title="dateName(props.row.reconciliationHeaderDate)">
-                    <!--{{ props.row.reconciliationHeaderDate}}-->
+                <q-td key="headerDate" :props="props" :title="dateName(props.row.headerDate)">
+                    <!--{{ props.row.headerDate}}-->
                     <q-input
-                        ref="reconciliationHeaderDate" 
-                        mask="date" :rules="['date']"
+                        ref="headerDate" 
+                        mask="date" 
                         dense borderless readonly class="no-padding" style="height: 20px !important;"
-                        :value="props.row.reconciliationHeaderDate" :title="dateName(props.row.reconciliationHeaderDate)"
+                        :value="props.row.headerDate" :title="dateName(props.row.headerDate)"
                         >
                         <template v-slot:append>
                         <q-icon name="event" class="cursor-pointer" size="xs">
-                            <q-popup-proxy ref="qDateProxy_reconciliationHeaderDate" transition-show="scale" transition-hide="scale">
+                            <q-popup-proxy ref="qDateProxy_headerDate" transition-show="scale" transition-hide="scale">
                             <q-date :locale="myQDateLocale" minimal 
-                                @input="(value)=>{updateRow(value,'reconciliationHeaderDate',props.row)}"
+                                :value="props.row.headerDate"
+                                @input="(value)=>{updateRow(value,'headerDate',props.row)}"
                                 >
                                 <div class="row items-center justify-end">
-                                <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                                    <q-btn v-close-popup label="Seleccionar" color="primary" flat />
                                 </div>
                             </q-date>
                             </q-popup-proxy>
@@ -64,23 +58,15 @@
                         </template>
                     </q-input>
                 </q-td>
-
-                <q-td key="reconciliationHeaderID" :props="props" >
-                    {{ props.row.reconciliationHeaderID}}
+                <q-td key="headerUser" :props="props" >
+                    {{ props.row.headerUser}}
                 </q-td>
-                
-                <q-td key="reconciliationMoveID" :props="props" >
-                    {{ props.row.reconciliationMoveID}}
-                </q-td>
-                
-                <!--<q-td key="accMoveDate" :props="props" :title="showDateName(props.row.accMoveDate)">
-                    {{ props.row.accMoveDate }}
-                </q-td>
-                <q-td key="docDate" :props="props" :title="showDateName(props.row.docDate)">
-                    {{ props.row.docDate }}
-                </q-td>-->
                 <q-td key="amount" :props="props" >
                     {{ props.row.amount.toFixed(userMoneyFormat) }}
+                </q-td>
+                <q-td key="uploaded" :props="props" >
+                    <!--Permitir Anular SI es que reconciliation está ya en la base-->
+                    <q-toggle :value="props.row.voided" v-if="props.row.uploaded" color="red" icon="fas fa-ban" flat dense size="sm" @input="updateRow(!props.row.voided,'voided',props.row)"/>
                 </q-td>
             </q-tr>
         </template>
@@ -93,17 +79,62 @@
                 </q-td>
                 <q-td>
                 </q-td>
-                <q-td>
-                </q-td>
-                <q-td>
-                </q-td>
                 <q-td class="text-right text-subtitle2 text-primary" >
                     Suma:
                 </q-td>
                 <q-td class="text-right text-subtitle2 text-primary">
-                    {{payments.reduce((total,item)=>{return total + item.amount}, 0).toFixed(userMoneyFormat)}}
+                    {{reconciliation.reduce((total,item)=>{return total + item.amount}, 0).toFixed(userMoneyFormat)}}
+                </q-td>
+                <q-td>
                 </q-td>
             </q-tr>
+            <q-tr></q-tr>
+        </template>
+    </q-table>
+
+    <div v-if="selectedRows&&selectedRows.length>0" class="text-h6 text-primary q-pl-sm q-pt-md">Detalle de Conciliación {{selectedRows[0].headerID}}</div>
+    <div v-if="selectedRows.length==0" class="text-h6 text-primary q-pl-sm q-pt-md">Selecciona una Conciliación </div>
+    <q-table v-if="selectedRows&&selectedRows.length>0"
+        :data="reconciliationLines.filter(x=>x.headerID==selectedRows[0].headerID)"
+        table-style="min-height: calc(100vh - 450px); max-height: calc(100vh - 450px)"
+        row-key="lineID"
+        dense hide-bottom
+        :separator="userTableLines"
+        :rows-per-page-options="[0]"
+        :columns="[
+          //{ name: 'lineID', required: true, label: 'lineID', align: 'left', field: row => row.lineID, sortable: true },
+          //{ name: 'accTypeID', required: true, label: 'Documento', align: 'left', field: row => row.accTypeID, sortable: true },
+          //{ name: 'accTypeName', required: true, label: 'Documento', align: 'left', field: row => row.accTypeName, sortable: true },
+          //{ name: 'accHeaderID', required: true, label: 'ID', align: 'left', field: row => row.accHeaderID, sortable: true },
+          { name: 'account_id', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.account_id, sortable: true },
+          { name: 'accHeaderNumeroDoc', required: true, label: '# Documento', align: 'left', field: row => row.accHeaderNumeroDoc, sortable: true },
+          { name: 'amount', required: true, label: 'Monto Aplicado', align: 'right', field: row => row.amount, sortable: true },
+        ]"
+    >
+        <template v-slot:body="props">
+            <q-tr :props="props" >
+                <!--<q-td key="lineID" :props="props">
+                    {{props.row.lineID}}
+                </q-td>
+                <q-td key="accTypeID" :props="props">
+                    {{props.row.accTypeID}}
+                </q-td>
+                <q-td key="accHeaderID" :props="props">
+                    {{props.row.accHeaderID}}
+                </q-td>-->
+                <q-td key="account_id" :props="props">
+                    {{lookup_accounts.filter(x=>x.value==props.row.account_id).map(y => {return y.code_es + " - " + y.label}).join("")}}
+                </q-td>
+                <q-td key="accHeaderNumeroDoc" :props="props">
+                    {{props.row.accHeaderNumeroDoc}}
+                </q-td>
+                <q-td key="amount" :props="props">
+                    {{props.row.amount}}
+                </q-td>
+            </q-tr>
+        </template>
+
+        <template v-slot:bottom-row>
             <q-tr></q-tr>
         </template>
 
@@ -125,6 +156,7 @@ export default ({
             pagination: { rowsPerPage: 0 },
             lookup_status: [{value: 1, label: 'Pagos'},{value:0, label: 'Historial'}],
             initialLookupValue: 1,
+            selectedRows: [],
             myQDateLocale: {
                 /* starting with Sunday */
                 days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
@@ -153,10 +185,17 @@ export default ({
         updateRow(newVal, colName, row){
             try{
                 this.$q.loading.show()
-                let newRows = JSON.parse(JSON.stringify(this.payments))
-                console.dir('newRows')
+                //let newRows = JSON.parse(JSON.stringify(this.payments))
+                let newRows = JSON.parse(JSON.stringify(this.reconciliation))
+                /*console.dir('newRows')
                 console.dir(newRows)
-                newRows.filter(x=>x.lineID==row.lineID).map(result=>{
+                console.dir('newVal')
+                console.dir(newVal)
+                console.dir('colName')
+                console.dir(colName)
+                console.dir('row')
+                console.dir(row)*/
+                newRows.filter(x=>x.headerID==row.headerID).map(result=>{
                     result[colName] = newVal;
                     /*if(colName=="amount"){
                     result[colName] = parseFloat(newVal);
@@ -164,7 +203,8 @@ export default ({
                     }*/
                     return result
                 })
-                this.payments = newRows;
+                //this.payments = newRows;
+                this.reconciliation = newRows;
                 this.$q.loading.hide()
                 //this.$emit('onAccMoveCompute')
             }catch(ex){
@@ -178,9 +218,20 @@ export default ({
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
         userTableLines: { get () { return this.$store.state.main.userTableLines } },
-        payments: {
+        lookup_accounts: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+        },
+        /*payments: {
           get () { return this.$store.state[this.moduleName].editData.payments },
           set (val) { this.$store.commit((this.moduleName)+'/updateEditDataPayments', val) }
+        },*/
+        reconciliation: {
+          get () { return this.$store.state[this.moduleName].editData.reconciliation },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliation', val) }
+        },
+        reconciliationLines: {
+          get () { return this.$store.state[this.moduleName].editData.reconciliationLines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliationLines', val) }
         },
     }
 })

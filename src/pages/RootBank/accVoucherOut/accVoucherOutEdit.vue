@@ -229,7 +229,8 @@ export default ({
                      basic: this.editData.basic
                     ,lines: this.editData.lines
                     ,accountLines: this.editData.accountLines
-                    ,payments: this.editData.payments
+                    ,reconciliation: this.editData.reconciliation
+                    ,reconciliationLines: this.editData.reconciliationLines
                     ,files: this.editData.files
                     //,address: this.editData.address.filter(x=>x.is_allowed).map(x=>x.headerID_ux)
                 }
@@ -273,18 +274,11 @@ export default ({
         return max;
     },
     updateAccountMove(){
-        console.dir('updateAccountMove')//accMoveDateNew
         this.$q.loading.show()
         let newAccountHeader = JSON.parse(JSON.stringify(this.accountHeader))
-        console.dir('this.accountHeader')//accMoveDateNew
-        console.dir(this.accountHeader)//accMoveDateNew
         //console.dir(newAccountHeader)//accMoveDateNew
         newAccountHeader.accMoveDateNew = this.headerDate
-        console.dir('newAccountHeader')//accMoveDateNew
-        console.dir(newAccountHeader)//accMoveDateNew
         this.accountHeader = newAccountHeader
-        console.dir(this.accountHeader)//accMoveDateNew
-        //accMoveDateNew
 
         //#region ACCOUNT_LINES
             let newRowsAccount = []
@@ -332,14 +326,14 @@ export default ({
 
 
         //#region PAYMENTS
-        console.dir('this.payments')
-        console.dir(this.payments)
-        let newLineID = 0
-        if(this.payments.length > 0){
-            let temp = this.getMax(this.payments, "lineID");
+        console.dir('this.reconciliation')
+        console.dir(this.reconciliation)
+        /*let newLineID = 0
+        if(this.reconciliation.length > 0){
+            let temp = this.getMax(this.reconciliation, "lineID");
             newLineID = parseInt(temp.lineID);
         }
-        let newPayments = JSON.parse(JSON.stringify(this.payments.filter(x=>x.uploaded)))
+        let newPayments = JSON.parse(JSON.stringify(this.reconciliation.filter(x=>x.uploaded)))
         console.dir('newPayments')
         
         this.lines.map(x=>{
@@ -375,7 +369,7 @@ export default ({
         })
         console.dir('newPayments')
         console.dir(newPayments)
-        this.payments = newPayments
+        this.payments = newPayments*/
         //#endregion
         this.$q.loading.hide()
         //console.dir('Asiento actualizado')
