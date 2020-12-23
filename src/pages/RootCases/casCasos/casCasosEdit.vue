@@ -151,12 +151,19 @@ export default ({
   data () {
     return {
         moduleName: "casCasos", router: this.$router,
-        tab: 'basic', splitterModel: 250, dataLoaded: false,
+        tab: 'tasks', splitterModel: 250, dataLoaded: false,
     }
   },
   created(){
     if(this.$q.screen.lt.sm){this.splitterModel = 60}
     this.loadData();
+  },
+  mounted(){
+      if(this.editMode){
+        this.tab = 'basic'
+      }else{
+        this.tab = 'tasks'
+      }
   },
   methods:{
     goBack(){
@@ -219,6 +226,10 @@ export default ({
                 persistent: true
             }).onOk(() => {
                 this.loadingData = true
+                console.dir('this.editData')
+                console.dir(this.editData)
+                console.dir('tasks edited:')
+                console.dir(this.editData.tasks.filter(x=>(x.edited)))
 
                 let newEditData = {
                      basic: this.editData.basic
@@ -226,7 +237,7 @@ export default ({
                     ,locations: this.editData.locations
                     ,payterms: this.editData.payterms
                     ,contacts: this.editData.contacts
-                    ,tasks: this.editData.tasks.filter(x=>!(x.uploaded))
+                    ,tasks: this.editData.tasks.filter(x=>(x.edited))//solamente lo nuevo & editado
                     ,files: this.editData.files
                 }
                 //console.dir(this.editData)

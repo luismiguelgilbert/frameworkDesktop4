@@ -11,26 +11,34 @@
         hide-bottom dense
         :filter="filterString"
         :columns="[
+          { name: 'delete', required: true, label: '', align: 'center', field: row => row.delete, sortable: false},
           { name: 'uploaded', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: false},
-          { name: 'taskDate', required: true, label: 'Fecha', align: 'left', field: row => row.taskDate, sortable: false },
-          { name: 'taskTypeName', required: true, label: 'Actividad', align: 'left', field: row => row.taskTypeName, sortable: true },
+          { name: 'taskDate', required: true, label: 'Fecha', align: 'left', field: row => row.taskDate, sortable: true },
+          { name: 'taskTypeID', required: true, label: 'Actividad', align: 'left', field: row => row.taskTypeID, sortable: true },
+          //{ name: 'taskTypeName', required: true, label: 'Actividad', align: 'left', field: row => row.taskTypeName, sortable: true },
           { name: 'taskLength', required: true, label: 'Duración', align: 'right', field: row => row.taskLength, sortable: true },
           { name: 'sys_user_fullname', required: true, label: 'Usuario', align: 'left', field: row => row.sys_user_fullname, sortable: true },
           { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, style: 'min-width: 300px;' },
+          { name: 'nextDate', required: true, label: 'Próxima Actividad', align: 'left', field: row => row.nextDate, sortable: true },
+          { name: 'nextDateComments', required: true, label: 'Próxima Actividad', align: 'left', field: row => row.nextDateComments, sortable: true, style: 'min-width: 300px;' },
         ]"
-
-
   >
     <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="uploaded" :props="props">
+            <q-td key="delete" :props="props">
               <q-btn dense flat round size="xs" color="red" icon="fas fa-trash-alt" v-if="!(props.row.uploaded)" title="Quitar este registro" @click="tasks=tasks.filter(x=>x.value!=props.row.value)" />
             </q-td>
-            <q-td key="taskDate" :props="props">
+            <q-td key="uploaded" :props="props">
+              <q-btn dense flat round size="xs" color="positive" icon="fas fa-edit" title="Editar este registro" @click="editRow(props.row)" />
+            </q-td>
+            <q-td key="taskDate" :props="props" :title="dateName(props.row.taskDate)">
               {{ props.row.taskDate }}
             </q-td>
-            <q-td key="taskTypeName" :props="props">
+            <!--<q-td key="taskTypeName" :props="props">
               {{ props.row.taskTypeName }}
+            </q-td>-->
+            <q-td key="taskTypeID" :props="props">
+              {{ lookup_taskTypes.filter(x=>x.value==props.row.taskTypeID).map(y=>y.label).join("")}}
             </q-td>
             <q-td key="taskLength" :props="props">
               {{ props.row.taskLength }}
@@ -42,6 +50,14 @@
               <!--{{ props.row.comments }}-->
               <span v-html="props.row.comments"></span>
             </q-td>
+            <q-td key="nextDate" :props="props" :title="dateName(props.row.nextDate)">
+              {{ props.row.nextDate }}
+            </q-td>
+            <q-td key="nextDateComments" :props="props">
+              <!--{{ props.row.comments }}-->
+              <span v-html="props.row.nextDateComments"></span>
+            </q-td>
+            
             
           </q-tr>
     </template>
@@ -105,7 +121,6 @@
               >
               <q-tab-panel name="basic"> 
                 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
-                  
                   <selectSearchable 
                     prependIcon="fas fa-tasks"
                     labelText="Tipo de Actividad (*)" labelSearchText="Buscar Tipo de Actividad"
@@ -120,8 +135,9 @@
                             { name: 'label', label: 'Tipo de Actividad', field: 'label', align: 'left'}
                             ,{ name: 'short_name_es', label: 'Abreviado', field: 'short_name_es', align: 'left'}
                         ]"
-                    @onItemSelected="(row)=>{ updateTaskTypeID(row) }"
+                    @onItemSelected="(row)=>{taskTypeID=row.value}"
                   />
+                  <!--@onItemSelected="(row)=>{ updateTaskTypeID(row) }"-->
                   
                   <q-input
                     ref="taskDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -206,6 +222,156 @@
       </q-form>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="editDialogOpen">
+    <q-card  style="min-width: 900px;">
+      <q-toolbar :class="'q-pr-none text-subtitle2 '+(sys_user_color=='blackDark'?'text-white':'text-primary')">
+          <q-toolbar-title class="text-weight-bolder">Editar Actividad</q-toolbar-title>
+          <q-space />
+          <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="editDialogOpen=false" />
+          <q-btn v-if="!editMode" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="updateLine" />
+      </q-toolbar>
+      <q-separator />
+      <q-splitter
+        v-model="splitterModel"
+        style="height: calc(100vh - 140px);" unit="px"
+        >
+        <template v-slot:before>
+          <q-list>
+            <q-item clickable @click="tabEdit='basic'" :active="tabEdit=='basic'" active-class="bg-primary text-white" >
+                <q-item-section side>
+                    <q-icon name="fas fa-info-circle" :color="tabEdit=='basic'?'white':'grey-7'" />
+                </q-item-section>
+                <q-item-section v-if="$q.screen.gt.xs">
+                    <q-item-label :class="'text-subtitle2 '+(tabEdit=='basic'?'text-white':'text-grey-7')">Información de la Actividad</q-item-label>
+                </q-item-section>
+            </q-item>
+                    
+            <q-item clickable @click="tabEdit='next'" :active="tabEdit=='next'" active-class="bg-primary text-white" >
+                <q-item-section side>
+                    <q-icon name="fas fa-calendar" :color="tabEdit=='next'?'white':'grey-7'" />
+                </q-item-section>
+                <q-item-section v-if="$q.screen.gt.xs">
+                    <q-item-label :class="'text-subtitle2 '+(tabEdit=='next'?'text-white':'text-grey-7')">Próxima Actividad</q-item-label>
+                </q-item-section>
+            </q-item>
+          </q-list>
+        </template>
+
+        <template v-slot:after>
+          <q-tab-panels
+              v-model="tabEdit" keep-alive
+              animated
+              vertical
+              transition-prev="jump-up"
+              transition-next="jump-up"
+              >
+              <q-tab-panel name="basic"> 
+                <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+                  
+                  <selectSearchable 
+                    prependIcon="fas fa-tasks"
+                    labelText="Tipo de Actividad (*)" labelSearchText="Buscar Tipo de Actividad"
+                    :optionsList="lookup_taskTypes"
+                    rowValueField="value" optionsListLabel="label" optionsListCaption="short_name_es"
+                    optionDisableField="estado"
+                    :isRequired="true" 
+                    :isDisable="false" 
+                    :isReadonly="false"
+                    :initialValue="editRecord.taskTypeID"
+                    :tableSearchColumns="[
+                            { name: 'label', label: 'Tipo de Actividad', field: 'label', align: 'left'}
+                            ,{ name: 'short_name_es', label: 'Abreviado', field: 'short_name_es', align: 'left'}
+                        ]"
+                    @onItemSelected="(row)=>{ editRecord.taskTypeID=row.value }"
+                  />
+                  
+                  <q-input
+                    ref="taskDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                    mask="date" :rules="['date']"
+                    placeholder="Ingrese la Fecha de la Actividad" label="Fecha de Actividad (aaaa/mm/dd)" filled
+                    v-model="editRecord.taskDate"
+                    >
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy ref="qDateProxy_taskDate" transition-show="scale" transition-hide="scale">
+                          <q-date v-model="taskDate">
+                            <div class="row items-center justify-end">
+                              <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                    <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+                  </q-input>
+
+                  <q-editor
+                      v-model="editRecord.comments" placeholder="Ingrese sus Comentarios de la actividad que realizó"
+                      :toolbar="[['bold', 'italic', 'strike', 'underline'],['quote', 'unordered', 'ordered', 'outdent', 'indent'],]"
+                      :rules="[val => !!val || 'Requerido']"
+                      />
+
+                  <q-input
+                      ref="taskLength" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                      placeholder="Escriba la Duración de la Actividad en Horas o fracción (*)" label="Duración en Horas (*)" filled
+                      v-model="editRecord.taskLength" type="number" :min=0
+                      :rules="[
+                              val => !!val || '* Requerido',
+                      ]"
+                      >
+                      <template v-slot:prepend><q-icon name="fas fa-clock" /></template>
+                  </q-input>
+
+                  <div class="row q-mt-none q-mb-md" >
+                    <q-toggle 
+                      v-model="editRecord.taskBillable" icon="fas fa-check" color="positive" label="Facturable?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                      />
+                  </div>
+                
+                  <br><br>
+                </q-form>
+              </q-tab-panel>
+              
+              <q-tab-panel name="next">
+                <q-form ref="formularioNext" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+                  <q-input
+                    ref="nextDate" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                    mask="date" :rules="['date']"
+                    placeholder="Ingrese la Fecha de la Próxima Actividad" label="Próxima Actividad (aaaa/mm/dd)" filled
+                    v-model="editRecord.nextDate" 
+                    >
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy ref="qDateProxy_editRecordNextDate" transition-show="scale" transition-hide="scale">
+                          <q-date v-model="editRecord.nextDate">
+                            <div class="row items-center justify-end">
+                              <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                    <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+                </q-input>
+
+                <q-editor
+                    v-model="editRecord.nextDateComments" placeholder="Comentarios de la Próxima Actividad"
+                    :toolbar="[['bold', 'italic', 'strike', 'underline'],['quote', 'unordered', 'ordered', 'outdent', 'indent'],]"
+                    />
+                </q-form>
+              </q-tab-panel>
+          </q-tab-panels>
+        </template>
+      </q-splitter>
+      <q-form>
+        
+       
+      </q-form>
+    </q-card>
+  </q-dialog>
+
+
 </div>
 </template>
 <style lang="sass">
@@ -256,7 +422,8 @@ export default ({
     data () {
         return {
             moduleName: "casCasos", filterString: '', dialogOpen: false, splitterModel: 250, tab: 'basic',
-            taskTypeID: null, taskTypeName: "", taskDate: "", comments: "", taskLength: 1, taskBillable: true, nextDate: "", nextDateComments: ""
+            taskTypeID: null, taskTypeName: "", taskDate: "", comments: "", taskLength: 1, taskBillable: true, nextDate: "", nextDateComments: "",
+            editDialogOpen: false, editRecord: null, tabEdit: 'basic'
             //"2020/12/04"
         }
     },
@@ -287,7 +454,7 @@ export default ({
           }
           let newRows = JSON.parse(JSON.stringify(this.tasks))
           newRows.push({
-            value: max_id
+             value: max_id
             ,taskTypeID: this.taskTypeID
             ,taskTypeName: this.taskTypeName
             ,taskDate: this.taskDate
@@ -296,8 +463,10 @@ export default ({
             ,comments: this.comments
             ,nextDate: this.nextDate
             ,nextDateComments: this.nextDateComments
+            ,taskBillable: true
             ,estado: true
             ,uploaded: false
+            ,edited: true
           })
           this.tasks = newRows
           this.dialogOpen = false
@@ -306,7 +475,48 @@ export default ({
         }
         
       },
+      editRow(row){
+        this.tabEdit='basic';
+        this.editRecord = JSON.parse(JSON.stringify(row));
+        this.editDialogOpen = true;
+      },
+      updateLine(){
+        let newRows = JSON.parse(JSON.stringify(this.tasks))
+        newRows.filter(x=>x.value==this.editRecord.value).map(y=>{
+          y.taskTypeID = this.editRecord.taskTypeID;
+          y.taskDate = this.editRecord.taskDate;
+          y.comments = this.editRecord.comments;
+          y.taskLength = this.editRecord.taskLength;
+          y.nextDate = this.editRecord.nextDate;
+          y.nextDateComments = this.editRecord.nextDateComments;
+          y.edited = true;
+          //y.estado = this.editRecord.estado;
+          //y.estado = this.editRecord.estado;
+          y = this.editRecord;
+          return y
+        })
+        this.tasks = newRows;
+        this.editDialogOpen = false
+      },
+      dateName(value){
+            let resultado = '...'
+            try{
+                resultado = date.formatDate(value, this.userDateFormat,
+                    {
+                    days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                    daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
+                    months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    }
+                )
+            }catch(ex){console.dir(ex)}
+            return resultado;
+        },
       activityShow(){
+        this.tab='basic';
+        this.comments='';
+        this.nextDate=null;
+        this.nextDateComments='';
         try{
           this.taskTypeID = this.lookup_taskTypes[0].value
         }catch(ex){}
@@ -327,6 +537,8 @@ export default ({
         userName: { get () { return this.$store.state.main.userName }  },
         userLastName: { get () { return this.$store.state.main.userLastName }  },
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
+        userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
