@@ -33,7 +33,7 @@
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
                 this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
-                this.partner_account_id=row.account_id
+                this.account_id=row.account_id
                 this.$emit('onAccMoveCompute')
             }"
         />
@@ -251,7 +251,7 @@ export default ({
                                                 let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
                                                 this.partnerID = partner.value
                                                 this.partnerName = partner.label
-                                                this.partner_account_id = partner.account_id;//usado para calcular el asiento contable
+                                                this.account_id = partner.account_id;//usado para calcular el asiento contable
                                                 this.$emit('onAccMoveCompute')
                                             }
                                             //arma comentarios
@@ -296,9 +296,9 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.headerUser },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerUser', value: val}) }
         },
-        partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_account_id', value: val}) }
+        account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id', value: val}) }
         },
         partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
@@ -331,6 +331,10 @@ export default ({
         voided: {
             get () { return this.$store.state[this.moduleName].editData.basic.voided },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'voided', value: val}) }
+        },
+        amountUnpaid: {
+            get () { return this.$store.state[this.moduleName].editData.basic.amountUnpaid },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'amountUnpaid', value: val}) }
         },
         headerDate: {
             get () { return this.$store.state[this.moduleName].editData.basic.headerDate },

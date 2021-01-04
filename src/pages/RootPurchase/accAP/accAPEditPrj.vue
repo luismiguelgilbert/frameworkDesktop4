@@ -261,13 +261,13 @@
             :isRequired="true" 
             :isDisable="false" 
             :isReadonly="false"
-            :initialValue="partner_account_id"
+            :initialValue="account_id"
             :tableSearchColumns="[
                    { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
                   ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
                 ]"
             @onItemSelected="(row)=>{
-                    this.partner_account_id=row.value;
+                    this.account_id=row.value;
                     this.isPartnerAccountDialog=false;
                     this.$emit('onAccMoveCompute');
                 }"
@@ -466,9 +466,9 @@ export default ({
         partnerName: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
         },
-        partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_account_id', value: val}) }
+        account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id', value: val}) }
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },

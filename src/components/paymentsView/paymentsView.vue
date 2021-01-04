@@ -1,6 +1,10 @@
 <template>
 <div>
-    <div class="text-h6 text-primary q-pl-sm">Conciliaciones</div>
+    <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
+        <q-toolbar-title class="text-weight-bolder">Conciliaciones</q-toolbar-title>
+        <q-space />
+        <q-btn v-if="allowPayment" :label="$q.screen.gt.sm?'Crear Nuevo Pago':''" title="Nuevo Pago" icon="fas fa-money-check-alt" color="primary" no-caps @click="openPaymentDialog"/>
+    </q-toolbar>
     <q-table
         :data="reconciliation"
         table-style="min-height: calc(100vh - 450px); max-height: calc(100vh - 450px)"
@@ -19,6 +23,7 @@
         ]"
     >
         <!--<template v-slot:top>
+            
             <div class="text-primary text-h5">Historial de Conciliaciones</div>
             <q-space />
             <q-select 
@@ -140,16 +145,31 @@
 
        
     </q-table>
+
+    <q-dialog v-model="isPaymentDialogOpen">
+        <q-card class="no-padding" style="min-height: 200px; height: calc(100vh - 50px); overflow-y: hidden; min-width: calc(100vw - 50px);">
+            <accVoucherEdit :dialogMode="true" :initialPartnerID="initialPartnerID" :initialLines="initialInvoiceLines" :amountUnpaid="amountUnpaid" />
+        </q-card>
+    </q-dialog>
 </div>
 </template>
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
+import accVoucherEdit from '../../pages/RootBank/accVoucherOut/accVoucherOutEdit'
 
 export default ({
+    components:{
+        accVoucherEdit: accVoucherEdit
+    },
     props: {
         moduleName: { type: String, required: true },
+        initialPartnerID: { type: Number, required: false, default: null },
+        amountUnpaid: { type: Number, required: false, default: null },
+        allowPayment: { type: Boolean, required: true, default: false },
+        allowReconcile: { type: Boolean, required: true, default: false },
+        
     },
     data () {
         return {
@@ -164,7 +184,8 @@ export default ({
                 months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
                 monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
                 firstDayOfWeek: 1
-            }
+            },
+            isPaymentDialogOpen: false, initialInvoiceLines: []
         }
     },
     methods:{
@@ -212,6 +233,23 @@ export default ({
                 this.$q.loading.hide()
             }
         },
+        openPaymentDialog(){
+            console.dir('openPaymentDialog')
+            this.$store.commit('accVoucherOut/updateState', {key: 'editRecord', value: {value: 0, row: null} })//initialize as New
+            this.$store.commit('accVoucherOut/updateState', {key: 'editMode', value: 1})//1 = New
+            this.initialInvoiceLines.push({
+                 lineID: 1
+                ,line_account_id: 1//row.account_id
+                ,amount: this.amountUnpaid
+                ,comments: 'PENDIENTE'//row.tipoComprobanteName + ' ' + row.numeroDoc
+                ,prjID: 0
+                ,initialAccTypeID: 2//row.accTypeID
+                ,initialAccTypeName: 'pendiente'//row.accTypeName
+                ,initialAccHeaderID: 0//row.headerID
+                ,maxValue: this.amountUnpaid
+            })
+            this.isPaymentDialogOpen=true
+        }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },

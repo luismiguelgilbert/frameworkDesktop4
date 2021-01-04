@@ -1,30 +1,40 @@
 <template>
 <q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+    
     <div class="row">
         <q-toggle class="col-12 col-md-6 offset-col-md-2"
+            v-if="dialogMode==false"
             v-model="voided" icon="fas fa-ban" color="red" label="Anulado?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
             />
-        <!--<q-btn label="pruebas" @click="openPartnerCreate" />-->
     </div>
-    
-    
+
     <selectSearchable 
-        prependIcon="fas fa-hand-holding-usd"
-        labelText="Tipo de Pago (*)" labelSearchText="Buscar Tipo de Pago"
-        :optionsList="this.lookup_voucherInitialTypes"
-        rowValueField="value" optionsListLabel="label"
-        :isRequired="true" 
-        :isDisable="false" 
-        :isReadonly="(allow_edit==false && allow_insert==false)"
-        :initialValue="initialTypeID"
+        prependIcon="fas fa-handshake"
+        :labelText="(initialTypeID==1||initialTypeID==2)?'Proveedor(*)':'Proveedor'" labelSearchText="Buscar Proveedor"
+        :optionsList="this.lookup_partners"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
+        :isRequired="(initialTypeID==1||initialTypeID==2)?true:false" 
+        :class="(initialTypeID==3)?'q-pb-md':undefined"
+        :isDisable="dialogMode?true:false" 
+        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :initialValue="partnerID"
         :tableSearchColumns="[
-                { name: 'label', label: 'Origen', field: 'label', align: 'left'}
+                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
             ]"
         @onItemSelected="(row)=>{
-                this.initialTypeID = row.value
-                this.clearLines()
+                this.partnerID=row.value;
+                this.printName=row.label;
+                this.account_id_invoice=row.account_id_invoice;
+                this.account_id_advance=row.account_id_advance;
+                this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
+
+                //this.partner_account_id=row.account_id
+                this.$emit('onAccMoveCompute')
             }"
         />
+    
+    
 
     <selectSearchable 
         prependIcon="fas fa-money-check"
@@ -59,48 +69,23 @@
                 val => !!val || '* Requerido',
         ]"
         >
-        <!--counter mask="### - ### - #########" unmasked-value-->
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
 
-    <!--partnerID-->
-    <selectSearchable 
-        prependIcon="fas fa-handshake"
-        :labelText="(initialTypeID==1||initialTypeID==2)?'Proveedor(*)':'Proveedor'" labelSearchText="Buscar Proveedor"
-        :optionsList="this.lookup_partners"
-        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
-        :isRequired="(initialTypeID==1||initialTypeID==2)?true:false" 
-        :class="(initialTypeID==3)?'q-pb-md':undefined"
-        :isDisable="false" 
-        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
-        :initialValue="partnerID"
-        :tableSearchColumns="[
-                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
-                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
-            ]"
-        @onItemSelected="(row)=>{
-                this.partnerID=row.value;
-                this.printName=row.label;
-                this.account_id_invoice=row.account_id_invoice;
-                this.account_id_advance=row.account_id_advance;
-                this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
-
-                //this.partner_account_id=row.account_id
-                this.$emit('onAccMoveCompute')
-            }"
-        />
+    <q-input
+        ref="amount" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        placeholder="Monto del Pago (*)" label="Monto del Pago (*)" filled
+        v-model="amount" :min="0" :max="amountUnpaid"
+        :disable="!dialogMode"
+        type="number" class="q-pb-md"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
+    </q-input>
+    
 
     
 
-    <!--<q-input
-        disable class="q-pb-md"
-        ref="amount"
-        placeholder="Monto del Documento (*)" label="Monto del Documento (*)" filled
-        v-model="amount"
-        type="number"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
-    </q-input>-->
+    
     
     
     <q-input
@@ -129,7 +114,7 @@
         v-model="comments"
         />
 
-    <!--<q-separator class="q-mb-lg" />-->
+    
     <br/>
     <br/>
     <div class="text-subtitle2 text-primary">Datos para Imprimir</div>
@@ -142,6 +127,8 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-print" /></template>
     </q-input>
+
+    
 
     <q-input
         ref="printDate" 
@@ -162,7 +149,6 @@
         </template>
         <template v-slot:prepend><q-icon name="fas fa-calendar-day" /></template>
     </q-input>
-
     
     <br><br>
 
@@ -171,6 +157,7 @@
             <partnersEdit />
         </q-card>
     </q-dialog>-->
+    
 
 </q-form>
 </template>
@@ -184,11 +171,20 @@ import xml2js from 'xml2js'
 //import computeFunctions from './computeFunctions.js'
 
 export default ({
+    props: {
+        dialogMode: { type: Boolean, default: false },
+        amountUnpaid: { type: Number, default: 0 },
+    },
     components: {
         mainLookup: mainLookup
         ,selectSearchable: selectSearchable
         //,computeFunctions: computeFunctions
         ,partnersEdit: () => import('../../../pages/RootMaster/Partners/PartnersEdit.vue')
+    },
+    created(){
+        if(this.amountUnpaid && this.amountUnpaid >= 0){
+            this.amount = this.amountUnpaid
+        }
     },
     data () {
         return {
@@ -216,12 +212,6 @@ export default ({
             }
             )
         },
-        clearLines(){
-            this.lines = []
-            this.reconciliation = []
-            this.reconciliationLines = []
-            this.$emit('onAccMoveCompute')
-        }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },

@@ -636,8 +636,8 @@ export default ({
         partnerName: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
         },
-        partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
+        account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id },
         },
         paytermID: {
             get () { return this.$store.state[this.moduleName].editData.basic.paytermID },

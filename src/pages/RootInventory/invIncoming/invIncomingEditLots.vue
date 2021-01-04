@@ -5,18 +5,19 @@
             <q-toolbar class="bg-primary text-white" >
                 <q-toolbar-title>Productos por Lote</q-toolbar-title>
             </q-toolbar>
-            <q-item clickable v-ripple v-for="line in lines.filter(x=>x.systemType==4 && x.newQuantity>0)" :key="line.lineID" @click="selectedColumn = line"
+            <q-item clickable v-ripple v-for="line in lines.filter(x=>x.systemType==4 && x.newQuantity>0)" :key="line.stockID" @click="selectedColumn = line"
                 :class="selectedColumn==line?'bg-blue-5 text-white':undefined">
                 <q-item-section>
                     <q-item-label>{{line.invName}}</q-item-label>
                     <q-item-label caption>
                         Recibir: {{line.newQuantity}}
-                        // Lotes: {{lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                        // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
                     </q-item-label>
+                    <!--Antes // Lotes: {{lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}-->
                 </q-item-section>
                 <q-item-section side>
                     <q-icon color="red" name="fas fa-exclamation" 
-                        v-if="line.newQuantity != lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)" />
+                        v-if="line.newQuantity != lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)" />
                     <q-icon v-else color="positive" name="fas fa-check" />
                 </q-item-section>
             </q-item>
@@ -33,7 +34,7 @@
             </q-toolbar>
             <q-card-section>
                 <q-list bordered separator class="scroll" style="height: calc(100vh - 255px);" >
-                    <q-item v-for="line in lots.filter(x=>x.lineID==selectedColumn.lineID)" :key="line.rowID">
+                    <q-item v-for="line in lots.filter(x=>x.stockID==selectedColumn.stockID)" :key="line.rowID">
                         <q-item-section>
                             <q-item-label>Lote: {{line.name_es}}</q-item-label>
                         </q-item-section>
@@ -116,6 +117,7 @@ export default ({
                 newRows.push({
                      rowID: max_id
                     ,lineID: this.selectedColumn.lineID
+                    ,stockID: this.selectedColumn.stockID//este StockID es único porque viene de la tabla invKardexOrders donde campo StockID es primaryKey
                     ,invID: this.selectedColumn.invID
                     ,lotID: x.lotID
                     ,name_es: x.name_es
@@ -164,59 +166,6 @@ export default ({
                 // console.log('>>>> OK, received', data)
             })
         },
-
-        /*openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            if(this.editMode){
-                this.mainLookupUpdateFieldValueName = UpdateFieldValueName
-                this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
-                this.mainLookupPredefinedValue = predefinedValue
-                this.isPartnerDialog = true
-            }
-        },
-        updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
-            this.isPartnerDialog = false
-            this.lines = []
-            this.loadPendingInv()
-        },
-        loadPendingInv(){
-            if(this.whID>0&&this.partnerID>0){
-                this.$q.loading.show()
-                this.$axios({
-                    method: 'GET',
-                    url: this.apiURL + 'spInvKardexSelectPending',
-                    headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-                    params: {
-                        userCode: this.userCode,
-                        userCompany: this.userCompany,
-                        userLanguage: 'es',
-                        partnerID: this.partnerID,
-                        whID: this.whID,
-                        direction: 1,//1=Incoming || 0==Outgoing
-                        editMode: this.editMode
-                    }
-                }).then((response) => {
-                    //this.lines = response.data[0].lines
-                    this.lines = JSON.parse(response.data[0].lines)
-                    this.lots = [];
-                    this.lookup_lots = JSON.parse(response.data[0].lookup_lots)
-                    this.$q.loading.hide()
-                }).catch((error) => {
-                    console.dir(error)
-                    let mensaje = ''
-                    if(error.message){ mensaje = error.message }
-                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                    })
-                    this.$q.loading.hide()
-                })
-            }
-        }*/
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },

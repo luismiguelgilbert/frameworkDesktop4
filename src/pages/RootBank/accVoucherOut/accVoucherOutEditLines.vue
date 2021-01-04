@@ -1,10 +1,27 @@
 <template>
 <div>
+    <selectSearchable 
+        prependIcon="fas fa-hand-holding-usd"
+        labelText="Tipo de Pago (*)" labelSearchText="Buscar Tipo de Pago"
+        :optionsList="this.lookup_voucherInitialTypes"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="initialTypeID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Origen', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.initialTypeID = row.value
+                this.clearLines()
+            }"
+        />
     <q-table
             ref="mainTable"
             :data="lines"
             :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-            table-style="min-height: calc(100vh - 230px); max-height: calc(100vh - 230px)"
+            table-style="min-height: calc(100vh - 300px); max-height: calc(100vh - 300px)"
             row-key="lineID"
             :separator="userTableLines"
             :rows-per-page-options="[0]"
@@ -349,8 +366,7 @@ export default ({
                     this.isItemsBatchDialog=false;
                     this.$q.loading.hide()
                     this.$emit('onAccMoveCompute')
-                }
-                
+                }    
             }catch(ex){
                 console.dir(ex)
                 this.$q.loading.hide()  
@@ -477,7 +493,7 @@ export default ({
                         //Agrega Líneas al Documento
                         let nuevaFila = {
                              lineID: newLineID
-                            ,line_account_id: row.partner_account_id
+                            ,line_account_id: row.account_id
                             ,amount: row.amountUnpaid
                             ,comments: row.tipoComprobanteName + ' ' + row.numeroDoc
                             ,prjID: 0
@@ -519,7 +535,7 @@ export default ({
                                 ,accTypeID: 3//va quemado 3=Pago
                                 ,accHeaderID: this.editRecord&&this.editRecord.row&&this.editRecord.row.headerID_ux?this.editRecord.row.headerID_ux:0//nuevo pago, pero debería ir el ID
                                 ,accHeaderNumeroDoc: tempAccHeaderNumeroDoc
-                                ,account_id: row.partner_account_id//aquí viene la cuenta del Documento que se está conciliando
+                                ,account_id: row.account_id//aquí viene la cuenta del Documento que se está conciliando
                                 ,amount: row.amountUnpaid
                                 ,isDebit_isCredit: false//true=Debit, false=Credit > como es la línea del Pago (plata que sale)
                             })
@@ -530,7 +546,7 @@ export default ({
                                 ,accTypeID: row.accTypeID//accTypeID del documento de la Cuenta x Pagar
                                 ,accHeaderID: row.headerID//headerID del documento de la Cuenta x Pagar
                                 ,accHeaderNumeroDoc: row.tipoComprobanteName + ' ' + row.numeroDoc
-                                ,account_id: row.partner_account_id
+                                ,account_id: row.account_id
                                 ,amount: row.amountUnpaid
                                 ,isDebit_isCredit: true//true=Debit, false=Credit > como es la línea del Documento (plata que entra)
                             })
@@ -553,6 +569,12 @@ export default ({
             //como este componente "contiene" a 2 subcomponentes
             //entonces simplemente re-emite el evento hacia accVoucherOutEdit
             //que es donde SÍ se actualiza asiento contable
+            this.$emit('onAccMoveCompute')
+        },
+        clearLines(){
+            this.lines = []
+            this.reconciliation = []
+            this.reconciliationLines = []
             this.$emit('onAccMoveCompute')
         }
     },

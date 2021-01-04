@@ -94,7 +94,7 @@
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
-                    <q-tab-panel name="payments"> <paymentsComponent ref="paymentsComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="payments"> <paymentsComponent ref="paymentsComponent" :moduleName="moduleName" :allowPayment="true" :allowReconcile="true" :initialPartnerID="partnerID" :amountUnpaid="amountUnpaid" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
                     <q-tab-panel name="accounting"><accountingComponent ref="accountingComponent"  :moduleName="moduleName" :accountHeader="accountHeader" :accountLines="accountLines" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
 
@@ -319,7 +319,7 @@ export default ({
             accLineID: newAccLineID
             ,lineID: 0
             ,taxLineID: 0
-            ,account_id: this.partner_account_id
+            ,account_id: this.account_id
             ,partnerID: this.partnerID
             ,debit: 0
             ,credit: partnerCredit
@@ -385,11 +385,15 @@ export default ({
     linesTaxes: {
             get () { return this.$store.state[this.moduleName].editData.linesTaxes },
     },
-    partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
+    account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id },
     },
     partnerName: {
         get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
+    },
+    amountUnpaid: {
+        get () { return this.$store.state[this.moduleName].editData.basic.amountUnpaid },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'amountUnpaid', value: val}) }
     },
     accountHeader: {
         get () { return this.$store.state[this.moduleName].editData.accountHeader },

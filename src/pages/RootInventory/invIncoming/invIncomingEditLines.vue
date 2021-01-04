@@ -182,6 +182,7 @@ export default ({
           return x
         })
         this.lines = newRows
+        this.$emit('onAccMoveCompute')
       },
       clearAll(){
         let newRows = JSON.parse(JSON.stringify(this.lines))
@@ -192,6 +193,7 @@ export default ({
           return x
         })
         this.lines = newRows
+        this.$emit('onAccMoveCompute')
       },
       updateRow(newVal, colName, row){
         try{

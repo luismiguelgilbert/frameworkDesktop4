@@ -163,6 +163,7 @@ export default ({
         this.$emit('onFilterApplied', 'onFilterApplied')
     },
     openEditForm(props, editMode){
+        //{value: 0, row: null}, 1
       this.editRecord = props
       this.editMode = editMode //false = edit || true  = new
       this.router.push(this.moduleEditName);

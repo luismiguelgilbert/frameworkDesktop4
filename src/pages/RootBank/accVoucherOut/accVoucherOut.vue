@@ -144,7 +144,6 @@ export default ({
       get () { return this.$store.state[this.moduleName].pagination },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }
     },
-
     columnsSystem: {
         get () { return this.$store.state[this.moduleName].columnsSystem },
         set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'columnsSystem', value: val}) }

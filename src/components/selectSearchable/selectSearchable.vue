@@ -9,7 +9,7 @@
             :disable="isDisable" 
             :readonly="isReadonly"
             :option-label="optionLabelField"
-            :autofocus="true"
+            :autofocus="autofocus"
             
             :dense="isDense"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"

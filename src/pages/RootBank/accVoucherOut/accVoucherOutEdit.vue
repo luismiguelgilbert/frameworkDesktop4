@@ -1,18 +1,20 @@
 <template>
-<q-page style="min-height: 200px; height: calc(100vh - 50px); overflow-y: hidden;" class="q-pa-none">
-
-    <q-card class="q-ma-md rounder-corners shadow-3" v-if="dataLoaded">
+<q-page style="min-height: 200px; height: calc(100vh - 50px); overflow-y: hidden; min-width: calc(100vw - 50px);" class="q-pa-none">
+    <q-card :class="dialogMode?'q-ma-none rounder-corners shadow-3':'q-ma-md rounder-corners shadow-3'" v-if="dataLoaded">
         <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
             <q-toolbar-title class="text-weight-bolder">{{editMode?'Nuevo Pago':'Editar Pago: '+editRecord.value}}</q-toolbar-title>
             <q-space />
-            <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
-            <q-btn v-if="editMode&&allow_insert" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
-            <q-btn v-if="!editMode&&allow_edit" label="Guardar" color="positive" title="Guardar" flat icon="fas fa-save" stretch @click="saveData" />
+            <!--dialogMode={{dialogMode}}-->
+            <q-btn v-if="dialogMode==false" label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="goBack" />
+            <q-btn v-if="dialogMode==false&&(editMode&&allow_insert)" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="saveData" />
+            <q-btn v-if="dialogMode==false&&(!editMode&&allow_edit)" label="Guardar" color="positive" title="Guardar" flat icon="fas fa-save" stretch @click="saveData" />
+            <q-btn v-if="dialogMode==true" label="Agregar" color="positive" flat icon="fas fa-plus" stretch />
         </q-toolbar>
         <q-separator />
+        <!--initialPartnerID={{initialPartnerID}} // amountUnpaid={{amountUnpaid}}-->
         <q-splitter
             v-model="splitterModel"
-            style="height: calc(100vh - 140px);" unit="px"
+                :style="dialogMode?'height: calc(100vh - 100px);':'height: calc(100vh - 140px);'" unit="px"
             >
 
             <template v-slot:before>
@@ -25,7 +27,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Datos del Documento</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='lines'" :active="tab=='lines'" active-class="bg-primary text-white" :disable="!(partnerID>0)">
+                    <q-item v-if="dialogMode==false" clickable @click="tab='lines'" :active="tab=='lines'" active-class="bg-primary text-white" :disable="!(partnerID>0)">
                         <q-item-section side>
                             <q-icon name="fas fa-list-ol" :color="tab=='lines'?'white':'grey-7'" />
                         </q-item-section>
@@ -33,7 +35,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Detalle del Documento ({{lines.length}})</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" :disable="!(methodID>0)||initialTypeID==2" >
+                    <q-item v-if="dialogMode==false" clickable @click="tab='payments'" :active="tab=='payments'" active-class="bg-primary text-white" :disable="!(methodID>0)||initialTypeID==2" >
                         <q-item-section side>
                             <q-icon name="fas fa-money-bill-alt"  :color="tab=='payments'?'white':'grey-7'" />
                         </q-item-section>
@@ -41,14 +43,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='payments'?'text-white':'text-grey-7')">Pagos Aplicados</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <!--<q-item clickable @click="tab='prj'" :active="tab=='prj'" active-class="bg-primary text-white" :disable="!(methodID>0)">
-                        <q-item-section side>
-                            <q-icon name="fas fa-folder-open" :color="tab=='prj'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='prj'?'text-white':'text-grey-7')">Ajustes Contables</q-item-label>
-                        </q-item-section>
-                    </q-item>-->
                     <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(methodID>0 && allow_accounting)" >
                         <q-item-section side>
                             <q-icon name="fas fa-book"  :color="tab=='accounting'?'white':'grey-7'" />
@@ -57,7 +51,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='accounting'?'text-white':'text-grey-7')">Asiento Contable</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
+                    <q-item v-if="dialogMode==false" clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
                         </q-item-section>
@@ -65,7 +59,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
+                    <q-item v-if="dialogMode==false" clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-history" :color="tab=='history'?'white':'grey-7'" />
                         </q-item-section>
@@ -83,6 +77,7 @@
             </template>
 
             <template v-slot:after>
+                initialLines:{{initialLines}}
                 <q-tab-panels
                     v-model="tab" keep-alive
                     animated
@@ -90,19 +85,20 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
-                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
-                    <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
-                    <q-tab-panel name="payments"> <paymentsComponent ref="paymentsComponent" :moduleName="moduleName" /> </q-tab-panel>
-                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
-                    <q-tab-panel name="accounting"><accountingComponent ref="accountingComponent"  :moduleName="moduleName" :accountHeader="accountHeader" :accountLines="accountLines" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
+                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" :dialogMode="dialogMode" @onAccMoveCompute="updateAccountMove" :amountUnpaid="amountUnpaid" /></q-tab-panel>
+                    <q-tab-panel name="lines" v-if="dialogMode==false" ><linesComponent ref="linesComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
+                    <q-tab-panel name="prj" v-if="dialogMode==false" ><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
+                    <q-tab-panel name="files" v-if="dialogMode==false" > <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="payments" v-if="dialogMode==false" > <paymentsComponent ref="paymentsComponent" :moduleName="moduleName" :allowPayment="false" :alloweReconcile="true" /> </q-tab-panel>
+                    <q-tab-panel name="history" v-if="dialogMode==false" ><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
+                    <q-tab-panel name="accounting" ><accountingComponent ref="accountingComponent"  :moduleName="moduleName" :accountHeader="accountHeader" :accountLines="accountLines" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
                 </q-tab-panels>
-
+                
             </template>
 
-            </q-splitter>
+        </q-splitter>
     </q-card>
+    
 
     <q-inner-loading :showing="loadingData" style="z-index: 999;">
         <q-spinner-ios size="50px" color="amber" />
@@ -125,6 +121,13 @@ import { date } from 'quasar';
 
 
 export default ({
+    props: {
+        dialogMode: { type: Boolean, default: false },
+        initialPartnerID: { type: Number, required: false, default: null },
+        initialLines: { type: Array, required: false, default: null },
+        amountUnpaid: { type: Number, required: false, default: null },
+        
+    },
   components:{
      basicComponent: basicComponent
     ,linesComponent: linesComponent
@@ -161,40 +164,88 @@ export default ({
     },
     loadData(){
         this.loadingData = true
-        this.$axios({
-            method: 'GET',
-            url: this.apiURL + 'spAccvoucherOutSelectEdit',
-            headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-            params: {
-                userCode: this.userCode,
-                userCompany: this.userCompany,
-                userLanguage: 'es',
-                row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.headerID_ux?this.editRecord.row.headerID_ux:0,
-                editMode: this.editMode
-            }
-        }).then((response) => {
-            this.editData = [];
-            let newEditData = {};
-            Object.keys(response.data[0]).map(x=>{
-                let name = x
-                newEditData[x] = JSON.parse(response.data[0][x])
+        //#region IfFirstCallEver
+            this.$axios({
+                method: 'GET',
+                url: this.apiURL + 'spSysModulesSelect',
+                headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+                params: {
+                    sys_user_code: this.userCode,
+                    link_name: this.moduleName,
+                }
+            }).then((response) => {
+                this.columnsSystem = JSON.parse(response.data[0].columnsSystem)
+                this.filters = JSON.parse(response.data[0].filters)
+                this.filtersDetails = JSON.parse(response.data[0].filtersDetails)
+                this.security = JSON.parse(response.data[0].security)
+                //antes estaba aquí this.pagination = JSON.parse(response.data[0].pagination)
+                if(!this.columnsUserLoaded){//es primera carga?
+                    this.pagination = JSON.parse(response.data[0].pagination)//ahora está aquí
+                    this.columnsUser=JSON.parse(response.data[0].columnsUser)//(asigna columnas de usuarios
+                    let initialPagination = JSON.parse(JSON.stringify(this.pagination))//clona
+                    initialPagination.rowsPerPage = this.userRowsPerPage//asigna rowsPerPage
+                    this.pagination = initialPagination;//save to vuex
+                    this.currentFilter = JSON.parse(response.data[0].currentFilter)//filtroPredeterminado viene desde la base de datos
+                    this.moduleReports = JSON.parse(response.data[0].moduleReports)//filtroPredeterminado viene desde la base de datos
+                }
+                this.maindataLoaded = true
+                this.loadingData = false
+            }).catch((error) => {
+                console.dir(error)
+                let mensaje = ''
+                if(error.message){ mensaje = error.message }
+                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                this.$q.notify({ html: true, multiLine: false, color: 'red'
+                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                })
+                this.loadingData = false
             })
-            this.editData = newEditData;
-            this.loadingData = false
-            this.dataLoaded = true
-        }).catch((error) => {
-            console.dir(error)
-            let mensaje = ''
-            if(error.message){ mensaje = error.message }
-            if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-            if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-            this.$q.notify({ html: true, multiLine: false, color: 'red'
-                ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+        //#endregion IfFirstCallEver
+        //#region GetData
+            this.$axios({
+                method: 'GET',
+                url: this.apiURL + 'spAccvoucherOutSelectEdit',
+                headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+                params: {
+                    userCode: this.userCode,
+                    userCompany: this.userCompany,
+                    userLanguage: 'es',
+                    row_id: this.editRecord&&this.editRecord.row&&this.editRecord.row.headerID_ux?this.editRecord.row.headerID_ux:0,
+                    editMode: this.editMode
+                }
+            }).then((response) => {
+                this.editData = [];
+                let newEditData = {};
+                Object.keys(response.data[0]).map(x=>{
+                    let name = x
+                    newEditData[x] = JSON.parse(response.data[0][x])
+                })
+                this.editData = newEditData;
+                
+                if(this.initialPartnerID && this.initialPartnerID > 0){
+                    this.partnerID = this.initialPartnerID
+                    this.printName = this.lookup_partners.filter(x=>x.value==this.initialPartnerID).map(y=>y.label).join("")
+                }
+                
+                this.loadingData = false
+                this.dataLoaded = true
+            }).catch((error) => {
+                console.dir(error)
+                let mensaje = ''
+                if(error.message){ mensaje = error.message }
+                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                this.$q.notify({ html: true, multiLine: false, color: 'red'
+                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                })
+                this.loadingData = false
             })
-            this.loadingData = false
-        })
+        //#endregion GetData
     },
     saveData(){
         try{
@@ -322,6 +373,7 @@ export default ({
             })
             //#endregion HABER
             this.accountLines = newRowsAccount
+            this.amount = totalAmount
         //#endregion ACCOUNT_LINES
 
 
@@ -376,6 +428,33 @@ export default ({
     }
   },
   computed:{
+    columnsSystem: {
+        get () { return this.$store.state[this.moduleName].columnsSystem },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'columnsSystem', value: val}) }
+    },
+    columnsUser: {
+        get () { return this.$store.state[this.moduleName].columnsUser },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'columnsUser', value: val}) }
+    },
+    columnsUserLoaded: {
+        get () { return this.$store.state[this.moduleName].columnsUser.length>0?true:false },
+    },
+    pagination: {
+      get () { return this.$store.state[this.moduleName].pagination },
+      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }
+    },
+    filters: {
+        get () { return this.$store.state[this.moduleName].filters },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'filters', value: val}) }
+    },
+    filtersDetails: {
+        get () { return this.$store.state[this.moduleName].filtersDetails },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'filtersDetails', value: val}) }
+    },
+    security: {
+        get () { return this.$store.state[this.moduleName].security },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'security', value: val}) }
+    },
     loadingData: {
         get () { return this.$store.state[this.moduleName].loadingData },
         set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'loadingData', value: val}) }
@@ -419,12 +498,16 @@ export default ({
     currentPath: { get () { return this.$store.state.main.currentPath }, set (val) { this.$store.commit('main/updateState', {key: 'currentPath', value: val}) } },
     currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
     userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
+    amount:  {
+        get () { return this.$store.state[this.moduleName].editData.basic.amount },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'amount', value: val}) }
+    },
     lines: {
         get () { return this.$store.state[this.moduleName].editData.lines },
     },
-    linesTaxes: {
+    /*linesTaxes: {
             get () { return this.$store.state[this.moduleName].editData.linesTaxes },
-    },
+    },*/
     account_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id },
     },
@@ -457,9 +540,13 @@ export default ({
     },
     printName:  {
         get () { return this.$store.state[this.moduleName].editData.basic.printName },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printName', value: val}) }
     },
     lookup_accPaymentMethods: {
             get () { return this.$store.state[this.moduleName].editData.lookup_accPaymentMethods },
+    },
+    lookup_partners: {
+        get () { return this.$store.state[this.moduleName].editData.lookup_partners },
     },
   },
 })
