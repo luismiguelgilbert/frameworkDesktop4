@@ -132,6 +132,7 @@ export default ({
     openEditForm(props, editMode){
       this.editRecord = props
       this.editMode = editMode //false = edit || true  = new
+      this.lastRecord = props.value//agregado para manejar scroll (cuando se crea, entonces regresar al principio)
       this.router.push(this.moduleEditName);
     },
     openReportForm(report){

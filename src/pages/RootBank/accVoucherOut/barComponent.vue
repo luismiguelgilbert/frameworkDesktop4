@@ -166,6 +166,7 @@ export default ({
         //{value: 0, row: null}, 1
       this.editRecord = props
       this.editMode = editMode //false = edit || true  = new
+      this.lastRecord = props.value//agregado para manejar scroll (cuando se crea, entonces regresar al principio)
       this.router.push(this.moduleEditName);
     },
     openReportForm(report){

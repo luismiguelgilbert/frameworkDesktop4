@@ -1,5 +1,6 @@
 <template>
 <div>
+    
     <q-table
       ref="mainTable"
       square
@@ -164,6 +165,8 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
+//import { debounce } from 'quasar';
+
 export default({
   name: 'tableComponent',
   props: {
@@ -249,7 +252,12 @@ export default({
     },
     tableContextMenu: {
       get () { return this.$store.state[this.moduleName].tableContextMenu },
-    }
+    },
+    lastRecord:{
+      get () { return this.$store.state[this.moduleName].lastRecord },
+      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'lastRecord', value: val}) }
+    },
+    
   },
   mounted(){
     this.loadData();
@@ -292,7 +300,8 @@ export default({
                 let newPagination = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].pagination)) //clona
                 newPagination.rowsNumber = response.data[0].gridDataMaxRows
                 this.pagination = newPagination
-                this.loadingData = false
+                this.loadingData = false;
+                this.callScroll();
               }else{
                   //pendiente corregir número de registros
                   //this.gridDataMaxRows = 0
@@ -337,15 +346,24 @@ export default({
       return resultado
     },
     openEditForm(props, editMode){
-      /*console.dir(props.value)
-      console.dir(props.row)*/
       let selectedRow = {
          value: props.value
         ,row: props.row
       }
       this.editRecord = selectedRow
       this.editMode = editMode //false = edit || true  = new
+      this.lastRecord = props.value//agregado para que funcione el AutoScroll en cada módulo
       this.router.push(this.moduleEditName);
+    },
+    callScroll(){
+      setTimeout(this.tryScroll, 650)
+    },
+    async tryScroll(){
+      try{
+        let index = this.dataRows.findIndex(x=>x[this.columnsSystem.find(x=>x.is_key).field]==this.lastRecord)
+        index=parseInt(index)-parseInt(1)
+        this.$refs.mainTable.scrollTo(index)
+      }catch(ex){}
     },
     runContextCommand(menuAction, data){
       let action = {
@@ -353,7 +371,8 @@ export default({
         ,dataProp: data
       }
       this.$emit('onContextMenuClicked', action)
-    }
+    },
+    
   }
 })
 </script>
