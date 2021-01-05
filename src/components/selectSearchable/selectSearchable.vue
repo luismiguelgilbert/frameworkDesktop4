@@ -1,6 +1,7 @@
 <template>
     <div>
-        <q-select
+            
+         <q-select
             ref="selectSearchableRef"
             filled use-input hide-dropdown-icon input-debounce="500"
             v-model="componentValue"
@@ -10,6 +11,7 @@
             :readonly="isReadonly"
             :option-label="optionLabelField"
             :autofocus="autofocus"
+            
             
             :dense="isDense"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
@@ -22,7 +24,7 @@
             <template v-slot:prepend><q-icon :name="prependIcon" /></template>
             <template v-slot:append="props">
                 <q-btn v-if="showSelectButton" icon="fas fa-check" title="Seleccionar" flat dense @click="(props)=>{itemSelected(props)}"  /> 
-                <q-btn :icon="appendIcon" flat dense @click="openSearch"  /> 
+                <q-btn :icon="appendIcon" flat dense @click="openSearch" :tabindex="-1"  /> 
             </template>
             <template v-slot:no-option> <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section>
           </q-item>
@@ -36,6 +38,7 @@
                 </q-item>
             </template>
         </q-select>
+        
         
         <q-dialog v-model="isDialogOpen" @show="tryScroll"  square>
             <q-card style="min-width: 850px;">
@@ -81,6 +84,7 @@
                 </q-card-section>
             </q-card>
         </q-dialog>
+        
     </div>
 </template>
 <script>
@@ -120,7 +124,7 @@ export default({
     },
     mounted(){
         if(this.autoShowPopup==true){
-            this.$refs.selectSearchableRef.showPopup ()
+            this.$refs.selectSearchableRef.showPopup()
         }
         try{//Backup Complete Data
             this.optionsListFiltered = JSON.parse(JSON.stringify(this.optionsList))
@@ -151,9 +155,14 @@ export default({
         },
         openSearch(){
             if(!(this.isReadonly||this.isDisable)){
-                this.$refs.selectSearchableRef.hidePopup()
                 this.isDialogOpen = true
             }
+            setTimeout(this.tryHidePopup, 125)//hides Popup after click on icon
+        },
+        async tryHidePopup(){
+            try{
+                this.$refs.selectSearchableRef.hidePopup()
+            }catch(ex){}
         },
         tryScroll(){
             try{
@@ -203,7 +212,7 @@ export default({
                 this.isDialogOpen = false
             }
         },
-        filterList (val, update) {
+        filterList(val, update) {
             if (val === '') {
                 this.optionsListFiltered = this.optionsList
             }

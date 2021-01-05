@@ -1,7 +1,8 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <div class="row">
       <q-toggle class="col-4"
+        tabindex="-1"
         v-model="voided" icon="fas fa-disable" color="red" label="Anulada?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     </div>

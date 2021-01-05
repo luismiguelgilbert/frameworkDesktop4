@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     <div>
       <q-toggle
         v-model="estado" color="positive" label="Estado" icon="fas fa-check" :disable="true"

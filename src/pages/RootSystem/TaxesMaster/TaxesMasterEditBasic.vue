@@ -1,17 +1,21 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
-    <q-banner inline-actions class="text-white bg-red">
+<q-form ref="formulario" greedy autofocus no-error-focus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+    <q-banner inline-actions class="text-white bg-red" tabindex="-1">
+        
       Los porcentajes no deberían modificarse. Si necesita un nuevo porcentaje, debe crear otro impuesto
     </q-banner>
 
     <div class="row">
       <q-toggle class="col-12 col-md-4"
+        tabindex="-1"
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
       />
       <q-toggle class="col-12 col-md-4"
+        tabindex="-1"
         v-model="es_retencion" color="positive" label="Retención?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
       />
       <q-toggle class="col-12 col-md-4"
+        tabindex="-1"
         v-model="isPercent" color="positive" :label="isPercent?'Porcentaje':'Valor Fijo'" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
       />
       

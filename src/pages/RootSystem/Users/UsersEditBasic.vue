@@ -1,12 +1,13 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">    
+<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">    
     <q-toggle
+        tabindex="-1"
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     <q-input 
         ref="sys_user_id" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese el login del usuario (*)" label="Login(*)" filled
-        v-model="sys_user_id"
+        v-model="sys_user_id" 
         :rules="[
                 val => !!val || '* Requerido',
                 val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
@@ -14,6 +15,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-id-card" /></template>
     </q-input>
+    
     <q-input 
         ref="sys_user_name" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese los nombres del usuario (*)" label="Nombres(*)" filled
@@ -46,6 +48,7 @@
         :isDisable="false" 
         :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         :initialValue="sys_profile_id"
+        :autofocus="false"
         :tableSearchColumns="[
                  { name: 'label', label: 'Perfil', field: 'label', align: 'left'}
                 ,{ name: 'estado', label: 'Estado', field: 'estado', align: 'left'}

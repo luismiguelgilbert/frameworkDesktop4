@@ -1,8 +1,9 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
     
     <div class="row">
       <q-toggle class="col-12 col-md-4"
+        tabindex="-1"
         v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)||(!editMode&&!allow_basic)"
         />
     </div>
