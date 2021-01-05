@@ -361,8 +361,13 @@ export default({
     async tryScroll(){
       try{
         let index = this.dataRows.findIndex(x=>x[this.columnsSystem.find(x=>x.is_key).field]==this.lastRecord)
-        index=parseInt(index)-parseInt(1)
-        this.$refs.mainTable.scrollTo(index)
+        if(this.$refs.mainTable.hasVirtScroll){
+          index=parseInt(index)+parseInt(14)
+          this.$refs.mainTable.scrollTo(index)
+        }else{
+          index=parseInt(index)-parseInt(1)
+          this.$refs.mainTable.scrollTo(index)
+        }
       }catch(ex){}
     },
     runContextCommand(menuAction, data){
