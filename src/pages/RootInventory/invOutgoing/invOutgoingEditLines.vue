@@ -46,6 +46,7 @@
               :value="props.row.quantity" type="number" :min="0"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               readonly />
         </q-td>
         <q-td key="quantityRcvd" :props="props" :tabindex="(props.key*10)+2">
@@ -53,6 +54,7 @@
               :value="props.row.quantityRcvd" type="number" :min="0"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               readonly />
         </q-td>
         <q-td key="quantityCancel" :props="props" :tabindex="(props.key*10)+2">
@@ -60,6 +62,7 @@
               :value="props.row.quantityCancel" type="number" :min="0"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               readonly />
         </q-td>
         <q-td key="quantityOpen" :props="props" :tabindex="(props.key*10)+2">
@@ -67,6 +70,7 @@
               :value="props.row.quantityOpen" type="number" :min="0"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               readonly />
         </q-td>
        
@@ -79,6 +83,7 @@
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @input="(value)=>{updateRow(value,'newQuantity',props.row)}"
               :readonly="!editMode"
+              @focus="$event.target.select()"
               />
         </q-td>
 

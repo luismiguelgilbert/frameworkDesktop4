@@ -45,26 +45,7 @@
               debounce="1000" @input="(value)=>{updateRow(value,'lineSubtotal',props.row)}" />
         </q-td>
         <q-td key="taxID" :props="props" :tabindex="(props.key*10)+3">
-          <inlineSelectSearchable 
-            labelSearchText="Buscar Retención"
-            :optionsList="lookup_taxes"
-            rowValueField="taxID" 
-            optionsListLabel="short_name_es" optionsListCaption="name_es" optionDisableField="estado"
-            optionLabelField="short_name_es"
-            :isClearable="false"
-            :isDense="true"
-            :isDisable="false" 
-            :isReadonly="false"
-            :initialValue="props.row.taxID"
-            :tableSearchColumns="[
-                    { name: 'name_es', label: 'Retención', field: 'name_es', align: 'left'}
-                    //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
-                ]"
-            @onItemSelected="(row)=>{
-                    //let impuesto = lookup_taxes.find(x=>x.taxID==row.taxID)
-                    updateRow(row,'taxID',props.row)
-                }"
-            />
+          {{props.row.taxID}}
         </q-td>
         <q-td key="baseImponible" :props="props" :tabindex="(props.key*10)+4">
           <!--{{ props.row.baseImponible }}-->
@@ -223,13 +204,10 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
-import inlineSelectSearchable from '../../../components/selectSearchable/inlineSelectSearchable.vue'
-
 
 export default ({
     components: {
         selectSearchable: selectSearchable
-        ,inlineSelectSearchable:inlineSelectSearchable
     },
     data () {
       return {

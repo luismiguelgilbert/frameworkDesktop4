@@ -187,8 +187,7 @@
           prependIcon="fas fa-cash-register"
           labelText="Cuenta de Liquidación de Compra del Item (*)" labelSearchText="Buscar Cuenta Contable"
           :optionsList="lookup_accounts"
-          rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" 
-          optionDisableField="estado"
+          rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" optionDisableField="estado"
           :isRequired="false" 
           :isDisable="false" 
           :isReadonly="false"
@@ -393,10 +392,6 @@ export default ({
         }
       },
       updateRow(newVal, colName, row){
-        console.dir('updateRow')
-        console.dir(newVal)
-        console.dir(colName)
-        console.dir(row)
         if(colName=='taxes'){
           newVal.map(x=>{
             x.taxAmount = x.isPercent?row.lineUntaxed*x.factor*x.factor_base:x.factor
@@ -404,7 +399,6 @@ export default ({
             return 
           })
         }
-        console.dir('flag 00')
         let newRows = JSON.parse(JSON.stringify(this.lines))
         newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
         this.lines = newRows

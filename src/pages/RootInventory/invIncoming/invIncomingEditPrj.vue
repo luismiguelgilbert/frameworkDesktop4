@@ -145,13 +145,11 @@ import Vuex from 'vuex';
 import { date } from 'quasar';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
-import inlineSelectSearchable from '../../../components/selectSearchable/inlineSelectSearchable.vue'
 
 export default ({
     components: {
         mainLookup: mainLookup
         ,selectSearchable:selectSearchable
-        ,inlineSelectSearchable: inlineSelectSearchable
     },
     data () {
       return {

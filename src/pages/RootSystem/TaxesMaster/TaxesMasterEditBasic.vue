@@ -39,6 +39,7 @@
         ref="factor_base" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Factor para calcular la base imponible del impuesto (*)" label="Base (*)" filled type="number"
         v-model="factor_base"
+        @focus="$event.target.select()"
         >
         <template v-slot:prepend><q-icon name="fas fa-calculator" /></template>
     </q-input>
@@ -47,6 +48,7 @@
         ref="factor" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Factor para calcular impuesto (*)" label="Factor (*)" filled type="number"
         v-model="factor"
+        @focus="$event.target.select()"
         >
         <template v-slot:prepend><q-icon name="fas fa-percent" /></template>
     </q-input>

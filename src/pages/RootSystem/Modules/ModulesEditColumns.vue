@@ -11,7 +11,7 @@
       <q-item clickable v-ripple v-for="columna in columns" :key="columna.db_column" @click="selectedColumn = columna"
         :class="selectedColumn==columna?'bg-blue-5':undefined">
         <q-item-section>
-          <q-item-label>{{columna.db_column}}</q-item-label>
+          <q-item-label>{{columna.db_column}} <i class="text-caption">({{columna.label}})</i> </q-item-label>
           <q-item-label caption>{{columna.db_type}}</q-item-label>
         </q-item-section>
         <q-menu touch-position context-menu>
@@ -123,6 +123,7 @@
         ref="label" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese longitud mínima del campo (*)" label="Ancho mínimo de columna (*)" filled type="number"
         v-model="selectedColumn.default_min_width"
+        @focus="$event.target.select()"
         :rules="[
                 val => !!val || '* Requerido',
         ]"
@@ -133,6 +134,7 @@
         ref="label" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese longitud máxima del campo (*)" label="Ancho máxima de columna (*)" filled type="number"
         v-model="selectedColumn.default_max_width"
+        @focus="$event.target.select()"
         :rules="[
                 val => !!val || '* Requerido',
         ]"
@@ -374,7 +376,14 @@ export default ({
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         columns: {
-            get () { return this.$store.state[this.moduleName].editData.columns },
+            get () { 
+              return this.$store.state[this.moduleName].editData.columns
+              /*let resultado = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].editData.columns))
+              try{
+                resultado = resultado.sort((a, b) => { return a.default_position - b.default_position;});
+              }catch(ex){}
+              return resultado*/
+            },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataColumns', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
         },
@@ -389,7 +398,7 @@ export default ({
         },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
-        },
+        }
     }
 })
 </script>

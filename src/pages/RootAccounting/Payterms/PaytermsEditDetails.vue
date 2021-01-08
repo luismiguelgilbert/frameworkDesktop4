@@ -31,12 +31,14 @@
               <q-input dense borderless lass="no-padding" style="height: 20px !important;"
                 :value="props.row.days" type="number" dense input-class="text-right" :min="0"
                 @input="(value)=>{updateRow(value,'days',props.row)}"
+                @focus="$event.target.select()"
                 />
             </q-td>
             <q-td key="factor" :props="props">
               <q-input dense borderless lass="no-padding" style="height: 20px !important;"
                 :value="props.row.factor" type="number" dense input-class="text-right" :min="0"
                 @input="(value)=>{updateRow(value,'factor',props.row)}"
+                @focus="$event.target.select()"
                 />
             </q-td>
             

@@ -43,6 +43,7 @@
               :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               debounce="1000"  @input="(value)=>{updateRow(value,'quantity',props.row)}" />
         </q-td>
         <q-td key="price" class="no-padding" :props="props" :tabindex="(props.key*10)+3">
@@ -51,6 +52,7 @@
               :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               debounce="1000" @input="(value)=>{updateRow(value,'price',props.row)}" />
         </q-td>
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" key="lineSubtotal" :props="props">
@@ -62,6 +64,7 @@
               :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               debounce="1000" @input="(value)=>{updateRow(value,'lineDiscntPrcnt',props.row)}" />
         </q-td>
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">

@@ -326,7 +326,7 @@ export default {
   },
 
   mounted(){
-    console.dir('mainLayout mounted')
+    //console.dir('mainLayout mounted')
     this.checkVersion();
   },
   
@@ -411,7 +411,7 @@ export default {
         console.dir(error.response)
       })
     },*/
-    openWebSocketConnection(){
+    /*openWebSocketConnection(){
       if(this.userCode && this.userCode > 0){
         const socket = new WebSocket(this.URL_ws+'?userid:'+this.userCode);
         socket.onopen = evento => {
@@ -439,14 +439,14 @@ export default {
       }else{
         this.$q.notify({color: 'red', message: 'userCode es inválido'});
       }
-    },
-    closeWebSocketConnection(){
+    },*/
+    /*closeWebSocketConnection(){
       if(this.wsConnection){
         this.wsConnection.close(1000,this.userCode);
         this.isWebSocketConnected = false;
       }
-    },
-    sendMessage(){
+    },*/
+    /*sendMessage(){
       if(this.wsConnection){
         if(this.wsConnection.readyState){
           console.dir('readyState')
@@ -458,26 +458,29 @@ export default {
           }
         }
       }
-    },
-    changeWebSocketStatus(){
+    },*/
+    /*changeWebSocketStatus(){
       this.isWebSocketConnected = !this.isWebSocketConnected
       if(this.isWebSocketConnected){//true, entonces conectar
         this.openWebSocketConnection()
       }else{//false, entonces desconectado
         this.closeWebSocketConnection()
       }
-    },
+    },*/
     checkVersion(){
       if(this.sysVersion&& this.sysVersion.length>0){
         this.sysVersion.filter(x=>x.platformName=='desktop').map(y=>{
           if(y.platformVersion==version){
-            console.dir('es la misma versión')
-            console.dir(version)
-            console.dir(this.sysVersion)
+            try{
+              console.dir('Su versión: ' + version)
+              console.dir('Versión de la plataforma: ' + y.platformVersion)
+              console.dir('Usted tiene la misma versión')
+            }catch(ex){}
+            
           }else{
-            console.dir('es versión diferente!!!!!')
-            console.dir(version)
-            console.dir(this.sysVersion)
+            console.dir('Su versión: ' + version)
+            console.dir('Versión de la plataforma: ' + y.platformVersion)
+            console.dir('Usted tiene una versión diferente!!!!!')
             let nuevaVersion = ''
             try{
               nuevaVersion = this.sysVersion.find(x=>x.platformName=='desktop').platformVersion;

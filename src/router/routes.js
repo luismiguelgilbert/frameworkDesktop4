@@ -91,8 +91,6 @@ const routes = [
       ,{ path: 'RootBank/accVoucherOutEdit', component: () => import('pages/RootBank/accVoucherOut/accVoucherOutEdit.vue') }
       ,{ path: 'RootBank/accVoucherIn', component: () => import('pages/RootBank/accVoucherIn/accVoucherIn.vue') }
       ,{ path: 'RootBank/accVoucherInEdit', component: () => import('pages/RootBank/accVoucherIn/accVoucherInEdit.vue') }
-      
-      
       //INVENTORY
       ,{ path: 'RootInventory/invQuery', component: () => import('pages/RootInventory/invQuery/invQuery.vue') }
       ,{ path: 'RootInventory/invQueryEdit', component: () => import('pages/RootInventory/invQuery/invQueryEdit.vue') }
@@ -131,6 +129,23 @@ const routes = [
       ,{ path: 'RootSchoenstatt/SCHApostoladosEdit', component: () => import('pages/RootSchoenstatt/SCHApostolados/SCHApostoladosEdit.vue') }
       ,{ path: 'RootSchoenstatt/SCHFormaciones', component: () => import('pages/RootSchoenstatt/SCHFormaciones/SCHFormaciones.vue') }
       ,{ path: 'RootSchoenstatt/SCHFormacionesEdit', component: () => import('pages/RootSchoenstatt/SCHFormaciones/SCHFormacionesEdit.vue') }
+      //MFG
+      ,{ path: 'RootMFG/mfgOrders', component: () => import('pages/RootMFG/mfgOrders/mfgOrders.vue') }
+      ,{ path: 'RootMFG/mfgOrdersEdit', component: () => import('pages/RootMFG/mfgOrders/mfgOrdersEdit.vue') }
+      ,{ path: 'RootMFG/mktMFG', component: () => import('pages/RootMFG/mktMFG/mktMFG.vue') }
+      ,{ path: 'RootMFG/mktMFGEdit', component: () => import('pages/RootMFG/mktMFG/mktMFGEdit.vue') }
+      ,{ path: 'RootMFG/mktMFGreturn', component: () => import('pages/RootMFG/mktMFGreturn/mktMFGreturn.vue') }
+      ,{ path: 'RootMFG/mktMFGreturnEdit', component: () => import('pages/RootMFG/mktMFGreturn/mktMFGreturnEdit.vue') }
+      ,{ path: 'RootMFG/mktPRD', component: () => import('pages/RootMFG/mktPRD/mktPRD.vue') }
+      ,{ path: 'RootMFG/mktPRDEdit', component: () => import('pages/RootMFG/mktPRD/mktPRDEdit.vue') }
+      ,{ path: 'RootMFG/mktPRDreturn', component: () => import('pages/RootMFG/mktPRDreturn/mktPRDreturn.vue') }
+      ,{ path: 'RootMFG/mktPRDreturnEdit', component: () => import('pages/RootMFG/mktPRDreturn/mktPRDreturnEdit.vue') }
+      ,{ path: 'RootMFG/mfgLocations', component: () => import('pages/RootMFG/mfgLocations/mfgLocations.vue') }
+      ,{ path: 'RootMFG/mfgLocationsEdit', component: () => import('pages/RootMFG/mfgLocations/mfgLocationsEdit.vue') }
+      ,{ path: 'RootMFG/mfgTypes', component: () => import('pages/RootMFG/mfgTypes/mfgTypes.vue') }
+      ,{ path: 'RootMFG/mfgTypesEdit', component: () => import('pages/RootMFG/mfgTypes/mfgTypesEdit.vue') }
+      ,{ path: 'RootMFG/mfgBOM', component: () => import('pages/RootMFG/mfgBOM/mfgBOM.vue') }
+      ,{ path: 'RootMFG/mfgBOMEdit', component: () => import('pages/RootMFG/mfgBOM/mfgBOMEdit.vue') }
     ]
   },
 

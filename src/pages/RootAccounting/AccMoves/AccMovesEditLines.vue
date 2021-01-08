@@ -43,6 +43,7 @@
               :value="props.row.debit" type="number" :min="0"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               @input="(value)=>{updateRow(value,'debit',props.row)}" />
         </q-td>
         <q-td key="credit" :props="props" :tabindex="(props.key*10)+2">
@@ -50,6 +51,7 @@
               :value="props.row.credit" type="number" :min="0"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               @input="(value)=>{updateRow(value,'credit',props.row)}" />
         </q-td>
         <q-td key="comments" :props="props">{{ props.row.comments }}</q-td>

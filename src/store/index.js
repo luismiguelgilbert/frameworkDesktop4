@@ -57,6 +57,15 @@ import Locations from './Locations' //Locations
 import accAP from './accAP' //Cuentas x Pagar
 import accRet from './accRet' //Retenciones en Compra
 
+import mfgOrders from './mfgOrders' //mfgOrders
+import mktMFG from './mktMFG' //mktMFG
+import mktMFGreturn from './mktMFGreturn' //mktMFGreturn
+import mktPRD from './mktPRD' //mktPRD
+import mktPRDreturn from './mktPRDreturn' //mktPRDreturn
+import mfgLocations from './mfgLocations' //mfgLocations
+import mfgTypes from './mfgTypes' //mfgTypes
+import mfgBOM from './mfgBOM' //mfgBOM
+
 Vue.use(Vuex)
 
 export default function (/* { ssrContext } */) {
@@ -127,6 +136,15 @@ export default function (/* { ssrContext } */) {
       ,casTasksTypes
       ,casContracts
       ,casInvoices
+      //MFG
+      ,mfgOrders
+      ,mktMFG
+      ,mktMFGreturn
+      ,mktPRD
+      ,mktPRDreturn
+      ,mfgLocations
+      ,mfgTypes
+      ,mfgBOM
     },
 
     // enable strict mode (adds overhead!)

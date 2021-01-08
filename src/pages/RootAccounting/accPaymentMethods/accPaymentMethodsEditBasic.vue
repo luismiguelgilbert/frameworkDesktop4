@@ -63,6 +63,7 @@
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Último Número" label="Último Número" filled type="number" min="0"
         v-model="lastNumber"
+        @focus="$event.target.select()"
         :rules="[
                 val => val >= 0 || 'Campo debe ser 0 o superior',
         ]"
@@ -94,6 +95,7 @@
         ref="position" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese la Ubicación de este medio en listas (*)" label="Ubicación en Listas (*)" filled type="number" min="0"
         v-model="position"
+        @focus="$event.target.select()"
         :rules="[
                 val => !!val || '* Requerido',
                 val => val >= 0 || 'Campo debe ser 0 o superior',

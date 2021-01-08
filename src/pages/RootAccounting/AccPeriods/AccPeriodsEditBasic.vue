@@ -10,6 +10,7 @@
         ref="fiscalYear" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" class="q-pt-md"
         placeholder="Escriba el año del periodo contable (*)" label="Año (*)" filled type="number"
         v-model="fiscalYear"
+        @focus="$event.target.select()"
         :rules="[
                 val => !!val || '* Requerido',
                 val => val > 2000 || 'Campo debe ser mayor al 2000',

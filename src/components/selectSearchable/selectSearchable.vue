@@ -1,30 +1,32 @@
 <template>
     <div>
-            
+            <!--:rules="isRequired?[ val => !!val || '* Requerido', ]:undefined"-->
          <q-select
             ref="selectSearchableRef"
-            filled use-input hide-dropdown-icon input-debounce="500"
+            :style="isInline?'height: 20px !important;':undefined"
+            :filled="!isInline" :borderless="isInline"
+            use-input hide-dropdown-icon input-debounce="500"
             v-model="componentValue"
-            :label="labelText"
+            :label="isInline?undefined:labelText"
             :options="optionsListFiltered" map-options
             :disable="isDisable" 
             :readonly="isReadonly"
             :option-label="optionLabelField"
             :autofocus="autofocus"
-            
-            
             :dense="isDense"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
             @keyup.keyCodes.113="openSearch"
             @filter="filterList"
             :clearable="!isRequired"
+            :hide-bottom-space="isInline?true:undefined"
             :rules="isRequired?[ val => !!val || '* Requerido', ]:undefined"
             @input="(itemSelected)=>{this.itemSelected(itemSelected)}"
             >
-            <template v-slot:prepend><q-icon :name="prependIcon" /></template>
+            <template v-if="prependIcon" v-slot:prepend><q-icon :size="isInline?'xs':'sm'" flat dense :name="prependIcon" /></template>
+            <template v-slot:error><div>Contenido del Error</div></template>
             <template v-slot:append="props">
                 <q-btn v-if="showSelectButton" icon="fas fa-check" title="Seleccionar" flat dense @click="(props)=>{itemSelected(props)}"  /> 
-                <q-btn :icon="appendIcon" flat dense @click="openSearch" :tabindex="-1"  /> 
+                <q-btn :icon="appendIcon" :size="isInline?'xs':'sm'" flat dense @click="openSearch" :tabindex="-1"  /> 
             </template>
             <template v-slot:no-option> <q-item> <q-item-section class="text-italic text-grey"> No hay datos </q-item-section>
           </q-item>
@@ -94,13 +96,14 @@ import Vuex from 'vuex';
 export default({
     name: 'selectSearchable',
     props: {
-        prependIcon: { type: String, required: true, default: 'fas fa-search' },
+        prependIcon: { type: String, required: false },
         appendIcon: { type: String, required: false, default: 'fas fa-search' },
         labelText: { type: String, required: true, default: 'Buscar' },
         labelSearchText: { type: String, required: true, default: 'Buscar' },
         optionLabelField: { type: String, required: false, default: 'label' },
         optionDisableField: { type: String, required: false },
         optionsList: { type: Array, required: true, default: [] },
+        isInline: { type: Boolean, required: false, default: false },
         isRequired: { type: Boolean, required: true, default: false },
         isReadonly: { type: Boolean, required: false, default: false },
         isDisable: { type: Boolean, required: false, default: false },

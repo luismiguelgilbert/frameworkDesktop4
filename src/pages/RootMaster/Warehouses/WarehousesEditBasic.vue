@@ -22,6 +22,7 @@
         ref="position" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Escriba la posición en que debe aparecer esta bodega" label="Posición de la Bodega" filled
         v-model="position" type="number" :min=0
+        @focus="$event.target.select()"
         :rules="[
                 val => !!val || '* Requerido',
         ]"

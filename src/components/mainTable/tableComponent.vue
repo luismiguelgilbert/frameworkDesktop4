@@ -1,6 +1,6 @@
 <template>
 <div>
-    
+  <!--:virtual-scroll="pagination.rowsPerPage==0||pagination.rowsPerPage>100?true:false"-->
     <q-table
       ref="mainTable"
       square
@@ -12,19 +12,18 @@
       selection="multiple"
       :row-key="columnsSystem.find(x=>x.is_key).field"
       rows-per-page-label= "Registros"
-
       no-data-label= "No hay registros"
       no-results-label= "No se encontraron registros"
       loading-label= "Cargando datos"
       :rows-per-page-options="[17,27,50,100,250,1000, 0]"
-      :class="userColor=='blackDark'?'my-sticky-header-table-dark bg-grey-10 ':'my-sticky-header-table '"
+      :class="tableLastLine"
       :table-style="userTableDense?'min-height: calc(100vh - 135px); max-height: calc(100vh - 135px)':'min-height: calc(100vh - 153px); max-height: calc(100vh - 153px)'"
       :selected.sync="selectedRows"
       :loading="loadingData"
       :pagination.sync="pagination"
       @request="requestData"
       binary-state-sort
-      :virtual-scroll="pagination.rowsPerPage==0||pagination.rowsPerPage>100?true:false"
+      :virtual-scroll="true"
       >
       <template v-slot:body-cell="props" >
         <q-td :props="props" class="text-weight-medium ellipsis no-padding" :title="props.value" >
@@ -102,66 +101,27 @@
     
 </div>
 </template>
-<style lang="sass">
-.q-table__bottom
-    padding: 0px
-.my-sticky-header-table
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
 
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: white
-    
-
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
-    padding-left: 5px
-    font-weight: bolder
-    color: $primary
-
-  td:last-child
-    /* bg color is important for td; just specify one */
-    background-color: white !important
-  tr th
-    position: sticky
-    /* higher than z-index for td below */
-    z-index: 2
-    /* bg color is important; just specify one */
-    background: #fff
-    font-color: red
-
-  td:last-child, th:last-child
-    position: sticky
-    
-
-
-.my-sticky-header-table-dark
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th 
-    /* bg color is important for th; just specify one */
-    background-color: $grey-10
-
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
-    padding-left: 5px
-    font-weight: bolder
-    color: $primary
-
-
+<style lang="scss">
+  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
+  .q-virtual-scroll__padding{ visibility: hidden;}
+  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; margin-bottom: 5px; }
+  .my-sticky-header-table{
+    .q-table thead tr:first-child th{ background-color: white }
+  }
+  .my-sticky-header-table-LastLine{
+    .q-table thead tr:first-child th{ background-color: white }
+    .q-table td{ border-bottom-width: 1px }
+  }
+  .my-sticky-header-table-dark{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+  }
+  .my-sticky-header-table-dark-LastLine{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+    //.q-table td{ border-bottom-width: 1px }
+  }
 </style>
+
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
@@ -190,6 +150,8 @@ export default({
     allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
     allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
     userColor: { get () { return this.$store.state.main.userColor }  },
+    //computedTableHeaderBG{ get () { return this.$store.state.main.userColor }  },
+    computedTableHeaderBG: { get () { if(this.$store.state.main.userColor=='default'){return 'white'} else{return '$grey-10'} } },
     apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
     userCode: { get () { return this.$store.state.main.userCode } },
     userCompany: { get () { return this.$store.state.main.userCompany } },
@@ -197,6 +159,28 @@ export default({
     userTableDense: { get () { return this.$store.state.main.userTableDense } },
     shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons } },
     shouldWrapCellText: { get () { return this.$store.state.main.shouldWrapCellText } },
+    tableLastLine: {
+      get () { 
+        let resultado = ''
+        if(this.userColor=='blackDark'){
+          if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+          {
+            resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
+          }else{
+            resultado = 'my-sticky-header-table-dark bg-grey-10 '
+          }
+        }
+        if(this.userColor!='blackDark'){
+          if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+          {
+            resultado = 'my-sticky-header-table-LastLine '
+          }else{
+            resultado = 'my-sticky-header-table '
+          }
+        }
+        return resultado
+      }
+    },
     pagination: {
       get () { return this.$store.state[this.moduleName].pagination },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }

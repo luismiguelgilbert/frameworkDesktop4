@@ -44,6 +44,7 @@
               :value="props.row.quantityCancelNew" type="number" :min="0" :readonly="(editMode==true)" :max="props.row.quantityOpen"
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
+              @focus="$event.target.select()"
               @input="(value)=>{updateRow(value,'quantityCancelNew',props.row)}" />
         </q-td>
         <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>

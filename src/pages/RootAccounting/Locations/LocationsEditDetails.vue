@@ -38,6 +38,7 @@
             <q-td key="firstNumberAR" :props="props" title="Secuencia Inicial de Facturas" >
               <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberAR" dense input-class="text-right" :min="0" type="number"
+                @focus="$event.target.select()"
                 @input="(value)=>{updateRow(value,'firstNumberAR',props.row)}"
                 />
             </q-td>
@@ -46,6 +47,7 @@
               <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberDelivery" dense input-class="text-right" :min="0" type="number"
                 @input="(value)=>{updateRow(value,'firstNumberDelivery',props.row)}"
+                @focus="$event.target.select()"
                 />
             </q-td>
 
@@ -53,6 +55,7 @@
               <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberNC" dense input-class="text-right" :min="0" type="number"
                 @input="(value)=>{updateRow(value,'firstNumberNC',props.row)}"
+                @focus="$event.target.select()"
                 />
             </q-td>
 
@@ -60,6 +63,7 @@
               <q-input borderless class="no-padding" style="height: 20px !important;"
                 :value="props.row.firstNumberRetencion" dense input-class="text-right" :min="0" type="number"
                 @input="(value)=>{updateRow(value,'firstNumberRetencion',props.row)}"
+                @focus="$event.target.select()"
                 />
             </q-td>
             
