@@ -8,7 +8,7 @@
     </div>
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba el nombre de la Línea de Producción (*)" label="Nombre de Línea de Producción (*)" filled
+        placeholder="Escriba el nombre del Tipo de Producción (*)" label="Nombre del Tipo Producción (*)" filled
         v-model="name_es"
         :rules="[
                 val => !!val || '* Requerido',
@@ -19,7 +19,7 @@
     </q-input>
     <q-input
         ref="short_name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Escriba la abreviatura de Línea de Producción (*)" label="Abreviatura (*)" filled
+        placeholder="Escriba la abreviatura de Tipo de Producción (*)" label="Abreviatura (*)" filled
         v-model="short_name_es"
         :rules="[
                 val => !!val || '* Requerido',
