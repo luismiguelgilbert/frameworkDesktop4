@@ -22,7 +22,7 @@
                             <q-icon name="fas fa-info-circle" :color="tab=='basic'?'white':'grey-7'" />
                         </q-item-section>
                         <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Datos del Pedido</q-item-label>
+                            <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Datos de la Orden</q-item-label>
                         </q-item-section>
                     </q-item>
                     <q-item clickable @click="tab='lines'" :active="tab=='lines'" active-class="bg-primary text-white" >
@@ -74,9 +74,9 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
-                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>
-                    <q-tab-panel name="warehouse"><whComponent ref="whComponent" /></q-tab-panel>
+                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" :moduleName="moduleName" /></q-tab-panel>
+                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" :moduleName="moduleName" /></q-tab-panel>
+                    <q-tab-panel name="warehouse"><whComponent ref="whComponent" :moduleName="moduleName" /></q-tab-panel>
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 

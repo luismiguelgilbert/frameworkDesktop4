@@ -83,12 +83,15 @@ import Vuex from 'vuex';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },   
     components: {
         mainLookup: mainLookup
     },
     data () {
         return {
-            moduleName: "invIncoming", selectedColumn: null, newLineDialog: false
+            selectedColumn: null, newLineDialog: false
             //: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
@@ -221,11 +224,11 @@ export default ({
         },
         lots: {
             get () { return this.$store.state[this.moduleName].editData.lots },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLots', val) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lots', value: val}) }
         },
         lookup_lots: {
             get () { return this.$store.state[this.moduleName].editData.lookup_lots },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLookupLots', val) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lookup_lots', value: val}) }
         },
     },
 })

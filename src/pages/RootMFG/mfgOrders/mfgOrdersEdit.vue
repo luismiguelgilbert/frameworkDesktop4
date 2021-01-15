@@ -41,6 +41,14 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='budget'?'text-white':'text-grey-7')">Presupuesto de Insumos</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable @click="tab='expense'" :active="tab=='expense'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-dollar-sign" :color="tab=='expense'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='expense'?'text-white':'text-grey-7')">Gastos de Producción</q-item-label>
+                        </q-item-section>
+                    </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-history" :color="tab=='history'?'white':'grey-7'" />
@@ -63,6 +71,7 @@
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
                     <q-tab-panel name="locations"> <locationsComponent ref="locationsComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
                     <q-tab-panel name="budget"> <budgetComponent ref="budgetComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
+                    <q-tab-panel name="expense"> <expenseComponent ref="expenseComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
 
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
@@ -85,6 +94,7 @@ import Vuex from 'vuex';
 import basicComponent from './mfgOrdersEditBasic'
 import locationsComponent from './mfgOrdersEditLocations'
 import budgetComponent from './mfgOrdersEditBudget'
+import expenseComponent from './mfgOrdersEditExpense'
 import historyComponent from '../../../components/historyView/historyView'
 
 
@@ -93,6 +103,7 @@ export default ({
      basicComponent: basicComponent
     ,locationsComponent: locationsComponent
     ,budgetComponent: budgetComponent
+    ,expenseComponent: expenseComponent
     ,historyComponent: historyComponent
   },
   data () {
@@ -171,6 +182,7 @@ export default ({
                      basic: this.editData.basic
                     ,locations: this.editData.locations
                     ,budget: this.editData.budget
+                    ,expense: this.editData.expense
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)

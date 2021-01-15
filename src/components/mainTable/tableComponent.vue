@@ -118,7 +118,7 @@
   }
   .my-sticky-header-table-dark-LastLine{
     .q-table thead tr:first-child th{ background-color: $grey-10 }
-    //.q-table td{ border-bottom-width: 1px }
+    .q-table td{ border-bottom-width: 1px }
   }
 </style>
 

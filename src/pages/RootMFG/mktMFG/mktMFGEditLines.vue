@@ -3,7 +3,7 @@
     <!--:class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"-->
     <q-table
         ref="mainTable"
-        :data="budget"
+        :data="lines"
         table-style="min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);"
         row-key="lineID"
         :separator="userTableLines"
@@ -25,11 +25,10 @@
         ]"
         >
         <template v-slot:top >
-                <q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
-                <q-btn :label="$q.screen.gt.sm?'Lista de Materiales (BoM)':''"  title="Agregar masivamente Lista de Materia Prima basado en una Lista de Materiales (BoM)" @click="addBoM" icon="fas fa-boxes" color="primary" no-caps class="q-ml-sm" />
-                <q-btn :label="$q.screen.gt.sm?'Actualizar Costos':''"  title="Actualizar Costos de los registros seleccionados usando precio promedio actual en plataforma" @click="updateCosts" icon="fas fa-calculator" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0" />
-                <q-space />
-                <div style="max-width: 45%;" class="text-primary ellipsis">Lista de Materiales requeridos para producir esta orden</div>
+            <q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+            <q-btn :label="$q.screen.gt.sm?'Presupuesto de Insumos':''"  title="Agregar masivamente Materia Prima basado en el Presupuesto de Insumos" @click="addBoM" icon="fas fa-file-invoice-dollar" color="primary" no-caps class="q-ml-sm" />
+            <q-space />
+            <div style="max-width: 45%;" class="text-primary ellipsis">Lista de Materiales para consumir de bodega</div>
         </template>
         <template v-slot:body="props">
             <q-tr :props="props" >
@@ -44,7 +43,6 @@
                         />
                 </q-td>
                 <q-td key="invID" :props="props" :title="dateName(props.row.stopDate)">
-                    
                     <selectSearchable
                         labelText="Materia Prima" 
                         labelSearchText="Buscar Materia Prima"
@@ -63,6 +61,8 @@
                         @onItemSelected="(row)=>{
                             updateRow(row.value,'invID',props.row)
                             updateRow(row.lastPrice,'price',props.row)
+                            updateRow(row.debit_account_id,'debit_account_id',props.row)
+                            updateRow(row.credit_account_id,'credit_account_id',props.row)
                             }"
                         />
                 </q-td>
@@ -105,7 +105,7 @@
                     Suma:
                 </q-td>
                 <q-td class="text-right text-subtitle2 text-primary">
-                    {{budget.reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
+                    {{lines.reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
                 </q-td>
                 <q-td>
                 </q-td>
@@ -115,31 +115,23 @@
     </q-table>
 
     <q-dialog v-model="isBoMDialogOpen">
-        <q-card style="min-width: 800px;" >
-            <q-card-section class="no-padding" >
-                <selectSearchable class="col-12"
-                    prependIcon="fas fa-boxes"
-                    labelText="Listas de Materiales Disponibles para el Producto de la Orden(*)" labelSearchText="Buscar Lista de Materiales"
-                    :optionsList="lookup_mfgBudget.filter(x=>x.invID==this.invID)"
-                    rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" optionDisableField="estado"
-                    :isRequired="false" 
-                    :isDisable="false" 
-                    :isReadonly="false"
-                    
-                    :tableSearchColumns="[
-                        { name: 'mfgTypeName', label: 'Tipo', field: 'mfgTypeName', align: 'left'}
-                        ,{ name: 'invName', label: 'Producto', field: 'invName', align: 'left'}
-                        ,{ name: 'quantity', label: 'Cantidad', field: 'quantity', align: 'right'}
-                        ,{ name: 'comments', label: 'Comentarios', field: 'comments', align: 'left'}
-                        ]"
-                    @onItemSelected="(row)=>{
-                            this.BoMDialogSelection = row.value
-                        }"
-                    />
-            </q-card-section>
+        <q-card style="min-width: 1000px;" >
+            <q-bar class="bg-primary text-white">
+                    Presupuesto de Insumos
+                    <q-space />
+                    <q-input 
+                        ref="inputSearch"
+                        input-class="text-white" borderless dense debounce="300" autofocus v-model="filterString" placeholder="Buscar"
+                        >
+                        <template v-slot:append>
+                            <q-icon v-if="!filterString" name="fas fa-search" flat round size="xs" color="white" />
+                            <q-btn v-if="filterString" @click="filterString=''" flat round icon="fas fa-times" size="xs" color="white" />
+                        </template>
+                    </q-input>
+                </q-bar>
             <q-card-section class="no-padding">
                 <q-table 
-                    :data="lookup_mfgBudgetLines.filter(x=>x.value==this.BoMDialogSelection)"
+                    :data="default_orderBudget"
                     table-style="min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);"
                     row-key="lineID"
                     :separator="userTableLines"
@@ -147,19 +139,64 @@
                     hide-bottom dense flat
                     :virtual-scroll="true"
                     :class="tableLastLine"
+                    selection="multiple" :selected.sync="selectedBudgetRows"
+                    :filter="filterString"
                     :columns="[
                         //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
                         { name: 'invName', required: true, label: 'Materia Prima', align: 'left', field: row => row.invName, sortable: true },
                         { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true },
                         { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true },
+                        { name: 'uomName', required: true, label: 'Unidad', align: 'left', field: row => row.uomName, sortable: true },
                         { name: 'price', required: true, label: 'Costo', align: 'right', field: row => row.price, sortable: true },
                         //{ name: 'lineDiscntPrcnt', required: true, label: 'Dcto. %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true },
                         //{ name: 'lineDiscntAmount', required: true, label: 'Dcto. $', align: 'right', field: row => row.lineDiscntAmount, sortable: true },
                         { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
+                        { name: 'quantityReal', required: true, label: 'Cantidad Consumida', align: 'right', field: row => row.quantityReal, sortable: true },
+                        { name: 'lineUntaxedReal', required: true, label: 'Total Consumido', align: 'right', field: row => row.lineUntaxedReal, sortable: true },
                     ]"
                     >
+                    <template v-slot:body="props">
+                        <q-tr :props="props" >
+                            <q-td auto-width>
+                                <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
+                            </q-td>
+                            <q-td key="invName" :props="props" :title="dateName(props.row.stopDate)">
+                                {{props.row.invName}}                                
+                            </q-td>
+                            <q-td key="internal_code" :props="props" >
+                                {{props.row.internal_code}}                                
+                            </q-td>
+                            <q-td key="quantity" :props="props">
+                                {{ props.row.quantity.toFixed(userMoneyFormat) }}
+                            </q-td>
+                            <q-td key="uomName" :props="props" >
+                                {{props.row.uomName}}                                
+                            </q-td>
+                            <q-td key="price" :props="props">
+                                {{ props.row.price.toFixed(userMoneyFormat) }}
+                            </q-td>
+                            <q-td  key="lineUntaxed" :props="props">
+                                {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
+                            </q-td>
+                            <q-td key="quantityReal" :props="props" >
+                                <q-linear-progress size="25px" :value="props.row.quantityRealProgress" 
+                                    :color="props.row.quantityRealProgressColor" >
+                                    <div class="absolute-full flex flex-center">
+                                        <q-badge color="white" text-color="primary" :label="props.row.quantityReal.toFixed(userMoneyFormat)" />
+                                    </div>
+                                </q-linear-progress>
+                            </q-td>
+                            <q-td key="lineUntaxedReal" :props="props">
+                                {{ props.row.lineUntaxedReal.toFixed(userMoneyFormat) }}
+                            </q-td>
+                        </q-tr>
+                    </template>
                     <template v-slot:bottom-row >
                         <q-tr>
+                            <q-td>
+                            </q-td>
+                            <q-td>
+                            </q-td>
                             <q-td>
                             </q-td>
                             <q-td>
@@ -170,9 +207,12 @@
                                 Suma:
                             </q-td>
                             <q-td class="text-right text-subtitle2 text-primary">
-                                <div v-if="BoMDialogSelection">
-                                    {{lookup_mfgBudgetLines.filter(x=>x.value==BoMDialogSelection).reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
-                                </div>
+                                {{default_orderBudget.reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
+                            </q-td>
+                            <q-td>
+                            </q-td>
+                            <q-td class="text-right text-subtitle2 text-primary">
+                                {{default_orderBudget.reduce((total,item)=>{return total + item.lineUntaxedReal}, 0).toFixed(userMoneyFormat)}}
                             </q-td>
                         </q-tr>
                         <q-tr></q-tr>
@@ -182,7 +222,7 @@
             <q-card-actions align="around">
                 <q-btn  flat label="Cancelar (ESC)" no-caps color="primary" @click="isBoMDialogOpen=false" />
                 <q-btn icon-right="fas fa-check-circle" label="Seleccionar" no-caps color="primary" 
-                :disable="BoMDialogSelection==null" @click="appendRows"
+                :disable="selectedBudgetRows.length<=0" @click="appendRows"
                 />
             </q-card-actions>
         </q-card>
@@ -205,7 +245,7 @@
   }
   .my-sticky-header-table-dark-LastLine{
     .q-table thead tr:first-child th{ background-color: $grey-10 }
-    //.q-table td{ border-bottom-width: 1px }
+    .q-table td{ border-bottom-width: 1px }
   }
 </style>
 <script>
@@ -223,7 +263,7 @@ export default ({
     },
     data () {
         return {
-             selected: [], isBoMDialogOpen: false, BoMDialogSelection: null
+             selected: [], isBoMDialogOpen: false, BoMDialogSelection: null, selectedBudgetRows: [], filterString: ''
             ,myQDateLocale: {
                 /* starting with Sunday */
                 days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
@@ -261,24 +301,28 @@ export default ({
             try{
                 this.$q.loading.show()
                 let newLineID = 0
-                if(this.budget.length > 0){
-                    let temp = this.getMax(this.budget, "lineID");
+                if(this.lines.length > 0){
+                    let temp = this.getMax(this.lines, "lineID");
                     newLineID = parseInt(temp.lineID);
                 }
-                let newRows = JSON.parse(JSON.stringify(this.budget))
+                let newRows = JSON.parse(JSON.stringify(this.lines))
                 newLineID++;
                 let nuevaFila = {
                      lineID: newLineID//
+                    ,mfg_orderID: this.default_mfg_orderID
                     ,invID: 0
                     ,quantity: 0
                     ,price: 0
                     ,lineDiscntPrcnt: 0
                     ,lineDiscntAmount: 0
                     ,lineUntaxed: 0
+                    ,debit_account_id: 0
+                    ,credit_account_id: 0
+                    ,whID: this.defaultWhID
                     ,uploaded: false
                 }
                 newRows.push(nuevaFila)
-                this.budget = newRows
+                this.lines = newRows
                 this.$q.loading.hide()
                 //this.$emit('onAccMoveCompute')
             }catch(ex){
@@ -293,9 +337,9 @@ export default ({
         deleteRow(currentRow){
             try{
                 this.$q.loading.show()
-                let newRows = JSON.parse(JSON.stringify(this.budget));
+                let newRows = JSON.parse(JSON.stringify(this.lines));
                 newRows = newRows.filter(x=>x.lineID!=currentRow.lineID);
-                this.budget = newRows;
+                this.lines = newRows;
                 this.$q.loading.hide()
                 //this.$emit('onAccMoveCompute')
             }catch(ex){
@@ -306,7 +350,7 @@ export default ({
         updateRow(newVal, colName, row){
             try{
                 this.$q.loading.show()
-                let newRows = JSON.parse(JSON.stringify(this.budget))
+                let newRows = JSON.parse(JSON.stringify(this.lines))
                 newRows.filter(x=>x.lineID==row.lineID).map(result=>{
                     if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
                         result[colName] = parseFloat(newVal);
@@ -318,7 +362,7 @@ export default ({
                     result.lineUntaxed = (result.price * result.quantity) - (result.price * result.quantity) * (result.lineDiscntPrcnt / 100);
                     return result
                 })
-                this.budget = newRows;
+                this.lines = newRows;
                 this.$q.loading.hide()
                 //this.$emit('onAccMoveCompute')
             }catch(ex){
@@ -330,7 +374,7 @@ export default ({
             if(currentRow.invID==null||currentRow.invID==undefined||currentRow.invID<=0){
                 return (returnType?true:'Debe corregir la celda: Materia Prima')
             }
-            if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<0){
+            if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<=0){
                 return (returnType?true:'Debe corregir la celda: Cantidad')
             }
             if(currentRow.lineUntaxed==null||currentRow.lineUntaxed==undefined||currentRow.lineUntaxed<0){
@@ -339,51 +383,40 @@ export default ({
             return false
         },
         appendRows(){
-            if(this.BoMDialogSelection!=null){
+            if(this.selectedBudgetRows!=null&&this.selectedBudgetRows.length>0){
                 this.$q.loading.show()
                 let newLineID = 0
-                if(this.budget.length > 0){
-                    let temp = this.getMax(this.budget, "lineID");
+                if(this.lines.length > 0){
+                    let temp = this.getMax(this.lines, "lineID");
                     newLineID = parseInt(temp.lineID);
                 }
-                let newRows = JSON.parse(JSON.stringify(this.budget))
+                let newRows = JSON.parse(JSON.stringify(this.lines))
 
-                this.lookup_mfgBudgetLines.filter(x=>x.value==this.BoMDialogSelection).map(x=>{
+                this.selectedBudgetRows.map(x=>{
                     //console.dir(x)
                     newLineID++;
                     let nuevaFila = {
                         lineID: newLineID//
+                        ,mfg_orderID: this.defaultWhID
                         ,invID: x.invID
-                        ,quantity: x.quantity
+                        ,quantity: x.quantityAvailable//agrega lo que está pendiente del presupuesto
                         ,price: x.price
-                        ,lineSubtotal: x.lineSubtotal
-                        ,lineDiscntPrcnt: x.lineDiscntPrcnt
-                        ,lineDiscntAmount: x.lineDiscntAmount
-                        ,lineUntaxed: x.lineUntaxed
+                        ,lineSubtotal: x.quantityAvailable * x.price
+                        ,lineDiscntPrcnt: 0
+                        ,lineDiscntAmount: 0
+                        ,lineUntaxed: x.quantityAvailable * x.price
+                        ,debit_account_id: x.debit_account_id
+                        ,credit_account_id: x.credit_account_id
+                        ,whID: this.defaultWhID
                         ,uploaded: false
                     }
                     newRows.push(nuevaFila);
                 })
-                this.budget = newRows;
+                this.lines = newRows;
                 this.$q.loading.hide();
                 this.isBoMDialogOpen=false;
             }
         },
-        updateCosts(){
-            this.$q.loading.show()
-            let newRows = JSON.parse(JSON.stringify(this.budget));
-            newRows.filter(x=>this.selected.some(y=>y.lineID==x.lineID)).map(row=>{
-                let newCost = row.price;
-                try{ newCost = this.lookup_items.find(r=>r.value==row.invID).lastPrice }catch(ex){}
-                row.price = newCost;
-                row.lineSubtotal = row.price * row.quantity;
-                row.lineDiscntAmount = (row.price * row.quantity) * (row.lineDiscntPrcnt / 100);
-                row.lineUntaxed = (row.price * row.quantity) - (row.price * row.quantity) * (row.lineDiscntPrcnt / 100);
-            })
-            this.budget = newRows;
-            this.$q.loading.hide()
-        },
-        
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
@@ -418,23 +451,23 @@ export default ({
                 }
                 return resultado
             }
-            },
-        //Module Specific
-        invID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.invID },
         },
-        budget: {
-            get () { return this.$store.state[this.moduleName].editData.budget },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'budget', value: val}) }
+        //Module Specific
+        defaultWhID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
+        },
+        default_mfg_orderID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.default_mfg_orderID },
+        },
+        lines: {
+            get () { return this.$store.state[this.moduleName].editData.lines },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+        },
+        default_orderBudget: {
+            get () { return this.$store.state[this.moduleName].editData.default_orderBudget },
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },
-        },
-        lookup_mfgBudget: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_mfgBudget },
-        },
-        lookup_mfgBudgetLines: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_mfgBudgetLines },
         },
     }
 })

@@ -43,15 +43,6 @@
                         </q-item-section>
                     </q-item>
 
-                    <q-item clickable @click="tab='prj'" :active="tab=='prj'" active-class="bg-primary text-white" :disable="!(partnerID>0 && allow_accounting)">
-                        <q-item-section side>
-                            <q-icon name="fas fa-folder-open" :color="tab=='prj'?'white':'grey-7'" />
-                        </q-item-section>
-                        <q-item-section v-if="$q.screen.gt.xs">
-                            <q-item-label :class="'text-subtitle2 '+(tab=='prj'?'text-white':'text-grey-7')">Cuentas Contables</q-item-label>
-                        </q-item-section>
-                    </q-item>
-
                     <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0 && allow_accounting)" >
                         <q-item-section side>
                             <q-icon name="fas fa-book"  :color="tab=='accounting'?'white':'grey-7'" />
@@ -91,13 +82,13 @@
                     transition-next="jump-up"
                     >
 
-                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
-                    <q-tab-panel name="items"> <itemsComponent ref="itemsComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
-                    <q-tab-panel name="lots"> <lotsComponent ref="lotsComponent" @onAccMoveCompute="updateAccountMove" /> </q-tab-panel>
-                    <q-tab-panel name="prj"><prjComponent ref="prjComponent" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
-                    <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" /> </q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
+                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" @onAccMoveCompute="updateAccountMove" :moduleName="moduleName.toString()" /> </q-tab-panel>
+                    <q-tab-panel name="items"> <itemsComponent ref="itemsComponent" @onAccMoveCompute="updateAccountMove" :moduleName="moduleName.toString()" /> </q-tab-panel>
+                    <q-tab-panel name="lots"> <lotsComponent ref="lotsComponent" @onAccMoveCompute="updateAccountMove" :moduleName="moduleName.toString()" /> </q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
+                    <q-tab-panel name="accounting"><accountingComponent ref="accountingComponent"  :moduleName="moduleName" :accountHeader="accountHeader" :accountLines="accountLines" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
+
 
                 </q-tab-panels>
 
@@ -118,10 +109,10 @@ import Vuex from 'vuex';
 import basicComponent from './invIncomingEditBasic'
 import itemsComponent from './invIncomingEditLines'
 import lotsComponent from './invIncomingEditLots'
-import prjComponent from './invIncomingEditPrj'
-import accountingComponent from './invIncomingEditAccounting'
-import filesComponent from './invIncomingEditFiles'
-import historyComponent from './invIncomingEditHistory'
+
+import accountingComponent from '../../../components/journalView/journalView'
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
 
 
 
@@ -130,7 +121,6 @@ export default ({
      basicComponent: basicComponent
     ,itemsComponent: itemsComponent
     ,lotsComponent: lotsComponent
-    ,prjComponent: prjComponent
     ,accountingComponent: accountingComponent
     ,filesComponent: filesComponent
     ,historyComponent: historyComponent
@@ -246,21 +236,21 @@ export default ({
             })
     },
     updateAccountMove(){
-        console.dir('updateAccountMove')
+        //console.dir('updateAccountMove')
         this.$q.loading.show()
         let newRowsAccount = []
         let newAccLineID = 0
-        //#region ITEM_LINES_debit (Cuenta de Inventario porque es un Ingreso)
+        //#region DEBE
             this.lines.filter(x=>x.newQuantity>0).map(row=>{
-                console.dir('línea mayor a 0')
-                console.dir(row)
+                //console.dir('línea mayor a 0')
+                //console.dir(row)
                 newAccLineID++;
                 newRowsAccount.push({
                     accLineID: newAccLineID
                     ,lineID: row.lineID
                     ,taxLineID: 0
-                    ,accountID: row.accInventory//row.account_id
-                    ,partnerID: this.partnerID
+                    ,account_id: row.debit_account_id
+                    ,partnerID: row.partnerID
                     ,debit: row.newQuantity * row.price
                     ,credit: 0
                     ,invID: row.invID
@@ -270,16 +260,16 @@ export default ({
                     ,comments: row.invName
                 })
             })
-        //#endregion ITEM_LINES_debit
-        //#region TAX_LINES_credit (Cuenta de Provisión)
+        //#endregion DEBE
+        //#region HABER
             this.lines.filter(x=>x.newQuantity>0).map(row=>{
                 newAccLineID++;
                 newRowsAccount.push({
                 accLineID: newAccLineID
                     ,lineID: row.lineID
                     ,taxLineID: 0
-                    ,accountID: row.accAllocation//row.account_id
-                    ,partnerID: this.partnerID
+                    ,account_id: row.credit_account_id
+                    ,partnerID: row.partnerID
                     ,debit: 0
                     ,credit: row.newQuantity * row.price
                     ,invID: row.invID
@@ -289,7 +279,8 @@ export default ({
                     ,comments: row.invName
             })
             })
-        //#endregion TAX_LINES_credit
+        //#endregion HABER
+
         //#region Finalize
         this.accountLines = newRowsAccount
         this.$q.loading.hide()
@@ -344,9 +335,13 @@ export default ({
     lines: {
         get () { return this.$store.state[this.moduleName].editData.lines },
     },
+    accountHeader: {
+        get () { return this.$store.state[this.moduleName].editData.accountHeader },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountHeader', value: val}) }
+    },
     accountLines: {
-        get () { return this.$store.state[this.moduleName].editData.linesTaxes },
-        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAccountLines', val) }
+        get () { return this.$store.state[this.moduleName].editData.accountLines },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountLines', value: val}) }
     },
   },
 })

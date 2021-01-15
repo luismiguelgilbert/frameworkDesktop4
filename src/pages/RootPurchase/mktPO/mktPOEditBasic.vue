@@ -129,14 +129,16 @@ import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+      moduleName: { type: String , required: true },
+    },
     components: {
         mainLookup: mainLookup
         ,selectSearchable:selectSearchable
     },
     data () {
         return {
-            moduleName: "mktPO"
-            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null, 
+            isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null, 
         }
     },
     mounted(){

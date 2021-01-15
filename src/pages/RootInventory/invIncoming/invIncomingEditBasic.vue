@@ -102,14 +102,16 @@ import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },            
     components: {
         mainLookup: mainLookup
         ,selectSearchable:selectSearchable
     },
     data () {
         return {
-            moduleName: "invIncoming"
-            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
     mounted(){
@@ -218,16 +220,16 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.lookup_invDocTypes },
         },
         lines: {
-            get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+          get () { return this.$store.state[this.moduleName].editData.lines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
         },
         lots: {
-            get () { return this.$store.state[this.moduleName].editData.lots },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLots', val) }
+          get () { return this.$store.state[this.moduleName].editData.lots },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lots', value: val}) }
         },
         lookup_lots: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_lots },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLookupLots', val) }
+          get () { return this.$store.state[this.moduleName].editData.lookup_lots },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lookup_lots', value: val}) }
         },
     },
 })

@@ -1,53 +1,74 @@
 <template>
-<div class="row ">
+<div style="margin: -16px;">
   <q-table
-        ref="mainTable"
-        :data="lines"
-        :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        table-style="min-height: calc(100vh - 400px); max-height: calc(100vh - 400px)"
-        row-key="lineID"
-        :separator="userTableLines"
-        :rows-per-page-options="[0]"
-        hide-bottom dense
-        selection="multiple" :selected.sync="selected"
-        :filter="filterString"
-        :columns="[
-          //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-          { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
-          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
-          { name: 'price', required: true, label: 'Precio', align: 'right', field: row => row.price, sortable: true , style: 'max-width: 100px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'lineSubtotal', required: true, label: 'Suman', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
-          { name: 'lineDiscntPrcnt', required: true, label: 'Descuento %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true , style: 'max-width: 60px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true , style: 'max-width: 100px;' },
-          //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
-          //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
-          //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
-        ]"
+    ref="mainTable"
+    :data="lines"
+    :table-style="editMode==true?'min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);' : 'min-height: calc(100vh - 140px); max-height: calc(100vh - 140px);'"
+    row-key="lineID"
+    :separator="userTableLines"
+    :rows-per-page-options="[0]"
+    hide-bottom dense flat
+    selection="multiple" :selected.sync="selected"
+    virtual-scroll
+    :class="tableLastLine"
+    :columns="[
+      //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
+      { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
+      { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
+      { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
+      { name: 'price', required: true, label: 'Precio', align: 'right', field: row => row.price, sortable: true , style: 'max-width: 100px;' , headerStyle: 'padding-right: 20px;' },
+      { name: 'lineSubtotal', required: true, label: 'Suman', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
+      { name: 'lineDiscntPrcnt', required: true, label: 'Descuento %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true , style: 'max-width: 60px;' , headerStyle: 'padding-right: 20px;' },
+      { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true , style: 'max-width: 100px;' },
+      //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
+      //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
+      //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
+    ]"
     >
+    <template v-slot:top v-if="editMode==true">
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Ingresos':''" title="Agregar Ítems de Ingresos a Bodega" @click="isRequisicionDialog = true;" icon="far fa-file-alt" color="primary" no-caps  />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+    </template>
 
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
           <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
         </q-td>
-        <q-td key="invID" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
-          <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
-              :value="props.row.invName" dense item-aligned borderless
-              :rules="[val => !!val || 'Requerido']"
-              @input="(value)=>{updateRow(value,'invName',props.row)}"
-              @keyup.keyCodes.113="openSearchItems(props.row)"
-              :title="rowTitleInventory(props.row)"
-              >
-              <template v-if="editMode==true" v-slot:prepend><q-btn icon="fas fa-search" title="Buscar (F2)" size="xs" round color="primary" flat @click="openSearchItems(props.row)" /></template>
-          </q-input>
+        <q-td key="hasError" :props="props" class="no-padding">
+            <q-icon 
+                size="xs" name="fas fa-exclamation-triangle" color="red" flat dense
+                v-if="rowValidation(props.row, true)"
+                :title="rowValidation(props.row, false)"
+                />
+        </q-td>
+        <q-td key="invID" :props="props" :tabindex="(props.key*10)+1" >
+          <selectSearchable
+              labelText="Materia Prima" 
+              labelSearchText="Buscar Materia Prima"
+              :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
+              rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
+              :isRequired="true" :isDisable="false" :isReadonly="true"
+              :isInline="true" :isDense="true"
+              appendIcon="f"
+              :tableSearchColumns="[
+                    { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
+                  ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
+                  ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
+                  ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                  ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
+              ]"
+              :initialValue="props.row.invID"
+              />
         </q-td>
         <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantity" type="number" :min="0" :max="props.row.maxQuantity" :readonly="(editMode==false)"
+              :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
               dense item-aligned borderless input-class="text-right"
+              :max="props.row.maxQuantity" 
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @focus="$event.target.select()"
-              @input="(value)=>{updateRow(value,'quantity',props.row)}" />
+              debounce="1000"  @input="(value)=>{updateRow(value,'quantity',props.row)}" />
         </q-td>
         <q-td key="price" :props="props" :tabindex="(props.key*10)+3">
           <q-input class="no-padding" style="height: 20px !important;"
@@ -56,7 +77,7 @@
               dense item-aligned borderless input-class="text-right"
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @focus="$event.target.select()"
-              @input="(value)=>{updateRow(value,'price',props.row)}" />
+              debounce="1000" @input="(value)=>{updateRow(value,'price',props.row)}" />
         </q-td>
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" key="lineSubtotal" :props="props">
           {{ props.row.lineSubtotal.toFixed(userMoneyFormat) }}
@@ -73,94 +94,16 @@
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
           {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
         </q-td>
-
-        <q-td key="whID" :props="props">{{ props.row.whName }}</q-td>
-        <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
-        <q-td key="transportTypeID" :props="props">{{ props.row.transportTypeName }}</q-td>
-
       </q-tr>
     </template>
-    <template v-slot:top >
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Ingresos':''" title="Agregar Ítems de Ingresos a Bodega" @click="addRequisiciones" icon="far fa-file-alt" color="primary" no-caps  />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
-        <q-space />
-        <q-btn size="sm" icon="fas fa-calculator" color="primary" flat no-caps class="q-mr-sm" :disable="selected.length<=0" @click="isStatsDialog=!isStatsDialog" />
-    </template>
+    
     <template v-slot:bottom-row >
       <q-tr></q-tr>
     </template>
   </q-table>
 
-  <div class="row col-12 q-pt-sm ">
-    <q-card class="col-md-12" >
-      <q-bar class="bg-primary text-white">
-        <q-icon name="fas fa-dollar-sign" color="white" />
-        <q-space />
-        <div v-if="$q.screen.gt.sm" class="text-subtitle2">Resumen del Documento</div>
-        <div v-else class="text-subtitle2">Resumen</div>
-      </q-bar>
-      <q-card-section class="no-padding">
-        <q-list class="scroll" style="height: 100px;">
-          <q-item clickable dense>
-            <q-item-section >
-                <q-item-label class="text-grey-7">Suman:</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              {{lines.reduce(function(sum, d) { return sum + d.lineSubtotal; }, 0).toFixed(userMoneyFormat)}}
-            </q-item-section>
-          </q-item>
-          <q-item clickable dense>
-            <q-item-section >
-                <q-item-label class="text-grey-7">Descuento:</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              {{(lines.reduce(function(sum, d) { return sum + d.lineDiscntAmount; }, 0) * -1).toFixed(userMoneyFormat)}}
-            </q-item-section>
-          </q-item>
-          <q-item clickable dense>
-            <q-item-section>
-              <b class="text-subtitle2 text-grey-7" >Subtotal:</b>
-            </q-item-section>
-            <q-item-section side>
-              <b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>
-            </q-item-section>
-          </q-item>
-          <q-separator />
-          <!--Sección Impuestos, que están en [calculatedSumOfTaxes] :key="fila.value"-->
-          <q-item clickable dense v-for="lines in calculatedSumOfTaxes" :key="lines.index">
-              <q-item-section >
-                  <q-item-label class="text-grey-7">{{lines.label}}:</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                {{lines.value.toFixed(userMoneyFormat)}}
-              </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-      <q-separator />
-      <q-card-actions class="no-padding">
-        <q-item clickable dense class="full-width">
-          <q-item-section >
-              <q-item-label class="text-subtitle2 text-primary"><b>TOTAL:</b></q-item-label>
-          </q-item-section>
-          <q-item-section side class="text-subtitle2 text-primary q-mr-md">
-            <!--<b>{{lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0).toFixed(userMoneyFormat)}}</b>-->
-            {{
-              (
-                lines.reduce(function(sum, d) { return sum + d.lineUntaxed; }, 0)
-                +
-                linesTaxes.reduce(function(sum, d) { return sum + d.taxAmount; }, 0)
-              ).toFixed(userMoneyFormat)
-            }}
-          </q-item-section>
-        </q-item>
-      </q-card-actions>
-
-    </q-card>
-  </div>
-
   <q-dialog v-model="isRequisicionDialog" @show="loadRequisicionesPendientes">
-    <q-card style="min-width: 950px;">
+    <q-card style="min-width: 95%;">
       <q-bar class="bg-primary text-white">
         Ingresos a Bodega
         <q-space />
@@ -173,13 +116,12 @@
       </q-bar>
       <q-card-section class="no-padding">
         <q-table
-          ref="requisicionesSearchTable"
-          :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
+          ref="requisicionesSearchTable" flat square
           table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
           :data="requisiciones"
           :columns="[
             { name: 'mktPOHeaderID', required: true, label: 'OC #', align: 'left', field: row => row.mktPOHeaderID, sortable: true, style: 'min-width: 30px;', },
-            { name: 'mktPOLineID', required: true, label: 'OC Línea #', align: 'left', field: row => row.mktPOLineID, sortable: true, style: 'min-width: 30px;', },
+            { name: 'mktPOLineID', required: true, label: 'OC Línea #', align: 'left', field: row => row.mktPOLineID, sortable: true,  },
             { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 250px;', },
             { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'min-width: 50px;', },
             { name: 'quantityReturned', required: true, label: 'Devolución', align: 'right', field: row => row.quantityReturned, sortable: true, style: 'min-width: 50px;', },
@@ -194,12 +136,15 @@
           virtual-scroll :rows-per-page-options="[0]"
           hide-bottom dense
           selection="multiple" :selected.sync="requisicionesDialogSelected"
+          :class="tableLastLine"
+          :separator="userTableLines"
           :filter="requisicionesFilterString"
           />
+          <q-separator />
       </q-card-section>
       <q-card-actions align="around">
-        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
-        :disable="requisicionesDialogSelected.length<=0" @click="requisicionesBatchDialogSelectAction(requisicionesDialogSelected)" ></q-btn>
+        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar" no-caps color="primary" 
+        :disable="requisicionesDialogSelected.length<=0" @click="addRows(requisicionesDialogSelected)" ></q-btn>
       </q-card-actions>
       <q-inner-loading :showing="isRequisicionDialogLoading" style="z-index: 10" >
         <q-spinner-gears size="50px" color="primary" />
@@ -207,76 +152,45 @@
     </q-card>
   </q-dialog >
 
-  <q-dialog v-model="isStatsDialog" >
-    <q-card style="min-width: 500px;">
-      <q-markup-table dense v-if="selected.length>0">
-        <thead >
-          <tr>
-            <th class="text-left">Seleccionadas</th>
-            <th class="text-right">Cantidad</th>
-            <th class="text-right">Suma</th>
-            <th class="text-right">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="text-left">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).length}}</td>
-            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.quantity); }, 0).toFixed(userMoneyFormat)}}</td>
-            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineSubtotal); }, 0).toFixed(userMoneyFormat)}}</td>
-            <td class="text-right">{{lines.filter(x=>selected.some(y=>y.lineID==x.lineID)).reduce(function(sum, d) { return parseFloat(sum) + parseFloat(d.lineUntaxed); }, 0).toFixed(userMoneyFormat)}}</td>
-          </tr>
-        </tbody>
-      </q-markup-table>
-    </q-card>
-  </q-dialog>
-
 </div>
 
 </template>
-<style lang="sass">
-  .q-table__bottom
-      padding: 0px
-  .my-sticky-header-usercompany
-    /* max height is important */
-    .q-table__middle
-      max-height: 50px
-
-    .q-table__top,
-    .q-table__bottom,
-    thead tr:first-child th /* bg color is important for th; just specify one */
-      background-color: white
-
-    thead tr:first-child th
-      position: sticky
-      top: 0
-      opacity: 1
-      z-index: 2
-
-  .my-sticky-header-usercompany-dark
-    /* max height is important */
-    .q-table__middle
-      max-height: 50px
-
-    .q-table__top,
-    .q-table__bottom,
-    thead tr:first-child th /* bg color is important for th; just specify one */
-      background-color: $grey-10
-
-    thead tr:first-child th
-      position: sticky
-      top: 0
-      opacity: 1
-      z-index: 2
+<style lang="scss">
+  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
+  .q-virtual-scroll__padding{ visibility: hidden;}
+  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
+  .my-sticky-header-table{
+    .q-table thead tr:first-child th{ background-color: white }
+  }
+  .my-sticky-header-table-LastLine{
+    .q-table thead tr:first-child th{ background-color: white }
+    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
+  }
+  .my-sticky-header-table-dark{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+  }
+  .my-sticky-header-table-dark-LastLine{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+    .q-table td{ border-bottom-width: 1px }
+  }
 </style>
+
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+  props: {
+    moduleName: { type: String , required: true },
+  },
+  components: {
+    selectSearchable: selectSearchable
+  },
     data () {
       return {
-          moduleName: "mktPORet", filterString: '', selected: []
+          filterString: '', selected: []
         ,isItemsDialog: false, itemsDialogFilter: '', itemsDialogSelected: [], itemsDialogRowToUpdate: null, itemsDialogTableBusy: false
         ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
         ,isRequisicionDialog: false, requisicionesDialogSelected: [], requisicionesFilterString: '', isRequisicionDialogLoading: false
@@ -292,231 +206,23 @@ export default ({
           }
           return max;
       },
-      updateRow(newVal, colName, row){
-        try{
-          //Actualiza las líneas
-          let newRows = JSON.parse(JSON.stringify(this.lines))
-          if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
-            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
-          }else{
-            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
-          }
-          newRows.find(x=>x.lineID==row.lineID)[colName] = newVal;
-          let invID = newRows.find(x=>x.lineID==row.lineID).invID
-          let invName = invID?this.lookup_items.find(x => x.value == invID).label:''
-          let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
-          let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
-          let lineUntaxed = lineSubtotal - lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
-          newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineUntaxed
-          newRows.find(x=>x.lineID==row.lineID).invName = invName
-          this.lines = newRows
-
-          //Actualiza todas las taxLines correspondientes a la línea modificada
-          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-          newRowsTaxes.filter(x=>x.lineID==row.lineID).map(lineaImpuesto=>{
-            lineaImpuesto.lineUntaxed = lineUntaxed;
-            lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor);
-            return lineaImpuesto
-            //return lineaImpuesto.taxAmount = lineaImpuesto.isPercent?( parseFloat(lineUntaxed * lineaImpuesto.factor_base) * parseFloat(lineaImpuesto.factor) )  :  parseFloat(lineaImpuesto.factor)
-          })
-          this.linesTaxes = newRowsTaxes
-
-        }catch(ex){
-          console.error(ex)
+      rowValidation(currentRow, returnType){
+        if(currentRow.invID==null||currentRow.invID==undefined||currentRow.invID<=0){
+            return (returnType?true:'Debe corregir la celda: Materia Prima')
         }
-      },
-      removeRows(){
-        if(this.selected.length > 0){
-          this.$q.dialog({ 
-            title: 'Confirmación'
-            ,message: 'Desea quitar las líneas seleccionadas?'
-            ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
-            ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
-          }
-          ).onOk(() => {
-            //Líneas
-            let newRows = JSON.parse(JSON.stringify(this.lines))
-            this.selected.map(row=>{
-              newRows = newRows.filter(x=>x.lineID!=row.lineID);
-            })
-            this.lines = newRows
-
-            //Impuestos
-            let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-            newRowsTaxes = newRowsTaxes.filter(x=>newRows.some(y=>y.lineID==x.lineID))
-            this.linesTaxes = newRowsTaxes
-
-            this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
-          })
+        if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<=0){
+            return (returnType?true:'Debe corregir la celda: Cantidad')
         }
-      },
-      getAge(fecha){
-        return date.getDateDiff(new Date(), fecha, 'years')
-      },
-      openSearchItems(currentRow){
-        if(this.editMode==true){
-          this.itemsDialogRowToUpdate = currentRow
-          this.isItemsDialog = true
-          if(currentRow&&currentRow.invID&&currentRow.invID>0){
-            this.itemsDialogTableBusy = true
-            try{
-              this.itemsDialogSelected = []
-              this.itemsDialogSelected.push(this.lookup_items.find(x => x.value == currentRow.invID))
-              this.itemsDialogTableBusy = false
-            }catch(ex){
-              this.itemsDialogTableBusy = false
-            }
-          }
+        if(currentRow.quantity>currentRow.maxQuantity){
+            return (returnType?true:'Debe disminuir el valor en la celda: Cantidad')
         }
-        
-        
-      },
-      itemsDialogSelectAction(){
-        if(this.itemsDialogSelected.length>0){
-          //Primero agrega los impuestos correspondientes al Item con su código de línea
-          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-          newRowsTaxes = newRowsTaxes.filter(x=>x.lineID!=this.itemsDialogRowToUpdate.lineID)//remuevo los impuestos de la línea xq voy a agregarlos nuevamente
-          this.lookup_items_taxes.filter(x=>x.invID==this.itemsDialogSelected[0].value).forEach(impuesto=>{
-              newRowsTaxes.push({
-                 lineID: this.itemsDialogRowToUpdate.lineID
-                ,taxID: impuesto.taxID
-                ,taxName: impuesto.shortLabel
-                ,taxAmount: 0
-                ,isPercent: impuesto.isPercent
-                ,factor: impuesto.factor
-                ,factor_base: impuesto.factor_base
-                ,lineUntaxed: 0
-              })
-            })
-          this.linesTaxes = newRowsTaxes
-
-          //Segundo, actualiza la fila por medio del método [updateRow] , el cual también actualiza las líneas del impuesto
-          if(this.itemsDialogSelected[0].estado==true){
-            this.updateRow(this.itemsDialogSelected[0].value, 'invID', this.itemsDialogRowToUpdate)
-            this.isItemsDialog = false
-          }
+        if(currentRow.debit_account_id==null||currentRow.debit_account_id==undefined||currentRow.debit_account_id<=0||currentRow.credit_account_id==null||currentRow.credit_account_id==undefined||currentRow.credit_account_id<=0){
+            return (returnType?true:'Debe corregir la configuración contable')
         }
-      },
-      itemsDialogShown(){
-        if(this.itemsDialogSelected.length>0){
-          try{
-            this.$refs.itemsSearchTable.scrollTo(this.lookup_items.findIndex(x=>x.value == this.itemsDialogSelected[0].value))
-          }catch(ex){}
+        if(currentRow.lineUntaxed==null||currentRow.lineUntaxed==undefined||currentRow.lineUntaxed<0){
+            return (returnType?true:'Debe verificar todas las celdas por un error en: Total')
         }
-        
-      },
-      checkIfRowNull(){
-        this.lines = this.lines.filter(x=>x.invID>0)
-      },
-      itemsBatchDialogSelectAction(){
-        let max_id = 0
-        let temp = null
-        if(this.lines.length > 0){
-          temp = this.getMax(this.lines, "lineID");
-          //max_id = parseInt(temp.lineID) + parseInt(1);
-          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
-        }
-        let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
-        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
-        if(this.itemsBatchDialogSelected.length>0){
-          this.itemsBatchDialogSelected.filter(x=>x.estado).map(row => {
-            max_id = parseInt(max_id) + parseInt(1);
-            //líneas
-            newRows.push({
-               lineID: max_id
-              ,invID: row.value
-              ,invName: row.label
-              ,quantity: 1
-              ,price: 1
-              ,lineSubtotal: 1
-              ,lineDiscntPrcnt: 0
-              ,lineDiscntAmount: 0
-              ,lineUntaxed: 1
-              ,whID: this.defaultWhID
-              ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
-              ,prjID: 0
-              ,prjName: ''
-              ,transportTypeID: this.defaultTransportID
-              ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
-            })
-
-            //Impuestos de la línea
-            this.lookup_items_taxes.filter(x=>x.invID==row.value).forEach(impuesto=>{
-                newRowsTaxes.push({
-                   lineID: max_id
-                  ,taxID: impuesto.taxID
-                  ,taxName: impuesto.shortLabel
-                  ,taxAmount: impuesto.isPercent?( parseFloat(1 * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
-                  ,isPercent: impuesto.isPercent
-                  ,factor: impuesto.factor
-                  ,factor_base: impuesto.factor_base
-                  ,lineUntaxed: 1
-                })
-              })
-          })
-          this.lines = newRows
-          this.linesTaxes = newRowsTaxes
-          this.isItemsBatchDialog = false
-        }
-      },
-      addRequisiciones(){
-        this.isRequisicionDialog = true;
-      },
-      requisicionesBatchDialogSelectAction(){
-        let max_id = 0
-        let temp = null
-        if(this.lines.length > 0){
-          temp = this.getMax(this.lines, "lineID");
-          //max_id = parseInt(temp.lineID) + parseInt(1);
-          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
-        }
-        let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
-        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
-        if(this.requisicionesDialogSelected.length>0){
-          this.requisicionesDialogSelected.map(row => {
-            max_id = parseInt(max_id) + parseInt(1);
-            //líneas
-            newRows.push({
-               lineID: max_id
-              ,invID: row.invID
-              ,invName: row.invName
-              ,quantity: row.quantityReturnedNew
-              ,maxQuantity: row.maxQuantity
-              ,price: row.price
-              ,lineSubtotal: row.quantityReturnedNew * row.price
-              ,lineDiscntPrcnt: 0
-              ,lineDiscntAmount: 0
-              ,lineUntaxed: row.quantityReturnedNew * row.price
-              ,whID: row.whID
-              ,whName: row.whName//this.lookup_wh.find(x => x.value == this.defaultWhID).label
-              ,prjID: row.prjID
-              ,prjName: row.prjName
-              ,kardexID: row.kardexID
-              ,stockID: row.stockID
-              ,moveID: row.moveID
-            })
-
-            /*//Impuestos de la línea
-            this.lookup_items_taxes.filter(x=>x.invID==row.invID).forEach(impuesto=>{
-                newRowsTaxes.push({
-                   lineID: max_id
-                  ,taxID: impuesto.taxID
-                  ,taxName: impuesto.shortLabel
-                  ,taxAmount: impuesto.isPercent?( parseFloat( (row.lineUntaxed) * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
-                  ,isPercent: impuesto.isPercent
-                  ,factor: impuesto.factor
-                  ,factor_base: impuesto.factor_base
-                  ,lineUntaxed: row.lineUntaxed
-                })
-              })*/
-          })
-          this.lines = newRows
-          //this.linesTaxes = newRowsTaxes
-          this.isItemsBatchDialog = false
-        }
-        this.isRequisicionDialog = false;
+        return false
       },
       loadRequisicionesPendientes(){
         this.isRequisicionDialogLoading = true;
@@ -548,16 +254,114 @@ export default ({
             this.isRequisicionDialogLoading = false;
         })
       },
-      rowTitleInventory(fila){
-        let resultado = 'Seleccionar...'
-        let target = null
-        if(fila&&fila.invID&&fila.invID>0){
+      addRows(){
+        if(this.requisicionesDialogSelected.length>0){
           try{
-            target = this.lookup_items.find(x=>x.value == fila.invID)
-            resultado = 'Código: ' + target.internal_code + ' || Unidad: ' + target.uomName + ' || Marca: ' + target.brandName
-          }catch(ex){}
+            this.$q.loading.show()
+            //GetMaxId
+            let max_id = 0
+            let temp = null
+            if(this.lines.length > 0){
+              temp = this.getMax(this.lines, "lineID");
+              max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+            }
+
+            //get Current Data
+            let newRows = JSON.parse(JSON.stringify(this.lines))
+            //let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
+
+            //Iterate Selected Rows
+            this.requisicionesDialogSelected.map(invRow => {
+              console.dir('Bandera')
+              console.dir(invRow)
+              max_id++;
+
+              //Append Line
+              newRows.push({
+                  lineID: max_id
+                ,invID: invRow.invID
+                ,debit_account_id: invRow.debit_account_id
+                ,credit_account_id: invRow.credit_account_id
+                ,quantity: invRow.quantityReturnedNew
+                ,maxQuantity: invRow.maxQuantity
+                ,price: invRow.price
+                ,lineSubtotal: invRow.quantityReturnedNew * invRow.price
+                ,lineDiscntPrcnt: 0
+                ,lineDiscntAmount: 0
+                ,lineUntaxed: invRow.quantityReturnedNew * invRow.price
+                ,whID: invRow.whID
+                ,prjID: invRow.prjID
+                ,transportTypeID: invRow.transportTypeID
+                ,kardexID: invRow.kardexID
+                ,stockID: invRow.stockID
+                ,moveID: invRow.moveID
+              })
+
+              //No se agrega impuestos..?
+            })
+            
+            //Update Data
+            this.lines = newRows;
+            this.isRequisicionDialog = false;
+            this.$q.loading.hide()
+          }catch(ex){
+            console.dir(ex)
+            this.$q.loading.hide()  
+          }
         }
-        return resultado
+      },
+      removeRows(){
+        if(this.selected.length > 0){
+          this.$q.dialog({ 
+            title: 'Confirmación'
+            ,message: 'Desea quitar las líneas seleccionadas?'
+            ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
+            ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
+          }
+          ).onOk(() => {
+            //Líneas
+            try{
+              this.$q.loading.show();
+              let newRows = JSON.parse(JSON.stringify(this.lines))
+              this.selected.map(row=>{
+                newRows = newRows.filter(x=>x.lineID!=row.lineID);
+              })
+              this.lines = newRows
+              this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
+              this.$q.loading.hide()
+            }catch(ex){
+              console.error(ex)
+              this.$q.loading.hide()
+            }
+            
+          })
+        }
+      },
+      updateRow(newVal, colName, row){
+        try{
+          this.$q.loading.show()
+          //Actualiza las líneas
+          let newRows = JSON.parse(JSON.stringify(this.lines))
+          newRows.filter(x=>x.lineID==row.lineID).map(result=>{
+            if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
+                result[colName] = parseFloat(newVal);
+            }else{
+                result[colName] = newVal;
+            }
+            result.lineSubtotal = result.price * result.quantity;
+            result.lineDiscntAmount = (result.price * result.quantity) * (result.lineDiscntPrcnt / 100);
+            result.lineUntaxed = (result.price * result.quantity) - (result.price * result.quantity) * (result.lineDiscntPrcnt / 100);
+            return result;
+          })
+
+          //Actualiza Datos
+          this.lines = newRows;
+          this.$q.loading.hide();
+
+        }catch(ex){
+          console.error(ex)
+          this.$q.loading.hide();
+        }
       },
     },
     computed:{
@@ -572,23 +376,43 @@ export default ({
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         userTableLines: { get () { return this.$store.state.main.userTableLines } },
+        tableLastLine: {
+          get () { 
+              let resultado = ''
+              if(this.userColor=='blackDark'){
+              if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+              {
+                  resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
+              }else{
+                  resultado = 'my-sticky-header-table-dark bg-grey-10 '
+              }
+              }
+              if(this.userColor!='blackDark'){
+                  if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+                  {
+                      resultado = 'my-sticky-header-table-LastLine '
+                  }else{
+                      resultado = 'my-sticky-header-table '
+                  }
+              }
+              return resultado
+          }
+        },
         partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
         },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
         },
         requisiciones: {
             get () { return this.$store.state[this.moduleName].editData.requisiciones },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataRequisiciones', val) }
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'requisiciones', value: val}) }
         },
-        linesTaxes: {
+        /*linesTaxes: {
             get () { return this.$store.state[this.moduleName].editData.linesTaxes },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLinesTaxes', val) }
-        },
+        },*/
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },

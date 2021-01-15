@@ -76,9 +76,12 @@ import Vuex from 'vuex';
 import { date } from 'quasar';
 
 export default ({
+    props: {
+      moduleName: { type: String , required: true },
+    },
     data () {
         return {
-            moduleName: "mktPR"
+            variable: null
         }
     },
     mounted(){

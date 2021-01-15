@@ -26,31 +26,6 @@
                 this.lines = []
             }"
         />
-    <!--<q-input
-        ref="partnerName" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
-        placeholder="Seleccione el Proveedor (*)" label="Proveedor (*)" filled
-        :value="partnerName" 
-        @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
-    </q-input>-->
-
-    <!--<q-select
-        label="Bodega (*)" placeholder="Seleccione la Bodega de Origen que está devolviendo los Items (*)" emit-value map-options filled
-        :options="lookup_wh" 
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
-        v-model="whID" @input="loadPendingInv()"
-        ref="whID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
-    </q-select>-->
 
     <q-select
         label="Usuario que Solicita Devolución (*)" placeholder="Seleccione el usuario (*)" emit-value map-options filled
@@ -117,14 +92,16 @@ import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+      moduleName: { type: String , required: true },
+    },
     components: {
         mainLookup: mainLookup
         ,selectSearchable:selectSearchable
     },
     data () {
         return {
-            moduleName: "mktPORet"
-            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
     mounted(){
@@ -163,8 +140,7 @@ export default ({
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
         },
         headerUser: {
             get () { return this.$store.state[this.moduleName].editData.basic.headerUser },

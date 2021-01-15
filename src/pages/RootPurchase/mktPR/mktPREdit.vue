@@ -74,9 +74,9 @@
                     transition-prev="jump-up"
                     transition-next="jump-up"
                     >
-                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" /></q-tab-panel>
-                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" /></q-tab-panel>
-                    <q-tab-panel name="warehouse"><whComponent ref="whComponent" /></q-tab-panel>
+                    <q-tab-panel name="basic"><basicComponent ref="basicComponent" :moduleName="moduleName" /></q-tab-panel>
+                    <q-tab-panel name="lines"><linesComponent ref="linesComponent" :moduleName="moduleName" /></q-tab-panel>
+                    <q-tab-panel name="warehouse"><whComponent ref="whComponent" :moduleName="moduleName" /></q-tab-panel>
 
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>

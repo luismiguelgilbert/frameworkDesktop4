@@ -1,25 +1,26 @@
 <template>
-<div>
+<div style="margin: -16px;">
   <q-table
-      :data="files"
-      :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-      table-style="min-height: 150px; max-height: calc(100vh - 225px)"
-      row-key="attach_id"
-      :separator="userTableLines"
-      :rows-per-page-options="[0]"
-      hide-bottom dense
-      :filter="filterString"
-      :columns="[
-        //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
-        { name: 'uploaded', required: true, label: 'Descargar', align: 'center', field: row => row.uploaded, sortable: true },
-        { name: 'original_file_name', required: true, label: 'Archivo', align: 'left', field: row => row.original_file_name, sortable: true },
-        { name: 'file_size', required: true, label: 'Tamaño (KB)', align: 'left', field: row => row.file_size, sortable: true },
-        { name: 'file_type', required: true, label: 'Tipo', align: 'left', field: row => row.file_type, sortable: true },
-        { name: 'sys_user_fullname', required: true, label: 'Usuario', align: 'center', field: row => row.sys_user_fullname, sortable: true },
-        { name: 'audit_last_date', required: true, label: 'Fecha', align: 'center', field: row => row.audit_last_date, sortable: true },
-        { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
-
-      ]"
+    ref="mainTable"
+    :data="files"
+    :table-style="editMode==true?'min-height: calc(100vh - 193px); max-height: calc(100vh - 193px);' : 'min-height: calc(100vh - 193px); max-height: calc(100vh - 193px);'"
+    row-key="attach_id"
+    :separator="userTableLines"
+    :rows-per-page-options="[0]"
+    hide-bottom dense flat
+    virtual-scroll
+    :class="tableLastLine"
+    :filter="filterString"
+    :columns="[
+      //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
+      { name: 'uploaded', required: true, label: 'Descargar', align: 'center', field: row => row.uploaded, sortable: true },
+      { name: 'original_file_name', required: true, label: 'Archivo', align: 'left', field: row => row.original_file_name, sortable: true },
+      { name: 'file_size', required: true, label: 'Tamaño (KB)', align: 'left', field: row => row.file_size, sortable: true },
+      { name: 'file_type', required: true, label: 'Tipo', align: 'left', field: row => row.file_type, sortable: true },
+      { name: 'sys_user_fullname', required: true, label: 'Usuario', align: 'center', field: row => row.sys_user_fullname, sortable: true },
+      { name: 'audit_last_date', required: true, label: 'Fecha', align: 'center', field: row => row.audit_last_date, sortable: true },
+      { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
+    ]"
 
 
     >
@@ -31,7 +32,7 @@
             <q-td key="original_file_name" :props="props">
               {{ props.row.original_file_name }}
             </q-td>
-            <q-td key="file_size" :props="props">
+            <q-td key="file_size" :props="props" :title="getFileSizeInMB(props.row.file_size)">
               {{ props.row.file_size }}
             </q-td>
             <q-td key="file_type" :props="props">
@@ -61,8 +62,7 @@
         </q-input>
     </template>
     <template v-slot:bottom-row >
-      <q-tr>
-      </q-tr>
+      <q-tr></q-tr>
     </template>
   </q-table>
   <q-dialog v-model="dialogVisible">
@@ -83,40 +83,25 @@
 </div>
 
 </template>
-<style lang="sass">
-.q-table__bottom
-    padding: 0px
-.my-sticky-header-usercompany
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
 
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: white
-
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
-
-.my-sticky-header-usercompany-dark
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
-
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: $grey-10
-
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
+<style lang="scss">
+  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
+  .q-virtual-scroll__padding{ visibility: hidden;}
+  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
+  .my-sticky-header-table{
+    .q-table thead tr:first-child th{ background-color: white }
+  }
+  .my-sticky-header-table-LastLine{
+    .q-table thead tr:first-child th{ background-color: white }
+    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
+  }
+  .my-sticky-header-table-dark{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+  }
+  .my-sticky-header-table-dark-LastLine{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+    .q-table td{ border-bottom-width: 1px }
+  }
 </style>
 <script>
 import Vue from 'vue';
@@ -257,8 +242,14 @@ export default ({
               })
               this.loadingData = false
           })
+      },
+      getFileSizeInMB(size){
+        let resultado = '';
+        try{
+          resultado = ((size / 1024)/1024)
+        }catch(ex){}
+        return resultado.toFixed(2) + ' MB';
       }
-
     },
     computed:{
         userCode: { get () { return this.$store.state.main.userCode } },
@@ -273,6 +264,28 @@ export default ({
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         serverFilesPath: { get () { return this.$q.sessionStorage.getItem('serverFilesPath') } },
+        tableLastLine: {
+        get () { 
+            let resultado = ''
+            if(this.userColor=='blackDark'){
+              if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+              {
+                  resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
+              }else{
+                  resultado = 'my-sticky-header-table-dark bg-grey-10 '
+              }
+              }
+              if(this.userColor!='blackDark'){
+                  if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+                  {
+                      resultado = 'my-sticky-header-table-LastLine '
+                  }else{
+                      resultado = 'my-sticky-header-table '
+                  }
+              }
+              return resultado
+          }
+        },
         files: {
             get () { return this.$store.state[this.moduleName].editData.files },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataFiles', val) }
