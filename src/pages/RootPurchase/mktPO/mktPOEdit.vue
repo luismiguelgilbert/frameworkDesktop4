@@ -57,12 +57,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='history'?'text-white':'text-grey-7')">Auditoría de Cambios</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item>
-                          <q-item-section />
-                          <q-item-section side>
-                              <q-item-label class="text-subtitle2 text-grey-7"></q-item-label>
-                          </q-item-section>
-                      </q-item>
                 </q-list>
             </template>
 
@@ -77,7 +71,6 @@
                     <q-tab-panel name="basic"><basicComponent ref="basicComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
                     <q-tab-panel name="lines"><linesComponent ref="linesComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
                     <q-tab-panel name="warehouse"><whComponent ref="whComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
-                    
                     <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName.toString()" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
 
@@ -98,9 +91,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './mktPOEditBasic'
-import whComponent from './mktPOEditWH'
 import linesComponent from './mktPOEditLines'
-
+import whComponent from './mktPOEditWH'
 
 import filesComponent from '../../../components/filesView/filesView'
 import historyComponent from '../../../components/historyView/historyView'

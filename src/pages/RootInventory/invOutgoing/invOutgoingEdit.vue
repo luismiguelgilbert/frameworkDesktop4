@@ -25,7 +25,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Documento de Egreso</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='items'" :active="tab=='items'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0)" >
+                    <q-item clickable @click="tab='items'" :active="tab=='items'" active-class="bg-primary text-white" :disable="!(partnerID>=0 && whID > 0)" >
                         <q-item-section side>
                             <q-icon name="fas fa-boxes"  :color="tab=='items'?'white':'grey-7'" />
                         </q-item-section>
@@ -33,8 +33,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='items'?'text-white':'text-grey-7')">Items Entregados ({{lines.filter(x=>x.newQuantity>0).length}})</q-item-label>
                         </q-item-section>
                     </q-item>
-
-                    <q-item clickable @click="tab='lots'" :active="tab=='lots'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0 && lines.some(x=>x.systemType==4))" >
+                    <q-item clickable @click="tab='lots'" :active="tab=='lots'" active-class="bg-primary text-white" :disable="!(partnerID>=0 && whID > 0 && lines.some(x=>x.systemType==4))" >
                         <q-item-section side>
                             <q-icon name="fas fa-barcode"  :color="tab=='lots'?'white':'grey-7'" />
                         </q-item-section>
@@ -42,8 +41,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='lots'?'text-white':'text-grey-7')">Lotes y Series ({{lines.filter(x=>x.newQuantity>0&&x.systemType==4).length}})</q-item-label>
                         </q-item-section>
                     </q-item>
-
-                    <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0 && allow_accounting)" >
+                    <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>=0 && whID > 0 && allow_accounting)" >
                         <q-item-section side>
                             <q-icon name="fas fa-book"  :color="tab=='accounting'?'white':'grey-7'" />
                         </q-item-section>
@@ -51,7 +49,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='accounting'?'text-white':'text-grey-7')">Asiento Contable</q-item-label>
                         </q-item-section>
                     </q-item>
-
                     <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
@@ -60,7 +57,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
                         </q-item-section>
                     </q-item>
-
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-history" :color="tab=='history'?'white':'grey-7'" />
@@ -69,7 +65,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='history'?'text-white':'text-grey-7')">Auditoría de Cambios</q-item-label>
                         </q-item-section>
                     </q-item>
-                    
                 </q-list>
             </template>
 
@@ -82,13 +77,12 @@
                     transition-next="jump-up"
                     >
 
-                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" /> </q-tab-panel>
-                    <q-tab-panel name="items"> <itemsComponent ref="itemsComponent" /> </q-tab-panel>
-                    <q-tab-panel name="lots"> <lotsComponent ref="lotsComponent" /> </q-tab-panel>
-                    <q-tab-panel name="accounting"> <accountingComponent ref="accountingComponent" /> </q-tab-panel>
-                    <q-tab-panel name="cases"> <casesComponent ref="casesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" /> </q-tab-panel>
-                    <q-tab-panel name="history"> <historyComponent /> </q-tab-panel>
+                    <q-tab-panel name="basic"> <basicComponent ref="basicComponent" @onAccMoveCompute="updateAccountMove" :moduleName="moduleName.toString()" /> </q-tab-panel>
+                    <q-tab-panel name="items"> <itemsComponent ref="itemsComponent" @onAccMoveCompute="updateAccountMove" :moduleName="moduleName.toString()" /> </q-tab-panel>
+                    <q-tab-panel name="lots"> <lotsComponent ref="lotsComponent" @onAccMoveCompute="updateAccountMove" :moduleName="moduleName.toString()" /> </q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName" /> </q-tab-panel>
+                    <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
+                    <q-tab-panel name="accounting"><accountingComponent ref="accountingComponent"  :moduleName="moduleName" :accountHeader="accountHeader" :accountLines="accountLines" @onAccMoveCompute="updateAccountMove" /></q-tab-panel>
 
                 </q-tab-panels>
 
@@ -109,11 +103,10 @@ import Vuex from 'vuex';
 import basicComponent from './invOutgoingEditBasic'
 import itemsComponent from './invOutgoingEditLines'
 import lotsComponent from './invOutgoingEditLots'
-import accountingComponent from './invOutgoingEditAccounting'
-import filesComponent from './invOutgoingEditFiles'
-import historyComponent from './invOutgoingEditHistory'
 
-
+import accountingComponent from '../../../components/journalView/journalView'
+import filesComponent from '../../../components/filesView/filesView'
+import historyComponent from '../../../components/historyView/historyView'
 
 export default ({
   components:{
@@ -233,6 +226,55 @@ export default ({
                     this.loadingData = false
                 })
             })
+    },
+    updateAccountMove(){
+        //console.dir('updateAccountMove')
+        this.$q.loading.show()
+        let newRowsAccount = []
+        let newAccLineID = 0
+        //#region DEBE
+            this.lines.filter(x=>x.newQuantity>0).map(row=>{
+                newAccLineID++;
+                newRowsAccount.push({
+                    accLineID: newAccLineID
+                    ,lineID: row.lineID
+                    ,taxLineID: 0
+                    ,account_id: row.debit_account_id
+                    ,partnerID: row.partnerID
+                    ,debit: row.newQuantity * row.price
+                    ,credit: 0
+                    ,invID: row.invID
+                    ,prjID: row.prjID
+                    ,stockID: row.stockID
+                    ,mktLineID: row.lineID
+                    ,comments: row.invName
+                })
+            })
+        //#endregion DEBE
+        //#region HABER
+            this.lines.filter(x=>x.newQuantity>0).map(row=>{
+                newAccLineID++;
+                newRowsAccount.push({
+                accLineID: newAccLineID
+                    ,lineID: row.lineID
+                    ,taxLineID: 0
+                    ,account_id: row.credit_account_id
+                    ,partnerID: row.partnerID
+                    ,debit: 0
+                    ,credit: row.newQuantity * row.price
+                    ,invID: row.invID
+                    ,prjID: row.prjID
+                    ,stockID: row.stockID
+                    ,mktLineID: row.lineID
+                    ,comments: row.invName
+            })
+            })
+        //#endregion HABER
+
+        //#region Finalize
+        this.accountLines = newRowsAccount
+        this.$q.loading.hide()
+        //#endregion Finalize
     }
   },
   computed:{
@@ -282,7 +324,15 @@ export default ({
     },
     lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
-        },
+    },
+    accountHeader: {
+        get () { return this.$store.state[this.moduleName].editData.accountHeader },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountHeader', value: val}) }
+    },
+    accountLines: {
+        get () { return this.$store.state[this.moduleName].editData.accountLines },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountLines', value: val}) }
+    },
   },
 })
 </script>

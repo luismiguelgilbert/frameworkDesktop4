@@ -37,7 +37,7 @@
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+          <q-checkbox v-model="props.selected" dense :title="props.row.lineID" />
         </q-td>
         <q-td key="hasError" :props="props" class="no-padding">
             <q-icon 
@@ -50,7 +50,7 @@
           <selectSearchable
               labelText="Materia Prima" 
               labelSearchText="Buscar Materia Prima"
-              :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
+              :optionsList="lookup_items"
               rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
               :isRequired="true" :isDisable="false" :isReadonly="true"
               :isInline="true" :isDense="true"
@@ -59,16 +59,16 @@
                     { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                   ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                   ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                  ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                  ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                   ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
               ]"
+              :tooltipColumns="[
+                   { name: 'label', label: 'Item'}
+                  ,{ name: 'internal_code', label: 'Código'}
+                  ,{ name: 'uomName', label: 'Unidad'}
+                  ,{ name: 'brandName', label: 'Marca'}
+              ]"
               :initialValue="props.row.invID"
-              @onItemSelected="(row)=>{
-                  updateRow(row.value,'invID',props.row)
-                  updateRow(row.lastPrice,'price',props.row)
-                  updateRow(row.debit_account_id,'debit_account_id',props.row)
-                  updateRow(row.credit_account_id,'credit_account_id',props.row)
-                  }"
               />
         </q-td>
         <q-td key="quantity" class="no-padding" :props="props" :tabindex="(props.key*10)+2">
@@ -103,9 +103,6 @@
         <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
           {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
         </q-td>
-
-
-
       </q-tr>
     </template>
     
@@ -183,7 +180,7 @@
   </q-table>
 
   <q-dialog v-model="isItemsBatchDialog">
-    <q-card style="min-width: 800px;" > 
+    <q-card style="min-width: 95%;" > 
       <q-bar class="bg-primary text-white">
         Buscar Items
         <q-space />
@@ -199,7 +196,7 @@
           ref="itemsSearchTable" flat square
           table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
           @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
-          :data="lookup_items.filter(x=>x.estado==true)"
+          :data="lookup_items"
           :columns="[
             { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
             { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
@@ -208,6 +205,8 @@
             { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
             //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
             { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
+            { name: 'lastPrice', required: true, label: 'Precio P. Actual', align: 'right', field: row => row.lastPrice, format: val => `$${val}`, sortable: true, style: 'min-width: 50px;'},
+            //{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: true, style: 'min-width: 50px;'},
           ]"
           row-key="value"
           virtual-scroll :rows-per-page-options="[0]"
@@ -217,16 +216,17 @@
           :class="tableLastLine"
           :separator="userTableLines"
           >
+          <template v-slot:body-selection="scope">
+            <q-checkbox v-if="scope.row.estado" v-model="scope.selected" dense :title="JSON.stringify(scope.row.estado)" :disable="!(scope.row.estado)" />
+            <q-icon v-if="!(scope.row.estado)" name="fas fa-ban" color="red" style="margin-left: 2px;" title="Se encuentra Inactivo"/>
+          </template>
         </q-table>
         <q-separator />
         
       </q-card-section>
       <q-card-actions align="around">
-        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.length<=0" @click="addRows(itemsBatchDialogSelected)" ></q-btn>
+        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.filter(x=>x.estado).length<=0" @click="addRows(itemsBatchDialogSelected)" ></q-btn>
       </q-card-actions>
-      <q-inner-loading :showing="itemsBatchDialogTableBusy" style="z-index: 10" >
-        <q-spinner-gears size="50px" color="primary" />
-      </q-inner-loading>
     </q-card>
   </q-dialog>
 
@@ -315,8 +315,8 @@ export default ({
   data () {
     return {
         selected: []
-      ,isItemsDialog: false, itemsDialogFilter: '', itemsDialogSelected: [], itemsDialogRowToUpdate: null, itemsDialogTableBusy: false
-      ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
+      ,itemsDialogSelected: []
+      ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: []
       ,isRequisicionDialog: false, requisicionesDialogSelected: [], requisicionesFilterString: '', isRequisicionDialogLoading: false
     }
   },
@@ -363,37 +363,86 @@ export default ({
           
           //Iterate Selected Rows
           this.itemsBatchDialogSelected.map(invRow => {
-            max_id++;
-            //Append Line
-            newRows.push({
-                lineID: max_id
-              ,invID: invRow.value
-              ,debit_account_id: invRow.debit_account_id
-              ,credit_account_id: invRow.credit_account_id
-              ,quantity: 1
-              ,price: invRow.lastPrice
-              ,lineSubtotal: 1 * invRow.lastPrice
-              ,lineDiscntPrcnt: 0
-              ,lineDiscntAmount: 0
-              ,lineUntaxed: 1 * invRow.lastPrice
-              ,whID: this.defaultWhID
-              ,prjID: 0
-              ,transportTypeID: this.defaultTransportID
-            })
+            
+            if(invRow.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
+              max_id++; //increase lineID
 
-            //Append LineTax
-            this.lookup_items_taxes.filter(x=>x.invID==invRow.value).map(impuesto=>{
-              let taxConfig = this.lookup_taxes.find(t=>t.taxID==impuesto.taxID)
-              newRowsTaxes.push({
-                lineID: max_id
-                ,taxID: impuesto.taxID
-                ,taxName: taxConfig.short_name_es
-                ,isPercent: taxConfig.isPercent
-                ,factor: taxConfig.factor
-                ,factor_base: taxConfig.factor_base
-                ,taxAmount: taxConfig.isPercent?( parseFloat(1 * taxConfig.factor_base) * parseFloat(taxConfig.factor) )  :  parseFloat(taxConfig.factor)
+              //Append Line
+              newRows.push({
+                  lineID: max_id
+                ,invID: invRow.value
+                ,debit_account_id: invRow.debit_account_id
+                ,credit_account_id: invRow.credit_account_id
+                ,quantity: 1
+                ,price: invRow.lastPrice
+                ,lineSubtotal: 1 * invRow.lastPrice
+                ,lineDiscntPrcnt: 0
+                ,lineDiscntAmount: 0
+                ,lineUntaxed: 1 * invRow.lastPrice
+                ,whID: this.defaultWhID
+                ,prjID: 0
+                ,transportTypeID: this.defaultTransportID
+                ,estado: true
               })
-            })
+
+              //Append LineTax
+              this.lookup_items_taxes.filter(x=>x.invID==invRow.value).map(impuesto=>{
+                let taxConfig = this.lookup_taxes.find(t=>t.taxID==impuesto.taxID)
+                newRowsTaxes.push({
+                  lineID: max_id
+                  ,taxID: impuesto.taxID
+                  ,taxName: taxConfig.short_name_es
+                  ,isPercent: taxConfig.isPercent
+                  ,factor: taxConfig.factor
+                  ,factor_base: taxConfig.factor_base
+                  ,taxAmount: taxConfig.isPercent?( parseFloat(1 * taxConfig.factor_base) * parseFloat(taxConfig.factor) )  :  parseFloat(taxConfig.factor)
+                })
+              })
+            
+            }
+
+            if(invRow.systemType==3){ //3=Kit > Entonces busco los materiales y recorro el resulto para irlos agregagando
+              this.lookup_items_kits.filter(x=>x.invID==invRow.value).map(material=>{//material es el item que debo agregar
+                this.lookup_items.filter(item=>item.value==material.materialID).map(item=>{//busco el código del material en los items
+                  
+                  max_id++; //increase lineID
+
+                  //Append Line
+                  newRows.push({
+                      lineID: max_id
+                    ,invID: item.value
+                    ,debit_account_id: item.debit_account_id
+                    ,credit_account_id: item.credit_account_id
+                    ,quantity: 1
+                    ,price: item.lastPrice
+                    ,lineSubtotal: 1 * item.lastPrice
+                    ,lineDiscntPrcnt: 0
+                    ,lineDiscntAmount: 0
+                    ,lineUntaxed: 1 * item.lastPrice
+                    ,whID: this.defaultWhID
+                    ,prjID: 0
+                    ,transportTypeID: this.defaultTransportID
+                    ,estado: true
+                  })
+
+                  //Append LineTax
+                  this.lookup_items_taxes.filter(x=>x.invID==item.value).map(impuesto=>{
+                    let taxConfig = this.lookup_taxes.find(t=>t.taxID==impuesto.taxID)
+                    newRowsTaxes.push({
+                      lineID: max_id
+                      ,taxID: impuesto.taxID
+                      ,taxName: taxConfig.short_name_es
+                      ,isPercent: taxConfig.isPercent
+                      ,factor: taxConfig.factor
+                      ,factor_base: taxConfig.factor_base
+                      ,taxAmount: taxConfig.isPercent?( parseFloat(1 * taxConfig.factor_base) * parseFloat(taxConfig.factor) )  :  parseFloat(taxConfig.factor)
+                    })
+                  })
+                
+                })
+              })
+            }
+
           })
 
           //Update Data
@@ -649,6 +698,9 @@ export default ({
       },
       lookup_items: {
           get () { return this.$store.state[this.moduleName].editData.lookup_items },
+      },
+      lookup_items_kits: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
       },
       lookup_items_taxes: {
           get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },

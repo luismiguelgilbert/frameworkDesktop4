@@ -6,7 +6,8 @@
         labelText="Proveedor/Cliente (*)" labelSearchText="Buscar Proveedor/Cliente"
         :optionsList="this.lookup_partners"
         rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
-        :isRequired="true" 
+        :isRequired="(editMode?true:false)" :allowZeroValue="true"
+        :class="(editMode?undefined:'q-pb-md')"
         :isDisable="false" 
         :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :initialValue="partnerID"
@@ -23,24 +24,10 @@
                 //this.partner_account_id=row.account_id
             }"
         />
-    <!--<q-input
-        ref="partnerName" :readonly="!editMode"
-        placeholder="Seleccione el Proveedor/Cliente (*)" label="Proveedor/Cliente (*)" filled
-        :value="partnerName" 
-        @keyup.keyCodes.113="openSearchPartner('partnerID','partnerName',partnerID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
-        <template v-if="editMode" v-slot:append><q-icon name="fas fa-search"  @click="openSearchPartner('partnerID','partnerName',partnerID)"/></template>
-    </q-input>-->
-
-    
     <q-select
         label="Bodega (*)" placeholder="Seleccione la Bodega donde está recibiendo los Items (*)" emit-value map-options filled
         :options="lookup_wh" 
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
         v-model="whID" @input="loadPendingInv()"
         ref="whID"
         :rules="[
@@ -74,7 +61,7 @@
     <q-select
         label="Establecimiento (*)" placeholder="Seleccione el Establecimiento correspondiente al despacho los Items (*)" emit-value map-options filled
         :options="lookup_establecimientos" 
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
         v-model="sys_location_id"
         ref="sys_location_id" @input="sys_location_pos_id=null"
         :rules="[
@@ -87,7 +74,7 @@
     <q-select
         label="Punto de Emisión (*)" placeholder="Seleccione el Punto de Emisión correspondiente al despacho los Items (*)" emit-value map-options filled
         :options="sys_location_id>0?lookup_pos.filter(x=>x.sys_location_id==sys_location_id):[]"
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
         v-model="sys_location_pos_id"
         ref="sys_location_pos_id"
         :rules="[
@@ -114,23 +101,6 @@
 
     <br><br>
 
-    <q-dialog v-model="isPartnerDialog">
-        <mainLookup 
-            titleBar="Seleccionar Proveedor"
-            :data="this.lookup_partners"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                    { name: 'label', required: true, label: 'Proveedor', align: 'left', field: row => row.label , sortable: false, style: 'min-width: 300px;' }
-                    ,{ name: 'partner_ruc', required: true, label: 'Número de Identificación', align: 'left', field: row => row.partner_ruc , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    ,{ name: 'pendingOrders', required: true, label: 'Órdenes Pendientes', align: 'left', field: row => row.pendingOrders , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    
-                    ]"
-            @onCancel="isPartnerDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        />
-    </q-dialog>
 </q-form>
 </template>
 <script>
@@ -147,30 +117,15 @@ export default ({
     data () {
         return {
             moduleName: "invOutgoing"
-            ,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            ,mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
     mounted(){
         this.$refs.formulario.validate()
     },
     methods:{
-        openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            if(this.editMode){
-                this.mainLookupUpdateFieldValueName = UpdateFieldValueName
-                this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
-                this.mainLookupPredefinedValue = predefinedValue
-                this.isPartnerDialog = true
-            }
-        },
-        updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
-            this.isPartnerDialog = false
-            this.lines = []
-            this.loadPendingInv()
-        },
         loadPendingInv(){
-            if(this.whID>0&&this.partnerID>0){
+            if(this.whID>0&&this.partnerID>=0){
                 this.$q.loading.show()
                 this.$axios({
                     method: 'GET',
@@ -269,16 +224,16 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.lookup_pos },
         },
         lines: {
-            get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
+          get () { return this.$store.state[this.moduleName].editData.lines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
         },
         lots: {
-            get () { return this.$store.state[this.moduleName].editData.lots },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLots', val) }
+          get () { return this.$store.state[this.moduleName].editData.lots },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lots', value: val}) }
         },
         lookup_lots: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_lots },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLookupLots', val) }
+          get () { return this.$store.state[this.moduleName].editData.lookup_lots },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lookup_lots', value: val}) }
         },
     },
 })

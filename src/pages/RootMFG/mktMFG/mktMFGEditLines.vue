@@ -1,10 +1,9 @@
 <template>
 <div style="margin: -16px;">
-    <!--:class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"-->
     <q-table
         ref="mainTable"
         :data="lines"
-        table-style="min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);"
+        :table-style="editMode==true?'min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);' : 'min-height: calc(100vh - 140px); max-height: calc(100vh - 140px);'"
         row-key="lineID"
         :separator="userTableLines"
         :rows-per-page-options="[0]"
@@ -17,66 +16,70 @@
             { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
             { name: 'invID', required: true, label: 'Materia Prima', align: 'left', field: row => row.invID, sortable: true },
             { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true },
-            { name: 'price', required: true, label: 'Costo', align: 'right', field: row => row.price, sortable: true },
+            { name: 'price', required: true, label: '$ Costo', align: 'right', field: row => row.price, sortable: true },
             //{ name: 'lineDiscntPrcnt', required: true, label: 'Dcto. %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true },
             //{ name: 'lineDiscntAmount', required: true, label: 'Dcto. $', align: 'right', field: row => row.lineDiscntAmount, sortable: true },
-            { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
-            { name: 'uploaded', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
+            { name: 'lineUntaxed', required: true, label: '$ Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
         ]"
         >
-        <template v-slot:top >
-            <q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
-            <q-btn :label="$q.screen.gt.sm?'Presupuesto de Insumos':''"  title="Agregar masivamente Materia Prima basado en el Presupuesto de Insumos" @click="addBoM" icon="fas fa-file-invoice-dollar" color="primary" no-caps class="q-ml-sm" />
+        <template v-slot:top v-if="editMode==true" >
+            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true" icon="fas fa-plus" color="primary" no-caps />
+            <!--<q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
+            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Presupuesto de Insumos':''"  title="Agregar masivamente Materia Prima basado en el Presupuesto de Insumos" @click="BoMDialogSelection=null; isBoMDialogOpen=true;" icon="fas fa-file-invoice-dollar" color="primary" no-caps class="q-ml-sm" />
+            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
             <q-space />
-            <div style="max-width: 45%;" class="text-primary ellipsis">Lista de Materiales para consumir de bodega</div>
         </template>
         <template v-slot:body="props">
             <q-tr :props="props" >
                 <q-td auto-width>
                     <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
                 </q-td>
-                <q-td key="hasError" :props="props" class="no-padding">
+                <q-td key="hasError" :props="props" class="no-padding" >
                     <q-icon 
                         size="xs" name="fas fa-exclamation-triangle" color="red" flat dense
                         v-if="rowValidation(props.row, true)"
                         :title="rowValidation(props.row, false)"
                         />
                 </q-td>
-                <q-td key="invID" :props="props" :title="dateName(props.row.stopDate)">
-                    <selectSearchable
+                <q-td key="invID" :props="props" >
+                    <selectSearchable 
                         labelText="Materia Prima" 
                         labelSearchText="Buscar Materia Prima"
                         :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
                         rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
-                        :isRequired="true" :isDisable="false" :isReadonly="false"
+                        :isRequired="true" :isDisable="false" :isReadonly="true"
                         :isInline="true" :isDense="true"
+                        appendIcon="f"
                         :tableSearchColumns="[
-                             { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
+                                { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                             ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                             ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                            ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                            ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                             ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
                         ]"
+                        :tooltipColumns="[
+                             { name: 'label', label: 'Item'}
+                            ,{ name: 'internal_code', label: 'Código'}
+                            ,{ name: 'uomName', label: 'Unidad'}
+                            ,{ name: 'brandName', label: 'Marca'}
+                        ]"
                         :initialValue="props.row.invID"
-                        @onItemSelected="(row)=>{
-                            updateRow(row.value,'invID',props.row)
-                            updateRow(row.lastPrice,'price',props.row)
-                            updateRow(row.debit_account_id,'debit_account_id',props.row)
-                            updateRow(row.credit_account_id,'credit_account_id',props.row)
-                            }"
+                        
                         />
                 </q-td>
                 <q-td key="quantity" :props="props">
                     <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.quantity" type="number" :min="0" 
+                        :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
                         dense item-aligned borderless input-class="text-right"
+                        :max="props.row.maxQuantity" 
                         :rules="[val => parseFloat(val)>=0 || 'Requerido']"
                         @focus="$event.target.select()"
-                        debounce="1000" @input="(value)=>{updateRow(value,'quantity',props.row)}" />
+                        debounce="1000"  @input="(value)=>{updateRow(value,'quantity',props.row)}" />
                 </q-td>
                 <q-td key="price" :props="props">
                     <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.price" type="number" :min="0" 
+                        :value="props.row.price" type="number" :min="0" readonly
+                        :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
                         dense item-aligned borderless input-class="text-right"
                         :rules="[val => parseFloat(val)>=0 || 'Requerido']"
                         @focus="$event.target.select()"
@@ -85,10 +88,6 @@
                 <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
                     {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
                 </q-td>
-                <q-td key="uploaded" :props="props" :title="dateName(props.row.stopDate)">
-                    <q-btn size="xs" icon="fas fa-trash-alt" color="red" flat dense @click="deleteRow(props.row)" />
-                </q-td>
-                
             </q-tr>
          </template>
         <template v-slot:bottom-row >
@@ -107,15 +106,64 @@
                 <q-td class="text-right text-subtitle2 text-primary">
                     {{lines.reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
                 </q-td>
-                <q-td>
-                </q-td>
             </q-tr>
             <q-tr></q-tr>
         </template>
     </q-table>
 
+    <q-dialog v-model="isItemsBatchDialog">
+        <q-card style="min-width: 90%;" > 
+        <q-bar class="bg-primary text-white">
+            Buscar Items
+            <q-space />
+            <q-input input-class="text-white" borderless dense debounce="300" autofocus v-model="itemsBatchDialogFilter" placeholder="Buscar">
+            <template v-slot:append>
+                <q-icon v-if="!itemsBatchDialogFilter" name="fas fa-search" flat round size="xs" color="white" />
+                <q-btn v-if="itemsBatchDialogFilter" @click="itemsBatchDialogFilter=''" flat round icon="fas fa-times" size="xs" color="white" />
+            </template>
+            </q-input>
+        </q-bar>
+        <q-card-section class="no-padding">
+            <q-table
+            ref="itemsSearchTable" flat square
+            table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
+            @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
+            :data="lookup_items"
+            :columns="[
+                { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
+                { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
+                { name: 'systemTypeName', required: true, label: 'Tipo', align: 'left', field: row => row.systemTypeName, sortable: true, style: 'min-width: 50px;', },
+                { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true, style: 'min-width: 50px;'},
+                { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
+                //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
+                { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
+                { name: 'lastPrice', required: true, label: 'Precio P. Actual', align: 'right', field: row => row.lastPrice, sortable: true, style: 'min-width: 50px;'},
+                
+            ]"
+            row-key="value"
+            virtual-scroll :rows-per-page-options="[0]"
+            hide-bottom dense
+            selection="multiple" :selected.sync="itemsBatchDialogSelected"
+            :filter="itemsBatchDialogFilter"
+            :class="tableLastLine"
+            :separator="userTableLines"
+            >
+            <template v-slot:body-selection="scope">
+                <q-checkbox v-if="scope.row.estado" v-model="scope.selected" dense :title="JSON.stringify(scope.row.estado)" :disable="!(scope.row.estado)" />
+                <q-icon v-if="!(scope.row.estado)" name="fas fa-ban" color="red" style="margin-left: 2px;" title="Se encuentra Inactivo"/>
+            </template>
+            </q-table>
+            <q-separator />
+            
+        </q-card-section>
+        <q-card-actions align="around">
+            <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.filter(x=>x.estado).length<=0" @click="addRows(itemsBatchDialogSelected)" ></q-btn>
+        </q-card-actions>
+        </q-card>
+    </q-dialog>
+
     <q-dialog v-model="isBoMDialogOpen">
-        <q-card style="min-width: 1000px;" >
+        <q-card style="min-width: 95%;" >
             <q-bar class="bg-primary text-white">
                     Presupuesto de Insumos
                     <q-space />
@@ -133,7 +181,7 @@
                 <q-table 
                     :data="default_orderBudget"
                     table-style="min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);"
-                    row-key="lineID"
+                    row-key="invID"
                     :separator="userTableLines"
                     :rows-per-page-options="[0]"
                     hide-bottom dense flat
@@ -160,7 +208,7 @@
                             <q-td auto-width>
                                 <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
                             </q-td>
-                            <q-td key="invName" :props="props" :title="dateName(props.row.stopDate)">
+                            <q-td key="invName" :props="props">
                                 {{props.row.invName}}                                
                             </q-td>
                             <q-td key="internal_code" :props="props" >
@@ -263,15 +311,9 @@ export default ({
     },
     data () {
         return {
-             selected: [], isBoMDialogOpen: false, BoMDialogSelection: null, selectedBudgetRows: [], filterString: ''
-            ,myQDateLocale: {
-                /* starting with Sunday */
-                days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
-                daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
-                months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
-                monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
-                firstDayOfWeek: 1
-            }
+             selected: []
+            ,isBoMDialogOpen: false, BoMDialogSelection: null, selectedBudgetRows: [], filterString: ''
+            ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: []
         }
     },
     methods:{
@@ -283,56 +325,89 @@ export default ({
             }
             return max;
         },
-        dateName(value){
-            let resultado = '...'
-            try{
-                resultado = date.formatDate(value, this.userDateFormat,
-                    {
-                    days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-                    daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
-                    months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                    monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+        addRows(){
+            if(this.itemsBatchDialogSelected.length>0){
+                try{
+                    this.$q.loading.show()
+
+                    //GetMaxId
+                    let max_id = 0
+                    let temp = null
+                    if(this.lines.length > 0){
+                        temp = this.getMax(this.lines, "lineID");
+                        max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
                     }
-                )
-            }catch(ex){console.dir(ex)}
-            return resultado;
-        },
-        addRow(){
-            try{
-                this.$q.loading.show()
-                let newLineID = 0
-                if(this.lines.length > 0){
-                    let temp = this.getMax(this.lines, "lineID");
-                    newLineID = parseInt(temp.lineID);
+                    
+                    //get Current Data
+                    let newRows = JSON.parse(JSON.stringify(this.lines))
+                    
+                    //Iterate Selected Rows
+                    this.itemsBatchDialogSelected.map(invRow => {
+
+                        if(invRow.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
+                            max_id++; //increase lineID
+
+                            //Append Line
+                            newRows.push({
+                                 lineID: max_id
+                                ,mfg_orderID: this.default_mfg_orderID
+                                ,invID: invRow.value
+                                ,debit_account_id: invRow.debit_account_id
+                                ,credit_account_id: invRow.credit_account_id
+                                ,quantity: 1
+                                ,price: invRow.lastPrice
+                                ,lineSubtotal: 1 * invRow.lastPrice
+                                ,lineDiscntPrcnt: 0
+                                ,lineDiscntAmount: 0
+                                ,lineUntaxed: 1 * invRow.lastPrice
+                                ,whID: this.defaultWhID
+                                ,prjID: 0
+                                //,transportTypeID: this.defaultTransportID
+                                //,estado: true
+                            })
+
+                        }
+
+                        if(invRow.systemType==3){ //3=Kit > Entonces busco los materiales y recorro el resulto para irlos agregagando
+                            this.lookup_items_kits.filter(x=>x.invID==invRow.value).map(material=>{//material es el item que debo agregar
+                                this.lookup_items.filter(item=>item.value==material.materialID).map(item=>{//busco el código del material en los items
+                                
+                                    max_id++; //increase lineID
+
+                                    //Append Line
+                                    newRows.push({
+                                         lineID: max_id
+                                        ,mfg_orderID: this.default_mfg_orderID
+                                        ,invID: item.value
+                                        ,debit_account_id: item.debit_account_id
+                                        ,credit_account_id: item.credit_account_id
+                                        ,quantity: 1
+                                        ,price: item.lastPrice
+                                        ,lineSubtotal: 1 * item.lastPrice
+                                        ,lineDiscntPrcnt: 0
+                                        ,lineDiscntAmount: 0
+                                        ,lineUntaxed: 1 * item.lastPrice
+                                        ,whID: this.defaultWhID
+                                        ,prjID: 0
+                                        //,transportTypeID: this.defaultTransportID
+                                        //,estado: true
+                                    })
+
+                                })
+                            })
+                        }
+                        
+                    })
+
+                    //Update Data
+                    this.lines = newRows
+                    this.$q.loading.hide()  
+                    this.isItemsBatchDialog = false
+                }catch(ex){
+                    console.dir(ex)
+                    this.$q.loading.hide()  
                 }
-                let newRows = JSON.parse(JSON.stringify(this.lines))
-                newLineID++;
-                let nuevaFila = {
-                     lineID: newLineID//
-                    ,mfg_orderID: this.default_mfg_orderID
-                    ,invID: 0
-                    ,quantity: 0
-                    ,price: 0
-                    ,lineDiscntPrcnt: 0
-                    ,lineDiscntAmount: 0
-                    ,lineUntaxed: 0
-                    ,debit_account_id: 0
-                    ,credit_account_id: 0
-                    ,whID: this.defaultWhID
-                    ,uploaded: false
-                }
-                newRows.push(nuevaFila)
-                this.lines = newRows
-                this.$q.loading.hide()
-                //this.$emit('onAccMoveCompute')
-            }catch(ex){
-                console.dir(ex)
-                this.$q.loading.hide()  
             }
-        },
-        addBoM(){
-            this.BoMDialogSelection = null
-            this.isBoMDialogOpen = true;
         },
         deleteRow(currentRow){
             try{
@@ -368,6 +443,26 @@ export default ({
             }catch(ex){
                 console.error(ex)
                 this.$q.loading.hide()
+            }
+        },
+        removeRows(){
+            if(this.selected.length > 0){
+                this.$q.dialog({ 
+                title: 'Confirmación'
+                ,message: 'Desea quitar las líneas seleccionadas?'
+                ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
+                ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
+                }
+                ).onOk(() => {
+                //Líneas
+                let newRows = JSON.parse(JSON.stringify(this.lines))
+                this.selected.map(row=>{
+                    newRows = newRows.filter(x=>x.lineID!=row.lineID);
+                })
+                this.lines = newRows
+
+                this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
+                })
             }
         },
         rowValidation(currentRow, returnType){
@@ -468,6 +563,9 @@ export default ({
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },
+        },
+        lookup_items_kits: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
         },
     }
 })

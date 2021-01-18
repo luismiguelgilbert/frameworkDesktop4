@@ -25,7 +25,8 @@
         ]"
         >
         <template v-slot:top >
-                <q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+                <q-btn :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true" icon="fas fa-plus" color="primary" no-caps />
+                <!--<q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
                 <q-btn :label="$q.screen.gt.sm?'Lista de Materiales (BoM)':''"  title="Agregar masivamente Lista de Materia Prima basado en una Lista de Materiales (BoM)" @click="addBoM" icon="fas fa-boxes" color="primary" no-caps class="q-ml-sm" />
                 <q-btn :label="$q.screen.gt.sm?'Actualizar Costos':''"  title="Actualizar Costos de los registros seleccionados usando precio promedio actual en plataforma" @click="updateCosts" icon="fas fa-calculator" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0" />
                 <q-space />
@@ -44,26 +45,28 @@
                         />
                 </q-td>
                 <q-td key="invID" :props="props" :title="dateName(props.row.stopDate)">
-                    
                     <selectSearchable
                         labelText="Materia Prima" 
                         labelSearchText="Buscar Materia Prima"
                         :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
                         rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
-                        :isRequired="true" :isDisable="false" :isReadonly="false"
+                        :isRequired="true" :isDisable="false" :isReadonly="true"
                         :isInline="true" :isDense="true"
+                        appendIcon="f"
                         :tableSearchColumns="[
                              { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                             ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                             ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                            ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                            ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                             ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
                         ]"
+                        :tooltipColumns="[
+                            { name: 'label', label: 'Item'}
+                            ,{ name: 'internal_code', label: 'Código'}
+                            ,{ name: 'uomName', label: 'Unidad'}
+                            ,{ name: 'brandName', label: 'Marca'}
+                        ]"
                         :initialValue="props.row.invID"
-                        @onItemSelected="(row)=>{
-                            updateRow(row.value,'invID',props.row)
-                            updateRow(row.lastPrice,'price',props.row)
-                            }"
                         />
                 </q-td>
                 <q-td key="quantity" :props="props">
@@ -113,6 +116,59 @@
             <q-tr></q-tr>
         </template>
     </q-table>
+
+
+    <q-dialog v-model="isItemsBatchDialog">
+        <q-card style="min-width: 95%;" > 
+        <q-bar class="bg-primary text-white">
+            Buscar Items
+            <q-space />
+            <q-input input-class="text-white" borderless dense debounce="300" autofocus v-model="itemsBatchDialogFilter" placeholder="Buscar">
+            <template v-slot:append>
+                <q-icon v-if="!itemsBatchDialogFilter" name="fas fa-search" flat round size="xs" color="white" />
+                <q-btn v-if="itemsBatchDialogFilter" @click="itemsBatchDialogFilter=''" flat round icon="fas fa-times" size="xs" color="white" />
+            </template>
+            </q-input>
+        </q-bar>
+        <q-card-section class="no-padding">
+            <q-table
+            ref="itemsSearchTable" flat square
+            table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
+            @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
+            :data="lookup_items"
+            :columns="[
+                { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
+                { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
+                { name: 'systemTypeName', required: true, label: 'Tipo', align: 'left', field: row => row.systemTypeName, sortable: true, style: 'min-width: 50px;', },
+                { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true, style: 'min-width: 50px;'},
+                { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
+                //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
+                { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
+                { name: 'lastPrice', required: true, label: 'Precio P. Actual', align: 'right', field: row => row.lastPrice, format: val => `$${val}`, sortable: true, style: 'min-width: 50px;'},
+                //{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: true, style: 'min-width: 50px;'},
+            ]"
+            row-key="value"
+            virtual-scroll :rows-per-page-options="[0]"
+            hide-bottom dense
+            selection="multiple" :selected.sync="itemsBatchDialogSelected"
+            :filter="itemsBatchDialogFilter"
+            :class="tableLastLine"
+            :separator="userTableLines"
+            >
+            <template v-slot:body-selection="scope">
+                <q-checkbox v-if="scope.row.estado" v-model="scope.selected" dense :title="JSON.stringify(scope.row.estado)" :disable="!(scope.row.estado)" />
+                <q-icon v-if="!(scope.row.estado)" name="fas fa-ban" color="red" style="margin-left: 2px;" title="Se encuentra Inactivo"/>
+            </template>
+            </q-table>
+            <q-separator />
+            
+        </q-card-section>
+        <q-card-actions align="around">
+            <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.filter(x=>x.estado).length<=0" @click="addRows(itemsBatchDialogSelected)" ></q-btn>
+        </q-card-actions>
+        </q-card>
+    </q-dialog>
+
 
     <q-dialog v-model="isBoMDialogOpen">
         <q-card style="min-width: 800px;" >
@@ -224,6 +280,7 @@ export default ({
     data () {
         return {
              selected: [], isBoMDialogOpen: false, BoMDialogSelection: null
+            ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: []
             ,myQDateLocale: {
                 /* starting with Sunday */
                 days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
@@ -257,7 +314,91 @@ export default ({
             }catch(ex){console.dir(ex)}
             return resultado;
         },
-        addRow(){
+        addRows(){
+            if(this.itemsBatchDialogSelected.length>0){
+                try{
+                this.$q.loading.show()
+
+                //GetMaxId
+                let max_id = 0
+                let temp = null
+                if(this.budget.length > 0){
+                    temp = this.getMax(this.budget, "lineID");
+                    max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+                }
+                
+                //get Current Data
+                let newRows = JSON.parse(JSON.stringify(this.budget))
+                
+                
+                //Iterate Selected Rows
+                this.itemsBatchDialogSelected.map(invRow => {
+                    
+                    if(invRow.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
+                        max_id++; //increase lineID
+
+                        //Append Line
+                        newRows.push({
+                            lineID: max_id
+                            ,invID: invRow.value
+                            ,debit_account_id: invRow.debit_account_id
+                            ,credit_account_id: invRow.credit_account_id
+                            ,quantity: 1
+                            ,price: invRow.lastPrice
+                            ,lineSubtotal: 1 * invRow.lastPrice
+                            ,lineDiscntPrcnt: 0
+                            ,lineDiscntAmount: 0
+                            ,lineUntaxed: 1 * invRow.lastPrice
+                            ,whID: this.defaultWhID
+                            ,prjID: 0
+                            ,transportTypeID: this.defaultTransportID
+                            ,estado: true
+                            ,uploaded: false
+                        })
+                        
+                    }
+
+                    if(invRow.systemType==3){ //3=Kit > Entonces busco los materiales y recorro el resulto para irlos agregagando
+                        this.lookup_items_kits.filter(x=>x.invID==invRow.value).map(material=>{//material es el item que debo agregar
+                            this.lookup_items.filter(item=>item.value==material.materialID).map(item=>{//busco el código del material en los items
+                            
+                            max_id++; //increase lineID
+
+                            //Append Line
+                            newRows.push({
+                                lineID: max_id
+                                ,invID: item.value
+                                ,debit_account_id: item.debit_account_id
+                                ,credit_account_id: item.credit_account_id
+                                ,quantity: 1
+                                ,price: item.lastPrice
+                                ,lineSubtotal: 1 * item.lastPrice
+                                ,lineDiscntPrcnt: 0
+                                ,lineDiscntAmount: 0
+                                ,lineUntaxed: 1 * item.lastPrice
+                                ,whID: this.defaultWhID
+                                //,prjID: 0
+                                //,transportTypeID: this.defaultTransportID
+                                ,estado: true
+                                ,uploaded: false
+                            })
+                            })
+                        })
+                    }
+
+                })
+
+                //Update Data
+                this.budget = newRows
+                this.$q.loading.hide()  
+                this.isItemsBatchDialog = false
+                }catch(ex){
+                console.dir(ex)
+                this.$q.loading.hide()  
+                }
+            }
+        },
+        /*addRow(){
             try{
                 this.$q.loading.show()
                 let newLineID = 0
@@ -285,7 +426,7 @@ export default ({
                 console.dir(ex)
                 this.$q.loading.hide()  
             }
-        },
+        },*/
         addBoM(){
             this.BoMDialogSelection = null
             this.isBoMDialogOpen = true;
@@ -330,7 +471,7 @@ export default ({
             if(currentRow.invID==null||currentRow.invID==undefined||currentRow.invID<=0){
                 return (returnType?true:'Debe corregir la celda: Materia Prima')
             }
-            if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<0){
+            if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<=0){
                 return (returnType?true:'Debe corregir la celda: Cantidad')
             }
             if(currentRow.lineUntaxed==null||currentRow.lineUntaxed==undefined||currentRow.lineUntaxed<0){
@@ -429,6 +570,9 @@ export default ({
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },
+        },
+        lookup_items_kits: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
         },
         lookup_mfgBudget: {
             get () { return this.$store.state[this.moduleName].editData.lookup_mfgBudget },

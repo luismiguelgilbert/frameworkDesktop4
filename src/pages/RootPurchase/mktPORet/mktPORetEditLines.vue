@@ -55,8 +55,14 @@
                     { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                   ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                   ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                  ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                  ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                   ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
+              ]"
+              :tooltipColumns="[
+                   { name: 'label', label: 'Item'}
+                  ,{ name: 'internal_code', label: 'Código'}
+                  ,{ name: 'uomName', label: 'Unidad'}
+                  ,{ name: 'brandName', label: 'Marca'}
               ]"
               :initialValue="props.row.invID"
               />

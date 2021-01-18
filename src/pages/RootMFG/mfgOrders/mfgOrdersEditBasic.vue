@@ -46,7 +46,7 @@
     <selectSearchable 
         prependIcon="fas fa-box"
         labelText="Producto (*)" labelSearchText="Buscar Producto"
-        :optionsList="this.lookup_items.filter(x=>x.is_sales)"
+        :optionsList="this.lookup_items.filter(x=>x.is_sales&&x.systemType!=3&&x.systemType!=1)"
         rowValueField="value" optionsListLabel="label" optionsListCaption="internal_code"
         :isRequired="true" 
         :isDisable="false" 

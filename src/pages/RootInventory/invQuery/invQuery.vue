@@ -119,7 +119,7 @@
     </q-dialog>
 
     <q-dialog v-model="isKardexDialog" v-if="kardexItemRow">
-        <q-card style="min-width: 950px;">
+        <q-card style="min-width: 95%;">
             <q-bar class="bg-primary text-white">
                 Kardex de: {{kardexItemRow.invName}} ({{kardexItemRow.internal_code}})
                 <q-space />
@@ -127,24 +127,28 @@
             </q-bar>
             <q-card-section class="no-padding">
                 <q-table
-                    :dense="userTableDense"
                     :data="kardexDataRows"
-                    table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-                    no-data-label="No hay registros"
-                    no-results-label="No se encontraron registros"
+                    table-style="min-height: calc(100vh - 193px); max-height: calc(100vh - 193px);"
+                    row-key="stockID"
+                    :separator="userTableLines"
+                    :rows-per-page-options="[0]"
+                    hide-bottom dense flat
+                    virtual-scroll
+                    :class="tableLastLine"
                     loading-label="Cargando datos"
-                    virtual-scroll :rows-per-page-options="[0]" :pagination.sync="kardexPagination"
+                     no-data-label="No hay registros"
+                    no-results-label="No se encontraron registros"
                     :columns="kardexColumns"
                     >
                     <template v-slot:body-cell="props" >
                                
-                        <q-td :props="props" :class="props.col.name=='RunningQTY'?'bg-primary text-white text-weight-medium':'text-weight-medium'" >
+                        <q-td :props="props" :class="props.col.name=='RunningQTY'?'bg-blue-4 text-white text-weight-medium':'text-weight-medium'" >
                             <div v-if="props.col.name=='moveDate'" >{{props.value}}</div>
                             <div v-if="props.col.name=='directionName'" >
                                 <q-item dense class="no-padding" style="min-height: 20px !important;">
                                     <q-item-section side class="q-pl-none q-pr-xs" >
                                         <q-icon :color="props.row.direction?'positive':'red'" 
-                                                :name="props.row.direction?'fas fa-sign-in-alt':'fas fa-circle'" size="0.8rem" />
+                                                :name="props.row.direction?'fas fa-sign-in-alt':'fas fa-sign-out-alt fa-rotate-180'" size="0.8rem" />
                                     </q-item-section>
                                     <q-item-section><q-item-label :class="props.row.direction?'text-positive':'text-red'" >{{props.row.directionName}}</q-item-label></q-item-section>
                                 </q-item>
@@ -158,6 +162,9 @@
                             <div v-if="props.col.name=='invDocName'" >{{props.value}}</div>
                             <div v-if="props.col.name=='invDocNumber'" >{{props.value}}</div>
                         </q-td>
+                    </template>
+                    <template v-slot:bottom-row >
+                        <q-tr></q-tr>
                     </template>
                 </q-table>
             </q-card-section>
@@ -206,59 +213,28 @@
 
 </q-layout>
 </template>
-<style lang="sass">
-.q-table__bottom
-    padding: 0px
-.my-sticky-header-table
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
-
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: white
-
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
-    padding-left: 0
-
-  td:last-child
-    /* bg color is important for td; just specify one */
-    background-color: white !important
-  tr th
-    position: sticky
-    /* higher than z-index for td below */
-    z-index: 2
-    /* bg color is important; just specify one */
-    background: #fff
-    font-color: red
-
-  td:last-child, th:last-child
-    position: sticky
-    right: 0
-
-
-.my-sticky-header-table-dark
-  /* max height is important */
-  .q-table__middle
-    max-height: 50px
-
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */
-    background-color: $grey-10
-
-  thead tr:first-child th
-    position: sticky
-    top: 0
-    opacity: 1
-    z-index: 2
-    padding-left: 0
+<style lang="scss">
+  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
+  .q-virtual-scroll__padding{ visibility: hidden;}
+  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
+  .my-sticky-header-table{
+    .q-table thead tr:first-child th{ background-color: white }
+  }
+  .my-sticky-header-table-LastLine{
+    .q-table thead tr:first-child th{ background-color: white }
+    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
+  }
+  .my-sticky-header-table-dark{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+  }
+  .my-sticky-header-table-dark-LastLine{
+    .q-table thead tr:first-child th{ background-color: $grey-10 }
+    .q-table td{ border-bottom-width: 1px }
+  }
 </style>
+
+
+
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
@@ -305,7 +281,7 @@ export default ({
   data () {
     return {
         moduleName: "invQuery", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
-        moduleEditName: "invQueryEdit",
+        //moduleEditName: "invQueryEdit",
         maindataLoaded: true,
         router: this.$router,
         mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null,
@@ -551,6 +527,28 @@ export default ({
     userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
     userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
     userTimeFormat: { get () { return this.$store.state.main.userTimeFormat }  },
+    tableLastLine: {
+        get () { 
+            let resultado = ''
+            if(this.userColor=='blackDark'){
+            if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+            {
+                resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
+            }else{
+                resultado = 'my-sticky-header-table-dark bg-grey-10 '
+            }
+            }
+            if(this.userColor!='blackDark'){
+                if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
+                {
+                    resultado = 'my-sticky-header-table-LastLine '
+                }else{
+                    resultado = 'my-sticky-header-table '
+                }
+            }
+            return resultado
+        }
+    },
     pagination: {
       get () { return this.$store.state[this.moduleName].pagination },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }

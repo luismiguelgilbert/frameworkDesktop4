@@ -41,7 +41,7 @@
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+          <q-checkbox v-model="props.selected" dense :title="props.row.lineID" />
         </q-td>
 
         <q-td key="hasError" :props="props" class="no-padding">
@@ -55,7 +55,7 @@
           <selectSearchable
               labelText="Materia Prima" 
               labelSearchText="Buscar Materia Prima"
-              :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
+              :optionsList="lookup_items"
               rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
               :isRequired="true" :isDisable="false" :isReadonly="true"
               :isInline="true" :isDense="true"
@@ -64,8 +64,14 @@
                     { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                   ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                   ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                  ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                  ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                   ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
+              ]"
+              :tooltipColumns="[
+                   { name: 'label', label: 'Item'}
+                  ,{ name: 'internal_code', label: 'Código'}
+                  ,{ name: 'uomName', label: 'Unidad'}
+                  ,{ name: 'brandName', label: 'Marca'}
               ]"
               :initialValue="props.row.invID"
               />
@@ -134,7 +140,7 @@
                     { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                   ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                   ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                  ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                  ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                   ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
               ]"
               :initialValue="props.row.transportTypeID"
@@ -153,7 +159,7 @@
                     { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                   ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                   ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                  ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                  ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                   ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
               ]"
               :initialValue="props.row.prjID"

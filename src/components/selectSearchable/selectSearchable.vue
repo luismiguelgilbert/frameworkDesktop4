@@ -1,6 +1,6 @@
 <template>
     <div>
-            <!--:rules="isRequired?[ val => !!val || '* Requerido', ]:undefined"-->
+         <!--:rules="isRequired?[ val => !!val || '* Requerido', ]:undefined"-->
          <q-select
             ref="selectSearchableRef"
             :style="isInline?'height: 20px !important;':undefined"
@@ -19,7 +19,7 @@
             @filter="filterList"
             :clearable="!isRequired"
             :hide-bottom-space="isInline?true:undefined"
-            :rules="isRequired?[ val => !!val || '* Requerido', ]:undefined"
+            :rules="isRequired?(allowZeroValue?[ val => (parseInt(val)>=0) || '* Requerido' ]:[ val => !!val || '* Requerido' ]):undefined"
             @input="(itemSelected)=>{this.itemSelected(itemSelected)}"
             >
             <template v-if="prependIcon" v-slot:prepend><q-icon :size="isInline?'xs':'sm'" flat dense :name="prependIcon" /></template>
@@ -86,6 +86,17 @@
                 </q-card-section>
             </q-card>
         </q-dialog>
+
+        <q-tooltip v-if="tooltipColumns&&componentValue" :delay="1000" content-class="q-pa-xs bg-primary text-white" >
+                <q-markup-table dense>
+                    <tbody>
+                        <tr v-if="componentValue[columna.name]" v-for="columna in tooltipColumns">
+                            <td><b>{{columna.label}}:</b></td>
+                            <td>{{componentValue[columna.name]}}</td>
+                        </tr>
+                    </tbody>
+                </q-markup-table>
+        </q-tooltip>
         
     </div>
 </template>
@@ -105,6 +116,7 @@ export default({
         optionsList: { type: Array, required: true, default: [] },
         isInline: { type: Boolean, required: false, default: false },
         isRequired: { type: Boolean, required: true, default: false },
+        allowZeroValue: { type: Boolean, required: false, default: false },
         isReadonly: { type: Boolean, required: false, default: false },
         isDisable: { type: Boolean, required: false, default: false },
         isDense: { type: Boolean, required: false, default: false },
@@ -119,10 +131,11 @@ export default({
                             { name: 'value', label: 'ID', field: 'value'}
                             ,{ name: 'label', label: 'Valor', field: 'label'}
                     ] },
+        tooltipColumns: { type: Array, required: false },
     },
     data () {
         return {
-            componentValue: null, optionsListFiltered:[], isDialogOpen: false, filterString: '', isTableBusy: false
+            componentValue: null, optionsListFiltered:[], isDialogOpen: false, filterString: '', isTableBusy: false, selectedRowData: null
         }
     },
     mounted(){
@@ -184,6 +197,7 @@ export default({
         },
         itemSelected(row){
             if(row){
+                this.selectedRowData = row
                 if(row.type=='click'){//cuando se permite botón para seleccionar cuenta predeterminada, se recibe "click" mouse event
                     if(this.$refs.selectSearchableRef&&this.$refs.selectSearchableRef.value){
                         row = this.$refs.selectSearchableRef.value

@@ -44,7 +44,7 @@
         </q-td>
         
         <q-td key="mktTypeName" :props="props"  :tabindex="(props.key*10)+1" >
-          {{props.row.mktTypeName}} #{{props.row.headerID}}
+          {{props.row.mktTypeName}}
         </q-td>
         
         <q-td key="invName" :props="props" :tabindex="(props.key*10)+1" :title="rowTitleInventory(props.row)">
@@ -68,6 +68,7 @@
               @focus="$event.target.select()"
               readonly />
         </q-td>
+
         <q-td key="quantityCancel" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.quantityCancel" type="number" :min="0"
@@ -76,6 +77,7 @@
               @focus="$event.target.select()"
               readonly />
         </q-td>
+
         <q-td key="quantityOpen" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
               :value="props.row.quantityOpen" type="number" :min="0"
@@ -85,7 +87,6 @@
               readonly />
         </q-td>
        
-        
         <q-td key="newQuantity" :props="props" :tabindex="(props.key*10)+2"
           :class="props.row.newQuantity>0?'bg-primary':(userColor=='blackDark'?'bg-primary':'bg-primary')">
           <q-input  class="no-padding" style="height: 20px !important;"
@@ -208,7 +209,7 @@ export default ({
           monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
           firstDayOfWeek: 1
         },
-        selected: [] ,filterString: '', dialogVisible: false
+        selected: [] ,filterString: ''
       }
   },
   methods:{
@@ -278,7 +279,6 @@ export default ({
           return (returnType?true:'Debe corregir la celda: Cantidad')
       }
       if(this.editMode){
-        console.dir('estoy validando aquí')
         if(currentRow.newQuantity==null||currentRow.newQuantity==undefined||currentRow.newQuantity<0 || currentRow.newQuantity > currentRow.quantityOpen){
           return (returnType?true:'Debe corregir la celda: Recibir')
         }
@@ -289,13 +289,10 @@ export default ({
       }
       return false
     },
-  
-
   },
   computed:{
       userCode: { get () { return this.$store.state.main.userCode } },
       userCompany: { get () { return this.$store.state.main.userCompany } },
-      userColor: { get () { return this.$store.state.main.userColor }  },
       userColor: { get () { return this.$store.state.main.userColor }  },
       userTableLines: { get () { return this.$store.state.main.userTableLines } },
       userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
@@ -346,11 +343,11 @@ export default ({
           if(this.editMode){
             columnas = [
               { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
-              { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 85px; max-width: 85px;' },
+              { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 85px;' },
               { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
               { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
               { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
-              { name: 'quantityCancel', required: true, label: 'Cancelada', align: 'right', field: row => row.quantityCancel, sortable: true , style: 'max-width: 70px;' },
+              { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true , style: 'max-width: 70px;' },
               { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true , style: 'max-width: 70px;' , headerStyle: 'padding-right: 20px;' },
               { name: 'newQuantity', required: true, label: 'Recibir', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
               { name: 'headerDate', required: true, label: 'Fecha Pedido (aaaa/mm/dd)', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 130px;' },
@@ -359,11 +356,11 @@ export default ({
           }else{
             columnas = [
               { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
-              { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 85px; max-width: 85px;' },
+              { name: 'mktTypeName', required: true, label: 'Motivo', align: 'left', field: row => row.mktTypeName, sortable: true, style: 'min-width: 85px;' },
               { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 200px;' },
               { name: 'newQuantity', required: true, label: 'Recibido', align: 'right', field: row => row.newQuantity, sortable: true , style: 'min-width: 100px;' , headerStyle: 'padding-right: 20px;' },
               { name: 'headerDate', required: true, label: 'Fecha Pedido (aaaa/mm/dd)', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 130px;' },
-              { name: 'moveDate', required: true, label: 'Fecha Ingreso (aaaa/mm/dd) ', align: 'right', field: row => row.moveDate, sortable: true , style: 'min-width: 130px;' , headerStyle: 'padding-right: 20px;' },
+              { name: 'moveDate', required: true, label: 'Fecha Ingreso (aaaa/mm/dd)', align: 'right', field: row => row.moveDate, sortable: true , style: 'min-width: 130px;' , headerStyle: 'padding-right: 20px;' },
             ]
           }
           return columnas

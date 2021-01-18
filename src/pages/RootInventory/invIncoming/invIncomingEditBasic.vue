@@ -6,7 +6,8 @@
         labelText="Proveedor/Cliente (*)" labelSearchText="Buscar Proveedor/Cliente"
         :optionsList="this.lookup_partners"
         rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
-        :isRequired="true" 
+        :isRequired="(editMode?true:false)" :allowZeroValue="true"
+        :class="(editMode?undefined:'q-pb-md')"
         :isDisable="false" 
         :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :initialValue="partnerID"
@@ -76,23 +77,6 @@
 
     <br><br>
 
-    <q-dialog v-model="isPartnerDialog">
-        <mainLookup 
-            titleBar="Seleccionar Proveedor"
-            :data="this.lookup_partners"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                    { name: 'label', required: true, label: 'Proveedor', align: 'left', field: row => row.label , sortable: false, style: 'min-width: 300px;' }
-                    ,{ name: 'partner_ruc', required: true, label: 'Número de Identificación', align: 'left', field: row => row.partner_ruc , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    ,{ name: 'pendingOrders', required: true, label: 'Órdenes Pendientes', align: 'left', field: row => row.pendingOrders , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    
-                    ]"
-            @onCancel="isPartnerDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        />
-    </q-dialog>
 </q-form>
 </template>
 <script>
@@ -111,28 +95,13 @@ export default ({
     },
     data () {
         return {
-            isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
     mounted(){
         this.$refs.formulario.validate()
     },
     methods:{
-        openSearchPartner(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
-            if(this.editMode){
-                this.mainLookupUpdateFieldValueName = UpdateFieldValueName
-                this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
-                this.mainLookupPredefinedValue = predefinedValue
-                this.isPartnerDialog = true
-            }
-        },
-        updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField];
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField];
-            this.isPartnerDialog = false
-            this.lines = []
-            this.loadPendingInv()
-        },
         loadPendingInv(){
             if(this.whID>0&&this.partnerID>0){
                 this.$q.loading.show()

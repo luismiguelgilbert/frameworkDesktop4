@@ -14,7 +14,7 @@
         rowValueField="value" optionLabelField="label" optionsListCaption="mfgProduct" optionsListLabel="label" optionDisableField="estado"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :isReadonly="((allow_edit==false && allow_insert==false)||editMode==false)"
         :initialValue="default_mfg_orderID"
         :tableSearchColumns="[
                  { name: 'label', label: 'Orden', field: 'label', align: 'left'}
@@ -63,7 +63,7 @@
     </q-input>
 
     <q-select
-        label="Bodega de Destino Predeterminada (*)" placeholder="Seleccione la bodega predeterminada donde desea recibir los ítems (*)" emit-value map-options filled
+        label="Pedido a Bodega (*)" placeholder="Seleccione la bodega donde desea pedir los ítems (*)" emit-value map-options filled
         :options="lookup_wh" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :option-disable="opt => !opt.estado"
         v-model="defaultWhID"
@@ -113,6 +113,7 @@ export default ({
     },
     mounted(){
         this.$refs.formulario.validate()
+        this.loadMfgOrder();
     },
     methods:{
         dateName(fecha){
@@ -124,12 +125,44 @@ export default ({
         },
         loadMfgOrder(){
             //this.loadMfgOrder();
-            this.lines=[];//clearSelectedLines
-            alert('Cargar Presupuesto + Consumo + Basado en Bodega de: ' + this.defaultWhID + ' || ' + this.default_mfg_orderID)
+            //this.lines=[];//clearSelectedLines
+            this.lines = this.lines.filter(x=>x.mfg_orderID==this.default_mfg_orderID);//clearSelectedLines
+            this.default_orderBudget = [];//clearBudget
+            //alert('Encerar presupuesto, Cargar Presupuesto + Consumo + Basado en Bodega de: ' + this.defaultWhID + ' || ' + this.default_mfg_orderID)
+            this.$q.loading.show();
+            this.$axios({
+                method: 'GET',
+                url: this.apiURL + 'spmktMFGSelectBudget',
+                headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+                params: {
+                    userCode: this.userCode,
+                    userCompany: this.userCompany,
+                    userLanguage: 'es',
+	                row_id: this.default_mfg_orderID
+                }
+            }).then((response) => {
+                this.default_orderBudget = response.data
+                this.$q.loading.hide();
+            }).catch((error) => {
+                console.dir(error)
+                let mensaje = ''
+                if(error.message){ mensaje = error.message }
+                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                this.$q.notify({ html: true, multiLine: false, color: 'red'
+                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                })
+                this.$q.loading.hide();
+            })
         }
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
+        userCode: { get () { return this.$store.state.main.userCode } },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
+        apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
         allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
         allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
@@ -163,6 +196,10 @@ export default ({
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+        },
+        default_orderBudget: {
+            get () { return this.$store.state[this.moduleName].editData.default_orderBudget },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'default_orderBudget', value: val}) }
         },
         lookup_items: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items },

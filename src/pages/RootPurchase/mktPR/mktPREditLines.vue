@@ -30,13 +30,13 @@
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true;" icon="fas fa-plus" color="primary" no-caps />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
         <q-space />
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-tag" color="primary" flat no-caps  class="q-ml-sm" :disable="selected.length<=0" />
+        <!--<q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Descuento':''" size="sm" title="Aplicar un mismo descuento a filas seleccionadas" @click="batchUpdateDiscount" icon="fas fa-tag" color="primary" flat no-caps  class="q-ml-sm" :disable="selected.length<=0" />-->
     </template>
 
     <template v-slot:body="props">
       <q-tr :props="props" >
         <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
+          <q-checkbox v-model="props.selected" dense :title="props.row.lineID" />
         </q-td>
         <q-td key="hasError" :props="props" class="no-padding">
             <q-icon 
@@ -49,26 +49,28 @@
           <selectSearchable
               labelText="Materia Prima" 
               labelSearchText="Buscar Materia Prima"
-              :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
+              :optionsList="lookup_items"
               rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
               :isRequired="true" :isDisable="false" :isReadonly="true"
               :isInline="true" :isDense="true"
-              appendIcon="f"
+              appendIcon="f" 
+              @mouseover=""
               :tableSearchColumns="[
                     { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
                   ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
                   ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                  ,{ name: 'lastPrice', label: 'Precio Actual', field: 'lastPrice', align: 'left'}
+                  ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
                   ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
               ]"
+              :tooltipColumns="[
+                   { name: 'label', label: 'Item'}
+                  ,{ name: 'internal_code', label: 'Código'}
+                  ,{ name: 'uomName', label: 'Unidad'}
+                  ,{ name: 'brandName', label: 'Marca'}
+              ]"
               :initialValue="props.row.invID"
-              @onItemSelected="(row)=>{
-                  updateRow(row.value,'invID',props.row)
-                  updateRow(row.lastPrice,'price',props.row)
-                  updateRow(row.debit_account_id,'debit_account_id',props.row)
-                  updateRow(row.credit_account_id,'credit_account_id',props.row)
-                  }"
-              />
+              >
+          </selectSearchable>
         </q-td>
         <q-td key="quantity" class="no-padding" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
@@ -178,7 +180,7 @@
   </q-table>
 
   <q-dialog v-model="isItemsBatchDialog">
-    <q-card style="min-width: 800px;" > 
+    <q-card style="min-width: 95%;" > 
       <q-bar class="bg-primary text-white">
         Buscar Items
         <q-space />
@@ -194,7 +196,7 @@
           ref="itemsSearchTable" flat square
           table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
           @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
-          :data="lookup_items.filter(x=>x.estado==true)"
+          :data="lookup_items"
           :columns="[
             { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
             { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
@@ -203,6 +205,8 @@
             { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
             //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
             { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
+            { name: 'lastPrice', required: true, label: 'Precio P. Actual', align: 'right', field: row => row.lastPrice, format: val => `$${val}`, sortable: true, style: 'min-width: 50px;'},
+            //{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: true, style: 'min-width: 50px;'},
           ]"
           row-key="value"
           virtual-scroll :rows-per-page-options="[0]"
@@ -212,11 +216,15 @@
           :class="tableLastLine"
           :separator="userTableLines"
           >
+          <template v-slot:body-selection="scope">
+            <q-checkbox v-if="scope.row.estado" v-model="scope.selected" dense :title="JSON.stringify(scope.row.estado)" :disable="!(scope.row.estado)" />
+            <q-icon v-if="!(scope.row.estado)" name="fas fa-ban" color="red" style="margin-left: 2px;" title="Se encuentra Inactivo"/>
+          </template>
         </q-table>
         <q-separator />
       </q-card-section>
       <q-card-actions align="around">
-        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.length<=0" @click="addRows(itemsBatchDialogSelected)" ></q-btn>
+        <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.filter(x=>x.estado).length<=0" @click="addRows(itemsBatchDialogSelected)" ></q-btn>
       </q-card-actions>
       <q-inner-loading :showing="itemsBatchDialogTableBusy" style="z-index: 10" >
         <q-spinner-gears size="50px" color="primary" />
@@ -308,39 +316,86 @@ export default ({
           let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
           
           //Iterate Selected Rows
-          this.itemsBatchDialogSelected.map(invRow => {
-            max_id++;
-            //Append Line
-            newRows.push({
-                lineID: max_id
-              ,invID: invRow.value
-              ,debit_account_id: invRow.debit_account_id
-              ,credit_account_id: invRow.credit_account_id
-              ,quantity: 1
-              ,price: invRow.lastPrice
-              ,lineSubtotal: 1 * invRow.lastPrice
-              ,lineDiscntPrcnt: 0
-              ,lineDiscntAmount: 0
-              ,lineUntaxed: 1 * invRow.lastPrice
-              ,whID: this.defaultWhID
-              ,prjID: 0
-              ,transportTypeID: this.defaultTransportID
-              ,estado: true
-            })
+          this.itemsBatchDialogSelected.filter(x=>x.estado).map(invRow => {
+            
+            if(invRow.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
+              max_id++; //increase lineID
 
-            //Append LineTax
-            this.lookup_items_taxes.filter(x=>x.invID==invRow.value).map(impuesto=>{
-              let taxConfig = this.lookup_taxes.find(t=>t.taxID==impuesto.taxID)
-              newRowsTaxes.push({
-                lineID: max_id
-                ,taxID: impuesto.taxID
-                ,taxName: taxConfig.short_name_es
-                ,isPercent: taxConfig.isPercent
-                ,factor: taxConfig.factor
-                ,factor_base: taxConfig.factor_base
-                ,taxAmount: taxConfig.isPercent?( parseFloat(1 * taxConfig.factor_base) * parseFloat(taxConfig.factor) )  :  parseFloat(taxConfig.factor)
+              //Append Line
+              newRows.push({
+                  lineID: max_id
+                ,invID: invRow.value
+                ,debit_account_id: invRow.debit_account_id
+                ,credit_account_id: invRow.credit_account_id
+                ,quantity: 1
+                ,price: invRow.lastPrice
+                ,lineSubtotal: 1 * invRow.lastPrice
+                ,lineDiscntPrcnt: 0
+                ,lineDiscntAmount: 0
+                ,lineUntaxed: 1 * invRow.lastPrice
+                ,whID: this.defaultWhID
+                ,prjID: 0
+                ,transportTypeID: this.defaultTransportID
+                ,estado: true
               })
-            })
+
+              //Append LineTax
+              this.lookup_items_taxes.filter(x=>x.invID==invRow.value).map(impuesto=>{
+                let taxConfig = this.lookup_taxes.find(t=>t.taxID==impuesto.taxID)
+                newRowsTaxes.push({
+                  lineID: max_id
+                  ,taxID: impuesto.taxID
+                  ,taxName: taxConfig.short_name_es
+                  ,isPercent: taxConfig.isPercent
+                  ,factor: taxConfig.factor
+                  ,factor_base: taxConfig.factor_base
+                  ,taxAmount: taxConfig.isPercent?( parseFloat(1 * taxConfig.factor_base) * parseFloat(taxConfig.factor) )  :  parseFloat(taxConfig.factor)
+                })
+              })
+            
+            }
+
+            if(invRow.systemType==3){ //3=Kit > Entonces busco los materiales y recorro el resulto para irlos agregagando
+              this.lookup_items_kits.filter(x=>x.invID==invRow.value).map(material=>{//material es el item que debo agregar
+                this.lookup_items.filter(item=>item.value==material.materialID).map(item=>{//busco el código del material en los items
+                  
+                  max_id++; //increase lineID
+
+                  //Append Line
+                  newRows.push({
+                      lineID: max_id
+                    ,invID: item.value
+                    ,debit_account_id: item.debit_account_id
+                    ,credit_account_id: item.credit_account_id
+                    ,quantity: 1
+                    ,price: item.lastPrice
+                    ,lineSubtotal: 1 * item.lastPrice
+                    ,lineDiscntPrcnt: 0
+                    ,lineDiscntAmount: 0
+                    ,lineUntaxed: 1 * item.lastPrice
+                    ,whID: this.defaultWhID
+                    ,prjID: 0
+                    ,transportTypeID: this.defaultTransportID
+                    ,estado: true
+                  })
+
+                  //Append LineTax
+                  this.lookup_items_taxes.filter(x=>x.invID==item.value).map(impuesto=>{
+                    let taxConfig = this.lookup_taxes.find(t=>t.taxID==impuesto.taxID)
+                    newRowsTaxes.push({
+                      lineID: max_id
+                      ,taxID: impuesto.taxID
+                      ,taxName: taxConfig.short_name_es
+                      ,isPercent: taxConfig.isPercent
+                      ,factor: taxConfig.factor
+                      ,factor_base: taxConfig.factor_base
+                      ,taxAmount: taxConfig.isPercent?( parseFloat(1 * taxConfig.factor_base) * parseFloat(taxConfig.factor) )  :  parseFloat(taxConfig.factor)
+                    })
+                  })
+                
+                })
+              })
+            }
           })
 
           //Update Data
@@ -354,86 +409,6 @@ export default ({
         }
       }
     },
-    itemsDialogSelectAction(){//este quitar?
-      if(this.itemsDialogSelected.length>0){
-        //Primero agrega los impuestos correspondientes al Item con su código de línea
-        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-        newRowsTaxes = newRowsTaxes.filter(x=>x.lineID!=this.itemsDialogRowToUpdate.lineID)//remuevo los impuestos de la línea xq voy a agregarlos nuevamente
-        this.lookup_items_taxes.filter(x=>x.invID==this.itemsDialogSelected[0].value).forEach(impuesto=>{
-            newRowsTaxes.push({
-                lineID: this.itemsDialogRowToUpdate.lineID
-              ,taxID: impuesto.taxID
-              ,taxName: impuesto.shortLabel
-              ,taxAmount: 0
-              ,isPercent: impuesto.isPercent
-              ,factor: impuesto.factor
-              ,factor_base: impuesto.factor_base
-              ,lineUntaxed: 0
-            })
-          })
-        this.linesTaxes = newRowsTaxes
-
-        //Segundo, actualiza la fila por medio del método [updateRow] , el cual también actualiza las líneas del impuesto
-        if(this.itemsDialogSelected[0].estado==true){
-          this.updateRow(this.itemsDialogSelected[0].value, 'invID', this.itemsDialogRowToUpdate)
-          this.isItemsDialog = false
-        }
-      }
-    },
-    itemsBatchDialogSelectAction(){//este quitar también?
-      //let max_id = 1
-      let max_id = 0
-      let temp = null
-      if(this.lines.length > 0){
-        temp = this.getMax(this.lines, "lineID");
-        //max_id = parseInt(temp.lineID) + parseInt(1);
-        max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
-      }
-      let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
-      let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
-      if(this.itemsBatchDialogSelected.length>0){
-        this.itemsBatchDialogSelected.filter(x=>x.estado).map(row => {
-          max_id = parseInt(max_id) + parseInt(1);
-          //líneas
-          newRows.push({
-              lineID: max_id
-            ,invID: row.value
-            ,invName: row.label
-            ,quantity: 1
-            ,price: 1
-            ,lineSubtotal: 1
-            ,lineDiscntPrcnt: 0
-            ,lineDiscntAmount: 0
-            ,lineUntaxed: 1
-            ,whID: this.defaultWhID
-            ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
-            ,prjID: 0
-            ,prjName: ''
-            ,transportTypeID: this.defaultTransportID
-            ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
-            ,estado: true
-          })
-
-          //Impuestos de la línea
-          this.lookup_items_taxes.filter(x=>x.invID==row.value).forEach(impuesto=>{
-              newRowsTaxes.push({
-                  lineID: max_id
-                ,taxID: impuesto.taxID
-                ,taxName: impuesto.shortLabel
-                ,taxAmount: impuesto.isPercent?( parseFloat(1 * impuesto.factor_base) * parseFloat(impuesto.factor) )  :  parseFloat(impuesto.factor)
-                ,isPercent: impuesto.isPercent
-                ,factor: impuesto.factor
-                ,factor_base: impuesto.factor_base
-                ,lineUntaxed: 1
-              })
-            })
-        })
-        this.lines = newRows
-        this.linesTaxes = newRowsTaxes
-        this.isItemsBatchDialog = false
-      }
-    },
-    
     updateRow(newVal, colName, row){
       try{
         //Actualiza las líneas
@@ -493,35 +468,6 @@ export default ({
           this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
         })
       }
-    },
-    
-    
-    rowTitleInventory(fila){
-      let resultado = 'Seleccionar...'
-      let target = null
-      if(fila&&fila.invID&&fila.invID>0){
-        try{
-          target = this.lookup_items.find(x=>x.value == fila.invID)
-          resultado = 'Código: ' + target.internal_code + ' || Unidad: ' + target.uomName + ' || Marca: ' + target.brandName
-        }catch(ex){}
-      }
-      return resultado
-    },
-    batchUpdateDiscount(){
-      this.$q.dialog({
-        title: 'Aplicar el siguiente descuento a líneas seleccionadas',
-        //message: 'Des?',
-        prompt: {
-          model: 0,
-          type: 'number',
-          //isValid: val => val >= 0, // << here is the magic
-          isValid: val => val >=0 && val <= 100
-        },
-        ok: { label: 'Aplicar', noCaps: true },
-        cancel: { label: 'Cancelar', noCaps: true, flat: true },
-      }).onOk(data => {
-        this.selected.forEach(row => this.updateRow(data.toString() ,'lineDiscntPrcnt', row) );
-      })
     }
   },
   computed:{
@@ -581,6 +527,9 @@ export default ({
       },
       lookup_items: {
           get () { return this.$store.state[this.moduleName].editData.lookup_items },
+      },
+      lookup_items_kits: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
       },
       lookup_items_taxes: {
           get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },

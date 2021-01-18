@@ -33,6 +33,22 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='lines'?'text-white':'text-grey-7')">Lista de Insumos</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable @click="tab='warehouse'" :active="tab=='warehouse'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-warehouse" :color="tab=='warehouse'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='warehouse'?'text-white':'text-grey-7')">Entregas y Cancelaciones</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
+                        </q-item-section>
+                    </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-history" :color="tab=='history'?'white':'grey-7'" />
@@ -54,6 +70,8 @@
                     >
                     <q-tab-panel name="basic"> <basicComponent ref="basicComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
                     <q-tab-panel name="lines"> <linesComponent ref="linesComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
+                    <q-tab-panel name="warehouse"><whComponent ref="whComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
+                    <q-tab-panel name="files"> <filesComponent ref="filesComponent" :moduleName="moduleName.toString()" /> </q-tab-panel>
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
                 </q-tab-panels>
@@ -74,6 +92,9 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import basicComponent from './mktMFGEditBasic'
 import linesComponent from './mktMFGEditLines'
+import whComponent from './mktMFGEditWH'
+
+import filesComponent from '../../../components/filesView/filesView'
 import historyComponent from '../../../components/historyView/historyView'
 
 
@@ -81,6 +102,8 @@ export default ({
   components:{
      basicComponent: basicComponent
     ,linesComponent: linesComponent
+    ,whComponent: whComponent
+    ,filesComponent: filesComponent
     ,historyComponent: historyComponent
   },
   data () {
@@ -158,6 +181,7 @@ export default ({
                 let newEditData = {
                      basic: this.editData.basic
                     ,lines: this.editData.lines
+                    ,files: this.editData.files
                 }
                 //console.dir(this.editData)
                 //console.dir(newEditData)

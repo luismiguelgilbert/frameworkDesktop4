@@ -93,7 +93,7 @@ const routes = [
       ,{ path: 'RootBank/accVoucherInEdit', component: () => import('pages/RootBank/accVoucherIn/accVoucherInEdit.vue') }
       //INVENTORY
       ,{ path: 'RootInventory/invQuery', component: () => import('pages/RootInventory/invQuery/invQuery.vue') }
-      ,{ path: 'RootInventory/invQueryEdit', component: () => import('pages/RootInventory/invQuery/invQueryEdit.vue') }
+      //,{ path: 'RootInventory/invQueryEdit', component: () => import('pages/RootInventory/invQuery/invQueryEdit.vue') }
       ,{ path: 'RootInventory/invIncoming', component: () => import('pages/RootInventory/invIncoming/invIncoming.vue') }
       ,{ path: 'RootInventory/invIncomingEdit', component: () => import('pages/RootInventory/invIncoming/invIncomingEdit.vue') }
       ,{ path: 'RootInventory/invOutgoing', component: () => import('pages/RootInventory/invOutgoing/invOutgoing.vue') }

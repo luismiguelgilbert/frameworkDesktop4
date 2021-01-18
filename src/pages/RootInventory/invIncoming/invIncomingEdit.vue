@@ -25,7 +25,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='basic'?'text-white':'text-grey-7')">Documento de Ingreso</q-item-label>
                         </q-item-section>
                     </q-item>
-                    <q-item clickable @click="tab='items'" :active="tab=='items'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0)" >
+                    <q-item clickable @click="tab='items'" :active="tab=='items'" active-class="bg-primary text-white" :disable="!(partnerID>=0 && whID > 0)" >
                         <q-item-section side>
                             <q-icon name="fas fa-boxes"  :color="tab=='items'?'white':'grey-7'" />
                         </q-item-section>
@@ -33,8 +33,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='items'?'text-white':'text-grey-7')">Items Recibidos ({{lines.filter(x=>x.newQuantity>0).length}})</q-item-label>
                         </q-item-section>
                     </q-item>
-                    
-                    <q-item clickable @click="tab='lots'" :active="tab=='lots'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0 && lines.some(x=>x.systemType==4))" >
+                    <q-item clickable @click="tab='lots'" :active="tab=='lots'" active-class="bg-primary text-white" :disable="!(partnerID>=0 && whID > 0 && lines.some(x=>x.systemType==4))" >
                         <q-item-section side>
                             <q-icon name="fas fa-barcode"  :color="tab=='lots'?'white':'grey-7'" />
                         </q-item-section>
@@ -42,8 +41,7 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='lots'?'text-white':'text-grey-7')">Lotes y Series ({{lines.filter(x=>x.newQuantity>0&&x.systemType==4).length}})</q-item-label>
                         </q-item-section>
                     </q-item>
-
-                    <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>0 && whID > 0 && allow_accounting)" >
+                    <q-item clickable @click="tab='accounting'" :active="tab=='accounting'" active-class="bg-primary text-white" :disable="!(partnerID>=0 && whID > 0 && allow_accounting)" >
                         <q-item-section side>
                             <q-icon name="fas fa-book"  :color="tab=='accounting'?'white':'grey-7'" />
                         </q-item-section>
@@ -51,7 +49,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='accounting'?'text-white':'text-grey-7')">Asiento Contable</q-item-label>
                         </q-item-section>
                     </q-item>
-
                     <q-item clickable @click="tab='files'" :active="tab=='files'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-paperclip"  :color="tab=='files'?'white':'grey-7'" />
@@ -60,7 +57,6 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='files'?'text-white':'text-grey-7')">Archivos Adjuntos</q-item-label>
                         </q-item-section>
                     </q-item>
-
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-history" :color="tab=='history'?'white':'grey-7'" />
