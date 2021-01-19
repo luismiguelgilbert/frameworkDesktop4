@@ -5,18 +5,18 @@
             <q-toolbar class="bg-primary text-white" >
                 <q-toolbar-title>Productos por Lote</q-toolbar-title>
             </q-toolbar>
-            <q-item clickable v-ripple v-for="line in lines.filter(x=>x.systemType==4 && x.newQuantity>0)" :key="line.lineID" @click="selectedColumn = line"
+            <q-item clickable v-ripple v-for="line in lines.filter(x=>x.systemType==4 && x.newQuantity>0)" :key="line.stockID" @click="selectedColumn = line"
                 :class="selectedColumn==line?'bg-blue-5 text-white':undefined">
                 <q-item-section>
                     <q-item-label>{{line.invName}}</q-item-label>
                     <q-item-label caption>
                         Entregar: {{line.newQuantity}}
-                        // Lotes: {{lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                        // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
                     </q-item-label>
                 </q-item-section>
                 <q-item-section side>
                     <q-icon color="red" name="fas fa-exclamation" 
-                        v-if="line.newQuantity != lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)" />
+                        v-if="line.newQuantity != lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)" />
                     <q-icon v-else color="positive" name="fas fa-check" />
                 </q-item-section>
             </q-item>
@@ -32,7 +32,7 @@
             </q-toolbar>
             <q-card-section>
                 <q-list bordered separator class="scroll" style="height: calc(100vh - 255px);" >
-                    <q-item v-for="line in lots.filter(x=>x.lineID==selectedColumn.lineID)" :key="line.rowID">
+                    <q-item v-for="line in lots.filter(x=>x.stockID==selectedColumn.stockID)" :key="line.rowID">
                         <q-item-section>
                             <q-item-label>Lote: {{line.name_es}}</q-item-label>
                         </q-item-section>
@@ -81,12 +81,15 @@ import Vuex from 'vuex';
 import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },   
     components: {
         mainLookup: mainLookup
     },
     data () {
         return {
-            moduleName: "invOutgoing", selectedColumn: null, newLineDialog: false
+            selectedColumn: null, newLineDialog: false
             //: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
@@ -115,6 +118,7 @@ export default ({
                 newRows.push({
                      rowID: max_id
                     ,lineID: this.selectedColumn.lineID
+                    ,stockID: this.selectedColumn.stockID//este StockID es único porque viene de la tabla invKardexOrders donde campo StockID es primaryKey
                     ,invID: this.selectedColumn.invID
                     ,lotID: x.lotID
                     ,name_es: x.name_es
