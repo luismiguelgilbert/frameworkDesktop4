@@ -278,8 +278,6 @@ export default ({
 
             //Iterate Selected Rows
             this.requisicionesDialogSelected.map(invRow => {
-              console.dir('Bandera')
-              console.dir(invRow)
               max_id++;
 
               //Append Line

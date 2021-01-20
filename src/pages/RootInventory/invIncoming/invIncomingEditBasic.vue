@@ -24,15 +24,15 @@
             }"
         />
 
-    
     <q-select
         label="Bodega (*)" placeholder="Seleccione la Bodega donde está recibiendo los Items (*)" emit-value map-options filled
         :options="lookup_wh" 
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>0&&editMode)"
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
         v-model="whID" @input="loadPendingInv()"
         ref="whID"
         :rules="[
                 val => val!= null || '* Requerido',
+                val => val>0      || '* Requerido',
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
@@ -103,7 +103,7 @@ export default ({
     },
     methods:{
         loadPendingInv(){
-            if(this.whID>0&&this.partnerID>0){
+            if(this.whID>0&&this.partnerID>=0){
                 this.$q.loading.show()
                 this.$axios({
                     method: 'GET',

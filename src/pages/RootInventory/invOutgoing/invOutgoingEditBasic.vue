@@ -19,11 +19,13 @@
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
                 this.lines = []
+                this.$emit('onAccMoveCompute')
                 this.loadPendingInv()
                 //this.partnerName=row.label;
                 //this.partner_account_id=row.account_id
             }"
         />
+
     <q-select
         label="Bodega (*)" placeholder="Seleccione la Bodega donde está recibiendo los Items (*)" emit-value map-options filled
         :options="lookup_wh" 
