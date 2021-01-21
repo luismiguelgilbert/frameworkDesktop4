@@ -330,11 +330,17 @@ export default({
       return resultado
     },
     openEditForm(props, editMode){
-      let selectedRow = {
-         value: props.value
-        ,row: props.row
-      }
-      this.editRecord = selectedRow
+      //select Openning row, helps user to find out wich record he was working with
+      try{
+        let newSelectedRow = [];
+        newSelectedRow.push(props.row)
+        this.selectedRows = newSelectedRow;
+        let selectedRow = {
+          value: props.value
+          ,row: props.row
+        }
+        this.editRecord = selectedRow
+      }catch(ex){}
       this.editMode = editMode //false = edit || true  = new
       this.lastRecord = props.value//agregado para que funcione el AutoScroll en cada módulo
       this.router.push(this.moduleEditName);

@@ -326,86 +326,134 @@ export default ({
             return max;
         },
         addRows(){
-            if(this.itemsBatchDialogSelected.length>0){
-                try{
-                    this.$q.loading.show()
+            if(this.default_mfg_orderID&&this.default_mfg_orderID>0){
+                if(this.itemsBatchDialogSelected.length>0){
+                    try{
+                        this.$q.loading.show()
+                        let selectedOrderData = this.lookup_mfgOrders.find(x=>x.value==this.default_mfg_orderID)
 
-                    //GetMaxId
-                    let max_id = 0
-                    let temp = null
-                    if(this.lines.length > 0){
-                        temp = this.getMax(this.lines, "lineID");
-                        max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
-                    }
-                    
-                    //get Current Data
-                    let newRows = JSON.parse(JSON.stringify(this.lines))
-                    
-                    //Iterate Selected Rows
-                    this.itemsBatchDialogSelected.map(invRow => {
-
-                        if(invRow.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
-                            max_id++; //increase lineID
-
-                            //Append Line
-                            newRows.push({
-                                 lineID: max_id
-                                ,mfg_orderID: this.default_mfg_orderID
-                                ,invID: invRow.value
-                                ,debit_account_id: invRow.debit_account_id
-                                ,credit_account_id: invRow.credit_account_id
-                                ,quantity: 1
-                                ,price: invRow.lastPrice
-                                ,lineSubtotal: 1 * invRow.lastPrice
-                                ,lineDiscntPrcnt: 0
-                                ,lineDiscntAmount: 0
-                                ,lineUntaxed: 1 * invRow.lastPrice
-                                ,whID: this.defaultWhID
-                                ,prjID: 0
-                                //,transportTypeID: this.defaultTransportID
-                                //,estado: true
-                            })
-
-                        }
-
-                        if(invRow.systemType==3){ //3=Kit > Entonces busco los materiales y recorro el resulto para irlos agregagando
-                            this.lookup_items_kits.filter(x=>x.invID==invRow.value).map(material=>{//material es el item que debo agregar
-                                this.lookup_items.filter(item=>item.value==material.materialID).map(item=>{//busco el código del material en los items
-                                
-                                    max_id++; //increase lineID
-
-                                    //Append Line
-                                    newRows.push({
-                                         lineID: max_id
-                                        ,mfg_orderID: this.default_mfg_orderID
-                                        ,invID: item.value
-                                        ,debit_account_id: item.debit_account_id
-                                        ,credit_account_id: item.credit_account_id
-                                        ,quantity: 1
-                                        ,price: item.lastPrice
-                                        ,lineSubtotal: 1 * item.lastPrice
-                                        ,lineDiscntPrcnt: 0
-                                        ,lineDiscntAmount: 0
-                                        ,lineUntaxed: 1 * item.lastPrice
-                                        ,whID: this.defaultWhID
-                                        ,prjID: 0
-                                        //,transportTypeID: this.defaultTransportID
-                                        //,estado: true
-                                    })
-
-                                })
-                            })
+                        //GetMaxId
+                        let max_id = 0
+                        let temp = null
+                        if(this.lines.length > 0){
+                            temp = this.getMax(this.lines, "lineID");
+                            max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
                         }
                         
-                    })
+                        //get Current Data
+                        let newRows = JSON.parse(JSON.stringify(this.lines))
+                        
+                        //Iterate Selected Rows
+                        this.itemsBatchDialogSelected.map(invRow => {
 
-                    //Update Data
-                    this.lines = newRows
-                    this.$q.loading.hide()  
-                    this.isItemsBatchDialog = false
-                }catch(ex){
-                    console.dir(ex)
-                    this.$q.loading.hide()  
+                            if(invRow.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
+                                max_id++; //increase lineID
+
+                                //Append Line
+                                newRows.push({
+                                    lineID: max_id
+                                    ,mfg_orderID: this.default_mfg_orderID
+                                    ,invID: invRow.value
+                                    ,debit_account_id: selectedOrderData.accMfg      //aquí viene la cuenta del Producto a Fabricar (basado en la Orden de Producción) entonces de esta forma siempre se manejaría 1 misma cuenta para que se simplifique el asiento contable al sacar el producto terminado
+                                    ,credit_account_id: invRow.credit_account_id    //como insumo sale, entonces se toma del item (accInventory, que es lo que viene del spmktMFGSelectEdit)
+                                    ,quantity: 1
+                                    ,price: invRow.lastPrice
+                                    ,lineSubtotal: 1 * invRow.lastPrice
+                                    ,lineDiscntPrcnt: 0
+                                    ,lineDiscntAmount: 0
+                                    ,lineUntaxed: 1 * invRow.lastPrice
+                                    ,whID: this.defaultWhID
+                                    ,prjID: 0
+                                    //,transportTypeID: this.defaultTransportID
+                                    //,estado: true
+                                })
+
+                            }
+
+                            if(invRow.systemType==3){ //3=Kit > Entonces busco los materiales y recorro el resulto para irlos agregagando
+                                this.lookup_items_kits.filter(x=>x.invID==invRow.value).map(material=>{//material es el item que debo agregar
+                                    this.lookup_items.filter(item=>item.value==material.materialID).map(item=>{//busco el código del material en los items
+                                    
+                                        max_id++; //increase lineID
+
+                                        //Append Line
+                                        newRows.push({
+                                            lineID: max_id
+                                            ,mfg_orderID: this.default_mfg_orderID
+                                            ,invID: item.value
+                                            ,debit_account_id: selectedOrderData.accMfg      //aquí viene la cuenta del Producto a Fabricar (basado en la Orden de Producción) entonces de esta forma siempre se manejaría 1 misma cuenta para que se simplifique el asiento contable al sacar el producto terminado
+                                            ,credit_account_id: invRow.credit_account_id    //como insumo sale, entonces se toma del item (accInventory, que es lo que viene del spmktMFGSelectEdit)
+                                            ,quantity: 1
+                                            ,price: item.lastPrice
+                                            ,lineSubtotal: 1 * item.lastPrice
+                                            ,lineDiscntPrcnt: 0
+                                            ,lineDiscntAmount: 0
+                                            ,lineUntaxed: 1 * item.lastPrice
+                                            ,whID: this.defaultWhID
+                                            ,prjID: 0
+                                            //,transportTypeID: this.defaultTransportID
+                                            //,estado: true
+                                        })
+
+                                    })
+                                })
+                            }
+                            
+                        })
+
+                        //Update Data
+                        this.lines = newRows
+                        this.$q.loading.hide()  
+                        this.isItemsBatchDialog = false
+                    }catch(ex){
+                        console.dir(ex)
+                        this.$q.loading.hide()  
+                    }
+                }
+            }
+        },
+        appendRows(){
+            if(this.default_mfg_orderID&&this.default_mfg_orderID>0){
+                if(this.selectedBudgetRows!=null&&this.selectedBudgetRows.length>0){
+                    try{
+                        this.$q.loading.show()
+                        let selectedOrderData = this.lookup_mfgOrders.find(x=>x.value==this.default_mfg_orderID)
+
+                        let newLineID = 0
+                        if(this.lines.length > 0){
+                            let temp = this.getMax(this.lines, "lineID");
+                            newLineID = parseInt(temp.lineID);
+                        }
+                        let newRows = JSON.parse(JSON.stringify(this.lines))
+        
+                        this.selectedBudgetRows.map(x=>{
+                            //console.dir(x)
+                            newLineID++;
+                            let nuevaFila = {
+                                lineID: newLineID//
+                                ,mfg_orderID: this.defaultWhID
+                                ,invID: x.invID
+                                ,quantity: x.quantityAvailable//agrega lo que está pendiente del presupuesto
+                                ,price: x.price
+                                ,lineSubtotal: x.quantityAvailable * x.price
+                                ,lineDiscntPrcnt: 0
+                                ,lineDiscntAmount: 0
+                                ,lineUntaxed: x.quantityAvailable * x.price
+                                ,debit_account_id: selectedOrderData.accMfg      //aquí viene la cuenta del Producto a Fabricar (basado en la Orden de Producción) entonces de esta forma siempre se manejaría 1 misma cuenta para que se simplifique el asiento contable al sacar el producto terminado
+                                ,credit_account_id: x.credit_account_id    //como insumo sale, entonces se toma del item (accInventory, que es lo que viene del spmktMFGSelectEdit)
+                                ,whID: this.defaultWhID
+                                ,uploaded: false
+                            }
+                            newRows.push(nuevaFila);
+                        })
+                        this.lines = newRows;
+                        this.$q.loading.hide();
+                        this.isBoMDialogOpen=false;
+                    }catch(ex){
+                        console.dir(ex)
+                        this.$q.loading.hide()  
+                    }
+                    
                 }
             }
         },
@@ -477,41 +525,7 @@ export default ({
             }
             return false
         },
-        appendRows(){
-            if(this.selectedBudgetRows!=null&&this.selectedBudgetRows.length>0){
-                this.$q.loading.show()
-                let newLineID = 0
-                if(this.lines.length > 0){
-                    let temp = this.getMax(this.lines, "lineID");
-                    newLineID = parseInt(temp.lineID);
-                }
-                let newRows = JSON.parse(JSON.stringify(this.lines))
-
-                this.selectedBudgetRows.map(x=>{
-                    //console.dir(x)
-                    newLineID++;
-                    let nuevaFila = {
-                        lineID: newLineID//
-                        ,mfg_orderID: this.defaultWhID
-                        ,invID: x.invID
-                        ,quantity: x.quantityAvailable//agrega lo que está pendiente del presupuesto
-                        ,price: x.price
-                        ,lineSubtotal: x.quantityAvailable * x.price
-                        ,lineDiscntPrcnt: 0
-                        ,lineDiscntAmount: 0
-                        ,lineUntaxed: x.quantityAvailable * x.price
-                        ,debit_account_id: x.debit_account_id
-                        ,credit_account_id: x.credit_account_id
-                        ,whID: this.defaultWhID
-                        ,uploaded: false
-                    }
-                    newRows.push(nuevaFila);
-                })
-                this.lines = newRows;
-                this.$q.loading.hide();
-                this.isBoMDialogOpen=false;
-            }
-        },
+        
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
@@ -566,6 +580,9 @@ export default ({
         },
         lookup_items_kits: {
             get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
+        },
+        lookup_mfgOrders: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_mfgOrders },
         },
     }
 })
