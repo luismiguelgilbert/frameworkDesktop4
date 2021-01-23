@@ -21,7 +21,6 @@
           { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityCancelNew', required: true, label: 'Cancelar', align: 'right', field: row => row.quantityCancelNew, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true, style: 'max-width: 100px;',  },
-          { name: 'quantityReturned', required: true, label: 'Devolución', align: 'right', field: row => row.quantityReturned, sortable: true, style: 'max-width: 100px;',  },
           //{ name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true, style: 'min-width: 250px;' },
           //{ name: 'expectedDate', required: true, label: 'Esperado el', align: 'left', field: row => row.expectedDate, sortable: true, style: 'min-width: 130px;' },
           //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'left', field: row => row.transportTypeID, sortable: true, style: 'min-width: 300px;' },
@@ -78,8 +77,6 @@
               @input="(value)=>{updateRow(value,'quantityCancelNew',props.row)}" />
         </q-td>
         <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>
-        <q-td key="quantityReturned" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityReturned }}</q-td>
-        
         <q-td key="whID" :props="props">
           <selectSearchable
               labelText="Bodega" 

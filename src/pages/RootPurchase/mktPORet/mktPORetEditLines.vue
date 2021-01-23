@@ -299,6 +299,8 @@ export default ({
                 ,kardexID: invRow.kardexID
                 ,stockID: invRow.stockID
                 ,moveID: invRow.moveID
+                ,mktPO_headerID: invRow.mktPO_headerID
+                ,mktPO_lineID: invRow.mktPO_lineID
               })
 
               //No se agrega impuestos..?

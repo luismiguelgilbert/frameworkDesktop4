@@ -26,7 +26,7 @@
     ]"
     >
     <template v-slot:top v-if="editMode==true">
-        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Consumos':''" title="Agregar Ítems de Pedidos de Insumos" @click="isRequisicionDialog = true;" icon="far fa-file-alt" color="primary" no-caps  />
+        <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Entregas':''" title="Agregar Ítems de Entregas de PT" @click="isRequisicionDialog = true;" icon="far fa-file-alt" color="primary" no-caps  />
         <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
     </template>
 
@@ -69,7 +69,7 @@
         </q-td>
         <q-td key="quantity" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
+              :value="props.row.quantity" type="number" :min="0" readonly
               dense item-aligned borderless input-class="text-right"
               :max="props.row.maxQuantity" 
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
@@ -111,7 +111,7 @@
   <q-dialog v-model="isRequisicionDialog" @show="loadRequisicionesPendientes">
     <q-card style="min-width: 95%;">
       <q-bar class="bg-primary text-white">
-        Insumos Consumidos
+        Entregas de Producto Terminado
         <q-space />
         <q-input input-class="text-white" borderless dense debounce="300" v-model="requisicionesFilterString" placeholder="Buscar">
           <template v-slot:append>
@@ -128,8 +128,8 @@
           :columns="[
             { name: 'mfg_orderID', required: true, label: 'OP #', align: 'left', field: row => row.mfg_orderID, sortable: true, style: 'min-width: 30px;', },
             { name: 'mfg_orderName', required: true, label: 'OP', align: 'left', field: row => row.mfg_orderName, sortable: true, style: 'min-width: 30px;', },
-            { name: 'headerID', required: true, label: 'Pedido #', align: 'left', field: row => row.headerID, sortable: true,  },
-            { name: 'lineID', required: true, label: 'Pedido Línea #', align: 'left', field: row => row.lineID, sortable: true,  },
+            { name: 'headerID', required: true, label: 'Entrega #', align: 'left', field: row => row.headerID, sortable: true,  },
+            { name: 'lineID', required: true, label: 'Entrega Línea #', align: 'left', field: row => row.lineID, sortable: true,  },
             { name: 'invName', required: true, label: 'Item', align: 'left', field: row => row.invName, sortable: true, style: 'min-width: 250px;', },
             { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'min-width: 50px;', },
             { name: 'quantityReturned', required: true, label: 'Devolución', align: 'right', field: row => row.quantityReturned, sortable: true, style: 'min-width: 50px;', },
@@ -235,7 +235,7 @@ export default ({
         this.requisicionesDialogSelected = [];
         this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spmktMFGRetSelectPending',
+            url: this.apiURL + 'spMktPRDRetSelectPending',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,
@@ -298,8 +298,6 @@ export default ({
                 ,kardexID: invRow.kardexID
                 ,stockID: invRow.stockID
                 ,moveID: invRow.moveID
-                ,mktMFG_headerID: invRow.mktMFG_headerID
-                ,mktMFG_lineID: invRow.mktMFG_lineID
               })
 
               //No se agrega impuestos..?

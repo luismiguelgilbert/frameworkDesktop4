@@ -106,6 +106,7 @@ export default ({
             return max;
         },
         addRow(selectedRows){
+            //this.lookup_lots.filter(x=>x.estado && x.invID == selectedColumn.invID)
             let newRows = JSON.parse(JSON.stringify(this.lots))
             
             let max_id = 1
@@ -122,7 +123,8 @@ export default ({
                     ,invID: this.selectedColumn.invID
                     ,lotID: x.lotID
                     ,name_es: x.name_es
-                    ,quantity: x.quantityAvailable
+                    //,quantity: x.quantityAvailable
+                    ,quantity: (this.selectedColumn.newQuantity>x.quantityAvailable)?x.quantityAvailable:this.selectedColumn.newQuantity//si cantidad x recibir excede disponible, entonces pongo disponible
                 })
             })
             this.lots = newRows

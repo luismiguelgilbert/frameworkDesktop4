@@ -18,13 +18,15 @@
           { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
           { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', },
           { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;',  },
-          { name: 'quantityInvoiced', required: true, label: 'Facturado', align: 'right', field: row => row.quantityInvoiced, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
-          { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
-          { name: 'quantityCancelNew', required: true, label: 'Cancelar', align: 'right', field: row => row.quantityCancelNew, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
+          { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;'  },
+          { name: 'quantityCancelNew', required: true, label: 'Cancelar', align: 'right', field: row => row.quantityCancelNew, sortable: true, style: 'max-width: 100px;' },
           { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true, style: 'max-width: 100px;',  },
+          { name: 'quantityInvoiced', required: true, label: 'Facturado', align: 'right', field: row => row.quantityInvoiced, sortable: true, style: 'max-width: 100px;'  },
+          { name: 'quantityReturned', required: true, label: 'Devolución', align: 'right', field: row => row.quantityReturned, sortable: true, style: 'max-width: 100px;',  },
           { name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true, style: 'min-width: 250px;' },
           { name: 'expectedDate', required: true, label: 'Esperado el', align: 'left', field: row => row.expectedDate, sortable: true, style: 'min-width: 130px;' },
           { name: 'transportTypeID', required: true, label: 'Entrega?', align: 'left', field: row => row.transportTypeID, sortable: true, style: 'min-width: 300px;' },
+          
           { name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: true, },
           
         ]"
@@ -78,7 +80,7 @@
         </q-td>
         <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
         <q-td key="quantityRcvd" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityRcvd }}</q-td>
-        <q-td key="quantityInvoiced" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityInvoiced }}</q-td>
+        
         <q-td key="quantityCancel" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityCancel }}</q-td>
         <q-td key="quantityCancelNew" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
@@ -89,6 +91,8 @@
               @input="(value)=>{updateRow(value,'quantityCancelNew',props.row)}" />
         </q-td>
         <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>
+        <q-td key="quantityInvoiced" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityInvoiced }}</q-td>
+        <q-td key="quantityReturned" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityReturned }}</q-td>
         <q-td key="whID" :props="props">
           <selectSearchable
               labelText="Bodega" 

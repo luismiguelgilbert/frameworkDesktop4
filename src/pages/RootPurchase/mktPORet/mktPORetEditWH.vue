@@ -17,7 +17,7 @@
       { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
       { name: 'invID', required: true, label: 'Item', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
       { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', },
-      { name: 'quantityRcvd', required: true, label: 'Devuelto', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;',  },
+      { name: 'quantityRcvd', required: true, label: 'Entregado', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;',  },
       //{ name: 'quantityInvoiced', required: true, label: 'Facturado', align: 'right', field: row => row.quantityInvoiced, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
       { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
       { name: 'quantityCancelNew', required: true, label: 'Cancelar', align: 'right', field: row => row.quantityCancelNew, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
@@ -26,7 +26,8 @@
       //{ name: 'expectedDate', required: true, label: 'Esperado el', align: 'left', field: row => row.expectedDate, sortable: true, style: 'min-width: 100px;' },
       //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'left', field: row => row.transportTypeID, sortable: true },
       //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: true },
-      
+      { name: 'mktPO_headerID', required: true, label: 'OC #', align: 'right', field: row => row.mktPO_headerID, sortable: true, style: 'max-width: 100px;',  },
+      { name: 'mktPO_lineID', required: true, label: 'OC Línea #', align: 'right', field: row => row.mktPO_lineID, sortable: true, style: 'max-width: 100px;',  },
     ]"
     >
 
@@ -81,7 +82,9 @@
         </q-td>
         
         <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>
-
+        
+        <q-td key="mktPO_headerID" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.mktPO_headerID }}</q-td>
+        <q-td key="mktPO_lineID" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.mktPO_lineID }}</q-td>
 
       </q-tr>
     </template>
