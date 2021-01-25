@@ -70,8 +70,8 @@
         <q-td key="quantityCancel" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityCancel }}</q-td>
         <q-td key="quantityCancelNew" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantityCancelNew" type="number" :min="0" :readonly="(editMode==true)" :max="props.row.quantityOpen"
-              dense item-aligned borderless input-class="text-right"
+              :value="props.row.quantityCancelNew" type="number" :min="0"  :max="props.row.quantityOpen"
+              dense item-aligned borderless input-class="text-right" readonly
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @focus="$event.target.select()"
               @input="(value)=>{updateRow(value,'quantityCancelNew',props.row)}" />

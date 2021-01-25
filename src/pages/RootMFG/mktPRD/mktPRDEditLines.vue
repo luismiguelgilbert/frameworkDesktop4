@@ -202,6 +202,9 @@ export default ({
             if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<=0){
                 return (returnType?true:'Debe corregir la celda: Cantidad')
             }
+            /*if(currentRow.mktPRD_headerID==null||currentRow.mktPRD_headerID<=0||currentRow.mktPRD_lineID==null||currentRow.mktPRD_lineID<=0){
+                return (returnType?true:'Debe corregir la referencia a la Entrega de PT')
+            }*/
             if(currentRow.lineUntaxed==null||currentRow.lineUntaxed==undefined||currentRow.lineUntaxed<0){
                 return (returnType?true:'Debe verificar todas las celdas por un error en: Total')
             }

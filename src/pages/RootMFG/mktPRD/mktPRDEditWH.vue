@@ -21,6 +21,7 @@
           { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityCancelNew', required: true, label: 'Cancelar', align: 'right', field: row => row.quantityCancelNew, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
           { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true, style: 'max-width: 100px;',  },
+          { name: 'quantityReturned', required: true, label: 'Devolución', align: 'right', field: row => row.quantityReturned, sortable: true, style: 'max-width: 100px;',  },
           //{ name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true, style: 'min-width: 250px;' },
           //{ name: 'expectedDate', required: true, label: 'Esperado el', align: 'left', field: row => row.expectedDate, sortable: true, style: 'min-width: 130px;' },
           //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'left', field: row => row.transportTypeID, sortable: true, style: 'min-width: 300px;' },
@@ -29,7 +30,8 @@
         ]"
     >
     <template v-slot:top v-if="editMode==false">
-        <q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" no-caps   :disable="selected.length<=0" />
+        <q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Limpiar':''" title="Limpiar Cancelaciones en seleccionadas" @click="clearCancelRows" icon="fas fa-broom" color="primary" no-caps   :disable="selected.length<=0" />
+        <q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" no-caps   :disable="selected.length<=0" class="q-ml-md" />
         <q-space />
     </template>
 
@@ -70,13 +72,14 @@
         <q-td key="quantityCancel" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityCancel }}</q-td>
         <q-td key="quantityCancelNew" :props="props" :tabindex="(props.key*10)+2">
           <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantityCancelNew" type="number" :min="0" :readonly="(editMode==true)" :max="props.row.quantityOpen"
-              dense item-aligned borderless input-class="text-right"
+              :value="props.row.quantityCancelNew" type="number" :min="0"  :max="props.row.quantityOpen"
+              dense item-aligned borderless input-class="text-right" readonly
               :rules="[val => parseFloat(val)>=0 || 'Requerido']"
               @focus="$event.target.select()"
               @input="(value)=>{updateRow(value,'quantityCancelNew',props.row)}" />
         </q-td>
         <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>
+        <q-td key="quantityReturned" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityReturned }}</q-td>
         <q-td key="whID" :props="props">
           <selectSearchable
               labelText="Bodega" 
@@ -211,6 +214,12 @@ export default ({
       this.selected.forEach(rowToUpdate=>{
         //pone en columna quantityCancel el valor de las cantidades pendientes (open / por recibir)
         this.updateRow(rowToUpdate.quantityOpen, 'quantityCancelNew', rowToUpdate)
+      })
+    },
+    clearCancelRows(){
+      this.selected.forEach(rowToUpdate=>{
+        //pone en columna quantityCancel el valor de las cantidades pendientes (open / por recibir)
+        this.updateRow(0, 'quantityCancelNew', rowToUpdate)
       })
     },
   },

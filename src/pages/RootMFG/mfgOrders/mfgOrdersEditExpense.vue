@@ -22,7 +22,7 @@
         ]"
         >
         <template v-slot:top >
-            <q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
+            <q-btn :disable="blockUserEdit" :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />
             <q-space />
             <div class="text-primary">Línea(s) de producción que se usaron para producir esta orden</div>
         </template>
@@ -258,6 +258,9 @@ export default ({
         expense: {
             get () { return this.$store.state[this.moduleName].editData.expense },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'expense', value: val}) }
+        },
+        blockUserEdit: {
+            get () { return this.$store.state[this.moduleName].editData.basic.blockUserEdit },
         },
     }
 })

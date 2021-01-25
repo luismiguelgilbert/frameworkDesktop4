@@ -290,7 +290,7 @@ export default ({
         }
         if(this.editMode){
           if(currentRow.newQuantity==null||currentRow.newQuantity==undefined||currentRow.newQuantity<0 || currentRow.newQuantity > currentRow.quantityOpen || currentRow.newQuantity > currentRow.quantityAvailable){
-            return (returnType?true:'Debe corregir la celda: Recibir')
+            return (returnType?true:'Debe corregir la celda: Entregar')
           }
         }
         

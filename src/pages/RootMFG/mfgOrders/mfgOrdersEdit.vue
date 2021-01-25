@@ -49,6 +49,22 @@
                             <q-item-label :class="'text-subtitle2 '+(tab=='expense'?'text-white':'text-grey-7')">Gastos de Producción</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable @click="tab='stats'" :active="tab=='stats'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-calculator" :color="tab=='stats'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='stats'?'text-white':'text-grey-7')">Resumen de OP</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable @click="tab='deliveries'" :active="tab=='deliveries'" active-class="bg-primary text-white" >
+                        <q-item-section side>
+                            <q-icon name="fas fa-box" :color="tab=='deliveries'?'white':'grey-7'" />
+                        </q-item-section>
+                        <q-item-section v-if="$q.screen.gt.xs">
+                            <q-item-label :class="'text-subtitle2 '+(tab=='deliveries'?'text-white':'text-grey-7')">Entregas de PT</q-item-label>
+                        </q-item-section>
+                    </q-item>
                     <q-item clickable @click="tab='history'" :active="tab=='history'" active-class="bg-primary text-white" >
                         <q-item-section side>
                             <q-icon name="fas fa-history" :color="tab=='history'?'white':'grey-7'" />
@@ -72,6 +88,8 @@
                     <q-tab-panel name="locations"> <locationsComponent ref="locationsComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
                     <q-tab-panel name="budget"> <budgetComponent ref="budgetComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
                     <q-tab-panel name="expense"> <expenseComponent ref="expenseComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
+                    <q-tab-panel name="stats"> <statsComponent ref="statsComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
+                    <q-tab-panel name="deliveries"> <deliveriesComponent ref="deliveriesComponent" :moduleName="moduleName.toString()" /></q-tab-panel>
 
                     <q-tab-panel name="history"><historyComponent  ref="historyComponent" :moduleName="moduleName" /></q-tab-panel>
 
@@ -95,6 +113,8 @@ import basicComponent from './mfgOrdersEditBasic'
 import locationsComponent from './mfgOrdersEditLocations'
 import budgetComponent from './mfgOrdersEditBudget'
 import expenseComponent from './mfgOrdersEditExpense'
+import statsComponent from './mfgOrdersEditStats'
+import deliveriesComponent from './mfgOrdersEditDelivieries'
 import historyComponent from '../../../components/historyView/historyView'
 
 
@@ -104,6 +124,8 @@ export default ({
     ,locationsComponent: locationsComponent
     ,budgetComponent: budgetComponent
     ,expenseComponent: expenseComponent
+    ,statsComponent: statsComponent
+    ,deliveriesComponent: deliveriesComponent
     ,historyComponent: historyComponent
   },
   data () {

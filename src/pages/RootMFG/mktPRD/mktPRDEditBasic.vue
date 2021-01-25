@@ -172,8 +172,6 @@ export default ({
                             ,comments: selectedOrder.comments
                         })
                         this.lines = newLine;
-                        console.dir('newLine')
-                        console.dir(newLine)
                         this.$q.loading.hide();
                     }catch(ex){
                         console.dir(ex)

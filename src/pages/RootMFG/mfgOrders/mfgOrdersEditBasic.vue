@@ -10,9 +10,9 @@
             v-model="voided" icon="fas fa-ban" color="red" label="Anulado?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
             />
     </div>
-    
+    <!--:readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"-->
     <q-input
-        ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="name_es" :readonly="blockUserEdit"
         placeholder="Escriba el nombre de la Orden de Producción (*)" label="Nombre de Orden de Producción (*)" filled
         v-model="name_es"
         :rules="[
@@ -23,6 +23,7 @@
         <template v-slot:prepend><q-icon name="fas fa-clipboard-list" /></template>
     </q-input>
 
+    <!--:isReadonly="(estado==false || (allow_edit==false && allow_insert==false))"-->
     <selectSearchable 
         prependIcon="fas fa-stream"
         labelText="Tipo (*)" labelSearchText="Buscar Tipo"
@@ -30,7 +31,7 @@
         rowValueField="value" optionsListLabel="label" optionsListCaption="short_name_es"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :isReadonly="blockUserEdit"
         :initialValue="mfgTypeID"
         :tableSearchColumns="[
                  { name: 'label', label: 'Tipo', field: 'label', align: 'left'}
@@ -50,7 +51,7 @@
         rowValueField="value" optionsListLabel="label" optionsListCaption="internal_code"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :isReadonly="blockUserEdit"
         :initialValue="invID"
         :tableSearchColumns="[
             { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
@@ -67,8 +68,10 @@
             }"
         />
 
+    <!--:readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)||estado==false"-->
     <q-input
-        ref="quantity" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="quantity" 
+        :readonly="blockUserEdit"
         placeholder="Ingrese la Cantidad Planificada a Producir (*)" label="Cantidad Estimada a Producir (*)" filled type="number" min="0"
         v-model="quantity"
         @focus="$event.target.select()"
@@ -175,6 +178,9 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        blockUserEdit: {
+            get () { return this.$store.state[this.moduleName].editData.basic.blockUserEdit },
+        },
         estado: {
             get () { return this.$store.state[this.moduleName].editData.basic.estado },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'estado', value: val}) }

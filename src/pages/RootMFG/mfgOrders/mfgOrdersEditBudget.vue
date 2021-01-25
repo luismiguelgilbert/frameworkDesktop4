@@ -25,10 +25,10 @@
         ]"
         >
         <template v-slot:top >
-                <q-btn :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true" icon="fas fa-plus" color="primary" no-caps />
+                <q-btn :disable="blockUserEdit" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true" icon="fas fa-plus" color="primary" no-caps />
                 <!--<q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
-                <q-btn :label="$q.screen.gt.sm?'Lista de Materiales (BoM)':''"  title="Agregar masivamente Lista de Materia Prima basado en una Lista de Materiales (BoM)" @click="addBoM" icon="fas fa-boxes" color="primary" no-caps class="q-ml-sm" />
-                <q-btn :label="$q.screen.gt.sm?'Actualizar Costos':''"  title="Actualizar Costos de los registros seleccionados usando precio promedio actual en plataforma" @click="updateCosts" icon="fas fa-calculator" color="primary" no-caps class="q-ml-sm" :disable="selected.length<=0" />
+                <q-btn :disable="blockUserEdit" :label="$q.screen.gt.sm?'Lista de Materiales (BoM)':''"  title="Agregar masivamente Lista de Materia Prima basado en una Lista de Materiales (BoM)" @click="addBoM" icon="fas fa-boxes" color="primary" no-caps class="q-ml-sm" />
+                <q-btn :disable="(blockUserEdit || selected.length<=0)" :label="$q.screen.gt.sm?'Actualizar Costos':''"  title="Actualizar Costos de los registros seleccionados usando precio promedio actual en plataforma" @click="updateCosts" icon="fas fa-calculator" color="primary" no-caps class="q-ml-sm" />
                 <q-space />
                 <div style="max-width: 45%;" class="text-primary ellipsis">Lista de Materiales requeridos para producir esta orden</div>
         </template>
@@ -561,6 +561,9 @@ export default ({
             }
             },
         //Module Specific
+        estado: {
+            get () { return this.$store.state[this.moduleName].editData.basic.estado },
+        },
         invID: {
             get () { return this.$store.state[this.moduleName].editData.basic.invID },
         },
@@ -579,6 +582,9 @@ export default ({
         },
         lookup_mfgBudgetLines: {
             get () { return this.$store.state[this.moduleName].editData.lookup_mfgBudgetLines },
+        },
+        blockUserEdit: {
+            get () { return this.$store.state[this.moduleName].editData.basic.blockUserEdit },
         },
     }
 })
