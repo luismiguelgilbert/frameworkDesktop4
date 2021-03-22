@@ -8,7 +8,7 @@
     <q-separator />
     <q-card-section class="text-primary q-ml-md q-mr-md">
             <b>1. Ingrese su usuario o correo electrónico:</b>
-                <q-input class="text-white" :autofocus="$q.screen.gt.sm?true:false" :input-class="isOSdarkMode?'text-white':undefined" placeholder="Ingrese su mail o su usuario" v-model="recoveryMail" aria-required required >
+                <q-input class="text-white"  placeholder="Ingrese su mail o su usuario" v-model="recoveryMail" aria-required required >
                     <template v-slot:prepend>
                         <q-icon name="fas fa-envelope" :color="isOSdarkMode?'grey-4':undefined" />
                     </template>
