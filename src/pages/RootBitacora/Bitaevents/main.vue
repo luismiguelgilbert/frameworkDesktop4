@@ -319,107 +319,39 @@ export default ({
                 e.component.selectRows(e.row.key);
                 this.selectedItem = e.row.data;
                 //this.shouldScrollToRow = true;
-                if(e.row.data.systemType==4){
-                    e.items = [
-                        { text: "Abrir Kardex del Item", icon: "fas fa-history", onItemClick: ()=> { 
-                                this.$axios({
-                                    method: 'GET',
-                                    url: this.apiURL + 'spInvQueryWhIDInvIDGetData',
-                                    headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-                                    params: {
-                                        userCode: this.userCode,
-                                        userCompany: this.userCompany,
-                                        userLanguage: 'es',
-                                        whID: this.warehouseID,
-                                        invID: this.selectedItem.invID,
-                                    }
-                                }).then((response) => {
-                                    this.selectedItemKardex = []
-                                    this.selectedItemKardex = response.data
-                                    this.kardexVisible = true;
-                                }).catch((error) => {
-                                    console.dir(error.message)
-                                    let mensaje = ''
-                                    if(error.message){ mensaje = error.message }
-                                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                                    })
-                                    this.selectedItemKardex = []
+                e.items = [
+                    { text: "Abrir Registro", icon: "fas fa-folder-open", onItemClick: ()=> { 
+                            this.$axios({
+                                method: 'GET',
+                                url: this.apiURL + 'spInvQueryWhIDInvIDGetData',
+                                headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+                                params: {
+                                    userCode: this.userCode,
+                                    userCompany: this.userCompany,
+                                    userLanguage: 'es',
+                                    whID: this.warehouseID,
+                                    invID: this.selectedItem.invID,
+                                }
+                            }).then((response) => {
+                                this.selectedItemKardex = []
+                                this.selectedItemKardex = response.data
+                                this.kardexVisible = true;
+                            }).catch((error) => {
+                                console.dir(error.message)
+                                let mensaje = ''
+                                if(error.message){ mensaje = error.message }
+                                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                                this.$q.notify({ html: true, multiLine: false, color: 'red'
+                                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+                                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
                                 })
-                            }
-                        },
-                        { disable: true, text: "Ver Stock por Lote", icon: "fas fa-barcode", onItemClick: ()=> {
-                                this.$axios({
-                                    method: 'GET',
-                                    url: this.apiURL + 'spInvQueryWhIDInvIDGetLotData',
-                                    headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-                                    params: {
-                                        userCode: this.userCode,
-                                        userCompany: this.userCompany,
-                                        userLanguage: 'es',
-                                        whID: this.warehouseID,
-                                        invID: this.selectedItem.invID,
-                                    }
-                                }).then((response) => {
-                                    this.selectedItemLots = []
-                                    this.selectedItemLots = response.data
-                                    this.lotVisible = true;
-                                }).catch((error) => {
-                                    console.dir(error.message)
-                                    let mensaje = ''
-                                    if(error.message){ mensaje = error.message }
-                                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                                    })
-                                    this.selectedItemKardex = []
-                                })
-                            }
-                        },
-                    ];
-                }else{
-                    e.items = [
-                        { text: "Abrir Kardex del Item", icon: "fas fa-history", onItemClick: ()=> { 
-                                this.$axios({
-                                    method: 'GET',
-                                    url: this.apiURL + 'spInvQueryWhIDInvIDGetData',
-                                    headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-                                    params: {
-                                        userCode: this.userCode,
-                                        userCompany: this.userCompany,
-                                        userLanguage: 'es',
-                                        whID: this.warehouseID,
-                                        invID: this.selectedItem.invID,
-                                    }
-                                }).then((response) => {
-                                    this.selectedItemKardex = []
-                                    this.selectedItemKardex = response.data
-                                    this.kardexVisible = true;
-                                }).catch((error) => {
-                                    console.dir(error.message)
-                                    let mensaje = ''
-                                    if(error.message){ mensaje = error.message }
-                                    if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                                    if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                                    this.$q.notify({ html: true, multiLine: false, color: 'red'
-                                        ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                                    })
-                                    this.selectedItemKardex = []
-                                })
-                            }
+                                this.selectedItemKardex = []
+                            })
                         }
-                    ];
-                }
-                
+                    }
+                ];
             }
         },
         kardexGridExport(){
