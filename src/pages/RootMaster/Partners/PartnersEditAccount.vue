@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <q-select class="col-4"
         label="Grupo Contable (*) - Aplica plantilla" placeholder="Seleccione el Grupo Contable al que pertenece el Item (*)" emit-value map-options filled
         :options="lookup_groups" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -136,7 +136,7 @@
     <!--paytermID-->
     <q-select
         ref="paytermID" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione Forma de Pago predeterminada (*)" label="Forma de Pago Predeterminada (*)" filled
+        placeholder="Seleccione Forma de Pago predeterminada usada en Orden de Compra (*)" label="Forma de Pago Predeterminada en Orden de Compra (*)" filled
         v-model="paytermID" 
         :options="lookup_payterms" map-options emit-value
         :option-disable="opt => !opt.estado"
@@ -148,59 +148,6 @@
     </q-select>
 
     
-    <!--PRICELIST-->
-    <div>
-        <q-toolbar class="bg-primary text-white shadow-2">
-            <q-toolbar-title>
-                <q-icon name="fas fa-list-ol" color="white" size="xs" /> Listas de Precios Permitidas
-            </q-toolbar-title>
-            <q-btn flat icon-right="fas fa-plus"  label="Agregar Lista de Precios" no-caps @click="isTaxesDialog=true" />
-        </q-toolbar>
-        <q-list bordered>
-            <q-item v-for="linea in pricelists" :key="linea.value" >
-                <q-item-section>
-                    <q-item-label class="text-bolder text-primary">{{linea.label}}</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                    <q-btn flat icon="fas fa-trash"  color="primary" round @click="removeTaxLine(linea)" />
-                </q-item-section>
-            </q-item>
-            <q-item v-if="pricelists.length<=0">
-                <q-item-section>
-                    <q-item-label class="text-bolder text-primary">No se han agregado listas de precios</q-item-label>
-                </q-item-section>
-            </q-item>
-        </q-list>
-    </div>
-
-    <!--PAYTERMS-->
-    <br />
-    <div>
-        <q-toolbar class="bg-primary text-white shadow-2">
-            <q-toolbar-title>
-                <q-icon name="fas fa-money-check" color="white" size="xs" /> Formas de Pago Permitidas
-            </q-toolbar-title>
-            <q-btn flat icon-right="fas fa-plus"  label="Agregar Formas de Pago" no-caps @click="isPaytermsDialog=true" />
-        </q-toolbar>
-        <q-list bordered>
-            <q-item v-for="linea in payterms" :key="linea.value" >
-                <q-item-section>
-                    <q-item-label class="text-bolder text-primary">{{linea.label}}</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                    <q-btn flat icon="fas fa-trash"  color="primary" round @click="removePaytermLine(linea)" />
-                </q-item-section>
-            </q-item>
-            <q-item v-if="payterms.length<=0">
-                <q-item-section>
-                    <q-item-label class="text-bolder text-primary">No se han agregado formas de pago</q-item-label>
-                </q-item-section>
-            </q-item>
-        </q-list>
-    </div>
-    
-
-
     <q-dialog v-model="isSearchDialog">
         <mainLookup 
             titleBar="Buscar Cuenta Contable"
@@ -219,39 +166,7 @@
         />
     </q-dialog>
 
-    <q-dialog v-model="isTaxesDialog">
-        <mainLookup 
-            titleBar="Buscar Lista de Precio"
-            :data="this.lookup_pricelists"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :columns="[
-                     { name: 'label', required: true, label: 'Lista de Precio', align: 'left', field: row => row.label, sortable: false,    }
-                    //,{ name: 'short_name_es', required: true, label: 'Código', align: 'left', field: row => row.short_name_es , sortable: true }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            @onCancel="isTaxesDialog=false"
-            @onSelect="(selectedRows)=>{addTax(selectedRows)}"
-        />
-    </q-dialog>
-
-    <q-dialog v-model="isPaytermsDialog">
-        <mainLookup 
-            titleBar="Buscar Formas de Pago"
-            :data="this.lookup_payterms"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :columns="[
-                     { name: 'label', required: true, label: 'Impuesto', align: 'left', field: row => row.label, sortable: false,    }
-                    //,{ name: 'short_name_es', required: true, label: 'Código', align: 'left', field: row => row.short_name_es , sortable: true }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            @onCancel="isPaytermsDialog=false"
-            @onSelect="(selectedRows)=>{addPayterm(selectedRows)}"
-        />
-    </q-dialog>
-
-    <br><br>
+    <br><br><br><br>
 </q-form>
 </template>
 <script>
@@ -261,13 +176,16 @@ import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },
     components: {
         mainLookup: mainLookup
         ,selectSearchable:selectSearchable
     },
     data () {
         return {
-            moduleName: "Partners", isSearchDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            isSearchDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
             ,isTaxesDialog: false, isSustentosDialog: false
             ,isPaytermsDialog: false
         }
@@ -283,8 +201,8 @@ export default ({
             this.isSearchDialog = true
         },
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField]
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField]
             this.isSearchDialog = false
         },
         applyNewGroup(){
@@ -326,14 +244,10 @@ export default ({
             })
             this.payterms = newPayterms
         },
-        removeTaxLine(linea){
-            let newTaxes = JSON.parse(JSON.stringify(this.pricelists))
-            newTaxes = newTaxes.filter(x=>x.value != linea.value);
-            this.pricelists = newTaxes
-        },
+        
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField]
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField]
             this.isSearchDialog = false
         },
         addTax(selectedRows){
@@ -360,11 +274,41 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         groupID: {
             get () { return this.$store.state[this.moduleName].editData.basic.groupID },

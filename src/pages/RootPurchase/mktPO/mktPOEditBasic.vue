@@ -1,6 +1,7 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div>
+        
       <q-toggle
         v-model="estado" color="positive" label="Estado" icon="fas fa-check" :disable="true"
         />
@@ -13,7 +14,7 @@
         :optionsList="this.lookup_partners"
         rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
         :isRequired="true" 
-        :isDisable="false" 
+        :isDisable="editStatus.editMode=='edit'?true:false"
         :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :initialValue="partnerID"
         :tableSearchColumns="[
@@ -51,7 +52,7 @@
         >
         <template v-slot:prepend><q-icon name="far fa-user" /></template>
     </q-select>
-    <q-select
+    <!--<q-select
         label="Bodega de Destino Predeterminada (*)" placeholder="Seleccione la bodega predeterminada donde desea recibir los ítems (*)" emit-value map-options filled
         :options="lookup_wh" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :option-disable="opt => !opt.estado"
@@ -74,7 +75,7 @@
         ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-truck" /></template>
-    </q-select>
+    </q-select>-->
     
     <q-input
         ref="headerDate" :readonly="true"
@@ -170,11 +171,44 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         headerUser: {
             get () { return this.$store.state[this.moduleName].editData.basic.headerUser },

@@ -33,10 +33,14 @@ export default {
   },
   methods:{
     goHome(){
+      /*
       //this.currentPath = 'RootHome';
       this.currentPath = null;
       this.currentPathModule = null;
       //this.router.push('/RootHome');//this.router.back();
+      this.router.push('/');//this.router.back();
+      */
+     //$router.go(-1)
       this.router.push('/');//this.router.back();
     }
   },

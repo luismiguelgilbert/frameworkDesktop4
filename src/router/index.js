@@ -26,5 +26,15 @@ export default function (/* { store, ssrContext } */) {
     base: process.env.VUE_ROUTER_BASE
   })
 
+  //TODO: Pendiente agregar metdata to router, y con eso ver si ruta requiere sesión activa 
+  /*Router.beforeEach((to, from, next) => {
+    console.dir('Router change')
+    console.dir('From')
+    console.dir(from)
+    console.dir('To')
+    console.dir(to)
+    next()
+  })*/
+
   return Router
 }

@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
         <q-toggle class="col-12 col-md-4"
             tabindex="-1"

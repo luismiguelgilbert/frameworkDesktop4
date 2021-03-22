@@ -1,24 +1,32 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
       <q-toggle class="col-4"
         tabindex="-1"
         v-model="voided" icon="fas fa-disable" color="red" label="Anulada?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     </div>
-
-    <q-input
-        ref="customerName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        placeholder="Seleccione el Cliente (*)" label="Cliente (*)" filled
-        :value="customerName"
-        @keyup.keyCodes.113="openSearchCustomer('customerID','customerName',customerID)"
-        :rules="[
-                val => !!val || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-handshake" /></template>
-        <template v-slot:append><q-icon name="fas fa-search" @click="openSearchCustomer('customerID','customerName',customerID)"/></template>
-    </q-input>
+    
+    <selectSearchable 
+        prependIcon="fas fa-handshake"
+        labelText="Cliente (*)" labelSearchText="Buscar Cliente"
+        :optionsList="this.lookup_customers"
+        rowValueField="value" optionLabelField="label" optionsListCaption="partner_ruc" optionsListLabel="label" 
+        optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(editStatus.editMode=='edit')"
+        :initialValue="customerID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Cliente', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+                ,{ name: 'short_name_es', label: 'Nombre Comercial', field: 'short_name_es', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.customerID = row.value;
+                this.loadPendingInv();
+            }"
+        />
 
     <q-input
         ref="invoiceNumber" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -74,42 +82,28 @@
         />
 
 
-    <q-dialog v-model="isCustomerDialog">
-        <mainLookup 
-            titleBar="Buscar Cliente"
-            :data="this.lookup_customers"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                     //{ name: 'value', required: true, label: 'Código', align: 'left', field: row => row.code_es , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    ,{ name: 'label', label: 'Cliente', align: 'left', field: row => row.label, sortable: true,    }
-                    ,{ name: 'partner_ruc', label: '# Identificación', align: 'left', field: row => row.partner_ruc, sortable: true,    }
-                    
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            
-            @onCancel="isCustomerDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'label')}"
-        /><!--boldIfChildrenFielname="account_has_children"-->
-    </q-dialog>
 
     <br><br>
 </q-form>
 </template>
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
-import mainLookup from '../../../components/mainLookup/mainLookup.vue'
+*/
+
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },
     components: {
-        mainLookup: mainLookup
+        selectSearchable
     },
     data () {
         return {
-            moduleName: "casInvoices"
-            ,mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
             ,isCustomerDialog: false
         }
     },
@@ -117,18 +111,6 @@ export default ({
         this.$refs.formulario.validate()
     },
     methods:{
-        changeMonth(){
-            /*if(this.parent_id){
-            let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id)
-            this.code_es = temporal.code_es + '.xxx'
-            this.account_type_root = temporal.account_type_root
-            this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
-            }else{
-            this.code_es = ''
-            this.account_type_root = 1
-            this.account_level = 0
-            }*/
-        },
         openSearchCustomer(UpdateFieldValueName, UpdateFieldLabelName, predefinedValue){
             this.mainLookupUpdateFieldValueName = UpdateFieldValueName
             this.mainLookupUpdateFieldLabelName = UpdateFieldLabelName
@@ -183,6 +165,10 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
+        },
         userCode: { get () { return this.$store.state.main.userCode } },
         userCompany: { get () { return this.$store.state.main.userCompany } },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
@@ -219,8 +205,7 @@ export default ({
         },
         lookup_payterms: {
             get () { return this.$store.state[this.moduleName].editData.lookup_payterms },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLookupPayterms', val) }
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lookup_payterms', value: val}) }
         },
     },
 })

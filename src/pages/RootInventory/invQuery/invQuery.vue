@@ -261,7 +261,7 @@ export default ({
         initialPagination.rowsPerPage = this.userRowsPerPage//asigna rowsPerPage
         this.pagination = initialPagination;//save to vuex
         this.columnsSystem = [
-             {name:"invID",db_column:"invID",label:"ID",field:"invID",ux_type:"string",is_key:true,isOpenButton:true,is_filterable:true,is_required:true,is_searchable:true,is_visible:true,align:"left",sortIndex:1,sortable:true,cellComponent:"div",cellAttributes:""}
+             {name:"invID",db_column:"invID",label:"# Item",field:"invID",ux_type:"string",is_key:true,isOpenButton:true,is_filterable:true,is_required:true,is_searchable:true,is_visible:true,align:"left",sortIndex:1,sortable:true,cellComponent:"div",cellAttributes:""}
             ,{name:"invName",db_column:"invName",label:"Item",field:"invName",ux_type:"string",is_key:false,isOpenButton:false,is_filterable:true,is_required:true,is_searchable:true,is_visible:true,align:"left",sortIndex:2,sortable:true,cellComponent:"div",cellAttributes:""}
             ,{name:"internal_code",db_column:"internal_code",label:"Código",field:"internal_code",ux_type:"string",is_key:false,isOpenButton:false,is_filterable:true,is_required:true,is_searchable:true,is_visible:true,align:"left",sortIndex:3,sortable:true,cellComponent:"div",cellAttributes:""}
             ,{name:"quantityOnHand",db_column:"quantityOnHand",label:"Cantidad",field:"quantityOnHand",ux_type:"string",is_key:false,isOpenButton:false,is_filterable:true,is_required:true,is_searchable:true,is_visible:true,align:"right",sortIndex:4,sortable:false,cellComponent:"div",cellAttributes:""}

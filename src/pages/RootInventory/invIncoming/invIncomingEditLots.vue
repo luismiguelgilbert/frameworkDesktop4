@@ -5,17 +5,23 @@
             <q-toolbar class="bg-primary text-white" >
                 <q-toolbar-title>Productos por Lote</q-toolbar-title>
             </q-toolbar>
-            <q-item clickable v-ripple v-for="line in lines.filter(x=>x.systemType==4 && x.newQuantity>0)" :key="line.stockID" @click="selectedColumn = line"
+            <q-item clickable v-ripple v-for="line in lines.filter(x=>x.systemType==4 && (x.newQuantity>0||x.quantityRcvd>0) )" :key="line.stockID" @click="selectedColumn = line"
                 :class="selectedColumn==line?'bg-blue-5 text-white':undefined">
                 <q-item-section>
                     <q-item-label>{{line.invName}}</q-item-label>
                     <q-item-label caption>
-                        Recibir: {{line.newQuantity}}
-                        // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                        <div v-if="editStatus.editMode=='create'">
+                            Recibir: {{line.newQuantity}}
+                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                        </div>
+                        <div v-if="editStatus.editMode=='edit'">
+                            Recibido: {{line.quantityRcvdThisMove}}
+                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                        </div>
                     </q-item-label>
                     <!--Antes // Lotes: {{lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}-->
                 </q-item-section>
-                <q-item-section side>
+                <q-item-section side v-if="editStatus.editMode=='create'">
                     <q-icon color="red" name="fas fa-exclamation" 
                         v-if="line.newQuantity != lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)" />
                     <q-icon v-else color="positive" name="fas fa-check" />
@@ -29,8 +35,8 @@
         <q-card flat style="height: calc(100vh - 180px)" class="q-pa-sm" v-if="selectedColumn">
             <q-toolbar>
                 <q-space />
-                <q-btn v-if="editMode" color="primary" icon="fas fa-barcode" label="Nuevo Lote" no-caps class="q-mr-md" title="Registrar Nuevo Lote" @click="addNewLot" />
-                <q-btn v-if="editMode" color="primary" icon="fas fa-plus" label="Recepción" no-caps title="Agregar Recepción" @click="newLineDialog=true" />
+                <q-btn v-if="editStatus.editMode=='create'" color="primary" icon="fas fa-barcode" label="Registrar Nuevo Lote" no-caps class="q-mr-md" title="Registrar Nuevo Lote" @click="addNewLot" />
+                <q-btn v-if="editStatus.editMode=='create'" color="primary" icon="fas fa-list" label="Seleccionar Lote" no-caps title=" Seleccionar lotes recibidos anteriormente" @click="newLineDialog=true" />
             </q-toolbar>
             <q-card-section>
                 <q-list bordered separator class="scroll" style="height: calc(100vh - 255px);" >
@@ -41,14 +47,14 @@
                         <q-item-section>
                             <q-item-label>
                                 <q-input 
-                                    filled dense stack-label label="Cantidad" :readonly="!editMode"
+                                    filled dense stack-label label="Cantidad" :readonly="editStatus.editMode=='edit'"
                                     :value="line.quantity" type="number" :min="0" :max="selectedColumn.newQuantity"
                                     debounce="1000" @input="(value)=>{updateRow(value,'quantity',line)}"
                                     />
                             </q-item-label>
                         </q-item-section>
                         <q-item-section side>
-                            <q-btn v-if="editMode" dense flat round color="red" icon="fas fa-trash-alt" @click="lots=lots.filter(x=>x.rowID!=line.rowID)" />
+                            <q-btn side v-if="editStatus.editMode=='create'" dense flat round color="red" icon="fas fa-trash-alt" @click="lots=lots.filter(x=>x.rowID!=line.rowID)" />
                         </q-item-section>
                     </q-item>
                     <q-separator />
@@ -68,6 +74,7 @@
                     //{ name: 'value', required: true, label: 'Código', align: 'left', field: row => row.short_name_es , sortable: true }
                     { name: 'name_es', required: true, label: '# Lote', align: 'left', field: row => row.name_es, sortable: false,    }
                     ,{ name: 'expirationDate', required: true, label: 'Fecha Expiración', align: 'left', field: row => row.expirationDate, sortable: false}
+                    ,{ name: 'lastRcvdDate', required: true, label: 'Última Movimiento', align: 'left', field: row => row.lastRcvdDate, sortable: false}
                     //{ name: 'warrantyDate', required: true, label: 'Fecha Garantía', align: 'left', field: row => row.warrantyDate, sortable: false,    }
                     //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
                     ]"
@@ -161,9 +168,11 @@ export default ({
                     }else{
                         this.$q.notify({message: 'Número ya existe', color: 'red'})
                     }
+                    /*
                     console.dir(this.lots)
                     console.dir(this.lookup_lots)
                     console.dir(data)
+                    */
                 }
                 
                 // console.log('>>>> OK, received', data)
@@ -180,7 +189,10 @@ export default ({
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
-        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        //editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        editStatus: {
+          get () { return this.$store.state[this.moduleName].editStatus },
+        },
         partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }

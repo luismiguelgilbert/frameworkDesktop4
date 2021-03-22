@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <!--partnerID-->
     <selectSearchable 
         prependIcon="fas fa-handshake"
@@ -9,8 +9,8 @@
         :isRequired="(editMode?true:false)" :allowZeroValue="true"
         :class="(editMode?undefined:'q-pb-md')"
         :isDisable="false" 
-        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :initialValue="partnerID"
+        :isReadonly="editStatus.editMode=='edit'"
         :tableSearchColumns="[
                  { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
                 ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
@@ -18,18 +18,18 @@
             ]"
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
-                this.lines = []
-                this.$emit('onAccMoveCompute')
+                //this.lines = []
+                //this.$emit('onAccMoveCompute')
                 this.loadPendingInv()
                 //this.partnerName=row.label;
                 //this.partner_account_id=row.account_id
             }"
         />
-
     <q-select
         label="Bodega (*)" placeholder="Seleccione la Bodega donde está recibiendo los Items (*)" emit-value map-options filled
         :options="lookup_wh" 
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
+        :option-disable="opt => !opt.estado" 
+        :readonly="editStatus.editMode=='edit'||editStatus.editMode=='create'&&!(partnerID>=0)"
         v-model="whID" @input="loadPendingInv()"
         ref="whID"
         :rules="[
@@ -164,14 +164,45 @@ export default ({
         }
     },
     computed:{
+        console: () => console,
         userColor: { get () { return this.$store.state.main.userColor }  },
         userCode: { get () { return this.$store.state.main.userCode } },
         userCompany: { get () { return this.$store.state.main.userCompany } },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         partnerID: {
@@ -224,6 +255,9 @@ export default ({
         },
         lookup_pos: {
             get () { return this.$store.state[this.moduleName].editData.lookup_pos },
+        },
+        editStatus: {
+          get () { return this.$store.state[this.moduleName].editStatus },
         },
         lines: {
           get () { return this.$store.state[this.moduleName].editData.lines },

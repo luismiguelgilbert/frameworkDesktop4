@@ -1,12 +1,12 @@
 <template>
-<q-form ref="formulario" greedy autofocus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">    
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <q-toggle
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
     <q-input 
-        ref="label" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" 
+        ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" 
         placeholder="Ingrese el nombre del Punto de Control (*)" label="Punto de Control (*)" filled
-        v-model="label"
+        v-model="name_es"
         :rules="[
                 val => !!val || '* Requerido',
                 val => val.length > 2 || 'Campo debe tener al menos 3 carateres',
@@ -35,9 +35,11 @@ import Vuex from 'vuex';
 
 
 export default ({
+    props: {
+      moduleName: { type: String , required: true },
+    },
     data () {
         return {
-            moduleName: "Bitaplaces"
         }
     },
     mounted(){
@@ -65,15 +67,45 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        label: { 
-            get () { return this.$store.state[this.moduleName].editData.basic.label }, 
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'label', value: val}) }  
+        name_es: { 
+            get () { return this.$store.state[this.moduleName].editData.basic.name_es }, 
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'name_es', value: val}) }  
         },
         estado: { 
             get () { return this.$store.state[this.moduleName].editData.basic.estado }, 

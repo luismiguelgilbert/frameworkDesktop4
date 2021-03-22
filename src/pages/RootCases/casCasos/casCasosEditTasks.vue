@@ -1,87 +1,50 @@
 <template>
-<div>
-  <q-table
-        :data="tasks"
-        :class="userColor=='blackDark'?'my-sticky-header-usercompany-dark bg-grey-10 ':'my-sticky-header-usercompany'"
-        table-style="min-height: 150px; max-height: calc(100vh - 225px)"
-        row-key="contactID"
-        :virtual-scroll="tasks.length>25?true:false"
-        :separator="userTableLines"
-        :rows-per-page-options="[0]"
-        hide-bottom dense
-        :filter="filterString"
-        :columns="[
-          { name: 'delete', required: true, label: '', align: 'center', field: row => row.delete, sortable: false},
-          { name: 'uploaded', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: false},
-          { name: 'taskDate', required: true, label: 'Fecha', align: 'left', field: row => row.taskDate, sortable: true },
-          { name: 'taskTypeID', required: true, label: 'Actividad', align: 'left', field: row => row.taskTypeID, sortable: true },
-          //{ name: 'taskTypeName', required: true, label: 'Actividad', align: 'left', field: row => row.taskTypeName, sortable: true },
-          { name: 'taskLength', required: true, label: 'Duración', align: 'right', field: row => row.taskLength, sortable: true },
-          { name: 'sys_user_fullname', required: true, label: 'Usuario', align: 'left', field: row => row.sys_user_fullname, sortable: true },
-          { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, style: 'min-width: 300px;' },
-          { name: 'nextDate', required: true, label: 'Próxima Actividad', align: 'left', field: row => row.nextDate, sortable: true },
-          { name: 'nextDateComments', required: true, label: 'Próxima Actividad', align: 'left', field: row => row.nextDateComments, sortable: true, style: 'min-width: 300px;' },
-        ]"
-  >
-    <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="delete" :props="props">
-              <q-btn dense flat round size="xs" color="red" icon="fas fa-trash-alt" v-if="!(props.row.uploaded)" title="Quitar este registro" @click="tasks=tasks.filter(x=>x.value!=props.row.value)" />
-            </q-td>
-            <q-td key="uploaded" :props="props">
-              <q-btn dense flat round size="xs" color="positive" icon="fas fa-edit" title="Editar este registro" @click="editRow(props.row)" />
-            </q-td>
-            <q-td key="taskDate" :props="props" :title="dateName(props.row.taskDate)">
-              {{ props.row.taskDate }}
-            </q-td>
-            <!--<q-td key="taskTypeName" :props="props">
-              {{ props.row.taskTypeName }}
-            </q-td>-->
-            <q-td key="taskTypeID" :props="props">
-              {{ lookup_taskTypes.filter(x=>x.value==props.row.taskTypeID).map(y=>y.label).join("")}}
-            </q-td>
-            <q-td key="taskLength" :props="props">
-              {{ props.row.taskLength }}
-            </q-td>
-            <q-td key="sys_user_fullname" :props="props">
-              {{ props.row.sys_user_fullname }}
-            </q-td>
-            <q-td key="comments" :props="props">
-              <!--{{ props.row.comments }}-->
-              <span v-html="props.row.comments"></span>
-            </q-td>
-            <q-td key="nextDate" :props="props" :title="dateName(props.row.nextDate)">
-              {{ props.row.nextDate }}
-            </q-td>
-            <q-td key="nextDateComments" :props="props">
-              <!--{{ props.row.comments }}-->
-              <span v-html="props.row.nextDateComments"></span>
-            </q-td>
-            
-            
-          </q-tr>
-    </template>
-    <template v-slot:top>
-        <!--SOLAMENTE cuando se está editando un caso, Y si perfil de usuario tiene permisos, entonces se pueden agregar actividades-->
-        <q-btn v-if="!editMode&&allow_tasks" label="Agregar Actividad" @click="dialogOpen=true" icon="fas fa-plus" color="primary" no-caps />
-        <q-space />
-        <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-          <template v-slot:append>
-            <q-icon name="fas fa-search" />
-          </template>
-        </q-input>
-    </template>
-    <template v-slot:bottom-row >
-      <q-tr></q-tr>
-    </template>
-  </q-table>
+<div style="margin: -16px;">
+  <q-toolbar class="no-padding">
+      <q-btn v-if="(allow_tasks)" flat stretch label="Nueva Actividad" color="primary" icon="fas fa-plus" @click="dialogOpen=true" />
+      <q-btn v-if="(allow_tasks)" flat stretch label="Editar Actividad" color="primary" icon="fas fa-edit" @click="editDialogOpen=true" :disable="selectedRowKeys.length<=0" />
+  </q-toolbar>
+  <q-separator />
+  <DxDataGrid
+    ref="mainviewtableDxDataGrid"
+    height="calc(100vh - 170px)"
+    width="100%"
+    column-resizing-mode="widget"
+    :data-source="tasks"
+    :allow-column-resizing="true" 
+    :allow-column-reordering="true"
+    :show-borders="false"
+    :show-column-lines="userTableLinesDXcols"
+    :show-row-lines="userTableLinesDXrows"
+    key-expr="value"
+    @selection-changed="onSelectionChanged"
+    @row-dbl-click="onRowDoubleClick"
+    >
+    <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
+    <DxPaging :enabled="true" :page-size="userRowsPerPage" />
+    <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
+    <DxPager :visible="true" :show-page-size-selector="false" :allowed-page-sizes="allowedPageSizes" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="false" :showPageSizeSelector="false" />
+    <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+    <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="single" />
+
+    <DxColumn caption="Fecha" data-field="taskDate" data-type="date" :visible="true" :allow-editing="false" format="dd-MMM-yyyy" width="150" />
+    <DxColumn caption="Actividad" data-field="taskTypeID" :visible="true" :allow-editing="false" width="120" >
+      <DxLookup value-expr="value" display-expr="label" :data-source="lookup_taskTypes" />
+    </DxColumn>
+    <DxColumn caption="Duración" data-field="taskLength" data-type="number" :visible="true" :allow-editing="false" width="120" />
+    <DxColumn caption="Usuario" data-field="sys_user_fullname" data-type="string" :visible="true" :allow-editing="false" width="150" />
+    <DxColumn caption="Comentario" data-field="comments" data-type="string" :visible="true" :allow-editing="false" width="350" :encodeHtml="false" />
+    <DxColumn caption="Próxima Actividad" data-field="nextDate" data-type="date" :visible="true" :allow-editing="false" format="dd-MMM-yyyy" width="120" />
+    <DxColumn caption="Próxima Actividad 1" data-field="nextDateComments" data-type="string" :visible="true" :allow-editing="false" width="300" />
+
+  </DxDataGrid>
 
   <q-dialog v-model="dialogOpen" @show="activityShow">
     <q-card  style="min-width: 900px;">
       <q-toolbar :class="'q-pr-none text-subtitle2 '+(sys_user_color=='blackDark'?'text-white':'text-primary')">
           <q-toolbar-title class="text-weight-bolder">Nueva Actividad</q-toolbar-title>
           <q-space />
-          <q-btn label="Cancelar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-arrow-circle-left" stretch @click="dialogOpen=false" />
+          <q-btn label="Cerrar" :color="userColor=='blackDark'?'white':'primary'" flat icon="fas fa-times" stretch @click="dialogOpen=false" />
           <q-btn v-if="!editMode" label="Guardar" color="positive" title="Crear" flat icon="fas fa-save" stretch @click="addRow" />
       </q-toolbar>
       <q-separator />
@@ -415,15 +378,34 @@ import Vuex from 'vuex';
 import { date } from 'quasar';
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
+import { DxDataGrid, DxColumn, DxScrolling, DxPaging, DxPager, DxLookup, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxSummary, DxTotalItem } from 'devextreme-vue/data-grid';
+
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },
     components: {
-      selectSearchable:selectSearchable
+        DxDataGrid,
+        DxColumn,
+        DxScrolling,
+        DxPager,
+        DxLookup,
+        DxSorting,
+        DxPaging,
+        DxHeaderFilter,
+        DxSelection,
+        DxEditing,
+        DxSummary, 
+        DxTotalItem,
+        selectSearchable:selectSearchable
     },
     data () {
         return {
-            moduleName: "casCasos", filterString: '', dialogOpen: false, splitterModel: 250, tab: 'basic',
+            selectedRowKeys: [],
+            filterString: '', dialogOpen: false, splitterModel: 250, tab: 'basic',
             taskTypeID: null, taskTypeName: "", taskDate: "", comments: "", taskLength: 1, taskBillable: true, nextDate: "", nextDateComments: "",
-            editDialogOpen: false, editRecord: null, tabEdit: 'basic'
+            editDialogOpen: false, editRecord: null, tabEdit: 'basic',
+            selectedRowKeys: []
             //"2020/12/04"
         }
     },
@@ -498,20 +480,6 @@ export default ({
         this.tasks = newRows;
         this.editDialogOpen = false
       },
-      dateName(value){
-            let resultado = '...'
-            try{
-                resultado = date.formatDate(value, this.userDateFormat,
-                    {
-                    days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-                    daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
-                    months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                    monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-                    }
-                )
-            }catch(ex){console.dir(ex)}
-            return resultado;
-        },
       activityShow(){
         this.tab='basic';
         this.comments='';
@@ -530,6 +498,14 @@ export default ({
           }
           this.taskDate = date.formatDate(fecha,'YYYY/MM/DD')//get current date in user pc (exact date no matter timezone)
         }catch(ex){}
+      },
+      onSelectionChanged({ selectedRowKeys, selectedRowsData }) {
+        this.selectedRowKeys = selectedRowKeys;
+        this.editRecord = JSON.parse(JSON.stringify(selectedRowsData[0]));
+      },
+      onRowDoubleClick(e){
+        console.dir('onRowDoubleClick')
+        this.editDialogOpen=true;
       }
     },
     computed:{
@@ -539,20 +515,77 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_tasks: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_tasks').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         userTableLines: { get () { return this.$store.state.main.userTableLines } },
+        userTableLinesDXcols: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+                return result
+            } 
+        },
+        userTableLinesDXrows: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+                return result
+            } 
+        },
+        userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
+        allowedPageSizes:{
+            get () { 
+                let resultado = []
+                resultado.push(this.userRowsPerPage)
+                return resultado
+            },
+        },
         //custom security
         allow_tasks: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_tasks').value }, },
         //custom security end
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         tasks: {
             get () { return this.$store.state[this.moduleName].editData.tasks },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataTasks', val) }
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditDataTasks', val) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'tasks', value: val}) }
         },
         sys_user_color: {
             get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },

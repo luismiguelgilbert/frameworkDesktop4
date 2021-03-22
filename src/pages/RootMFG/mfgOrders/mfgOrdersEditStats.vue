@@ -1,112 +1,54 @@
 <template>
 <div style="margin: -16px;">
-    <q-table
-        ref="mainTable"
-        :data="lookup_mfgLines"
-        table-style="min-height: calc(100vh - 140px); max-height: calc(100vh - 140px);"
-        row-key="lineID"
-        :separator="userTableLines"
-        :rows-per-page-options="[0]"
-        hide-bottom dense flat
-        :virtual-scroll="true"
-        :class="tableLastLine"
-        :columns="[
-            //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-            { name: 'invID', required: true, label: 'Materia Prima', align: 'left', field: row => row.invID, sortable: true },
-            { name: 'qtyIN', required: true, label: 'Pedido de Insumos', align: 'right', field: row => row.qtyIN, sortable: true },
-            { name: 'qtyINReal', required: true, label: 'Insumos Recibidos', align: 'right', field: row => row.qtyINReal, sortable: true },
-            { name: 'qtyOUT', required: true, label: 'Devolución Insumos', align: 'right', field: row => row.qtyOUT, sortable: true },
-            { name: 'qtyOUTReal', required: true, label: 'Insumos Devueltos', align: 'right', field: row => row.qtyOUTReal, sortable: true },
-            { name: 'final', required: true, label: 'Real', align: 'right', field: row => row.final, sortable: true },
-        ]"
+    <DxDataGrid
+        ref="dxgrid"
+        height="calc(100vh - 119px)"
+        width="100%"
+        column-resizing-mode="widget"
+        :data-source="lookup_mfgLines"
+        :allow-column-resizing="true" 
+        :allow-column-reordering="true"
+        :show-borders="true"
+        :show-column-lines="userTableLinesDXcols"
+        :show-row-lines="userTableLinesDXrows"
+        :stateStoring="{ ignoreColumnOptionNames: [] }"
+        key-expr="invID"
         >
-        <template v-slot:top v-if="editMode==true" >
-            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true" icon="fas fa-plus" color="primary" no-caps />
-            <!--<q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
-            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Presupuesto de Insumos':''"  title="Agregar masivamente Materia Prima basado en el Presupuesto de Insumos" @click="BoMDialogSelection=null; isBoMDialogOpen=true;" icon="fas fa-file-invoice-dollar" color="primary" no-caps class="q-ml-sm" />
-            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
-            <q-space />
-        </template>
-        <template v-slot:body="props">
-            <q-tr :props="props" >
-                <q-td key="invID" :props="props" >
-                    <selectSearchable 
-                        labelText="Materia Prima" 
-                        labelSearchText="Buscar Materia Prima"
-                        :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
-                        rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
-                        :isRequired="true" :isDisable="false" :isReadonly="true"
-                        :isInline="true" :isDense="true"
-                        appendIcon="f"
-                        :tableSearchColumns="[
-                                { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
-                            ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
-                            ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                            ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
-                            ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
-                        ]"
-                        :tooltipColumns="[
-                             { name: 'label', label: 'Item'}
-                            ,{ name: 'internal_code', label: 'Código'}
-                            ,{ name: 'uomName', label: 'Unidad'}
-                            ,{ name: 'brandName', label: 'Marca'}
-                        ]"
-                        :initialValue="props.row.invID"
-                        
-                        />
-                </q-td>
-                <q-td key="qtyIN" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.qtyIN" type="number" :min="0" readonly
-                        dense item-aligned borderless input-class="text-right"
-                        @focus="$event.target.select()"
-                        />
-                </q-td>
-                <q-td key="qtyINReal" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.qtyINReal" type="number" :min="0" readonly
-                        dense item-aligned borderless input-class="text-right"
-                        @focus="$event.target.select()"
-                        />
-                </q-td>
-                <q-td key="qtyOUT" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.qtyOUT" type="number" :min="0" readonly
-                        dense item-aligned borderless input-class="text-right"
-                        @focus="$event.target.select()"
-                        />
-                </q-td>
-                <q-td key="qtyOUTReal" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.qtyOUTReal" type="number" :min="0" readonly
-                        dense item-aligned borderless input-class="text-right"
-                        @focus="$event.target.select()"
-                        />
-                </q-td>
-                <q-td key="final" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.qtyINReal -  props.row.qtyOUTReal" type="number" :min="0" readonly
-                        dense item-aligned borderless input-class="text-right"
-                        @focus="$event.target.select()"
-                        />
-                </q-td>
-                
-                
-                
-                <!--<q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
-                    {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
-                </q-td>-->
-            </q-tr>
-         </template>
+        <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
+        <DxColumnChooser  mode="select" />
+        <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
+        <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+        <DxEditing :allow-updating="true" mode="cell" :select-text-on-edit-start="true"  /> <!-- me gustan: cell, row, popup -->
+        <DxScrolling mode="virtual" :useNative="false" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
         
-    </q-table>
+        <DxColumn caption="Item" data-field="invID" name="invID" data-type="number" :allow-editing="false" alignment="left" :minWidth="200">
+            <DxLookup value-expr="value" display-expr="label" :data-source="lookup_items" />
+        </DxColumn>
+        <DxColumn caption="Orden #" data-field="orderID" name="orderID" data-type="number" :allow-editing="true" alignment="right" :width="100"  :editor-options="{ min: 0 }" />
+        <DxColumn caption="Pedido de Insumos" data-field="qtyIN" name="qtyIN" data-type="number" :allow-editing="true" alignment="right" :width="100"  :editor-options="{ min: 0 }" />
+        <DxColumn caption="Insumos Recibidos" data-field="qtyINReal" name="qtyINReal" data-type="number" :allow-editing="true" alignment="right" :width="100" :editor-options="{ min: 0 }" />
+        <DxColumn caption="Devolución de Insumos" data-field="qtyOUT" name="qtyOUT" data-type="number" :allow-editing="true" alignment="right" :width="100"  :editor-options="{ min: 0 }" />
+        <DxColumn caption="Insumos Devueltos" data-field="qtyOUTReal" name="qtyOUTReal" data-type="number" :allow-editing="true" alignment="right" :width="100" :editor-options="{ min: 0 }" />
+        <DxColumn caption="Real" data-field="final" name="final" data-type="number" :allow-editing="true" alignment="right" :width="100" :editor-options="{ min: 0 }" :cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'"/>
+        <DxSummary >
+            <DxTotalItem column="invID" summary-type="count"/>
+            <DxTotalItem column="qtyIN" summary-type="sum" cssClass="q-mr-none" > <DxValueFormat type="#.00" /> </DxTotalItem>
+            <DxTotalItem column="qtyINReal" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        </DxSummary>
+        >
+        
+    </DxDataGrid>
+    
 </div>
 </template>
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
+*/
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxValueFormat, DxColumnChooser } from 'devextreme-vue/data-grid';
 
 
 export default ({
@@ -114,22 +56,33 @@ export default ({
         moduleName: { type: String , required: true },
     },
     components: {
-        selectSearchable: selectSearchable
+        DxDataGrid,
+        DxColumn,
+        DxColumnFixing,
+        DxScrolling,
+        DxStateStoring,
+        DxSorting,
+        DxPaging,
+        DxHeaderFilter,
+        DxSelection,
+        DxEditing,
+        DxLookup,
+        DxSummary,
+        DxTotalItem,
+        DxValueFormat,
+        DxColumnChooser,
     },
     data () {
         return {
-            myQDateLocale: {
-                /* starting with Sunday */
+            /*myQDateLocale: {
+                // starting with Sunday
                 days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
                 daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
                 months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
                 monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
                 firstDayOfWeek: 1
-            }
+            }*/
         }
-    },
-    mounted(){
-        //this.$refs.formulario.validate()
     },
     methods:{
       dateName(fecha){
@@ -174,6 +127,27 @@ export default ({
             }
         },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
+        userTableLinesDXcols: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+                return result
+            } 
+        },
+        userTableLinesDXrows: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+                return result
+            } 
+        },
+        userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
+        allowedPageSizes:{
+            get () { 
+                let resultado = []
+                resultado.push(this.userRowsPerPage)
+                return resultado
+            },
+        },
         lookup_mfgLines: {
             get () { return this.$store.state[this.moduleName].editData.lookup_mfgLines },
         },

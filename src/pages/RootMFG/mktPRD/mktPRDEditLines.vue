@@ -1,275 +1,370 @@
 <template>
 <div style="margin: -16px;">
-    <q-table
-        ref="mainTable"
-        :data="lines"
-        :table-style="editMode==true?'min-height: calc(100vh - 140px); max-height: calc(100vh - 140px);' : 'min-height: calc(100vh - 140px); max-height: calc(100vh - 140px);'"
-        row-key="lineID"
-        :separator="userTableLines"
-        :rows-per-page-options="[0]"
-        hide-bottom dense flat
-        selection="multiple" :selected.sync="selected"
-        :virtual-scroll="true"
-        :class="tableLastLine"
-        :columns="[
-            //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-            { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
-            { name: 'invID', required: true, label: 'Materia Prima', align: 'left', field: row => row.invID, sortable: true },
-            { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true },
-            { name: 'price', required: true, label: '$ Costo', align: 'right', field: row => row.price, sortable: true },
-            //{ name: 'lineDiscntPrcnt', required: true, label: 'Dcto. %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true },
-            //{ name: 'lineDiscntAmount', required: true, label: 'Dcto. $', align: 'right', field: row => row.lineDiscntAmount, sortable: true },
-            { name: 'lineUntaxed', required: true, label: '$ Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
-        ]"
-        >
-        <template v-slot:body="props">
-            <q-tr :props="props" >
-                <q-td auto-width>
-                    <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
-                </q-td>
-                <q-td key="hasError" :props="props" class="no-padding" >
-                    <q-icon 
-                        size="xs" name="fas fa-exclamation-triangle" color="red" flat dense
-                        v-if="rowValidation(props.row, true)"
-                        :title="rowValidation(props.row, false)"
-                        />
-                </q-td>
-                <q-td key="invID" :props="props" >
-                    <selectSearchable 
-                        labelText="Materia Prima" 
-                        labelSearchText="Buscar Materia Prima"
-                        :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
-                        rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
-                        :isRequired="true" :isDisable="false" :isReadonly="true"
-                        :isInline="true" :isDense="true"
-                        appendIcon="f"
-                        :tableSearchColumns="[
-                                { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
-                            ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
-                            ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                            ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
-                            ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
-                        ]"
-                        :tooltipColumns="[
-                             { name: 'label', label: 'Item'}
-                            ,{ name: 'internal_code', label: 'Código'}
-                            ,{ name: 'uomName', label: 'Unidad'}
-                            ,{ name: 'brandName', label: 'Marca'}
-                        ]"
-                        :initialValue="props.row.invID"
-                        
-                        />
-                </q-td>
-                <q-td key="quantity" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
-                        dense item-aligned borderless input-class="text-right"
-                        :max="props.row.maxQuantity" 
-                        :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-                        @focus="$event.target.select()"
-                        debounce="1000"  @input="(value)=>{updateRow(value,'quantity',props.row)}" />
-                </q-td>
-                <q-td key="price" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.price" type="number" :min="0" readonly
-                        :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
-                        dense item-aligned borderless input-class="text-right"
-                        :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-                        @focus="$event.target.select()"
-                        debounce="1000" @input="(value)=>{updateRow(value,'price',props.row)}" />
-                </q-td>
-                <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
-                    {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
-                </q-td>
-            </q-tr>
-         </template>
-        <template v-slot:bottom-row >
-            <q-tr>
-                <q-td>
-                </q-td>
-                <q-td>
-                </q-td>
-                <q-td>
-                </q-td>
-                <q-td>
-                </q-td>
-                <q-td class="text-right text-subtitle2 text-primary" >
-                    Suma:
-                </q-td>
-                <q-td class="text-right text-subtitle2 text-primary">
-                    {{lines.reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
-                </q-td>
-            </q-tr>
-            <q-tr></q-tr>
-        </template>
-    </q-table>
+  
+  <q-toolbar class="no-padding">
+    <q-btn color="primary" flat stretch label="Opciones" icon-right="fas fa-chevron-down" no-caps>
+      <q-menu>
+        <q-list style="min-width: 100px">
+          <q-item clickable>
+            <q-item-section side>
+              <q-icon name="fas fa-columns" />
+            </q-item-section>
+            <q-item-section>Configurar Columnas</q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" />
+            </q-item-section>
+
+            <q-menu anchor="top right" self="top left" >
+              <q-list>
+                <q-item clickable v-ripple v-close-popup @click="openColumnSelector">
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-columns" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Abrir Selector de Columnas</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple v-close-popup @click="saveGridUserState">
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-save" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Guardar Configuración</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple v-close-popup @click="deleteGridUserState">
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-trash-alt" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Eliminar Configuración</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-btn>
+
+  </q-toolbar>
+  <q-separator />
+
+  <DxDataGrid
+    ref="dxgrid"
+    height="calc(100vh - 170px)"
+    width="100%"
+    column-resizing-mode="widget"
+    :data-source="internalLines"
+    :allow-column-resizing="true" 
+    :allow-column-reordering="true"
+    :show-borders="true"
+    :show-column-lines="userTableLinesDXcols"
+    :show-row-lines="userTableLinesDXrows"
+    :stateStoring="{ ignoreColumnOptionNames: [] }"
+    key-expr="lineID"
+    :selected-row-keys.sync="maingridSelectedRowKeys"
+    @row-updating="roundInputToSixDigits"
+    @row-updated="onRowUpdated"
+    @editor-preparing="checkIfCellEditable"
+    >
+      <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
+      <DxColumnChooser  mode="select" />
+      <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
+      <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+      <DxEditing :allow-updating="true" mode="cell" :select-text-on-edit-start="true"  /> <!-- me gustan: cell, row, popup -->
+      <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      <DxScrolling mode="virtual" :useNative="false" showScrollbar="always" />
+      
+      <DxColumn caption="lineID" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
+      <DxColumn caption="Item" data-field="invID" name="invID" data-type="number" :allow-editing="false" alignment="left" >
+        <DxLookup value-expr="value" display-expr="label" :data-source="lookup_items" />
+      </DxColumn>
+      <DxColumn caption="Cantidad" data-field="quantity" name="quantity" data-type="number" :allow-editing="true" alignment="right" :visible="true" :width="80" :editor-options="{ min: 0.000001 }" :cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'" />
+      <DxColumn caption="Costo $" data-field="price" name="price" data-type="number" :allow-editing="false" alignment="right" :width="100" :visible="true" />
+      <DxColumn caption="Total $" data-field="lineUntaxed" name="lineUntaxed" data-type="number" :allow-editing="false" alignment="right" :width="100" :visible="true" :format="userMoneyFormat" />
+      <DxColumn caption="Cancelado" data-field="quantityCancel" name="quantityCancel" data-type="number" :allow-editing="false" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :visible="true" cssClass="text-red" />
+      <DxColumn caption="Cancelar" data-field="quantityCancelNew" name="quantityCancelNew" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :visible="true" cssClass="text-red" />
+      <DxColumn caption="Recibido" data-field="quantityRcvd" name="quantityRcvd" data-type="number" :allow-editing="false" alignment="right" :width="120" :visible="true" cssClass="text-positive" />
+      <DxColumn caption="Bodega" data-field="whID" name="whID" data-type="number" :allow-editing="true" alignment="left" :width="200" :visible="true">
+        <DxLookup value-expr="value" display-expr="label" :data-source="lookup_wh" />
+      </DxColumn>
+      />
+  </DxDataGrid>
+
 </div>
+
 </template>
-<style lang="scss">
-  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
-  .q-virtual-scroll__padding{ visibility: hidden;}
-  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
-  .my-sticky-header-table{
-    .q-table thead tr:first-child th{ background-color: white }
-  }
-  .my-sticky-header-table-LastLine{
-    .q-table thead tr:first-child th{ background-color: white }
-    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
-  }
-  .my-sticky-header-table-dark{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-  }
-  .my-sticky-header-table-dark-LastLine{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-    .q-table td{ border-bottom-width: 1px }
-  }
-</style>
+
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
-import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
+*/
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxValueFormat, DxColumnChooser } from 'devextreme-vue/data-grid';
 
 export default ({
-    props: {
-        moduleName: { type: String , required: true },
-    },
-    components: {
-        selectSearchable: selectSearchable
-    },
-    data () {
-        return {
-             selected: []
-            ,isBoMDialogOpen: false, BoMDialogSelection: null, selectedBudgetRows: [], filterString: ''
-            ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: []
+  props: {
+      moduleName: { type: String , required: true },
+  },
+  components: {
+    DxDataGrid,
+    DxColumn,
+    DxColumnFixing,
+    DxScrolling,
+    DxStateStoring,
+    DxSorting,
+    DxPaging,
+    DxHeaderFilter,
+    DxSelection,
+    DxEditing,
+    DxLookup,
+    DxSummary,
+    DxTotalItem,
+    DxValueFormat,
+    DxColumnChooser,
+  },
+  data () {
+      return {
+        maingridSelectedRowKeys: [],
+        internalLines: [],
+        /*myQDateLocale: {
+          days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
+          daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
+          months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+          monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
+          firstDayOfWeek: 1
+        },*/
+        filterString: ''
+      }
+  },
+  mounted(){
+    this.internalLines = JSON.parse(JSON.stringify(this.lines));
+    this.$refs['dxgrid'].instance.option("stateStoring.ignoreColumnOptionNames", []);
+    let savedState = this.gridState.find(x=>x.gridName==[this.moduleName+'_lines']);
+    if(savedState&&savedState.gridState){
+      let estado = JSON.parse(savedState.gridState)
+      this.$refs['dxgrid'].instance.state(estado);
+    }
+  },
+  methods:{
+    roundInputToSixDigits(e){
+      const columnas = e.component.getVisibleColumns();
+      Object.keys(e.newData).map(x=>{
+        const datatype = columnas.find(c=>c.dataField==x).dataType
+        //cambia números a un máximo de 6 decimales (redondeado a 6 decimales)
+        if(datatype=='number'){
+          if(e.newData[x]==null||e.newData[x]==NaN||e.newData[x]==undefined){
+            e.newData[x] = 0
+          }else{
+            e.newData[x] = parseFloat(parseFloat(e.newData[x]).toFixed(6))
+          }
         }
+      })
     },
-    methods:{
-        getMax(arr, prop) {
-            var max;
-            for (var i=0 ; i<arr.length ; i++) {
-                if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
-                    max = arr[i];
-            }
-            return max;
+    onRowUpdated(e){
+      //this.updateAccountMove();
+      //console.dir(e)
+      e.data.price = parseFloat(parseFloat(e.data.lineUntaxed / e.data.quantity).toFixed(6))
+    },
+    openColumnSelector(){
+      this.$refs['dxgrid'].instance.showColumnChooser();
+    },
+    saveGridUserState(){
+      let gridState = this.$refs['dxgrid'].instance.state();
+      this.$axios.post( this.apiURL + 'saveGridUserState', {
+              userCode: this.userCode,
+              userCompany: this.userCompany,
+              moduleName: this.moduleName,
+              gridName: this.moduleName+'_lines',
+              gridState: JSON.stringify(gridState),
+          }
+      , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+      ).then(() => {//).then((response) => {
+          this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+      }).catch((error) => {
+          console.dir(error.message)
+          let mensaje = ''
+          if(error.message){ mensaje = error.message }
+          if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+          if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          this.$q.notify({ html: true, multiLine: false, color: 'red'
+              ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+              ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+              ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+          })
+          this.dataLoaded = true;
+      })
+            
+    },
+    deleteGridUserState(){
+      this.$refs['dxgrid'].instance.state(null);//resets to default
+      this.$axios.post( this.apiURL + 'saveGridUserState', {
+              userCode: this.userCode,
+              userCompany: this.userCompany,
+              moduleName: this.moduleName,
+              gridName: this.moduleName+'_lines',
+              gridState: null,
+          }
+      , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+      ).then(() => {//).then((response) => {
+          this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+      }).catch((error) => {
+          console.dir(error.message)
+          let mensaje = ''
+          if(error.message){ mensaje = error.message }
+          if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+          if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          this.$q.notify({ html: true, multiLine: false, color: 'red'
+              ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+              ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+              ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+          })
+          this.dataLoaded = true;
+      })
+            
+    },
+    checkIfCellEditable(e){
+      if (e.parentType === 'dataRow' && e.dataField === 'quantity') {
+        e.editorOptions.disabled = e.row.data.quantity_isEditDisabled
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'whID') {
+        e.editorOptions.disabled = e.row.data.whID_isEditDisabled
+      }
+      if(e.editorOptions.disabled){
+        this.$q.notify({color: 'red', message: 'No está permitido editar este campo', timeout: 500, icon: "fas fa-ban" });
+      }
+    },
+    updateVuex(){
+      //esto realmente lo usa editForm.vue para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
+      this.lines = JSON.parse(JSON.stringify(this.internalLines))
+    },
+    receiveAll(){
+      this.internalLines.filter(x=>this.maingridSelectedRowKeys.some(y=>y==x.stockID)).map(row=>{
+        row.newQuantity = row.quantityOpen
+      })
+      //this.updateAccountMove();
+    },
+    clearAll(){
+      this.internalLines.filter(x=>this.maingridSelectedRowKeys.some(y=>y==x.stockID)).map(row=>{
+        row.newQuantity = 0
+      })
+      //this.updateAccountMove();
+    },
+  },
+  computed:{
+      userCode: { get () { return this.$store.state.main.userCode } },
+      userCompany: { get () { return this.$store.state.main.userCompany } },
+      userColor: { get () { return this.$store.state.main.userColor }  },
+      userTableLines: { get () { return this.$store.state.main.userTableLines } },
+      userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
+      userTimeFormat: { get () { return this.$store.state.main.userTimeFormat }  },
+      allow_view: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_edit: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_report: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_disable: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_row_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_row_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      userMoneyFormat: { get () { 
+        let resultado ="#0.000000";
+        if(this.$store.state.main.userMoneyFormat==0){ resultado = "#0" }
+        if(this.$store.state.main.userMoneyFormat==1){ resultado = "#0.0" }
+        if(this.$store.state.main.userMoneyFormat==2){ resultado = "#0.00" }
+        if(this.$store.state.main.userMoneyFormat==3){ resultado = "#0.000" }
+        if(this.$store.state.main.userMoneyFormat==4){ resultado = "#0.0000" }
+        if(this.$store.state.main.userMoneyFormat==5){ resultado = "#0.00000" }
+        if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
+        return resultado }
+      },
+      gridState: {
+          get () { 
+            return this.$store.state[this.moduleName].editData.gridState
+          },
+      },
+      editStatus: {
+          get () { return this.$store.state[this.moduleName].editStatus },
         },
-        updateRow(newVal, colName, row){
-            try{
-                this.$q.loading.show()
-                let newRows = JSON.parse(JSON.stringify(this.lines))
-                newRows.filter(x=>x.lineID==row.lineID).map(result=>{
-                    if(colName=="quantity"){
-                        result[colName] = parseFloat(newVal);
-                    }else{
-                        result[colName] = newVal;
-                    }
-                    result.lineSubtotal = result.lineUntaxed;
-                    result.price = (result.lineUntaxed / result.quantity).toFixed(6);
-                    return result
-                })
-                this.lines = newRows;
-                this.$q.loading.hide()
-                //this.$emit('onAccMoveCompute')
-            }catch(ex){
-                console.error(ex)
-                this.$q.loading.hide()
-            }
-        },
-        removeRows(){
-            if(this.selected.length > 0){
-                this.$q.dialog({ 
-                title: 'Confirmación'
-                ,message: 'Desea quitar las líneas seleccionadas?'
-                ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
-                ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
-                }
-                ).onOk(() => {
-                //Líneas
-                let newRows = JSON.parse(JSON.stringify(this.lines))
-                this.selected.map(row=>{
-                    newRows = newRows.filter(x=>x.lineID!=row.lineID);
-                })
-                this.lines = newRows
+      userTableLines: { get () { return this.$store.state.main.userTableLines } },
+      userTableLinesDXcols: { get () { 
+              let result = false;
+              if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+              return result
+          } 
+      },
+      userTableLinesDXrows: { get () { 
+              let result = false;
+              if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+              return result
+          } 
+      },
+      userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
+      lookup_mktTypes: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_mktTypes },
+      },
 
-                this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
-                })
-            }
-        },
-        rowValidation(currentRow, returnType){
-            if(currentRow.invID==null||currentRow.invID==undefined||currentRow.invID<=0){
-                return (returnType?true:'Debe corregir la celda: Materia Prima')
-            }
-            if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<=0){
-                return (returnType?true:'Debe corregir la celda: Cantidad')
-            }
-            /*if(currentRow.mktPRD_headerID==null||currentRow.mktPRD_headerID<=0||currentRow.mktPRD_lineID==null||currentRow.mktPRD_lineID<=0){
-                return (returnType?true:'Debe corregir la referencia a la Entrega de PT')
-            }*/
-            if(currentRow.lineUntaxed==null||currentRow.lineUntaxed==undefined||currentRow.lineUntaxed<0){
-                return (returnType?true:'Debe verificar todas las celdas por un error en: Total')
-            }
-            return false
-        },
-        
-    },
-    computed:{
-        userColor: { get () { return this.$store.state.main.userColor }  },
-        userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
-        userTableLines: { get () { return this.$store.state.main.userTableLines } },
-        allow_view: { get () { return true }, },
-        allow_edit: { get () { return true }, },
-        allow_insert: { get () { return true }, },
-        allow_report: { get () { return true }, },
-        allow_disable: { get () { return true }, },
-        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        sys_user_color: { get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color }, },
-        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
-        tableLastLine: {
-            get () { 
-                let resultado = ''
-                if(this.userColor=='blackDark'){
-                if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-                {
-                    resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
-                }else{
-                    resultado = 'my-sticky-header-table-dark bg-grey-10 '
-                }
-                }
-                if(this.userColor!='blackDark'){
-                    if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-                    {
-                        resultado = 'my-sticky-header-table-LastLine '
-                    }else{
-                        resultado = 'my-sticky-header-table '
-                    }
-                }
-                return resultado
-            }
-        },
-        //Module Specific
-        defaultWhID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
-        },
-        default_mfg_orderID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.default_mfg_orderID },
-        },
-        lines: {
-            get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
-        },
-        default_orderBudget: {
-            get () { return this.$store.state[this.moduleName].editData.default_orderBudget },
-        },
-        lookup_items: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_items },
-        },
-        lookup_items_kits: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
-        },
-        lookup_mfgOrders: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_mfgOrders },
-        },
+      editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+      apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
+      lines: {
+        get () { return this.$store.state[this.moduleName].editData.lines },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+      },
+      accountLines: {
+        get () { return this.$store.state[this.moduleName].editData.accountLines },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountLines', value: val}) }
+      },
+      sys_user_color: {
+          get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
+      },
+      lookup_items: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_items },
+      },
+      lookup_wh: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_wh },
+      },
+  },
+  watch: {
+      lines: function (val) {
+        this.internalLines = JSON.parse(JSON.stringify(this.lines))
+        //this.updateAccountMove();
+      },
     }
 })
-
 </script>

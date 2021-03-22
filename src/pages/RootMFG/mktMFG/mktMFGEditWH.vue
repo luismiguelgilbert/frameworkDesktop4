@@ -1,129 +1,108 @@
 <template>
 <div style="margin: -16px;">
-  <q-table
-        ref="mainTable"
-        :data="lines"
-        :table-style="editMode==true?'min-height: calc(100vh - 140px); max-height: calc(100vh - 140px);' : 'min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);'"
-        row-key="lineID"
-        :separator="userTableLines"
-        :rows-per-page-options="[0]"
-        hide-bottom dense
-        selection="multiple" :selected.sync="selected"
-        :filter="filterString"
-        :virtual-scroll="true"
-        :class="tableLastLine"
-        :columns="[
-          //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-          { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
-          { name: 'invID', required: true, label: 'Materia Prima', align: 'left', field: row => row.invID, sortable: true, style: 'min-width: 300px;' },
-          { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true, style: 'max-width: 100px;', },
-          { name: 'quantityRcvd', required: true, label: 'Recibido', align: 'right', field: row => row.quantityRcvd, sortable: true, style: 'max-width: 100px;',  },
-          { name: 'quantityCancel', required: true, label: 'Cancelado', align: 'right', field: row => row.quantityCancel, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
-          { name: 'quantityCancelNew', required: true, label: 'Cancelar', align: 'right', field: row => row.quantityCancelNew, sortable: true, style: 'max-width: 100px;',headerStyle: 'padding-right: 20px;'  },
-          { name: 'quantityOpen', required: true, label: 'Por Recibir', align: 'right', field: row => row.quantityOpen, sortable: true, style: 'max-width: 100px;',  },
-          { name: 'quantityReturned', required: true, label: 'Devolución', align: 'right', field: row => row.quantityReturned, sortable: true, style: 'max-width: 100px;',  },
-          //{ name: 'whID', required: true, label: 'Bodega', align: 'left', field: row => row.whID, sortable: true, style: 'min-width: 250px;' },
-          //{ name: 'expectedDate', required: true, label: 'Esperado el', align: 'left', field: row => row.expectedDate, sortable: true, style: 'min-width: 130px;' },
-          //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'left', field: row => row.transportTypeID, sortable: true, style: 'min-width: 300px;' },
-          //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'left', field: row => row.prjID, sortable: true, },
-          
-        ]"
-    >
-    <template v-slot:top v-if="editMode==false">
-        <q-btn v-if="editMode==false" :label="$q.screen.gt.sm?'Cancelar':''" title="Cancelar líneas seleccionadas" @click="cancelRows" icon="fas fa-ban" color="primary" no-caps   :disable="selected.length<=0" />
-        <q-space />
-    </template>
+  <div class="q-pa-xs row justify-center q-gutter-lg q-mb-md">
+    <!--Lines Count-->
+    <q-card style="width: 100%; max-width: 200px; height: 150px;">
+      <q-toolbar class="bg-primary text-white">
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="white" name="fas fa-boxes" />
+          </q-item-section>
 
-    <template v-slot:body="props">
-      <q-tr :props="props" >
-        <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
-        </q-td>
+          <q-item-section>
+            <q-item-label>Items</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-toolbar>
+      <q-card-section class="absolute-center text-primary q-mt-lg" style="fontSize: 100px; ">
+        {{ lines.length }}
+      </q-card-section>
+    </q-card>
 
-        <q-td key="hasError" :props="props" class="no-padding">
-            <q-icon 
-                size="xs" name="fas fa-exclamation-triangle" color="red" flat dense
-                v-if="rowValidation(props.row, true)"
-                :title="rowValidation(props.row, false)"
-                />
-        </q-td>
-        <q-td key="invID" :props="props">
-          <selectSearchable
-              labelText="Materia Prima" 
-              labelSearchText="Buscar Materia Prima"
-              :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
-              rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
-              :isRequired="true" :isDisable="false" :isReadonly="true"
-              :isInline="true" :isDense="true"
-              appendIcon="f"
-              :tableSearchColumns="[
-                    { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
-                  ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
-                  ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                  ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
-                  ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
-              ]"
-              :initialValue="props.row.invID"
-              />
-        </q-td>
-        <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
-        <q-td key="quantityRcvd" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityRcvd }}</q-td>
-        <q-td key="quantityCancel" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityCancel }}</q-td>
-        <q-td key="quantityCancelNew" :props="props" :tabindex="(props.key*10)+2">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.quantityCancelNew" type="number" :min="0" :readonly="(editMode==true)" :max="props.row.quantityOpen"
-              dense item-aligned borderless input-class="text-right"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @focus="$event.target.select()"
-              @input="(value)=>{updateRow(value,'quantityCancelNew',props.row)}" />
-        </q-td>
-        <q-td key="quantityOpen" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityOpen }}</q-td>
-        <q-td key="quantityReturned" :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'" :props="props">{{ props.row.quantityReturned }}</q-td>
+    <!--Cancels Count-->
+    <q-card style="width: 100%; max-width: 200px; height: 150px;">
+      <q-toolbar class="bg-red text-white">
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="white" name="fas fa-ban" />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>Cancelaciones</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-toolbar>
+      <q-card-section class="absolute-center text-red q-mt-lg" style="fontSize: 100px; ">
         
-        <q-td key="whID" :props="props">
-          <selectSearchable
-              labelText="Bodega" 
-              labelSearchText="Buscar Bodega"
-              :optionsList="lookup_wh"
-              rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
-              :isRequired="true" :isDisable="false" :isReadonly="true"
-              :isInline="true" :isDense="true"
-              appendIcon="f"
-              :tableSearchColumns="[
-                    { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
-              ]"
-              :initialValue="props.row.whID"
-              />
-        </q-td>
-      </q-tr>
-    </template>
-    
-    <template v-slot:bottom-row >
-      <q-tr></q-tr>
-    </template>
-  </q-table>
+        <!--{{lines.reduce((total,item)=>{return total + item.quantityCancel}, 0)}}-->
+        {{lines.filter(x=>x.quantityCancel>0).length}}
+      </q-card-section>
+    </q-card>
+
+    <!--Recevied Count-->
+    <q-card style="width: 100%; max-width: 200px; height: 150px;">
+      <q-toolbar class="bg-primary text-white">
+        <q-item>
+          <q-item-section avatar>
+            <q-icon color="white" name="fas fa-warehouse" />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>Recepciones</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-toolbar>
+      <q-card-section class="absolute-center text-primary q-mt-lg" style="fontSize: 100px; ">
+        {{lines.filter(x=>x.quantityRcvd>0).length}}
+      </q-card-section>
+    </q-card>
+
+  </div>
+  
+  <q-separator />
+
+  <q-list separator dense>
+    <q-item v-for="row in lines" :key="row.lineID" clickable>
+      <q-item-section side> 
+        <q-item-label class="text-primary" style="max-width: 100px;">{{lookup_items.find(x=>x.value==row.invID).label}}</q-item-label> 
+        <q-item-label caption>Cantidad: {{row.quantity}}</q-item-label> 
+      </q-item-section>
+      <q-item-section>
+        <q-stepper :value="0" flat ref="stepper" color="primary" animated class="no-padding" >
+
+          <q-step :name="1"
+            :title="$q.screen.gt.sm?'Pedido':undefined" 
+            :caption="$q.screen.gt.sm?(row.creation_date):undefined" 
+            icon="fas fa-watch" done-icon="fas fa-plus" 
+            :done="row.uploaded" />
+
+          <q-step :name="2"
+            :title="$q.screen.gt.sm?'Cancelado':undefined"
+            :caption="$q.screen.gt.sm?(row.quantityCancel):undefined" 
+            icon="fas fa-times" done-icon="fas fa-times"
+            :done="(row.quantityCancel>0)" done-color="red" />
+
+          <q-step :name="3"
+            :title="$q.screen.gt.sm?'Recibido':undefined" 
+            :caption="$q.screen.gt.sm?(row.quantityRcvd):undefined" 
+            icon="fas fa-warehouse" done-icon="fas fa-warehouse"
+            :done="row.quantityRcvd>0" />
+
+          <q-step :name="4"
+            :title="$q.screen.gt.sm?'Finalizado':undefined" 
+            :caption="$q.screen.gt.sm?(row.quantitymktPO):undefined" 
+            icon="fas fa-check" done-icon="fas fa-check"
+            :done="(row.uploaded&&!row.estado)" done-color="positive" />
+          
+        </q-stepper>
+      </q-item-section>
+    </q-item>
+  </q-list>
+  <q-separator />
 
 </div>
 </template>
-<style lang="scss">
-  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
-  .q-virtual-scroll__padding{ visibility: hidden;}
-  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
-  .my-sticky-header-table{
-    .q-table thead tr:first-child th{ background-color: white }
-  }
-  .my-sticky-header-table-LastLine{
-    .q-table thead tr:first-child th{ background-color: white }
-    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
-  }
-  .my-sticky-header-table-dark{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-  }
-  .my-sticky-header-table-dark-LastLine{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-    .q-table td{ border-bottom-width: 1px }
-  }
-</style>
+
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
@@ -139,43 +118,18 @@ export default ({
   },
   data () {
     return {
-        myQDateLocale: {
-            /* starting with Sunday */
-            days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
-            daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
-            months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
-            monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
-            firstDayOfWeek: 1
-        }
-      ,filterString: '', selected: []
-      //,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
+      lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
     }
   },
   methods:{
-    rowValidation(currentRow, returnType){
-        if(currentRow.invID==null||currentRow.invID==undefined||currentRow.invID<=0){
-            return (returnType?true:'Debe corregir la celda: Materia Prima')
+    getMax(arr, prop) {
+        var max;
+        for (var i=0 ; i<arr.length ; i++) {
+            if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
+                max = arr[i];
         }
-        if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<=0){
-            return (returnType?true:'Debe corregir la celda: Cantidad')
-        }
-        if(currentRow.quantity>currentRow.maxQuantity){
-            return (returnType?true:'Debe disminuir el valor en la celda: Cantidad')
-        }
-        if(currentRow.debit_account_id==null||currentRow.debit_account_id==undefined||currentRow.debit_account_id<=0||currentRow.credit_account_id==null||currentRow.credit_account_id==undefined||currentRow.credit_account_id<=0){
-            return (returnType?true:'Debe corregir la configuración contable')
-        }
-        if(currentRow.lineUntaxed==null||currentRow.lineUntaxed==undefined||currentRow.lineUntaxed<0){
-            return (returnType?true:'Debe verificar todas las celdas por un error en: Total')
-        }
-        if(this.editMode==false){
-          if(currentRow.quantityCancelNew==null||currentRow.quantityCancelNew==undefined||currentRow.quantityCancelNew<0||currentRow.quantityCancelNew>currentRow.quantityOpen){
-            return (returnType?true:'Debe corregir la celda: Cancelar')
-          }
-        }
-        
-        return false
-      },
+        return max;
+    },
     dateName(value){
         let resultado = '...'
         try{
@@ -210,10 +164,47 @@ export default ({
         this.$q.loading.hide()
       }
     },
+    whDialogSelectAction(){
+      if(this.whDialogSelected.length>0){
+        //Segundo, actualiza la fila por medio del método [updateRow]
+        if(this.whDialogSelected[0].estado==true){
+          this.selected.forEach(rowToUpdate=>{
+              this.updateRow(this.whDialogSelected[0].value, 'whID', rowToUpdate)
+          })
+          this.isWHDialog = false
+        }
+      }
+    },
+    updateExpectedDates(){
+      this.isExpectedDialog=false
+      this.selected.forEach(row => this.updateRow(this.expectedDialogDate, 'expectedDate' , row) );
+    },
+    transportDialogSelectAction(){
+      if(this.transportDialogSelected.length>0){
+        //Segundo, actualiza la fila por medio del método [updateRow]
+        if(this.transportDialogSelected[0].estado==true){
+          this.selected.forEach(rowToUpdate=>{
+              this.updateRow(this.transportDialogSelected[0].value, 'transportTypeID', rowToUpdate)
+          })
+          this.isTransportDialog = false
+        }
+      }
+    },
+    prjDialogSelectAction(){
+      if(this.prjDialogSelected.length>0){
+        //Segundo, actualiza la fila por medio del método [updateRow]
+        if(this.prjDialogSelected[0].estado==true){
+          this.selected.forEach(rowToUpdate=>{
+              this.updateRow(this.prjDialogSelected[0].value, 'prjID', rowToUpdate)
+          })
+          this.isPrjDialog = false
+        }
+      }
+    },
     cancelRows(){
       this.selected.forEach(rowToUpdate=>{
         //pone en columna quantityCancel el valor de las cantidades pendientes (open / por recibir)
-        this.updateRow(rowToUpdate.quantityOpen, 'quantityCancelNew', rowToUpdate)
+        this.updateRow(false, 'estado', rowToUpdate)
       })
     },
   },
@@ -253,9 +244,21 @@ export default ({
           get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
           set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultWhID', value: val}) }
       },
+      defaultTransportID: {
+          get () { return this.$store.state[this.moduleName].editData.basic.defaultTransportID },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultTransportID', value: val}) }
+      },
+      paytermID: {
+          get () { return this.$store.state[this.moduleName].editData.basic.paytermID },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'paytermID', value: val}) }
+      },
       lines: {
           get () { return this.$store.state[this.moduleName].editData.lines },
           set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+      },
+      linesTaxes: {
+          get () { return this.$store.state[this.moduleName].editData.linesTaxes },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLinesTaxes', val) }
       },
       userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
       sys_user_color: {
@@ -266,6 +269,21 @@ export default ({
       },
       lookup_wh: {
           get () { return this.$store.state[this.moduleName].editData.lookup_wh },
+      },
+      lookup_prj: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_prj },
+      },
+      lookup_transports: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_transports },
+      },
+      lookup_payterms: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_payterms },
+      },
+      lookup_paytermsDetails: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_paytermsDetails },
+      },
+      lookup_taxesByGroup: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_taxesByGroup },
       },
   }
 })

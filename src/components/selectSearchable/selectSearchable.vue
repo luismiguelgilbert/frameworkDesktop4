@@ -147,7 +147,7 @@ export default({
             //this.optionsListFiltered = Object.freeze(JSON.parse(JSON.stringify(this.optionsList)))
         }catch(ex){}
         try{//Preselect Default Value
-            if(this.initialValue){
+            if(this.initialValue!=null||this.initialValue==0){
                 if(this.optionsList.some(x=>x[this.rowValueField]==this.initialValue)){
                     this.componentValue=this.optionsList.find(x=>x[this.rowValueField]==this.initialValue)
                 }

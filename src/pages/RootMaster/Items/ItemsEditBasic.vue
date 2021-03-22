@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
       <q-toggle class="col-12 col-md-4"
         tabindex="-1"
@@ -144,44 +144,64 @@
 </q-form>
 </template>
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
+*/
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },
     components: {
         selectSearchable:selectSearchable
-    },
-    data () {
-        return {
-            moduleName: "Items"
-        }
     },
     mounted(){
         this.$refs.formulario.validate()
     },
-    methods:{
-      changeMonth(){
-        /*if(this.parent_id){
-          let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id)
-          this.code_es = temporal.code_es + '.xxx'
-          this.account_type_root = temporal.account_type_root
-          this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
-        }else{
-          this.code_es = ''
-          this.account_type_root = 1
-          this.account_level = 0
-        }*/
-      }
-    },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        editConfig: {
+            get () { return this.$store.state[this.moduleName].editConfig },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editConfig', value: val})  }
+        },
         estado: {
             get () { return this.$store.state[this.moduleName].editData.basic.estado },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'estado', value: val}) }
@@ -262,5 +282,53 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.lookup_brands },
         },
     },
+    watch: {
+        systemType(newValue, oldValue) {
+            let newEditConfig = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].editConfig));
+            console.dir(newValue)
+            if(newValue==1){
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bom').isTabDisable
+            }
+            if(newValue==1){//servicio
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bom').isTabDisable = true;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='lots').isTabDisable = true;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bins').isTabDisable = true;
+            }
+            if(newValue==2){//producto
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bom').isTabDisable = true;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='lots').isTabDisable = true;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bins').isTabDisable = false;
+            }
+            if(newValue==3){//kit
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bom').isTabDisable = false;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='lots').isTabDisable = true;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bins').isTabDisable = false;
+            }
+            if(newValue==4){//producto lote
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bom').isTabDisable = true;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='lots').isTabDisable = false;
+                newEditConfig.moduleTabs.find(x=>x.tabName=='bins').isTabDisable = false;
+            }
+            this.editConfig = newEditConfig;
+        },
+        is_sales(newValue, oldValue) {
+            let newEditConfig = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].editConfig));
+            if(newValue){
+                newEditConfig.moduleTabs.find(x=>x.tabName=='priceLists').isTabDisable = false;
+            }else{
+                newEditConfig.moduleTabs.find(x=>x.tabName=='priceLists').isTabDisable = true;
+            }
+            this.editConfig = newEditConfig;
+        },
+        is_purchase(newValue, oldValue) {
+            let newEditConfig = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].editConfig));
+            if(newValue){
+                newEditConfig.moduleTabs.find(x=>x.tabName=='partners').isTabDisable = false;
+            }else{
+                newEditConfig.moduleTabs.find(x=>x.tabName=='partners').isTabDisable = true;
+            }
+            this.editConfig = newEditConfig;
+        },
+    }
 })
 </script>

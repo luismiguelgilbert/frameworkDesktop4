@@ -148,7 +148,7 @@
 
     <q-dialog v-model="isPaymentDialogOpen">
         <q-card class="no-padding" style="min-height: 200px; height: calc(100vh - 50px); overflow-y: hidden; min-width: calc(100vw - 50px);">
-            <accVoucherEdit :dialogMode="true" :initialPartnerID="initialPartnerID" :initialLines="initialInvoiceLines" :amountUnpaid="amountUnpaid" />
+            <!--<accVoucherEdit :dialogMode="true" :initialPartnerID="initialPartnerID" :initialLines="initialInvoiceLines" :amountUnpaid="amountUnpaid" />-->
         </q-card>
     </q-dialog>
 </div>
@@ -157,11 +157,11 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
-import accVoucherEdit from '../../pages/RootBank/accVoucherOut/accVoucherOutEdit'
+//import accVoucherEdit from '../../pages/RootBank/accVoucherOut/accVoucherOutEdit'
 
 export default ({
     components:{
-        accVoucherEdit: accVoucherEdit
+        //accVoucherEdit: accVoucherEdit
     },
     props: {
         moduleName: { type: String, required: true },

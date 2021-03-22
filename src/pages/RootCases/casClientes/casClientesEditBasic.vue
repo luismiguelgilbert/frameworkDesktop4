@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
       <q-toggle class="col-4"
         tabindex="-1"
@@ -64,40 +64,55 @@
 </q-form>
 </template>
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+*/
 
 export default ({
-    data () {
-        return {
-            moduleName: "casClientes"
-        }
+    props: {
+        moduleName: { type: String , required: true },
     },
     mounted(){
         this.$refs.formulario.validate()
     },
-    methods:{
-      changeMonth(){
-        /*if(this.parent_id){
-          let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id)
-          this.code_es = temporal.code_es + '.xxx'
-          this.account_type_root = temporal.account_type_root
-          this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
-        }else{
-          this.code_es = ''
-          this.account_type_root = 1
-          this.account_level = 0
-        }*/
-      }
-    },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         estado: {
             get () { return this.$store.state[this.moduleName].editData.basic.estado },

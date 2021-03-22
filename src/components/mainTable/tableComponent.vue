@@ -1,6 +1,7 @@
 <template>
 <div>
   <!--:virtual-scroll="pagination.rowsPerPage==0||pagination.rowsPerPage>100?true:false"-->
+  <!--:row-key="columnsSystem.find(x=>x.is_key).field"-->
     <q-table
       ref="mainTable"
       square
@@ -10,14 +11,14 @@
       :color="userColor=='blackDark'?undefined:'primary'"
       :separator="userTableLines"
       selection="multiple"
-      :row-key="columnsSystem.find(x=>x.is_key).field"
+      row-key="value"
       rows-per-page-label= "Registros"
       no-data-label= "No hay registros"
       no-results-label= "No se encontraron registros"
       loading-label= "Cargando datos"
       :rows-per-page-options="[17,27,50,100,250,1000, 0]"
       :class="tableLastLine"
-      :table-style="userTableDense?'min-height: calc(100vh - 135px); max-height: calc(100vh - 135px)':'min-height: calc(100vh - 153px); max-height: calc(100vh - 153px)'"
+      :table-style="userTableDense?'min-height: calc(100vh - 138px); max-height: calc(100vh - 138px)':'min-height: calc(100vh - 153px); max-height: calc(100vh - 153px)'"
       :selected.sync="selectedRows"
       :loading="loadingData"
       :pagination.sync="pagination"
@@ -28,21 +29,22 @@
       <template v-slot:body-cell="props" >
         <q-td :props="props" class="text-weight-medium ellipsis no-padding" :title="props.value" >
           
-          <q-menu touch-position context-menu :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'">
+          <q-menu touch-position context-menu @show="contextSelectRow(props.row)" :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'">
             <q-list separator style="min-width: 100px">
               <q-item clickable v-close-popup  v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}" title="Abrir">
                 <q-item-section avatar>
                   <q-icon color="primary" name="fas fa-external-link-alt" />
                 </q-item-section>
-                <q-item-section>Abrir Registro {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
+                <q-item-section>Abrir Registro</q-item-section>
               </q-item>
               <q-item v-if="allow_insert" clickable v-close-popup  v-ripple @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, true)}" title="Copiar">
                 <q-item-section avatar>
                   <q-icon color="primary" name="fas fa-copy" />
                 </q-item-section>
-                <q-item-section>Copiar Registro {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
+                <q-item-section>Copiar Registro</q-item-section>
               </q-item>
-              <!--Addition Modules Options-->
+              <!--Addition Modules Options: ESTAS OPCIONES ESTÁN EN VUEX STORE MODULE STATUS-->
+              <!--
               <q-item v-if="tableContextMenu" 
                 clickable v-close-popup v-ripple
                 @click="()=>{ 
@@ -57,13 +59,13 @@
                 </q-item-section>
                 <q-item-section>{{menu.menuText}} {{props.row[columnsSystem.find(x=>x.is_required).field]}}</q-item-section>
               </q-item>
-              
+              -->
             </q-list>
           </q-menu>
-          <q-btn v-if="props.col.is_key" flat color="primary" dense size="sm" 
+          <q-btn v-if="props.col.is_key" flat color="primary" dense  class="full-width text-weight-bolder" stretch 
             @click="()=>{ let newProps = JSON.parse(JSON.stringify(props)); newProps['value']= props.row[columnsSystem.find(x=>x.is_required).field]; openEditForm(newProps, false)}"
             >
-            <u>{{props.value}}</u>
+            {{props.value}}
           </q-btn>
           <div v-if="!props.col.is_key&&props.col.cellComponent=='estado'" class="q-pl-xs">
             <q-item dense class="no-padding" style="min-height: 20px !important;">
@@ -97,6 +99,101 @@
         <q-tr>
         </q-tr>
       </template>
+
+      <template v-slot:bottom="scope" >
+        <q-item dense :class="userColor=='blackDark'?'tex-white text-bold':'text-primary text-bold'" style="margin-left: -10px !important;">
+          <q-item-section>
+            <q-item-label>
+              <q-icon v-if="$q.screen.gt.sm" name="fas fa-database" size="1.2rem" class="q-mr-sm" />
+                {{$q.screen.gt.sm?totalRowspagesNumber + ' registros':totalRowspagesNumber}} 
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-btn 
+          v-if="selectedRows.length>0"
+          :color="userColor=='blackDark'?'white':'primary'"
+          flat  size="sm" no-caps dense
+          icon-right="fas fa-times-circle" 
+          :label="$q.screen.gt.sm?(selectedRows.length + ' seleccionados'):undefined"
+          title="Limpiar registros seleccionados"
+          @click="selectedRows=[]"
+          />
+
+        <q-btn 
+          v-if="isCurrentFilter" class="q-ml-md"
+          :color="userColor=='blackDark'?'red':'red'"
+          flat  size="sm" no-caps dense
+          icon-right="fas fa-eraser" 
+          :label="$q.screen.gt.sm?'Limpiar filtros':undefined"
+          title="Limpiar filtros activos"
+          @click="currentFilter=[]; loadData();"
+          />
+
+
+        <q-space />
+
+        <q-btn v-if="$q.screen.gt.sm" size="sm" stretch icon="fas fa-file-alt" color="primary" flat no-caps
+          :label="paginationOptions.filter(x=>x.value==pagination.rowsPerPage).map(x=>x.selectedLabel).join('')">
+          <q-menu>
+            <q-list>
+              <q-item clickable v-ripple v-close-popup v-for="option in paginationOptions" :key="option.value"
+                :active="option.value==pagination.rowsPerPage"
+                @click="changePagination(option.value)" >
+                <q-item-section side>
+                  <q-icon :name="option.icon" :color="option.value==pagination.rowsPerPage?'primary':undefined" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{option.label}}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+        
+        <q-btn
+          icon="first_page"
+          color="primary"
+          round dense flat
+          :disable="scope.isFirstPage"
+          @click="scope.firstPage"
+          />
+        <q-btn
+          icon="chevron_left"
+          color="primary"
+          round dense flat
+          :disable="scope.isFirstPage"
+          @click="scope.prevPage"
+          />
+        
+        <q-btn flat disable color="primary" 
+          :label="scope.pagination.page + ' / ' + scope.pagesNumber"  
+          />
+        
+        <q-btn
+          icon="chevron_right"
+          color="primary"
+          round dense flat
+          :disable="scope.isLastPage"
+          @click="scope.nextPage"
+          />
+        <q-btn
+          icon="last_page"
+          color="primary"
+          round dense flat
+          :disable="scope.isLastPage"
+          @click="scope.lastPage"
+          />
+
+      </template>
+            
+            <!--<q-btn dense v-if="selectedRows.length>0" title="Limpiar selección" stretch flat size="sm" color="primary" icon="fas fa-times-circle" @click="selectedRows = []" />
+            
+            
+            <q-space />
+
+            <div>Contenido</div>
+            -->
+          
     </q-table>
     
 </div>
@@ -105,20 +202,24 @@
 <style lang="scss">
   .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
   .q-virtual-scroll__padding{ visibility: hidden;}
-  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; margin-bottom: 5px; }
+  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder;  margin-bottom: 5px; }
   .my-sticky-header-table{
-    .q-table thead tr:first-child th{ background-color: white }
+    .q-table thead tr:first-child th{ background-color: white;}
+    .q-table thead tr:first-child th{ color: $primary; }
   }
   .my-sticky-header-table-LastLine{
-    .q-table thead tr:first-child th{ background-color: white }
-    .q-table td{ border-bottom-width: 1px }
+    .q-table thead tr:first-child th{ background-color: white; }
+    .q-table td{ border-bottom-width: 1px; }
+    .q-table thead tr:first-child th{ color: $primary; }
   }
   .my-sticky-header-table-dark{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
+    .q-table thead tr:first-child th{ background-color: $grey-10;}
+    .q-table thead tr:first-child th{ color:  $primary; }
   }
   .my-sticky-header-table-dark-LastLine{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-    .q-table td{ border-bottom-width: 1px }
+    .q-table thead tr:first-child th{ background-color: $grey-10; }
+    .q-table td{ border-bottom-width: 1px; }
+    .q-table thead tr:first-child th{ color: $primary; }
   }
 </style>
 
@@ -135,7 +236,18 @@ export default({
   },
   data () {
     return {
-      dataRows: [], router: this.$router,
+      
+      router: this.$router,
+      paginationOptions: [
+        { label: 'Mostrar 17 filas por página (Más Rápido)', value: 17, icon: 'fas fa-bolt', selectedLabel: 'Mostrar 17' },
+        { label: 'Mostrar 27 filas por página (Más Rápido)', value: 27, icon: 'fas fa-bolt' , selectedLabel: 'Mostrar 27' },
+        { label: 'Mostrar 50 filas por página (Rápido)', value: 50, icon: 'fas fa-bolt' , selectedLabel: 'Mostrar 50' },
+        { label: 'Mostrar 100 filas por página (Normal)', value: 100, icon: 'far fa-hourglass' , selectedLabel: 'Mostrar 100' },
+        { label: 'Mostrar 250 filas por página (Lento)', value: 250, icon: 'fas fa-clock' , selectedLabel: 'Mostrar 250' },
+        { label: 'Mostrar 1000 filas por página (Muy Lento)', value: 1000, icon: 'fas fa-clock' , selectedLabel: 'Mostrar 1000' },
+        { label: 'Mostrar todas las filas (Más Lento)', value: 1000000, icon: 'fas fa-clock' , selectedLabel: 'Mostrar Todo' },
+      ]
+      //dataRows: [], router: this.$router,
       //selectedRows: [],
     }
   },
@@ -150,6 +262,10 @@ export default({
     allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
     allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
     userColor: { get () { return this.$store.state.main.userColor }  },
+    dataRows: {
+        get () { return this.$store.state[this.moduleName].dataRows },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'dataRows', value: val}) }
+    },
     //computedTableHeaderBG{ get () { return this.$store.state.main.userColor }  },
     computedTableHeaderBG: { get () { if(this.$store.state.main.userColor=='default'){return 'white'} else{return '$grey-10'} } },
     apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
@@ -165,9 +281,9 @@ export default({
         if(this.userColor=='blackDark'){
           if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
           {
-            resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
+            resultado = 'q-pa-md my-sticky-header-table-dark-LastLine bg-grey-10 '
           }else{
-            resultado = 'my-sticky-header-table-dark bg-grey-10 '
+            resultado = 'q-pa-md my-sticky-header-table-dark bg-grey-10 '
           }
         }
         if(this.userColor!='blackDark'){
@@ -181,6 +297,10 @@ export default({
         return resultado
       }
     },
+    mainRoute: {
+            get () { return this.$store.state[this.moduleName].mainRoute },
+            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'mainRoute', value: val}) }
+        },
     pagination: {
       get () { return this.$store.state[this.moduleName].pagination },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'pagination', value: val}) }
@@ -217,7 +337,8 @@ export default({
       get () { return this.$store.state[this.moduleName].columnsSystem },
     },
     currentFilter: {
-      get () {  return this.$store.state[this.moduleName].currentFilter; }
+        get () { return this.$store.state[this.moduleName].currentFilter },
+        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'currentFilter', value: val}) }
     },
     currentFilterSearch: {
         get () { return this.$store.state[this.moduleName].currentFilterSearch },
@@ -226,10 +347,10 @@ export default({
       get () { return this.$store.state[this.moduleName].selectedRows },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'selectedRows', value: val}) }
     },
-    editRecord: {
+    /*editRecord: {
       get () { return this.$store.state[this.moduleName].editRecord },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editRecord', value: val}) }
-    },
+    },*/
     editMode: {
       get () { return this.$store.state[this.moduleName].editMode },
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editMode', value: val}) }
@@ -242,6 +363,27 @@ export default({
       set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'lastRecord', value: val}) }
     },
     
+    isCurrentFilter: {
+        get () { return this.$store.state[this.moduleName].currentFilter.filter(x => x.valueA != null || x.valueB != null || (x.valueC != null && x.valueC.length > 0)).length>0; },
+    },
+    pagesNumber:{
+      get() { 
+        let result = 0
+        if(this.dataRows.length>0){
+          result = Math.ceil(this.dataRows[0].gridDataMaxRows / this.pagination.rowsPerPage)
+        }
+        return result
+      }
+    },
+    totalRowspagesNumber:{
+      get() { 
+        let result = 0
+        if(this.dataRows.length>0){
+          result = this.dataRows[0].gridDataMaxRows
+        }
+        return result
+      }
+    }
   },
   mounted(){
     this.loadData();
@@ -329,35 +471,64 @@ export default({
       }catch(ex){}
       return resultado
     },
+    contextSelectRow(clickedRow){
+      console.dir(clickedRow)
+      try{
+        let newSelectedRow = [];
+        newSelectedRow.push(clickedRow)
+        this.selectedRows = newSelectedRow;
+      }catch(ex){}
+    },
     openEditForm(props, editMode){
       //select Openning row, helps user to find out wich record he was working with
       try{
         let newSelectedRow = [];
         newSelectedRow.push(props.row)
         this.selectedRows = newSelectedRow;
+        
+        
         let selectedRow = {
           value: props.value
           ,row: props.row
         }
-        this.editRecord = selectedRow
+        //this.editRecord = selectedRow
       }catch(ex){}
       this.editMode = editMode //false = edit || true  = new
       this.lastRecord = props.value//agregado para que funcione el AutoScroll en cada módulo
-      this.router.push(this.moduleEditName);
+      //this.router.push(this.moduleEditName);
+      //console.dir(this.router.currentRoute.path)
+      //console.dir(this.router.currentRoute.path+'/'+props.value)
+      if(this.router.currentRoute.path=='/RootPurchase/mktPR'||this.router.currentRoute.path=='/RootPurchase/mktPO'){
+        this.router.push(this.router.currentRoute.path+'/'+props.value);
+      }else{
+        this.router.push(this.moduleEditName);
+      }
+      
+      /*console.dir('this.mainRoute')
+      console.dir(this.mainRoute)
+      console.dir('this.router.currentRoute.path')
+      console.dir(this.router.currentRoute.path)*/
+      //this.router.push({ name: this.mainRoute, params: { id: '19' }})
+      //router.push({ path: `/user/${userId}` }) // -> /user/123
+      //router.push((router)=>{ path: router.currentRoute.path + '/19' }) // -> /user/123
+      //this.router.push({ name: 'user', params: { username: 'eduardo' } })
     },
     callScroll(){
       setTimeout(this.tryScroll, 650)
     },
     async tryScroll(){
       try{
-        let index = this.dataRows.findIndex(x=>x[this.columnsSystem.find(x=>x.is_key).field]==this.lastRecord)
-        if(this.$refs.mainTable.hasVirtScroll){
-          index=parseInt(index)+parseInt(14)
-          this.$refs.mainTable.scrollTo(index)
-        }else{
-          index=parseInt(index)-parseInt(1)
-          this.$refs.mainTable.scrollTo(index)
+        if(this.lastRecord&&this.lastRecord>0){
+          let index = this.dataRows.findIndex(x=>x[this.columnsSystem.find(x=>x.is_key).field]==this.lastRecord)
+          if(this.$refs.mainTable.hasVirtScroll){
+            index=parseInt(index)+parseInt(10)
+            this.$refs.mainTable.scrollTo(index)
+          }else{
+            index=parseInt(index)-parseInt(1)
+            this.$refs.mainTable.scrollTo(index)
+          }
         }
+        
       }catch(ex){}
     },
     runContextCommand(menuAction, data){

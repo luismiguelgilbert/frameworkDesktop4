@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy spellcheck="false" autocorrect="off" autocapitalize="off" class="no-padding">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <q-splitter
         v-model="splitterModel" class="no-padding"
         style="height: calc(100vh - 140px);" unit="%"

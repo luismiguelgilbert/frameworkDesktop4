@@ -41,7 +41,8 @@ export default ({
   },
   methods:{
     goBack(){
-        this.router.replace('/'+this.currentPathModule); //navigate to previous Main module
+        //this.router.replace('/'+this.currentPathModule); //navigate to previous Main module
+        this.router.go(-1)
     },
     onload(){
         console.dir('fire onLoad')

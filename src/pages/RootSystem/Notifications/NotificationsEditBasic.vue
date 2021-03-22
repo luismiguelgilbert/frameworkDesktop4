@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">    
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <q-input 
         ref="title" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese el título del mensaje (*)" label="Título(*)" filled

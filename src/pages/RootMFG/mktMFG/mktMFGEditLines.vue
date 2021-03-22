@@ -1,590 +1,945 @@
 <template>
 <div style="margin: -16px;">
-    <q-table
-        ref="mainTable"
-        :data="lines"
-        :table-style="editMode==true?'min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);' : 'min-height: calc(100vh - 140px); max-height: calc(100vh - 140px);'"
-        row-key="lineID"
-        :separator="userTableLines"
-        :rows-per-page-options="[0]"
-        hide-bottom dense flat
-        selection="multiple" :selected.sync="selected"
-        :virtual-scroll="true"
-        :class="tableLastLine"
-        :columns="[
-            //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-            { name: 'hasError', required: true, label: '', align: 'center', field: row => row.uploaded, sortable: true },
-            { name: 'invID', required: true, label: 'Materia Prima', align: 'left', field: row => row.invID, sortable: true },
-            { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true },
-            { name: 'price', required: true, label: '$ Costo', align: 'right', field: row => row.price, sortable: true },
-            //{ name: 'lineDiscntPrcnt', required: true, label: 'Dcto. %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true },
-            //{ name: 'lineDiscntAmount', required: true, label: 'Dcto. $', align: 'right', field: row => row.lineDiscntAmount, sortable: true },
-            { name: 'lineUntaxed', required: true, label: '$ Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
-        ]"
-        >
-        <template v-slot:top v-if="editMode==true" >
-            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Varios Ítems" @click="itemsBatchDialogSelected=[];isItemsBatchDialog=true" icon="fas fa-plus" color="primary" no-caps />
-            <!--<q-btn :label="$q.screen.gt.sm?'Nueva Línea':''"  title="Agregar Nueva Línea" @click="addRow" icon="fas fa-plus" color="primary" no-caps />-->
-            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Presupuesto de Insumos':''"  title="Agregar masivamente Materia Prima basado en el Presupuesto de Insumos" @click="BoMDialogSelection=null; isBoMDialogOpen=true;" icon="fas fa-file-invoice-dollar" color="primary" no-caps class="q-ml-sm" />
-            <q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm" :disable="selected.length<=0" />
-            <q-space />
-        </template>
-        <template v-slot:body="props">
-            <q-tr :props="props" >
-                <q-td auto-width>
-                    <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
-                </q-td>
-                <q-td key="hasError" :props="props" class="no-padding" >
-                    <q-icon 
-                        size="xs" name="fas fa-exclamation-triangle" color="red" flat dense
-                        v-if="rowValidation(props.row, true)"
-                        :title="rowValidation(props.row, false)"
-                        />
-                </q-td>
-                <q-td key="invID" :props="props" >
-                    <selectSearchable 
-                        labelText="Materia Prima" 
-                        labelSearchText="Buscar Materia Prima"
-                        :optionsList="lookup_items.filter(x=>x.systemType!=3/*3=Kit*/)"
-                        rowValueField="value" optionLabelField="label" optionsListCaption="internal_code" optionsListLabel="label" optionDisableField="estado"
-                        :isRequired="true" :isDisable="false" :isReadonly="true"
-                        :isInline="true" :isDense="true"
-                        appendIcon="f"
-                        :tableSearchColumns="[
-                                { name: 'label', label: 'Línea de Producción', field: 'label', align: 'left'}
-                            ,{ name: 'internal_code', label: 'Código', field: 'internal_code', align: 'left'}
-                            ,{ name: 'uomName', label: 'Unidad', field: 'uomName', align: 'left'}
-                            ,{ name: 'lastPrice', label: 'Precio P. Actual', field: 'lastPrice', align: 'left'}
-                            ,{ name: 'systemTypeName', label: 'Tipo', field: 'systemTypeName', align: 'left'}
-                        ]"
-                        :tooltipColumns="[
-                             { name: 'label', label: 'Item'}
-                            ,{ name: 'internal_code', label: 'Código'}
-                            ,{ name: 'uomName', label: 'Unidad'}
-                            ,{ name: 'brandName', label: 'Marca'}
-                        ]"
-                        :initialValue="props.row.invID"
-                        
-                        />
-                </q-td>
-                <q-td key="quantity" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.quantity" type="number" :min="0" :readonly="(editMode==false)"
-                        dense item-aligned borderless input-class="text-right"
-                        :max="props.row.maxQuantity" 
-                        :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-                        @focus="$event.target.select()"
-                        debounce="1000"  @input="(value)=>{updateRow(value,'quantity',props.row)}" />
-                </q-td>
-                <q-td key="price" :props="props">
-                    <q-input class="no-padding" style="height: 20px !important;"
-                        :value="props.row.price" type="number" :min="0" readonly
-                        :title="(props.row.quantityRcvd>0)?'No se permite editar porque ya existe ingreso a bodega':undefined"
-                        dense item-aligned borderless input-class="text-right"
-                        :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-                        @focus="$event.target.select()"
-                        debounce="1000" @input="(value)=>{updateRow(value,'price',props.row)}" />
-                </q-td>
-                <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" key="lineUntaxed" :props="props">
-                    {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
-                </q-td>
-            </q-tr>
-         </template>
-        <template v-slot:bottom-row >
-            <q-tr>
-                <q-td>
-                </q-td>
-                <q-td>
-                </q-td>
-                <q-td>
-                </q-td>
-                <q-td>
-                </q-td>
-                <q-td class="text-right text-subtitle2 text-primary" >
-                    Suma:
-                </q-td>
-                <q-td class="text-right text-subtitle2 text-primary">
-                    {{lines.reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
-                </q-td>
-            </q-tr>
-            <q-tr></q-tr>
-        </template>
-    </q-table>
+  <q-toolbar class="no-padding">
+    <q-btn label="Nuevo" icon="fas fa-plus" color="primary" flat stretch @click="isListDialog=true" :disable="!allow_row_insert" />
+    <q-btn label="Lista de Materiales (BoM)" icon="fas fa-file-invoice-dollar" color="primary" flat stretch @click="isRequisicionesDialog=true" :disable="!allow_row_insert" />
+    <q-btn label="Eliminar" icon="fas fa-trash-alt" color="red" flat stretch :disable="maingridSelectedRowKeys.length<=0" @click="removeRows" />
+    <q-btn color="primary" flat stretch label="Opciones" icon-right="fas fa-chevron-down" no-caps>
+      <q-menu>
+        <q-list style="min-width: 100px">
+          <q-item clickable>
+            <q-item-section side>
+              <q-icon name="fas fa-tasks" />
+            </q-item-section>
+            <q-item-section>Aplicación por Lotes</q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" />
+            </q-item-section>
 
-    <q-dialog v-model="isItemsBatchDialog">
-        <q-card style="min-width: 90%;" > 
-        <q-bar class="bg-primary text-white">
-            Buscar Items
-            <q-space />
-            <q-input input-class="text-white" borderless dense debounce="300" autofocus v-model="itemsBatchDialogFilter" placeholder="Buscar">
-            <template v-slot:append>
-                <q-icon v-if="!itemsBatchDialogFilter" name="fas fa-search" flat round size="xs" color="white" />
-                <q-btn v-if="itemsBatchDialogFilter" @click="itemsBatchDialogFilter=''" flat round icon="fas fa-times" size="xs" color="white" />
-            </template>
-            </q-input>
-        </q-bar>
-        <q-card-section class="no-padding">
-            <q-table
-            ref="itemsSearchTable" flat square
-            table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-            @keydown.native.keyCodes.115="addRows(itemsDialogSelected)"
-            :data="lookup_items"
-            :columns="[
-                { name: 'value', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
-                { name: 'label', required: true, label: 'Item', align: 'left', field: row => row.label, sortable: true, style: 'min-width: 250px;', },
-                { name: 'systemTypeName', required: true, label: 'Tipo', align: 'left', field: row => row.systemTypeName, sortable: true, style: 'min-width: 50px;', },
-                { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true, style: 'min-width: 50px;'},
-                { name: 'uomName', required: true, label: 'Unidad de Medida', align: 'left', field: row => row.uomName, sortable: true, style: 'min-width: 50px;'},
-                //{ name: 'groupName', required: true, label: 'Grupo Contable', align: 'left', field: row => row.groupName, sortable: true, style: 'min-width: 50px;'},
-                { name: 'brandName', required: true, label: 'Marca', align: 'left', field: row => row.brandName, sortable: true, style: 'min-width: 50px;'},
-                { name: 'lastPrice', required: true, label: 'Precio P. Actual', align: 'right', field: row => row.lastPrice, sortable: true, style: 'min-width: 50px;'},
-                
-            ]"
-            row-key="value"
-            virtual-scroll :rows-per-page-options="[0]"
-            hide-bottom dense
-            selection="multiple" :selected.sync="itemsBatchDialogSelected"
-            :filter="itemsBatchDialogFilter"
-            :class="tableLastLine"
-            :separator="userTableLines"
+            <q-menu anchor="top right" self="top left" >
+              <q-list>
+                <q-item clickable v-ripple v-close-popup :disable="maingridSelectedRowKeys.length<=0" @click="dialogOP=true">
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-clipboard-list" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Aplicar Orden de Producción</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple v-close-popup :disable="maingridSelectedRowKeys.length<=0" @click="dialogWH=true" >
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-warehouse" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Aplicar Bodega</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple v-close-popup :disable="maingridSelectedRowKeys.length<=0" @click="dialogExpected=true" >
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-calendar" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Aplicar Fecha Entrega</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item clickable v-ripple v-close-popup :disable="maingridSelectedRowKeys.length<=0" @click="cancelRows" class="text-red" >
+                  <q-item-section avatar>
+                      <q-icon color="red" name="fas fa-ban" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Cancelar Cantidades Pendientes</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+
+          </q-item>
+
+          <q-separator />
+
+          <q-item clickable>
+            <q-item-section side>
+              <q-icon name="fas fa-columns" />
+            </q-item-section>
+            <q-item-section>Configurar Columnas</q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" />
+            </q-item-section>
+
+            <q-menu anchor="top right" self="top left" >
+              <q-list>
+                <q-item clickable v-ripple v-close-popup @click="openColumnSelector">
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-columns" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Abrir Selector de Columnas</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple v-close-popup @click="saveGridUserState">
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-save" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Guardar Configuración</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple v-close-popup @click="deleteGridUserState">
+                  <q-item-section avatar>
+                      <q-icon :color="userColor=='blackDark'?'white':'grey-7'" name="fas fa-trash-alt" />
+                  </q-item-section>
+                  <q-item-section>
+                      <q-item-label>Eliminar Configuración</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-btn>
+
+ </q-toolbar>
+
+  <q-separator />
+
+  <DxDataGrid
+    ref="dxgrid"
+    height="calc(100vh - 170px)"
+    width="100%"
+    column-resizing-mode="widget"
+    :data-source="internalLines"
+    :allow-column-resizing="true" 
+    :allow-column-reordering="true"
+    :show-borders="true"
+    :show-column-lines="userTableLinesDXcols"
+    :show-row-lines="userTableLinesDXrows"
+    :stateStoring="{ ignoreColumnOptionNames: [] }"
+    key-expr="lineID"
+    :selected-row-keys.sync="maingridSelectedRowKeys"
+    @row-updating="roundInputToSixDigits"
+    @row-updated="onRowUpdated"
+    @editor-preparing="checkIfCellEditable"
+    >
+      <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
+      <DxColumnChooser  mode="select" />
+      <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
+      <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+      <DxEditing :allow-updating="true" mode="cell" :select-text-on-edit-start="true"  /> <!-- me gustan: cell, row, popup -->
+      <DxScrolling mode="virtual" :useNative="false" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      
+      <DxColumn caption="lineID" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
+      <DxColumn caption="# OP" data-field="mfg_orderID" name="mfg_orderID" data-type="number" :allow-editing="true" alignment="left" :width="100" :visible="true">
+        <DxLookup value-expr="value" display-expr="label" :data-source="lookup_mfgOrders" />
+      </DxColumn>
+      <DxColumn caption="Item" data-field="invID" name="invID" data-type="number" :allow-editing="false" alignment="left" :minWidth="250">
+        <DxLookup value-expr="value" display-expr="label" :data-source="lookup_items" />
+      </DxColumn>
+      <DxColumn caption="Cantidad" data-field="quantity" name="quantity" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'" />
+      <DxColumn caption="Costo" data-field="price" name="price" data-type="number" :allow-editing="false" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" />
+      <DxColumn caption="Total" data-field="lineSubtotal" name="lineSubtotal" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
+      
+      <DxColumn caption="Cancelado" data-field="quantityCancel" name="quantityCancel" data-type="number" :allow-editing="false" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :visible="true" cssClass="text-red" />
+      <DxColumn caption="Cancelar" data-field="quantityCancelNew" name="quantityCancelNew" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :visible="true" cssClass="text-red" />
+      <DxColumn caption="Recibido" data-field="quantityRcvd" name="quantityRcvd" data-type="number" :allow-editing="false" alignment="right" :width="120" :visible="true" cssClass="text-positive" />
+      <DxColumn caption="Devolución" data-field="quantityReturned" name="quantityReturned" data-type="number" :allow-editing="false" alignment="right" :width="120" :visible="true" cssClass="text-positive" />
+      <DxColumn caption="Bodega" data-field="whID" name="whID" data-type="number" :allow-editing="true" alignment="left" :width="200" :visible="true">
+        <DxLookup value-expr="value" display-expr="label" :data-source="lookup_wh" />
+      </DxColumn>
+      <DxColumn caption="Observaciones" data-field="comments" name="comments" data-type="string" :allow-editing="true" alignment="left" :width="120" :visible="true" />
+      <DxColumn caption="Fecha Entrega" data-field="expectedDate" name="expectedDate" data-type="date" :allow-editing="true" alignment="left" :width="120" format="dd-MMM-yyyy" :visible="true" />
+      
+         
+      <DxSummary >
+        <DxTotalItem column="invID" summary-type="count"/>
+        <DxTotalItem column="lineSubtotal" summary-type="sum" cssClass="q-mr-none" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxTotalItem column="lineUntaxed" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxTotalItem column="lineTotal" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+      </DxSummary>
+      
+      />
+  </DxDataGrid>
+
+  <DxPopup
+      :visible.sync="isListDialog"
+      :drag-enabled="true"
+      :close-on-outside-click="true"
+      :show-title="true"
+      width="calc(85vw)"
+      height="calc(75vh)"
+      @shown="listGridShown"
+      >
+        <DxToolbarItem text="Seleccionar registros" location="before" :options="{ class: 'text-primary' }"></DxToolbarItem>
+        <DxToolbarItem location="after" widget="dxTextBox" :options="dxdialogSearchBoxOptions"></DxToolbarItem>
+        
+        <q-separator />
+
+        <div style="margin: -15px;">
+
+          <DxDataGrid
+            ref="dxGridSearchList"
+            height="calc(75vh - 115px)"
+            width="100%"
+            column-resizing-mode="widget"
+            :data-source="lookup_items.filter(x=>x.systemType!=3)"
+            :allow-column-resizing="true" 
+            :allow-column-reordering="true"
+            :show-borders="false"
+            :show-column-lines="userTableLinesDXcols"
+            :show-row-lines="userTableLinesDXrows"
+            key-expr="value"
+            :selected-row-keys="listSelectedRowKeys" @selection-changed="onListSelectionChanged"
             >
-            <template v-slot:body-selection="scope">
-                <q-checkbox v-if="scope.row.estado" v-model="scope.selected" dense :title="JSON.stringify(scope.row.estado)" :disable="!(scope.row.estado)" />
-                <q-icon v-if="!(scope.row.estado)" name="fas fa-ban" color="red" style="margin-left: 2px;" title="Se encuentra Inactivo"/>
-            </template>
-            </q-table>
-            <q-separator />
+            <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
+            <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" />
+            <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
             
-        </q-card-section>
-        <q-card-actions align="around">
-            <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" :disable="itemsBatchDialogSelected.filter(x=>x.estado).length<=0" @click="addRows(itemsBatchDialogSelected)" ></q-btn>
-        </q-card-actions>
-        </q-card>
-    </q-dialog>
+            <DxColumn caption="value" data-field="value" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
+            <DxColumn caption="Item" data-field="label" data-type="string" :allow-editing="false" alignment="left" :visible="true" :minWidth="350" />
+            <DxColumn caption="Tipo" data-field="systemTypeName" data-type="string" :allow-editing="false" alignment="left" :visible="true" :width="100" />
+            <DxColumn caption="Código" data-field="internal_code" data-type="string" :allow-editing="false" alignment="left" :visible="true" :width="100" />
+            <DxColumn caption="Unidad" data-field="uomName" data-type="string" :allow-editing="false" alignment="left" :visible="true" :width="120"  />
+            <DxColumn caption="Marca" data-field="brandName" data-type="string" :allow-editing="false" alignment="left" :visible="true" :width="100"  />
+            <DxColumn caption="Grupo Contable" data-field="groupName" data-type="string" :allow-editing="false" alignment="left" :visible="true" :width="120"  />
+            <DxColumn caption="Precio Actual" data-field="lastPrice" data-type="number" :allow-editing="false" alignment="right" :visible="true" :format="userMoneyFormat" :width="130"  />
 
-    <q-dialog v-model="isBoMDialogOpen">
-        <q-card style="min-width: 95%;" >
-            <q-bar class="bg-primary text-white">
-                    Presupuesto de Insumos
-                    <q-space />
-                    <q-input 
-                        ref="inputSearch"
-                        input-class="text-white" borderless dense debounce="300" autofocus v-model="filterString" placeholder="Buscar"
-                        >
-                        <template v-slot:append>
-                            <q-icon v-if="!filterString" name="fas fa-search" flat round size="xs" color="white" />
-                            <q-btn v-if="filterString" @click="filterString=''" flat round icon="fas fa-times" size="xs" color="white" />
-                        </template>
-                    </q-input>
-                </q-bar>
+          </DxDataGrid>
+
+          <q-separator />
+          
+          <q-card-actions align="around">
+              <q-btn icon="fas fa-save" flat color="primary" label="Agregar" @click="addRows" :disable="!listSelectedRowKeys.length>0" />
+          </q-card-actions>
+        
+        </div>
+  </DxPopup>
+
+  <q-dialog v-model="isRequisicionesDialog" @show="clearBoMSelection">
+        <q-card style="min-width: 80%;" >
+            <q-card-section class="no-padding" >
+                <selectSearchable class="col-12"
+                    prependIcon="fas fa-boxes"
+                    labelText="Listas de Materiales (*)" labelSearchText="Buscar Lista de Materiales"
+                    :optionsList="lookup_bom"
+                    rowValueField="budgetID" optionLabelField="invName" optionsListCaption="quantity" optionsListLabel="invName" optionDisableField="estado"
+                    :isRequired="false" 
+                    :isDisable="false" 
+                    :isReadonly="false"
+                    
+                    :tableSearchColumns="[
+                        { name: 'mfgTypeName', label: 'Tipo', field: 'mfgTypeName', align: 'left'}
+                        ,{ name: 'invName', label: 'Producto', field: 'invName', align: 'left'}
+                        ,{ name: 'quantity', label: 'Cantidad', field: 'quantity', align: 'right'}
+                        ,{ name: 'comments', label: 'Comentarios', field: 'comments', align: 'left'}
+                        ]"
+                    @onItemSelected="(row)=>{
+                            this.BoMDialogSelection = row.budgetID
+                        }"
+                    />
+            </q-card-section>
             <q-card-section class="no-padding">
-                <q-table 
-                    :data="default_orderBudget"
-                    table-style="min-height: calc(100vh - 189px); max-height: calc(100vh - 189px);"
-                    row-key="invID"
-                    :separator="userTableLines"
-                    :rows-per-page-options="[0]"
-                    hide-bottom dense flat
-                    :virtual-scroll="true"
-                    :class="tableLastLine"
-                    selection="multiple" :selected.sync="selectedBudgetRows"
-                    :filter="filterString"
-                    :columns="[
-                        //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-                        { name: 'invName', required: true, label: 'Materia Prima', align: 'left', field: row => row.invName, sortable: true },
-                        { name: 'internal_code', required: true, label: 'Código', align: 'left', field: row => row.internal_code, sortable: true },
-                        { name: 'quantity', required: true, label: 'Cantidad', align: 'right', field: row => row.quantity, sortable: true },
-                        { name: 'uomName', required: true, label: 'Unidad', align: 'left', field: row => row.uomName, sortable: true },
-                        { name: 'price', required: true, label: 'Costo', align: 'right', field: row => row.price, sortable: true },
-                        //{ name: 'lineDiscntPrcnt', required: true, label: 'Dcto. %', align: 'right', field: row => row.lineDiscntPrcnt, sortable: true },
-                        //{ name: 'lineDiscntAmount', required: true, label: 'Dcto. $', align: 'right', field: row => row.lineDiscntAmount, sortable: true },
-                        { name: 'lineUntaxed', required: true, label: 'Total', align: 'right', field: row => row.lineUntaxed, sortable: true },
-                        { name: 'quantityReal', required: true, label: 'Cantidad Consumida', align: 'right', field: row => row.quantityReal, sortable: true },
-                        { name: 'lineUntaxedReal', required: true, label: 'Total Consumido', align: 'right', field: row => row.lineUntaxedReal, sortable: true },
-                    ]"
+                <DxDataGrid
+                    ref="dxGridSearchBOMList"
+                    height="calc(75vh - 115px)"
+                    width="100%"
+                    column-resizing-mode="widget"
+                    :data-source="lookup_bom_details.filter(x=>x.budgetID==this.BoMDialogSelection)"
+                    :allow-column-resizing="true" 
+                    :allow-column-reordering="true"
+                    :show-borders="false"
+                    :show-column-lines="userTableLinesDXcols"
+                    :show-row-lines="userTableLinesDXrows"
+                    key-expr="invID"
                     >
-                    <template v-slot:body="props">
-                        <q-tr :props="props" >
-                            <q-td auto-width>
-                                <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
-                            </q-td>
-                            <q-td key="invName" :props="props">
-                                {{props.row.invName}}                                
-                            </q-td>
-                            <q-td key="internal_code" :props="props" >
-                                {{props.row.internal_code}}                                
-                            </q-td>
-                            <q-td key="quantity" :props="props">
-                                {{ props.row.quantity.toFixed(userMoneyFormat) }}
-                            </q-td>
-                            <q-td key="uomName" :props="props" >
-                                {{props.row.uomName}}                                
-                            </q-td>
-                            <q-td key="price" :props="props">
-                                {{ props.row.price.toFixed(userMoneyFormat) }}
-                            </q-td>
-                            <q-td  key="lineUntaxed" :props="props">
-                                {{ props.row.lineUntaxed.toFixed(userMoneyFormat) }}
-                            </q-td>
-                            <q-td key="quantityReal" :props="props" >
-                                <q-linear-progress size="25px" :value="props.row.quantityRealProgress" 
-                                    :color="props.row.quantityRealProgressColor" >
-                                    <div class="absolute-full flex flex-center">
-                                        <q-badge color="white" text-color="primary" :label="props.row.quantityReal.toFixed(userMoneyFormat)" />
-                                    </div>
-                                </q-linear-progress>
-                            </q-td>
-                            <q-td key="lineUntaxedReal" :props="props">
-                                {{ props.row.lineUntaxedReal.toFixed(userMoneyFormat) }}
-                            </q-td>
-                        </q-tr>
-                    </template>
-                    <template v-slot:bottom-row >
-                        <q-tr>
-                            <q-td>
-                            </q-td>
-                            <q-td>
-                            </q-td>
-                            <q-td>
-                            </q-td>
-                            <q-td>
-                            </q-td>
-                            <q-td>
-                            </q-td>
-                            <q-td class="text-right text-subtitle2 text-primary" >
-                                Suma:
-                            </q-td>
-                            <q-td class="text-right text-subtitle2 text-primary">
-                                {{default_orderBudget.reduce((total,item)=>{return total + item.lineUntaxed}, 0).toFixed(userMoneyFormat)}}
-                            </q-td>
-                            <q-td>
-                            </q-td>
-                            <q-td class="text-right text-subtitle2 text-primary">
-                                {{default_orderBudget.reduce((total,item)=>{return total + item.lineUntaxedReal}, 0).toFixed(userMoneyFormat)}}
-                            </q-td>
-                        </q-tr>
-                        <q-tr></q-tr>
-                    </template>
-                </q-table>
+                    <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" />
+                    <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
+                    
+                    <DxColumn caption="Item" data-field="invID" name="invID" data-type="number" :allow-editing="false" alignment="left" :minWidth="250">
+                      <DxLookup value-expr="value" display-expr="label" :data-source="lookup_items" />
+                    </DxColumn>
+                    <DxColumn caption="Cantidad" data-field="quantity" data-type="number" :allow-editing="false" alignment="right" :visible="true" :width="130"  />
+                    <DxColumn caption="Costo" data-field="price" data-type="number" :allow-editing="false" alignment="right" :visible="true" :width="130" :format="userMoneyFormat" />
+                    <DxColumn caption="Subtotal" data-field="lineSubtotal" data-type="number" :allow-editing="false" alignment="right" :visible="true" :width="130" :format="userMoneyFormat" />
+
+                    <DxSummary >
+                        <DxTotalItem column="invID" summary-type="count"/>
+                        <DxTotalItem column="lineSubtotal" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+                    </DxSummary>
+
+                </DxDataGrid>
             </q-card-section>
             <q-card-actions align="around">
                 <q-btn  flat label="Cancelar (ESC)" no-caps color="primary" @click="isBoMDialogOpen=false" />
                 <q-btn icon-right="fas fa-check-circle" label="Seleccionar" no-caps color="primary" 
-                :disable="selectedBudgetRows.length<=0" @click="appendRows"
+                :disable="BoMDialogSelection==null" @click="appendBoMRows"
                 />
             </q-card-actions>
         </q-card>
     </q-dialog>
+
+
+  <q-dialog v-model="dialogWH">
+    <q-card style="min-width: 500px">
+      <q-card-section> <div class="text-primary">Seleccione la Bodega para aplicar en lote a los registros seleccionados</div> </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-select :options="lookup_wh" v-model="dialogWHValue" emit-value map-options />
+      </q-card-section>
+
+      <q-card-actions align="around" class="text-primary">
+        <q-btn flat label="Aplicar" v-close-popup @click="changeWH" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="dialogExpected">
+    <q-card style="min-width: 500px">
+      <q-card-section> <div class="text-primary">Seleccione la Fecha Entrega para aplicar en lote a los registros seleccionados</div> </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-date v-model="dialogExpectedValue" landscape />
+      </q-card-section>
+
+      <q-card-actions align="around" class="text-primary">
+        <q-btn flat label="Aplicar" v-close-popup @click="changeExpectedDate" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="dialogOP">
+    <q-card style="min-width: 500px">
+      <q-card-section> <div class="text-primary">Seleccione la Orden de Producción aplicar en lote a los registros seleccionados</div> </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-select :options="lookup_mfgOrders" v-model="dialogOPValue" emit-value map-options />
+      </q-card-section>
+
+      <q-card-actions align="around" class="text-primary">
+        <q-btn flat label="Aplicar" v-close-popup @click="changeOP" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+ 
 </div>
 </template>
-<style lang="scss">
-  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
-  .q-virtual-scroll__padding{ visibility: hidden;}
-  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
-  .my-sticky-header-table{
-    .q-table thead tr:first-child th{ background-color: white }
-  }
-  .my-sticky-header-table-LastLine{
-    .q-table thead tr:first-child th{ background-color: white }
-    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
-  }
-  .my-sticky-header-table-dark{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-  }
-  .my-sticky-header-table-dark-LastLine{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-    .q-table td{ border-bottom-width: 1px }
-  }
-</style>
+
 <script>
-import Vue from 'vue';
-import Vuex from 'vuex';
-import { date } from 'quasar';
+
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxValueFormat, DxColumnChooser } from 'devextreme-vue/data-grid';
+import DxPopup, { DxToolbarItem  } from 'devextreme-vue/popup';
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
-    props: {
-        moduleName: { type: String , required: true },
-    },
-    components: {
-        selectSearchable: selectSearchable
-    },
-    data () {
-        return {
-             selected: []
-            ,isBoMDialogOpen: false, BoMDialogSelection: null, selectedBudgetRows: [], filterString: ''
-            ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: []
-        }
-    },
-    methods:{
-        getMax(arr, prop) {
-            var max;
-            for (var i=0 ; i<arr.length ; i++) {
-                if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
-                    max = arr[i];
-            }
-            return max;
-        },
-        addRows(){
-            if(this.default_mfg_orderID&&this.default_mfg_orderID>0){
-                if(this.itemsBatchDialogSelected.length>0){
-                    try{
-                        this.$q.loading.show()
-                        let selectedOrderData = this.lookup_mfgOrders.find(x=>x.value==this.default_mfg_orderID)
-
-                        //GetMaxId
-                        let max_id = 0
-                        let temp = null
-                        if(this.lines.length > 0){
-                            temp = this.getMax(this.lines, "lineID");
-                            max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
-                        }
-                        
-                        //get Current Data
-                        let newRows = JSON.parse(JSON.stringify(this.lines))
-                        
-                        //Iterate Selected Rows
-                        this.itemsBatchDialogSelected.map(invRow => {
-
-                            if(invRow.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
-                                max_id++; //increase lineID
-
-                                //Append Line
-                                newRows.push({
-                                    lineID: max_id
-                                    ,mfg_orderID: this.default_mfg_orderID
-                                    ,invID: invRow.value
-                                    ,debit_account_id: selectedOrderData.accMfg      //aquí viene la cuenta del Producto a Fabricar (basado en la Orden de Producción) entonces de esta forma siempre se manejaría 1 misma cuenta para que se simplifique el asiento contable al sacar el producto terminado
-                                    ,credit_account_id: invRow.credit_account_id    //como insumo sale, entonces se toma del item (accInventory, que es lo que viene del spmktMFGSelectEdit)
-                                    ,quantity: 1
-                                    ,price: invRow.lastPrice
-                                    ,lineSubtotal: 1 * invRow.lastPrice
-                                    ,lineDiscntPrcnt: 0
-                                    ,lineDiscntAmount: 0
-                                    ,lineUntaxed: 1 * invRow.lastPrice
-                                    ,whID: this.defaultWhID
-                                    ,prjID: 0
-                                    //,transportTypeID: this.defaultTransportID
-                                    //,estado: true
-                                })
-
-                            }
-
-                            if(invRow.systemType==3){ //3=Kit > Entonces busco los materiales y recorro el resulto para irlos agregagando
-                                this.lookup_items_kits.filter(x=>x.invID==invRow.value).map(material=>{//material es el item que debo agregar
-                                    this.lookup_items.filter(item=>item.value==material.materialID).map(item=>{//busco el código del material en los items
-                                    
-                                        max_id++; //increase lineID
-
-                                        //Append Line
-                                        newRows.push({
-                                            lineID: max_id
-                                            ,mfg_orderID: this.default_mfg_orderID
-                                            ,invID: item.value
-                                            ,debit_account_id: selectedOrderData.accMfg      //aquí viene la cuenta del Producto a Fabricar (basado en la Orden de Producción) entonces de esta forma siempre se manejaría 1 misma cuenta para que se simplifique el asiento contable al sacar el producto terminado
-                                            ,credit_account_id: invRow.credit_account_id    //como insumo sale, entonces se toma del item (accInventory, que es lo que viene del spmktMFGSelectEdit)
-                                            ,quantity: 1
-                                            ,price: item.lastPrice
-                                            ,lineSubtotal: 1 * item.lastPrice
-                                            ,lineDiscntPrcnt: 0
-                                            ,lineDiscntAmount: 0
-                                            ,lineUntaxed: 1 * item.lastPrice
-                                            ,whID: this.defaultWhID
-                                            ,prjID: 0
-                                            //,transportTypeID: this.defaultTransportID
-                                            //,estado: true
-                                        })
-
-                                    })
-                                })
-                            }
-                            
-                        })
-
-                        //Update Data
-                        this.lines = newRows
-                        this.$q.loading.hide()  
-                        this.isItemsBatchDialog = false
-                    }catch(ex){
-                        console.dir(ex)
-                        this.$q.loading.hide()  
-                    }
-                }
-            }
-        },
-        appendRows(){
-            if(this.default_mfg_orderID&&this.default_mfg_orderID>0){
-                if(this.selectedBudgetRows!=null&&this.selectedBudgetRows.length>0){
-                    try{
-                        this.$q.loading.show()
-                        let selectedOrderData = this.lookup_mfgOrders.find(x=>x.value==this.default_mfg_orderID)
-
-                        let newLineID = 0
-                        if(this.lines.length > 0){
-                            let temp = this.getMax(this.lines, "lineID");
-                            newLineID = parseInt(temp.lineID);
-                        }
-                        let newRows = JSON.parse(JSON.stringify(this.lines))
-        
-                        this.selectedBudgetRows.map(x=>{
-                            //console.dir(x)
-                            newLineID++;
-                            let nuevaFila = {
-                                lineID: newLineID//
-                                ,mfg_orderID: this.defaultWhID
-                                ,invID: x.invID
-                                ,quantity: x.quantityAvailable//agrega lo que está pendiente del presupuesto
-                                ,price: x.price
-                                ,lineSubtotal: x.quantityAvailable * x.price
-                                ,lineDiscntPrcnt: 0
-                                ,lineDiscntAmount: 0
-                                ,lineUntaxed: x.quantityAvailable * x.price
-                                ,debit_account_id: selectedOrderData.accMfg      //aquí viene la cuenta del Producto a Fabricar (basado en la Orden de Producción) entonces de esta forma siempre se manejaría 1 misma cuenta para que se simplifique el asiento contable al sacar el producto terminado
-                                ,credit_account_id: x.credit_account_id    //como insumo sale, entonces se toma del item (accInventory, que es lo que viene del spmktMFGSelectEdit)
-                                ,whID: this.defaultWhID
-                                ,uploaded: false
-                            }
-                            newRows.push(nuevaFila);
-                        })
-                        this.lines = newRows;
-                        this.$q.loading.hide();
-                        this.isBoMDialogOpen=false;
-                    }catch(ex){
-                        console.dir(ex)
-                        this.$q.loading.hide()  
-                    }
-                    
-                }
-            }
-        },
-        deleteRow(currentRow){
-            try{
-                this.$q.loading.show()
-                let newRows = JSON.parse(JSON.stringify(this.lines));
-                newRows = newRows.filter(x=>x.lineID!=currentRow.lineID);
-                this.lines = newRows;
-                this.$q.loading.hide()
-                //this.$emit('onAccMoveCompute')
-            }catch(ex){
-                console.dir(ex)
-                this.$q.loading.hide()  
-            }
-        },
-        updateRow(newVal, colName, row){
-            try{
-                this.$q.loading.show()
-                let newRows = JSON.parse(JSON.stringify(this.lines))
-                newRows.filter(x=>x.lineID==row.lineID).map(result=>{
-                    if(colName=="quantity"||colName=="price"||colName=="lineDiscntPrcnt"){
-                        result[colName] = parseFloat(newVal);
-                    }else{
-                        result[colName] = newVal;
-                    }
-                    result.lineSubtotal = result.price * result.quantity;
-                    result.lineDiscntAmount = (result.price * result.quantity) * (result.lineDiscntPrcnt / 100);
-                    result.lineUntaxed = (result.price * result.quantity) - (result.price * result.quantity) * (result.lineDiscntPrcnt / 100);
-                    return result
-                })
-                this.lines = newRows;
-                this.$q.loading.hide()
-                //this.$emit('onAccMoveCompute')
-            }catch(ex){
-                console.error(ex)
-                this.$q.loading.hide()
-            }
-        },
-        removeRows(){
-            if(this.selected.length > 0){
-                this.$q.dialog({ 
-                title: 'Confirmación'
-                ,message: 'Desea quitar las líneas seleccionadas?'
-                ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
-                ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
-                }
-                ).onOk(() => {
-                //Líneas
-                let newRows = JSON.parse(JSON.stringify(this.lines))
-                this.selected.map(row=>{
-                    newRows = newRows.filter(x=>x.lineID!=row.lineID);
-                })
-                this.lines = newRows
-
-                this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
-                })
-            }
-        },
-        rowValidation(currentRow, returnType){
-            if(currentRow.invID==null||currentRow.invID==undefined||currentRow.invID<=0){
-                return (returnType?true:'Debe corregir la celda: Materia Prima')
-            }
-            if(currentRow.quantity==null||currentRow.quantity==undefined||currentRow.quantity<=0){
-                return (returnType?true:'Debe corregir la celda: Cantidad')
-            }
-            if(currentRow.lineUntaxed==null||currentRow.lineUntaxed==undefined||currentRow.lineUntaxed<0){
-                return (returnType?true:'Debe verificar todas las celdas por un error en: Total')
-            }
-            return false
-        },
-        
-    },
-    computed:{
-        userColor: { get () { return this.$store.state.main.userColor }  },
-        userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
-        userTableLines: { get () { return this.$store.state.main.userTableLines } },
-        allow_view: { get () { return true }, },
-        allow_edit: { get () { return true }, },
-        allow_insert: { get () { return true }, },
-        allow_report: { get () { return true }, },
-        allow_disable: { get () { return true }, },
-        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        sys_user_color: { get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color }, },
-        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
-        tableLastLine: {
-            get () { 
-                let resultado = ''
-                if(this.userColor=='blackDark'){
-                if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-                {
-                    resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
-                }else{
-                    resultado = 'my-sticky-header-table-dark bg-grey-10 '
-                }
-                }
-                if(this.userColor!='blackDark'){
-                    if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-                    {
-                        resultado = 'my-sticky-header-table-LastLine '
-                    }else{
-                        resultado = 'my-sticky-header-table '
-                    }
-                }
-                return resultado
-            }
-        },
-        //Module Specific
-        defaultWhID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
-        },
-        default_mfg_orderID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.default_mfg_orderID },
-        },
-        lines: {
-            get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
-        },
-        default_orderBudget: {
-            get () { return this.$store.state[this.moduleName].editData.default_orderBudget },
-        },
-        lookup_items: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_items },
-        },
-        lookup_items_kits: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
-        },
-        lookup_mfgOrders: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_mfgOrders },
-        },
+  props: {
+    moduleName: { type: String , required: true },
+  },
+  components: {
+    DxDataGrid,
+    DxColumn,
+    DxColumnFixing,
+    DxScrolling,
+    DxStateStoring,
+    DxSorting,
+    DxPaging,
+    DxHeaderFilter,
+    DxSelection,
+    DxEditing,
+    DxPopup,
+    DxLookup,
+    DxToolbarItem,
+    DxSummary,
+    DxTotalItem,
+    DxValueFormat,
+    DxColumnChooser,
+    selectSearchable
+  },
+  data () {
+    return {
+      isListDialog: false,
+      listSelectedRowKeys: [],
+      dxdialogSearchBoxOptions:{
+          placeholder: "Buscar...",
+          showClearButton: true,
+          onContentReady: (e)=>{
+              this.searchTextBox = e;
+              setTimeout(()=>{ 
+                  this.searchTextBox.component.focus();
+              }, 500);
+          },
+          onInput: (e)=>{
+              this.$refs['dxGridSearchList'].instance.searchByText(e.component.option('text'));
+          }
+      },
+      maingridSelectedRowKeys: [],
+      maingridDeleteBtnDisabled: true,
+      internalLines: [],
+      isRequisicionesDialog: false,
+      dialogWH: false, dialogWHValue: null,
+      dialogExpected: false, dialogExpectedValue: null,
+      dialogTransport: false, dialogTransportValue: null,
+      dialogOP: false, dialogOPValue: null,
+      requisicionesSelectedRowKeys: [],
+      BoMDialogSelection: null
     }
-})
+  },
+  created(){
+    this.internalLines = JSON.parse(JSON.stringify(this.lines));
+  },
+  mounted(){
+    this.internalLines = JSON.parse(JSON.stringify(this.lines));
+    this.$refs['dxgrid'].instance.option("stateStoring.ignoreColumnOptionNames", []);
+    let savedState = this.gridState.find(x=>x.gridName==[this.moduleName+'_lines']);
+    if(savedState&&savedState.gridState){
+      let estado = JSON.parse(savedState.gridState)
+      this.$refs['dxgrid'].instance.state(estado);
+    }
+  },
+  methods:{
+    getMax(arr, prop) {
+        var max;
+        for (var i=0 ; i<arr.length ; i++) {
+            if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
+                max = arr[i];
+        }
+        return max;
+    },
+    cellTemplate(container, options){
+      container.textContent = this.lookup_taxes.filter(x=>options.value.some(y=>x.taxID==y)).map(z=>z.short_name_es).join(', ');
+      //container.title = 'texto2';
+    },
+    onListSelectionChanged({ selectedRowKeys, selectedRowsData }) {
+      this.listSelectedRowKeys = selectedRowKeys;
+    },
+    addRows(){
+      //GetMaxId
+      let max_id = 0
+      let temp = null
+      if(this.internalLines.length > 0){
+        temp = this.getMax(this.internalLines, "lineID");
+        max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+      }
+      
+      //Iterate selected Items
+      let newGridData = JSON.parse(JSON.stringify(this.internalLines));
+      this.lookup_items.filter(x=>this.listSelectedRowKeys.some(y=>y==x.value)).map(row=>{
+        if(row.systemType!=3){ //3=Kit > Cuando es Kit, agrega la lista de materiales
+          max_id++;
+          //ADD ITEM
+          const newRow = {
+            lineID: max_id,
+            uploaded: false,
+            invID: row.value,
+            quantity: 0,
+            quantityCancel: 0,
+            quantityCancelNew: 0,
+            quantityRcvd: 0,
+            price: row.lastPrice,
+            lineSubtotal: 0,
+            lineDiscntPrcnt: 0,
+            lineDiscntAmount: 0,
+            lineUntaxed: 0,
+            whID: this.defaultWhID,
+            mfg_orderID: this.default_mfg_orderID,
+            estado: true,
+            creation_date: null,
+            debit_account_id: row.debit_account_id,
+            credit_account_id: row.credit_account_id,
+            taxAmount: 0,
+            lineTotal: 0,
+            quantityOpen: 0,
+            quantityReturned: 0,
+            prjID: 0,
+            expectedDate: null,
+            quantity_isEditDisabled: false,
+            price_isEditDisabled: false,
+            lineDiscntPrcnt_isEditDisabled: false,
+            taxes_isEditDisabled: false,
+            whID_isEditDisabled: false,
+            expectedDate_isEditDisabled: false,
+            quantityCancelNew_isEditDisabled: false,
+            mfg_orderID_isEditDisabled: false,
+          }
+          newGridData.push(newRow)
+        }
+      })
+      this.internalLines = newGridData;
+      this.isListDialog = false
+    },
+    appendBoMRows(){
+      if(this.BoMDialogSelection&&this.BoMDialogSelection>0){
+        //GetMaxId
+        let max_id = 0
+        let temp = null
+        if(this.internalLines.length > 0){
+          temp = this.getMax(this.internalLines, "lineID");
+          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+        }
+        
+        //Iterate selected Items
+        let newGridData = JSON.parse(JSON.stringify(this.internalLines));
+        
+        this.lookup_bom_details.filter(x=>x.budgetID==this.BoMDialogSelection).map(row =>{
+          max_id++;
+          //ADD ITEM
+            const newRow = {
+              lineID: max_id,
+              uploaded: false,
+              invID: row.invID,
+              quantity: row.quantity,
+              quantityCancel: 0,
+              quantityCancelNew: 0,
+              quantityRcvd: 0,
+              price: row.price,
+              lineSubtotal: row.lineSubtotal,
+              lineDiscntPrcnt: 0,
+              lineDiscntAmount: 0,
+              lineUntaxed: row.lineSubtotal,
+              whID: this.defaultWhID,
+              mfg_orderID: this.default_mfg_orderID,
+              estado: true,
+              creation_date: null,
+              debit_account_id: row.debit_account_id,
+              credit_account_id: row.credit_account_id,
+              taxAmount: 0,
+              lineTotal: 0,
+              quantityOpen: 0,
+              quantityReturned: 0,
+              prjID: 0,
+              expectedDate: null,
+              quantity_isEditDisabled: false,
+              price_isEditDisabled: false,
+              lineDiscntPrcnt_isEditDisabled: false,
+              taxes_isEditDisabled: false,
+              whID_isEditDisabled: false,
+              expectedDate_isEditDisabled: false,
+              quantityCancelNew_isEditDisabled: false,
+              mfg_orderID_isEditDisabled: false,
+            }
+            newGridData.push(newRow)
+          })
+        this.internalLines = newGridData;
+        this.isRequisicionesDialog = false;
+      }
+      
+    },
+    roundInputToSixDigits(e){
+      const columnas = e.component.getVisibleColumns();
+      Object.keys(e.newData).map(x=>{
+        const datatype = columnas.find(c=>c.dataField==x).dataType
+        //cambia números a un máximo de 6 decimales (redondeado a 6 decimales)
+        if(datatype=='number'){
+          if(e.newData[x]==null||e.newData[x]==NaN||e.newData[x]==undefined){
+            e.newData[x] = 0
+          }else{
+            e.newData[x] = parseFloat(parseFloat(e.newData[x]).toFixed(6))
+          }
+        }
+      })
+    },
+    onRowUpdated(e){
+      e.data.lineSubtotal = parseFloat(parseFloat(e.data.quantity * e.data.price).toFixed(6))
+      e.data.lineDiscntAmount = parseFloat(parseFloat(e.data.lineSubtotal * (e.data.lineDiscntPrcnt/100)).toFixed(6))
+      e.data.lineUntaxed = parseFloat(parseFloat(e.data.lineSubtotal - e.data.lineDiscntAmount).toFixed(6))
+      e.data.lineTotal = parseFloat(parseFloat(e.data.lineSubtotal - e.data.lineDiscntAmount).toFixed(6))
+      
+      this.$refs['dxgrid'].instance.refresh();//agrega ~4 milisegundos, pero actualiza summaries de format correcta; NOTA: Opción en dxsummary :recalculate-while-editing="true" no actualiza correctamente
+    },
+    removeRows(){
+      if(this.maingridSelectedRowKeys.length > 0){
+        this.$q.dialog({ 
+            title: 'Confirmación'
+            ,persistent: false
+            ,message: 'Desea eliminar las líneas seleccionadas?'
+            ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true, color: 'red', flat: true }
+            ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
+        }
+        ).onOk(() => {
+          this.internalLines = this.internalLines.filter(x=> (x.uploaded) || (!x.uploaded&&!(this.maingridSelectedRowKeys.some(y=>y==x.lineID)))  );//Devuelve [TODO lo uploaded]  + [TODO lo nuevo - NO seleccionado]
+          this.maingridSelectedRowKeys = []//limpia selección para evitar problema de referencia a filas que no existan
+        })
+      }
+    },
+    updateVuex(){
+      //esto realmente lo usa editForm.vue para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
+      this.lines = JSON.parse(JSON.stringify(this.internalLines))
+    },
+    listGridShown(){
+      this.$refs['dxGridSearchList'].instance.searchByText('');
+      this.listSelectedRowKeys=[];
+    },
+    openColumnSelector(){
+      this.$refs['dxgrid'].instance.showColumnChooser();
+    },
+    changeWH(){
+      if(this.dialogWHValue&&this.dialogWHValue>0){
+        this.internalLines.map(x=> this.maingridSelectedRowKeys.filter(xx=> x.lineID == xx).map(xxx=>{
+          if(x.whID_isEditDisabled==false){//solamente si está permitido
+            x['whID'] = this.dialogWHValue
+          }
+          
+        }) )
+      }
+    },
+    changeExpectedDate(){
+      if(this.dialogExpectedValue){
+        this.internalLines.map(x=> this.maingridSelectedRowKeys.filter(xx=> x.lineID == xx).map(xxx=>{
+          if(x.expectedDate_isEditDisabled==false){//solamente si está permitido
+            x['expectedDate'] = this.dialogExpectedValue
+          }
+        }) )
+      }
+    },
+    changeOP(){
+        console.dir(this.dialogOPValue)
+      if(this.dialogOPValue&&this.dialogOPValue>0){
+        this.internalLines.map(x=> this.maingridSelectedRowKeys.filter(xx=> x.lineID == xx).map(xxx=>{
+          console.dir()
+          if(x.mfg_orderID_isEditDisabled==false){//solamente si está permitido
+            x['mfg_orderID'] = this.dialogOPValue
+          }
+        }) )
+        this.$refs['dxgrid'].instance.refresh();//refresh, recalculates summaries
+      }
+      
+    },
+    cancelRows(){
+      this.internalLines.filter(y=>this.maingridSelectedRowKeys.some(z=>z==y.lineID)).map(row=>{
+        row.quantityCancelNew = (row.quantity?row.quantity:0) - (row.quantityRcvd?row.quantityRcvd:0) - (row.quantityCancel?row.quantityCancel:0)
+        return row
+      })
+    },
+    saveGridUserState(){
+      let gridState = this.$refs['dxgrid'].instance.state();
+      this.$axios.post( this.apiURL + 'saveGridUserState', {
+              userCode: this.userCode,
+              userCompany: this.userCompany,
+              moduleName: this.moduleName,
+              gridName: this.moduleName+'_lines',
+              gridState: JSON.stringify(gridState),
+          }
+      , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+      ).then(() => {//).then((response) => {
+          this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+      }).catch((error) => {
+          console.dir(error.message)
+          let mensaje = ''
+          if(error.message){ mensaje = error.message }
+          if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+          if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          this.$q.notify({ html: true, multiLine: false, color: 'red'
+              ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+              ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+              ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+          })
+          this.dataLoaded = true;
+      })
+            
+    },
+    deleteGridUserState(){
+      this.$refs['dxgrid'].instance.state(null);//resets to default
+      this.$axios.post( this.apiURL + 'saveGridUserState', {
+              userCode: this.userCode,
+              userCompany: this.userCompany,
+              moduleName: this.moduleName,
+              gridName: this.moduleName+'_lines',
+              gridState: null,
+          }
+      , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
+      ).then(() => {//).then((response) => {
+          this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+      }).catch((error) => {
+          console.dir(error.message)
+          let mensaje = ''
+          if(error.message){ mensaje = error.message }
+          if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+          if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          this.$q.notify({ html: true, multiLine: false, color: 'red'
+              ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+              ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+              ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+          })
+          this.dataLoaded = true;
+      })
+            
+    },
+    checkIfCellEditable(e){
+      if (e.parentType === 'dataRow' && e.dataField === 'quantity' && e.row.data.quantity_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'price' && e.row.data.price_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'lineDiscntPrcnt' && e.row.data.lineDiscntPrcnt_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'taxes' && e.row.data.taxes_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'whID' && e.row.data.whID_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'expectedDate' && e.row.data.expectedDate_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'quantityCancelNew' && e.row.data.quantityCancelNew_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'mfg_orderID' && e.row.data.mfg_orderID_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if(e.editorOptions.disabled){
+        this.$q.notify({color: 'red', message: 'No está permitido editar este campo', timeout: 500, icon: "fas fa-ban" });
+      }
+      
+      
+    },
+    //
+    loadRequisiciones(){
+      this.$axios({
+          method: 'GET',
+          url: this.apiURL + 'spMktPOSelectmktPR',
+          headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
+          params: {
+              userCode: this.userCode,
+              userCompany: this.userCompany,
+              userLanguage: 'es'
+          }
+      }).then((response) => {
+          this.requisiciones = response.data
+      }).catch((error) => {
+          console.dir(error)
+          let mensaje = ''
+          if(error.message){ mensaje = error.message }
+          if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+          if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          this.$q.notify({ html: true, multiLine: false, color: 'red'
+              ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
+              ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+              ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+          })
+      })
+    },
+    addRequisiciones(){
+      //GetMaxId
+      let max_id = 0
+      let temp = null
+      if(this.internalLines.length > 0){
+        temp = this.getMax(this.internalLines, "lineID");
+        max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+      }
 
+      let newGridData = JSON.parse(JSON.stringify(this.internalLines));
+      this.requisiciones.filter(x=>this.requisicionesSelectedRowKeys.some(y=>y==x.value)).map(row=>{
+        max_id++;
+        //ADD ITEM
+        const itemTaxes = this.lookup_items_taxes.filter(r=>r.invID==row.invID).map(rr=>rr.taxID) //get array of taxes for current Item
+        let newTaxAmount = 0;
+        itemTaxes.map(x=>{
+          this.lookup_taxes.filter(xx=>xx.taxID==x).map(xxx=>{
+            const newAmount = (           xxx.isPercent ? (  parseFloat(row.lineUntaxed * xxx.factor_base * xxx.factor)  ) : parseFloat(taxConfig.factor)             )
+            newTaxAmount = parseFloat(newTaxAmount) + parseFloat(newAmount)
+          })
+        })
+
+        const newRow = {
+          lineID: max_id,
+          uploaded: false,
+          invID: row.invID,
+          quantity: row.quantityOpen, //row.quantity,
+          quantityCancel: 0,
+          quantityCancelNew: 0,
+          quantityRcvd: 0,
+          quantityInvoiced: 0,
+          price: row.lastPrice,
+          lineSubtotal: parseFloat(parseFloat(row.quantityOpen * row.price).toFixed(6)),
+          lineDiscntPrcnt: row.lineDiscntPrcnt,
+          lineDiscntAmount: parseFloat(parseFloat(   parseFloat(parseFloat(row.quantityOpen * row.price).toFixed(6))     *    (row.lineDiscntPrcnt/100)).toFixed(6)),
+          lineUntaxed: parseFloat(parseFloat( parseFloat(parseFloat(row.quantityOpen * row.price).toFixed(6))   -  parseFloat(parseFloat(   parseFloat(parseFloat(row.quantityOpen * row.price).toFixed(6))     *    (row.lineDiscntPrcnt/100)).toFixed(6)) ).toFixed(6)),
+          whID: this.defaultWhID,
+          estado: true,
+          creation_date: null,
+          debit_account_id: row.debit_account_id,
+          credit_account_id: row.credit_account_id,
+          taxes: itemTaxes,
+          taxAmount: parseFloat(newTaxAmount.toFixed(6)),
+          lineTotal: (parseFloat(parseFloat(parseFloat( parseFloat(parseFloat(row.quantityOpen * row.price).toFixed(6))   -  parseFloat(parseFloat(   parseFloat(parseFloat(row.quantityOpen * row.price).toFixed(6))     *    (row.lineDiscntPrcnt/100)).toFixed(6)) ).toFixed(6)) + parseFloat(newTaxAmount.toFixed(6)) ).toFixed(6)),
+          quantityOpen: 0,
+          quantityReturned: 0,
+          prjID: 0,
+          transportTypeID: this.defaultTransportID,
+          expectedDate: null,
+          quantity_isEditDisabled: false,
+          price_isEditDisabled: false,
+          lineDiscntPrcnt_isEditDisabled: false,
+          taxes_isEditDisabled: false,
+          whID_isEditDisabled: false,
+          expectedDate_isEditDisabled: false,
+          transportTypeID_isEditDisabled: false,
+          quantityCancelNew_isEditDisabled: false,
+          mktPRHeader: row.mktPRHeader,
+          mktPRlineID: row.mktPRlineID
+        }
+        newGridData.push(newRow)
+      })
+      this.internalLines = newGridData;
+      this.isRequisicionesDialog = false
+    },
+    clearBoMSelection(){
+      //console.dir('clearBoMSelection')
+      //this.appendBoMRows = false;
+      //this.isRequisicionesDialog = 
+      this.BoMDialogSelection = null
+    }
+  },
+  computed:{
+      console: () => console,
+      userColor: { get () { return this.$store.state.main.userColor }  },
+      userCode: { get () { return this.$store.state.main.userCode } },
+      userCompany: { get () { return this.$store.state.main.userCompany }  },
+      apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
+      userMoneyFormat: { get () { 
+        let resultado ="#0.000000";
+        if(this.$store.state.main.userMoneyFormat==0){ resultado = "#0" }
+        if(this.$store.state.main.userMoneyFormat==1){ resultado = "#0.0" }
+        if(this.$store.state.main.userMoneyFormat==2){ resultado = "#0.00" }
+        if(this.$store.state.main.userMoneyFormat==3){ resultado = "#0.000" }
+        if(this.$store.state.main.userMoneyFormat==4){ resultado = "#0.0000" }
+        if(this.$store.state.main.userMoneyFormat==5){ resultado = "#0.00000" }
+        if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
+        return resultado }
+      },
+      allow_view: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_edit: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_report: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_disable: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_row_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_row_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      userTableLines: { get () { return this.$store.state.main.userTableLines } },
+      userTableLinesDXcols: { get () { 
+              let result = false;
+              if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+              return result
+          } 
+      },
+      userTableLinesDXrows: { get () { 
+              let result = false;
+              if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+              return result
+          } 
+      },
+      userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
+      allowedPageSizes:{
+          get () { 
+              let resultado = []
+              resultado.push(this.userRowsPerPage)
+              return resultado
+          },
+      },
+
+      editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+      defaultWhID: {
+          get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultWhID', value: val}) }
+      },
+      defaultTransportID: {
+          get () { return this.$store.state[this.moduleName].editData.basic.defaultTransportID },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultTransportID', value: val}) }
+      },
+      paytermID: {
+          get () { return this.$store.state[this.moduleName].editData.basic.paytermID },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'paytermID', value: val}) }
+      },
+      lines: {
+          get () { return this.$store.state[this.moduleName].editData.lines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+      },
+      requisiciones: {
+          get () { return this.$store.state[this.moduleName].editData.requisiciones },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'requisiciones', value: val}) }
+      },
+      lookup_items: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_items },
+      },
+      lookup_items_kits: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_items_kits },
+      },
+      lookup_items_taxes: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_items_taxes },
+      },
+      lookup_taxes: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_taxes },
+      },
+      lookup_wh: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_wh },
+      },
+      lookup_prj: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_prj },
+      },
+      lookup_transports: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_transports },
+      },
+      lookup_mfgOrders: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_mfgOrders },
+      },
+      lookup_bom: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_bom },
+      },
+      lookup_bom_details: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_bom_details },
+      },
+      default_mfg_orderID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.default_mfg_orderID },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'default_mfg_orderID', value: val}) }
+        },
+      gridState: {
+          get () { 
+            return this.$store.state[this.moduleName].editData.gridState
+          },
+      }
+      /*lookup_payterms: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_payterms },
+      },
+      lookup_paytermsDetails: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_paytermsDetails },
+      },*/
+  }
+})
 </script>

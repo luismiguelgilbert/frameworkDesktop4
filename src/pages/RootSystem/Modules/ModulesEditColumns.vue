@@ -8,7 +8,7 @@
 
     <q-list bordered separator class="scroll" style="height: calc(100vh - 230px)">
 
-      <q-item clickable v-ripple v-for="columna in columns" :key="columna.db_column" @click="selectedColumn = columna"
+      <q-item clickable v-ripple v-for="columna in columns" :key="columna.db_column" @click="()=>{ selectedColumn = JSON.parse(JSON.stringify(columna)) } "
         :class="selectedColumn==columna?'bg-blue-5':undefined">
         <q-item-section>
           <q-item-label>{{columna.db_column}} <i class="text-caption">({{columna.label}})</i> </q-item-label>
@@ -34,39 +34,46 @@
         <div class="col-sm-12 col-md-6">
             <div>
               <q-toggle
-                v-model="selectedColumn.is_key" color="positive" label="Clave Primaria?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-                />
-            </div>
-            <!--<div>
-              <q-toggle
-                v-model="selectedColumn.isOpenButton" color="positive" label="Botón Edición?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-                />
-            </div>-->
-            <div>
-              <q-toggle
-                v-model="selectedColumn.is_required" color="positive" label="Siempre Visible?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                color="positive" label="Clave Primaria?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                :value="selectedColumn.is_key"
+                @input="(value)=>{updateColumn('is_key', value)}"
                 />
             </div>
             <div>
               <q-toggle
-                v-model="selectedColumn.default_is_visible" color="positive" label="Se muestra en tabla (default)?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                color="positive" label="Siempre Visible?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                :value="selectedColumn.is_required"
+                @input="(value)=>{updateColumn('is_required', value)}"
+                />
+            </div>
+            <div>
+              <q-toggle
+                color="positive" label="Se muestra en tabla (default)?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                :value="selectedColumn.default_is_visible"
+                @input="(value)=>{updateColumn('default_is_visible', value)}"
                 />
             </div>
         </div>
         <div class="col-sm-12 col-md-6">
             <div>
               <q-toggle
-                v-model="selectedColumn.is_sortable" color="positive" label="Se puede ordenar?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                color="positive" label="Se puede ordenar?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                :value="selectedColumn.is_sortable"
+                @input="(value)=>{updateColumn('is_sortable', value)}"
                 />
             </div>
             <div>
               <q-toggle
-                v-model="selectedColumn.is_filterable" color="positive" label="Se puede filtrar?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                color="positive" label="Se puede filtrar?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                :value="selectedColumn.is_filterable"
+                @input="(value)=>{updateColumn('is_filterable', value)}"
                 />
             </div>
             <div>
               <q-toggle
-                v-model="selectedColumn.is_searchable" color="positive" label="Se usa en búsqueda rápida?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                color="positive" label="Se usa en búsqueda rápida?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+                :value="selectedColumn.is_searchable"
+                @input="(value)=>{updateColumn('is_searchable', value)}"
                 />
             </div>
 
@@ -99,7 +106,8 @@
                     ,{value: 20, label: 'Posición 20'}
                   ]"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.default_position"
+          :value="selectedColumn.default_position"
+          @input="(value)=>{updateColumn('default_position', value)}"
           ref="default_position"
           :rules="[
             val => !!val || '* Requerido'
@@ -111,7 +119,8 @@
       <q-input
         ref="label" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese el nombre del campo (*)" label="Nombre (*)" filled
-        v-model="selectedColumn.label"
+        :value="selectedColumn.label"
+        @input="(value)=>{updateColumn('label', value)}"
         :rules="[
                 val => !!val || '* Requerido',
                 val => val.length > 0 || 'Campo debe tener al menos 1 caracter',
@@ -119,10 +128,12 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-tag" /></template>
       </q-input>
+
       <q-input
         ref="label" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese longitud mínima del campo (*)" label="Ancho mínimo de columna (*)" filled type="number"
-        v-model="selectedColumn.default_min_width"
+        :value="selectedColumn.default_min_width"
+        @input="(value)=>{updateColumn('default_min_width', value)}"
         @focus="$event.target.select()"
         :rules="[
                 val => !!val || '* Requerido',
@@ -130,10 +141,12 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-text-width" /></template>
       </q-input>
+
       <q-input
         ref="label" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese longitud máxima del campo (*)" label="Ancho máxima de columna (*)" filled type="number"
-        v-model="selectedColumn.default_max_width"
+        :value="selectedColumn.default_max_width"
+        @input="(value)=>{updateColumn('default_max_width', value)}"
         @focus="$event.target.select()"
         :rules="[
                 val => !!val || '* Requerido',
@@ -141,6 +154,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-text-width" /></template>
       </q-input>
+
       <q-select class="q-mt-xl"
           label="Tipo de Dato en Interface (*)" placeholder="Seleccione el tipo de datos en interface" emit-value map-options filled
           :options="[{value: 'bool', label: 'bool'}
@@ -154,52 +168,65 @@
                     ,{value: 'user', label: 'user'}
                   ]"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.ux_type"
+          :value="selectedColumn.ux_type"
+          @input="(value)=>{updateColumn('ux_type', value)}"
           ref="ux_type"
           :rules="[
             val => !!val || '* Requerido'
           ]">
           <template v-slot:prepend><q-icon name="fas fa-keyboard" /></template>
       </q-select>
+
       <q-select v-if="selectedColumn.ux_type=='lookup'" class="q-mt-md"
           label="Tipo de Join (*)" placeholder="Seleccione el tipo de join" emit-value map-options filled
           :options="[{value: 'INNER JOIN', label: 'INNER JOIN'}
                     ,{value: 'LEFT JOIN', label: 'LEFT JOIN'}
                   ]"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.lookup_join"
+          :value="selectedColumn.lookup_join"
+          @input="(value)=>{updateColumn('lookup_join', value)}"
           ref="lookup_join">
           <template v-slot:prepend><q-icon name="far fa-object-ungroup" /></template>
       </q-select>
+
       <q-select v-if="selectedColumn.ux_type=='lookup'&&selectedColumn.lookup_join" class="q-mt-md"
           label="Tabla usada en JOIN (*)" placeholder="Seleccione la tabla de datos" emit-value map-options filled
           :options="lookup_tables"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.lookup_table"
+          :value="selectedColumn.lookup_table"
+          @input="(value)=>{updateColumn('lookup_table', value)}"
           ref="lookup_table">
           <template v-slot:prepend><q-icon name="fas fa-table" /></template>
       </q-select>
+
       <q-select v-if="selectedColumn.ux_type=='lookup'&&selectedColumn.lookup_join&&selectedColumn.lookup_table" class="q-mt-md"
           :label="'Columna de tabla [' + selectedColumn.lookup_table + '] para usar en JOIN (*)'" placeholder="Seleccione la tabla de datos" emit-value map-options filled
           :options="lookup_cols.filter(x=>x.table_name==selectedColumn.lookup_table)"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.lookup_field"
+          :value="selectedColumn.lookup_field"
+          @input="(value)=>{updateColumn('lookup_field', value)}"
           ref="lookup_field">
           <template v-slot:prepend><q-icon name="fas fa-columns" /></template>
       </q-select>
+
       <q-select v-if="selectedColumn.ux_type=='lookup'&&selectedColumn.lookup_join" class="q-mt-md"
           :label="'Columna de tabla [' + selectedColumn.lookup_table + '] para mostrar etiqueta del JOIN (*)'" placeholder="Seleccione la tabla de datos" emit-value map-options filled
           :options="lookup_cols.filter(x=>x.table_name==selectedColumn.lookup_table)"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.lookup_displayField"
+          :value="selectedColumn.lookup_displayField"
+          @input="(value)=>{updateColumn('lookup_displayField', value)}"
           ref="lookup_displayField">
           <template v-slot:prepend><q-icon name="fas fa-columns" /></template>
       </q-select>
+
       <div>
         <q-toggle  v-if="selectedColumn.ux_type=='lookup'&&selectedColumn.lookup_join"
-          v-model="selectedColumn.lookup_is_company_filtered" color="positive" label="Filtrado por compañía?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+          color="positive" label="Filtrado por compañía?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+          :value="selectedColumn.lookup_is_company_filtered"
+          @input="(value)=>{updateColumn('lookup_is_company_filtered', value)}"
           />
       </div>
+
       <q-select class="q-mt-xl"
           label="Tipo de Celda usada en Interface (*)" placeholder="Seleccione el tipo de celda en interface" emit-value map-options filled
           :options="[{value: 'div', label: 'div'}
@@ -208,17 +235,20 @@
                     ,{value: 'bool', label: 'bool'}
                   ]"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.cellComponent"
+          :value="selectedColumn.cellComponent"
+          @input="(value)=>{updateColumn('cellComponent', value)}"
           ref="cellComponent"
           :rules="[
             val => !!val || '* Requerido'
           ]">
           <template v-slot:prepend><q-icon name="fas fa-vector-square" /></template>
       </q-select>
+
       <q-input class="q-mt-md"
         label="Atributos para celda" placeholder='Ingrese atributos usados en la celda. Ejemplo: {"color": [{"value": "Inactivo", "result": "red-7"},{"value": "Activo", "result": "green-13"}] }' filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="selectedColumn.cellAttributes"
+        :value="selectedColumn.cellAttributes"
+        @input="(value)=>{updateColumn('cellAttributes', value)}"
         />
 
       <q-select class="q-mt-md"
@@ -228,7 +258,8 @@
                     ,{value: 'right', label: 'right'}
                   ]"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-          v-model="selectedColumn.align"
+          :value="selectedColumn.align"
+          @input="(value)=>{updateColumn('align', value)}"
           ref="ux_type"
           :rules="[
             val => !!val || '* Requerido'
@@ -239,7 +270,8 @@
       <q-input class="q-mt-md"
         label="Query para obtener lista de valores al filtrar" placeholder="Ingrese sentencia SQL usada en la Lista en Filtro. Ejemplo: select estado as value, name_es as Estado from sys_users_status order by estado" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="selectedColumn.lookup_search_data_query"
+        :value="selectedColumn.lookup_search_data_query"
+        @input="(value)=>{updateColumn('lookup_search_data_query', value)}"
         />
 
       <br><br>
@@ -320,14 +352,12 @@ export default ({
     },
     methods:{
         addColumns(){
-          //console.dir(this.columns)
           let contador = this.columns.length;
           //let newAddedColumns = []
           let newAddedColumns = JSON.parse(JSON.stringify(this.columns));
           this.addedColumns.map(x => {
             if(!this.columns.some(y=>y.db_column==x.value)){
               contador++;
-              //console.dir(x)
               let nuevo = {
                 align: "left"
                 ,cellAttributes: ""
@@ -365,6 +395,12 @@ export default ({
           let newColumns = this.columns.filter(x => x.db_column != columna.db_column);
           this.columns = newColumns;
           this.selectedColumn =  null;
+        },
+        updateColumn(attribute, newVal){
+          let newColumns = JSON.parse(JSON.stringify(this.columns));
+          newColumns.find(x=>x.db_column==this.selectedColumn.db_column)[attribute] = newVal;
+          this.selectedColumn[attribute] = newVal;
+          this.columns = newColumns;
         }
     },
     computed:{
@@ -384,8 +420,9 @@ export default ({
               }catch(ex){}
               return resultado*/
             },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataColumns', val) }
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditDataColumns', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'columns', value: val}) }
         },
         lookup_tables: {
             get () { return this.$store.state[this.moduleName].editData.lookup_tables },

@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <!--<q-btn color="purple" label="Pruebas" @click="pruebasClick" />-->
     <q-input
         ref="link_id" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
@@ -123,7 +123,7 @@
         <template v-slot:prepend><q-icon name="fas fa-sort-alpha-up-alt" /></template>
     </q-select>
     <q-input
-        label="Filtro Adicional" placeholder="Ingrese sentencia SQL para filtrar datos. Ejemplo: INNER JOIN (select * from bitaPlacesUsers int1 where int1.sys_company_id = @sys_company_id and sys_user_code = @sys_user_code) JF on A.placeID = JF.placeID" filled
+        label="Filtro Adicional" placeholder="Ingrese sentencia SQL para filtrar datos. Ejemplo: and A.caseID in (select caseID from casCasesUsers z1 where z1.sys_company_id = @sys_company_id and z1.sys_user_code = @sys_user_code)" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="extraFilter"
         />
@@ -197,11 +197,41 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         link_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.link_id },

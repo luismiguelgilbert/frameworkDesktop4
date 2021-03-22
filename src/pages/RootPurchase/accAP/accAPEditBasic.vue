@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
         <q-toggle class="col-12 col-md-4"
             tabindex="-1"
@@ -130,7 +130,7 @@
 
     <q-dialog v-model="isPartnerDialog">
         <q-card style="minWidth: 1000px; width: 1000px;">
-            <partnersEdit />
+            <!--<partnersEdit />-->
         </q-card>
     </q-dialog>
 
@@ -150,7 +150,7 @@ export default ({
         mainLookup: mainLookup
         ,selectSearchable: selectSearchable
         //,computeFunctions: computeFunctions
-        ,partnersEdit: () => import('../../../pages/RootMaster/Partners/PartnersEdit.vue')
+        //,partnersEdit: () => import('../../../pages/RootMaster/Partners/PartnersEdit.vue')
     },
     data () {
         return {

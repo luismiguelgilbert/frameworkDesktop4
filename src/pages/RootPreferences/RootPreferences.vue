@@ -63,7 +63,7 @@
                         />
                     </q-item-section>
                 </q-item>
-                <q-item>
+                <!--<q-item>
                     <q-item-section side>
                         <q-icon name="fas fa-palette" color="primary"/>
                     </q-item-section>
@@ -82,7 +82,7 @@
                                     //{ label: 'Dark', value: 'blackDark' },
                                 ]"/>
                     </q-item-section>
-                </q-item>
+                </q-item>-->
             </q-card>
             <!--FOTO-->
             <q-card class="q-ma-md">
@@ -162,12 +162,9 @@
                     <q-item-section>
                         <q-select dense v-model="userRowsPerPage"  label="Cantidad de registros por cada lectura de base de datos" emit-value map-options
                             :options="[
-                                    { label: '17 (Más Rápido, ideal 1366x768)', value: 17, icon: 'fas fa-bolt' },
-                                    { label: '27 (Más Rápido, ideal 1920x1080)', value: 27, icon: 'fas fa-bolt' },
+                                    { label: '25 (Más Rápido, ideal 1920x1080)', value: 25, icon: 'fas fa-bolt' },
                                     { label: '50 (Rápido)', value: 50, icon: 'fas fa-bolt' },
                                     { label: '100 (Normal)', value: 100, icon: 'far fa-hourglass' },
-                                    { label: '250 (Lento)', value: 250, icon: 'fas fa-clock' },
-                                    { label: '1000 (Muy Lento)', value: 1000, icon: 'fas fa-clock' },
                                     { label: 'Todos (Más Lento)', value: 1000000, icon: 'fas fa-clock' },
                                 ]">
                             <template v-slot:option="scope">
@@ -300,14 +297,14 @@
                         <q-toggle v-model="shouldHideMenu" color="primary" label="Ocultar Menú automáticamente al abrir un módulo" />
                     </q-item-section>
                 </q-item>
-                <q-item>
+                <!--<q-item>
                     <q-item-section side>
                         <q-icon name="fas fa-external-link-alt" color="primary" />
                     </q-item-section>
                     <q-item-section>
                         <q-toggle v-model="shouldHideTableButtons" color="primary" label="Ocultar Botones de Edición en Tablas Principales" />
                     </q-item-section>
-                </q-item>
+                </q-item>-->
                 <q-item>
                     <q-item-section side>
                         <q-icon name="fas fa-text-height" color="primary" />

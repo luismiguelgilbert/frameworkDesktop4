@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     
     <div class="row">
       <q-toggle class="col-12 col-md-4"
@@ -105,8 +105,10 @@
 </q-form>
 </template>
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
+*/
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
@@ -137,21 +139,57 @@ export default ({
             this.isCustomerDialog = true
         },
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField]
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField]
             this.isSearchDialog = false
             this.isCustomerDialog = false
         },
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         //custom security
-        allow_basic: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_basic').value }, },
+        allow_basic: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_basic').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         //custom security end
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         estado: {

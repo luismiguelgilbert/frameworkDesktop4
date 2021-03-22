@@ -1,17 +1,20 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+//import { store } from 'quasar/wrappers'
 
-import main from './main' //session
+import main from './main'
+import Items from './Items'
+import Partners from './Partners'
 import Users from './Users' //Users Module
 import Roles from './Roles' //Roles Module
 import Companies from './Companies' //Roles Companies
 import Modules from './Modules' //Roles Companies
 import Bitaplaces from './Bitaplaces' //Bitacora Places Companies
+import Bitacars from './Bitacars' //Bitacars
+import Bitaevents from './Bitaevents' //Bitacora Places Companies
 import Bitaconsola from './Bitaconsola' //Bitacora Consola
 import BitaRoutes from './BitaRoutes' //Bitacora Routes GPS
 import BitaRounds from './BitaRounds' //Bitacora Rounds
-import BitaCars from './BitaCars' //BitaCars Cars
-import BitacoraPeople from './BitacoraPeople' //BitacoraPeople
 import Notifications from './Notifications' //Notifications
 import Employees from './Employees' //Employees
 import Equipistas from './Equipistas' //Equipistas
@@ -28,8 +31,6 @@ import SCHApostolados from './SCHApostolados' //SCHApostolados
 import SCHFormaciones from './SCHFormaciones' //SCHFormaciones
 import SCHGroups from './SCHGroups' //SCHGroups
 import SCHSectores from './SCHSectores' //SCHSectores
-import Partners from './Partners' //partnerMaster
-import Items from './Items' //Items
 import Warehouses from './Warehouses' //Warehouses
 import UoM from './UoM' //UoM
 import Brands from './Brands' //Brands
@@ -56,7 +57,6 @@ import invMasterGroups from './invMasterGroups' //invMasterGroups
 import Locations from './Locations' //Locations
 import accAP from './accAP' //Cuentas x Pagar
 import accRet from './accRet' //Retenciones en Compra
-
 import mfgOrders from './mfgOrders' //mfgOrders
 import mktMFG from './mktMFG' //mktMFG
 import mktMFGreturn from './mktMFGreturn' //mktMFGreturn
@@ -71,7 +71,9 @@ Vue.use(Vuex)
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-       main
+      main,
+      Items,
+      Partners
       //System
       ,Users
       ,Roles
@@ -79,11 +81,11 @@ export default function (/* { ssrContext } */) {
       ,Modules
       //Bitacora
       ,Bitaplaces
+      ,Bitacars
+      ,Bitaevents
       ,Bitaconsola
       ,BitaRoutes
       ,BitaRounds
-      ,BitaCars
-      ,BitacoraPeople
       //Others
       ,Notifications
       ,Employees
@@ -111,8 +113,6 @@ export default function (/* { ssrContext } */) {
       ,SCHGroups
       ,SCHSectores
       //Master
-      ,Partners
-      ,Items
       ,Warehouses
       ,UoM
       ,Brands
@@ -146,11 +146,9 @@ export default function (/* { ssrContext } */) {
       ,mfgTypes
       ,mfgBOM
     },
-
     // enable strict mode (adds overhead!)
     // for dev mode only
     strict: process.env.DEV
   })
-
   return Store
 }

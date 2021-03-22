@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <!--partnerID-->
     <selectSearchable 
         prependIcon="fas fa-handshake"
@@ -9,8 +9,8 @@
         :isRequired="(editMode?true:false)" :allowZeroValue="true"
         :class="(editMode?undefined:'q-pb-md')"
         :isDisable="false" 
-        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :initialValue="partnerID"
+        :isReadonly="editStatus.editMode=='edit'"
         :tableSearchColumns="[
                  { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
                 ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
@@ -18,16 +18,16 @@
             ]"
         @onItemSelected="(row)=>{
                 this.partnerID=row.value;
-                this.lines = []
-                this.$emit('onAccMoveCompute')
+                //this.lines = []
+                //this.$emit('onAccMoveCompute')
                 this.loadPendingInv()
             }"
         />
-
     <q-select
         label="Bodega (*)" placeholder="Seleccione la Bodega donde está recibiendo los Items (*)" emit-value map-options filled
         :options="lookup_wh" 
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
+        :option-disable="opt => !opt.estado" 
+        :readonly="editStatus.editMode=='edit'||editStatus.editMode=='create'&&!(partnerID>=0)"
         v-model="whID" @input="loadPendingInv()"
         ref="whID"
         :rules="[
@@ -45,9 +45,10 @@
       </template>
     </q-input>
 
+    <!-- :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" -->
     <q-select
         label="Tipo de Documento de Recepción (*)" placeholder="Seleccione el Tipo de Documento de Recepción (*)" emit-value map-options filled
-        :options="lookup_invDocTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :options="lookup_invDocTypes" 
         :option-disable="opt => !opt.estado" 
         v-model="invDocTypeID"
         ref="invDocTypeID"
@@ -58,9 +59,10 @@
         <template v-slot:prepend><q-icon name="fas fa-file-invoice" /></template>
     </q-select>
 
-    
+    <!-- :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" -->
     <q-input class="q-mb-md"
-        ref="invDocNumber" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        ref="invDocNumber" 
+        
         placeholder="Escriba el Número del Documento (*)" label="Número del Documento (*)" filled
         v-model="invDocNumber"
         >
@@ -68,10 +70,11 @@
     </q-input>
 
     
-
+    <!-- :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)" -->
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Ingreso" filled
-        type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        type="textarea" 
+        
         v-model="comments"
         />
 
@@ -98,9 +101,6 @@ export default ({
             mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
         }
     },
-    mounted(){
-        this.$refs.formulario.validate()
-    },
     methods:{
         loadPendingInv(){
             if(this.whID>0&&this.partnerID>=0){
@@ -119,10 +119,12 @@ export default ({
                         editMode: this.editMode
                     }
                 }).then((response) => {
+                    this.accountLines = []
+                    this.lines = []
                     this.lines = JSON.parse(response.data[0].lines)
                     this.lookup_lots = JSON.parse(response.data[0].lookup_lots)
                     this.lots = [];
-                    this.$emit('onAccMoveCompute')
+                    //this.$emit('onAccMoveCompute')
                     this.$q.loading.hide()
                 }).catch((error) => {
                     console.dir(error)
@@ -141,14 +143,45 @@ export default ({
         }
     },
     computed:{
+        console: () => console,
         userColor: { get () { return this.$store.state.main.userColor }  },
         userCode: { get () { return this.$store.state.main.userCode } },
         userCompany: { get () { return this.$store.state.main.userCompany } },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         partnerID: {
@@ -188,9 +221,16 @@ export default ({
         lookup_invDocTypes: {
             get () { return this.$store.state[this.moduleName].editData.lookup_invDocTypes },
         },
+        editStatus: {
+          get () { return this.$store.state[this.moduleName].editStatus },
+        },
         lines: {
           get () { return this.$store.state[this.moduleName].editData.lines },
           set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+        },
+        accountLines: {
+            get () { return this.$store.state[this.moduleName].editData.accountLines },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountLines', value: val}) }
         },
         lots: {
           get () { return this.$store.state[this.moduleName].editData.lots },

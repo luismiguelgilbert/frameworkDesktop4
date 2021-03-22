@@ -1,247 +1,352 @@
 <template>
-  <q-layout dark view="hHh lpr lFf" style="min-height: 200px;">
-    <q-header >
-      <q-toolbar v-if="userCompanies && userCompanies.length>0" :class="userMainLayoutToolbar">
-        <span >&ensp;</span>
-        <q-btn flat icon="fas fa-bars" @click="leftDrawerOpen=!leftDrawerOpen" :color="userColor=='blackDark'?'primary':null" />
-        <!--ROOT-->
-        <span v-if="$q.screen.gt.xs">&ensp;</span>
-        <div flat :dense="!$q.screen.gt.xs" v-if="currentPath" menu-anchor="bottom left" menu-self="top left" no-caps size="sm">
-            <div class="row items-center no-wrap">
-              <q-icon v-if="$q.screen.gt.xs" left :name="menuData.find(x=>x.link_name==currentPath).icon"  />
-              <div v-if="$q.screen.gt.xs" class="text-center">
-                {{menuData.find(x=>x.link_name==currentPath).label}}
+<div>
+  <div v-if="isDefaultDataLoaded">
+    <q-layout v-if="isDefaultDataLoaded" dark view="hHh lpr lFf" style="min-height: 200px; overflow-y: hidden;">
+      
+      <q-header>
+        <q-toolbar v-if="userCompanies && userCompanies.length>0" :class="userMainLayoutToolbar">
+          
+          <q-btn flat stretch icon="fas fa-bars" @click="leftDrawerOpen=!leftDrawerOpen" :color="userColor=='blackDark'?'primary':null" />
+          <!--ROOT-->
+          <div class="q-ml-md"
+            v-if="menuData.find(x=>x.link_name==ruta) && menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent)">
+              <div class="row items-center no-wrap">
+                <q-icon v-if="$q.screen.gt.xs" left :name="menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent).icon"  />
+                <div v-if="$q.screen.gt.xs" class="text-center">
+                  {{menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent).label}}
+                </div>
+                <div v-if="$q.screen.gt.xs" class="q-ml-sm ">/</div>
               </div>
-            </div>
-        </div>
-        <span v-if="$q.screen.gt.xs">&ensp;</span><span v-if="$q.screen.gt.xs">&ensp;</span><div v-if="$q.screen.gt.xs && currentPathModule">/</div>
-        <!--MODULE-->
-        <span v-if="$q.screen.gt.xs">&ensp;</span>
-        <q-btn-dropdown  flat :dense="!$q.screen.gt.xs" v-if="currentPathModule" menu-anchor="bottom left" menu-self="top left"  no-caps >
-          <template v-slot:label>
-            <div class="row items-center no-wrap">
-              <q-icon left :name="menuData.find(x=>x.link_name==currentPathModule).icon" />
-              <div v-if="$q.screen.gt.xs" class="text-center">
-                {{menuData.find(x=>x.link_name==currentPathModule).label}}
-              </div>
-            </div>
-          </template>
-          <q-list class="text-grey-7">
-              <q-item
-                v-for="(module,index) in menuData.filter(y=>y.parent == (menuData.find(x=>x.link_name==currentPathModule).parent) )" :key="index"
-                clickable @click="openModule(module)"
-                :active="module.link_name==currentPathModule"
-                active-class="text-primary text-weight-bold"
-                >
-                <q-item-section avatar>
-                  <q-icon :name="module.icon" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label :title="module.comment" >{{module.label}}</q-item-label>
-                </q-item-section>
-              </q-item>
-          </q-list>
-        </q-btn-dropdown>
+          </div>
+          <q-btn v-else-if="$q.screen.gt.xs&&router.currentRoute.path=='/'" stretch flat no-caps 
+            icon="fas fa-home" 
+            label="Inicio" />
 
-        <q-space />
-        
-        <!--Universal Search A FUTURO-->
-        <q-space />
 
-        
-        <!--COMPANY-->
-        <q-btn-dropdown flat :dense="!$q.screen.gt.xs" menu-anchor="bottom left" menu-self="top left" no-caps :disable="disableCompanyChange"  >
-          <template v-slot:label>
-            <div class="row items-center no-wrap">
-              <q-icon left name="fas fa-building" />
-              <div v-if="$q.screen.gt.xs" class="text-center">
-                {{userCompanies.find(x=>x.companyID==userCompany).companyShortName}}
-              </div>
-            </div>
-          </template>
-          <q-list class="text-grey-7" v-close-popup >
-              <q-item
-                v-for="company in userCompanies" :key="company.companyID"
-                clickable @click="changeCompany(company)"
-                :active="userCompany==company.companyID"
-                active-class="text-primary text-weight-bold"
-                >
-                <q-item-section avatar>
-                  <q-icon name="fas fa-building" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label :title="company.companyName + ' (' + company.companyNumber + ')'" >{{company.companyShortName}}</q-item-label>
-                </q-item-section>
-              </q-item>
-          </q-list>
-        </q-btn-dropdown>
-
-        <!--NOTIFICATION-->
-        <!--<span>&ensp;</span>
-        <q-btn flat dense menu-anchor="bottom left" menu-self="top left" no-caps 
-          :icon="isWebSocketConnected?'fas fa-bell':'fas fa-bell-slash'"
-          :title="isWebSocketConnected?'Ustes está conectado al servicio de Notificaciones':'Haga click para conectarse al servicio de Notificaciones'"
-          class="q-mr-md"  >
-          <q-badge floating color="red" v-if="unreadNotifications.length>0&&unreadCount>0">!</q-badge>
-          <q-menu>
-            <div class="scroll" style="max-height: 240px;">
-              <q-list separator class="text-grey-7" v-close-popup >
-                <q-item tag="label" v-ripple>
-                  <q-item-section>
-                    <q-item-label> {{isWebSocketConnected?'Notificaciones Activas':'Sin Notificaciones'}}</q-item-label>
-                  </q-item-section>
-                  <q-item-section side top>
-                    <q-toggle color="primary" :value="isWebSocketConnected" @input="changeWebSocketStatus" />
-                  </q-item-section>
-                </q-item>
-
-                <q-item clickable v-for="(note,index) in unreadNotifications" :key="index" @click="gotoNotifications(note.sender_sys_user_code)">
-                  <q-item-section avatar>
-                    <q-img
-                      v-if="note.userPhoto&&note.userPhoto.length>2"
-                      :src="serverFilesPath + note.userPhoto"
-                      basic style="width: 30px; max-height: 35px;"
-                      spinner-color="white"
-                      class="rounded-borders"
-                      />
-                    <q-avatar v-if="!(note.userPhoto&&note.userPhoto.length>2)" color="primary" text-color="white" icon="fas fa-user" size="md" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{note.title}}</q-item-label>
-                    <q-item-label caption lines="2">{{note.sender_sys_user_name}} {{note.sender_sys_user_lastname}}</q-item-label>
-                  </q-item-section>
-                  <q-item-section side top>
-                    <q-item-label caption>{{note.messageDateElapsed}}</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item v-if="unreadNotifications.length <= 0">
-                  <q-item-section>
-                    <q-item-label>No tiene notificaciones pendientes</q-item-label>
-                  </q-item-section>
-                </q-item>
-
+          <!--MODULE-->
+          <!--icon-right="fas fa-caret-down"-->
+          <q-btn  flat stretch class="q-ml-sm"
+            v-if="$q.screen.gt.xs&&menuData.find(x=>x.link_name==ruta)"
+            :label="$q.screen.gt.xs?menuData.find(x=>x.link_name==ruta).label:undefined"
+            :icon="menuData.find(x=>x.link_name==ruta).icon"
+            :title="$q.screen.gt.xs?menuData.find(x=>x.link_name==ruta).label:undefined"
+            
+            menu-anchor="bottom left" menu-self="top left"  no-caps >
+            <q-menu square v-if="router.currentRoute.path!='/RootPreferences'">
+              <q-list class="text-grey-7">
+                  <q-item
+                    v-for="(menuItem,index) in menuData.filter(y=>y.parent == menuData.find(x=>x.link_name==ruta).parent)" :key="index"
+                    clickable :to="'/'+menuItem.link_name"
+                    :active="menuItem.link_name==menuData.find(x=>x.link_name==ruta).link_name"
+                    active-class="bg-primary text-white text-weight-bold"
+                    :title="menuItem.comment"
+                    >
+                    <q-item-section avatar>
+                      <q-icon :name="menuItem.icon" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label >{{menuItem.label}}</q-item-label>
+                    </q-item-section>
+                  </q-item>
               </q-list>
-            </div>
-            <q-item-label caption><q-btn icon="fas fa-external-link-alt" size="md" label="Abrir Notificaciones" no-caps class="full-width no-border-radius" color="primary"  @click="gotoNotifications(0)" /></q-item-label>
-          </q-menu>
-        </q-btn>
-        -->
+            </q-menu>
+          </q-btn>
 
-        <q-toggle v-model="userColor" title="Color Preferido" false-value="default" true-value="blackDark" checked-icon="fas fa-moon" unchecked-icon="fas fa-sun" size="sm" />
+          <div v-if="$q.screen.gt.xs&&router.currentRoute.path!='/'&&!isNaN(router.currentRoute.path.split('/')[(router.currentRoute.path.split('/').length)-1])"
+            class="row items-center q-ml-sm" >
+            <div v-if="$q.screen.gt.xs" class="q-mr-sm">/</div>
+            <q-icon name="fas fa-edit" color="white" class="q-mr-sm" /> Edición
+          </div>
 
-        <!--USER-->
-        <span>&ensp;</span>
-        <q-btn flat dense :title="userID">
-          <q-img
-            v-if="userPhoto&&userPhoto.length>2"
-            :src="serverFilesPath + userPhoto"
-            basic style="width: 30px; max-height: 35px;"
-            spinner-color="white"
-            class="rounded-borders"
-            />
-          <q-avatar v-if="!(userPhoto&&userPhoto.length>2)" color="primary" text-color="white" icon="fas fa-user" size="md" />
+          <q-space />
+          
+          
+          <!--Universal Search A FUTURO-->
+          <q-space />
 
-          <q-menu auto-close content-style="min-width: 325px;" >
-            <q-card bordered class="text-primary q-pa-sm">
-              <q-list separator dense>
-                <q-item>
+          
+          <!--COMPANY-->
+          <q-btn icon="fas fa-home" flat stretch to="/" title="Ir a Inicio" />
+          <q-btn 
+            flat stretch no-caps 
+            :label="$q.screen.gt.sm?(userCompanies.find(x=>x.companyID==userCompany).companyShortName):undefined"
+            :disable="disableCompanyChange"
+            v-if="$q.screen.gt.sm"
+            >
+            <q-menu v-if="userCompanies.length>1">
+              <q-list class="text-grey-7" v-close-popup >
+                <q-item
+                  v-for="company in userCompanies" :key="company.companyID"
+                  clickable v-ripple v-close-popup
+                  @click="changeCompany(company)"
+                  :active="userCompany==company.companyID" 
+                  active-class="text-primary text-weight-bold"
+                  >
                   <q-item-section avatar>
-                      <q-img
-                        v-if="userPhoto"
-                        :src="serverFilesPath + userPhoto"
-                        basic style="width: 120px"
-                        spinner-color="white"
-                        class="rounded-borders"
-                      />
+                    <q-icon name="fas fa-building" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item dense>
-                      <q-item-section side><q-icon name="fas fa-user"/></q-item-section>
-                      <q-item-section><q-item-label class="text-primary text-subtitle2">{{userName}} {{userLastName}}</q-item-label></q-item-section>
-                    </q-item>
-                    <q-item dense>
-                      <q-item-section side><q-icon name="fas fa-envelope"/></q-item-section>
-                      <q-item-section><q-item-label class="text-primary text-caption">{{userMail}}</q-item-label></q-item-section>
-                    </q-item>
-                    <q-item dense>
-                      <q-item-section side><q-icon name="fas fa-user-shield"/></q-item-section>
-                      <q-item-section><q-item-label class="text-primary text-subtitle2">{{userProfileName}}</q-item-label></q-item-section>
-                    </q-item>
-                    <q-item dense>
-                      <q-item-section side><q-icon name="fas fa-code-branch"/></q-item-section>
-                      <q-item-section><q-item-label class="text-primary text-subtitle2">Version: {{version}}</q-item-label></q-item-section>
-                    </q-item>
-                    
-                    <!--<q-item-label caption>{{userProfileName}}</q-item-label>-->
-                    <q-item-label caption><q-btn icon="fas fa-user-edit" label="Mi Cuenta" no-caps class="full-width q-mt-sm" color="primary"  @click="gotoPreferences" /></q-item-label>
-                    <q-item-label caption><q-btn icon="fas fa-sign-out-alt" label="Cerrar Sesión" no-caps class="full-width" color="red"  @click="logOut" /></q-item-label>
+                    <q-item-label :title="company.companyName + ' (' + company.companyNumber + ')'" >{{company.companyShortName}}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+
+          <q-toggle 
+            v-model="userColor" 
+            title="Color Preferido" 
+            false-value="default" true-value="blackDark" 
+            checked-icon="fas fa-moon" 
+            unchecked-icon="fas fa-sun" 
+            size="sm"
+            @input="userColorChange"
+            />
+
+          <!--USER-->
+          <q-btn flat  stretch :title="userID" >
+            <q-img
+              v-if="userPhoto&&userPhoto.length>2"
+              :src="serverFilesPath + userPhoto"
+              basic style="width: 30px; max-height: 35px;"
+              spinner-color="white"
+              class="rounded-borders"
+              />
+            <q-avatar v-if="!(userPhoto&&userPhoto.length>2)" color="primary" text-color="white" icon="fas fa-user" size="md" />
+            <!--<q-img
+              v-if="userPhoto&&userPhoto.length>2"
+              :src="serverFilesPath + userPhoto"
+              basic 
+              :ratio="1"
+              spinner-color="white"
+              class="rounded-borders"
+              />
+              -->
+
+            <q-menu auto-close content-style="min-width: 325px;" >
+              <q-card bordered class="text-primary q-pa-sm">
+                <q-list separator dense>
+                  <q-item>
+                    <q-item-section avatar>
+                        <q-img
+                          v-if="userPhoto"
+                          :src="serverFilesPath + userPhoto"
+                          basic style="width: 120px"
+                          spinner-color="white"
+                          class="rounded-borders"
+                        />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item dense>
+                        <q-item-section side><q-icon name="fas fa-user"/></q-item-section>
+                        <q-item-section><q-item-label class="text-primary text-subtitle2">{{userName}} {{userLastName}}</q-item-label></q-item-section>
+                      </q-item>
+                      <q-item dense>
+                        <q-item-section side><q-icon name="fas fa-envelope"/></q-item-section>
+                        <q-item-section><q-item-label class="text-primary text-caption">{{userMail}}</q-item-label></q-item-section>
+                      </q-item>
+                      <q-item dense>
+                        <q-item-section side><q-icon name="fas fa-user-shield"/></q-item-section>
+                        <q-item-section><q-item-label class="text-primary text-subtitle2">{{userProfileName}}</q-item-label></q-item-section>
+                      </q-item>
+                      <q-item dense>
+                        <q-item-section side><q-icon name="fas fa-code-branch"/></q-item-section>
+                        <q-item-section><q-item-label class="text-primary text-subtitle2">Version: {{version}}</q-item-label></q-item-section>
+                      </q-item>
+                      
+                      <!--<q-item-label caption>{{userProfileName}}</q-item-label>-->
+                      <q-item-label caption><q-btn icon="fas fa-user-edit" label="Mi Cuenta" no-caps class="full-width q-mt-sm" color="primary"  to="/RootPreferences" /></q-item-label>
+                      <q-item-label caption><q-btn icon="fas fa-sign-out-alt" label="Cerrar Sesión" no-caps class="full-width" color="red"  @click="logOut" /></q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-card>
+            </q-menu>
+          </q-btn>
+        </q-toolbar>
+      </q-header>
+
+      <q-drawer elevated overlay v-model="leftDrawerOpen" @show="focusSearchMenuInput" 
+        :content-class="userColor=='default'?'text-grey-5':'bg-grey-10 text-white'">
+        <!-- :content-class="userColor=='default'?'bg-primary text-white':'bg-grey-10 text-white'"> -->
+        <!--<q-list class="text-grey-7"  >-->
+        <q-input
+          ref="mainMenuSearchStringInput"
+          v-model="mainMenuSearchString"
+          filled dense
+          class="q-pl-sm q-pr-sm q-pb-sm q-mt-sm"
+          debounce="750"
+          placeholder="Buscar"
+          >
+          <template v-slot:prepend >
+              <q-icon name="fas fa-search"  />
+          </template>
+          <template v-if="mainMenuSearchString" v-slot:append>
+              <q-btn @click="()=>{mainMenuSearchString=''}" round flat icon="fas fa-times-circle"  color="white" />
+          </template>
+        </q-input>
+        <q-separator inset dark />
+        <q-list>
+          <!-- :header-class="root.link_name==currentPath?'text-weight-bolder text-primary':'text-weight-bold'" -->
+          <!-- v-for="(root,index) in menuData.filter(x=>x.parent==null&&x.sys_link_id!=99&&x.sys_link_id!=98)" :key="index" -->
+          <q-expansion-item
+            v-for="(root,index) in filteredMainMenu" :key="index"
+            group="sameRootGroup" dark
+            :icon="root.icon"
+            :label="root.label"
+            :header-class="root.link_name==rutaRoot?'bg-primary text-weight-bolder text-white':'text-weight-bold text-grey-7'"
+            expand-icon-class="text-grey-5"
+            >
+            <q-card :dark="userColor=='blackDark'" class="text-grey-7">
+              <q-list bordered>
+                <!-- v-for="(modulo,index) in menuData.filter(y=>y.parent==root.sys_link_id)" :key="index" -->
+                <q-item
+                  v-for="(modulo,index) in filteredMainMenuDetails(root.sys_link_id)" :key="index"
+                  clickable dense :to="'/'+modulo.link_name"
+                  @click="shouldHideMenu?leftDrawerOpen=false:leftDrawerOpen=true"
+                  :active="modulo.link_name==currentPathModule"
+                  active-class="text-primary text-weight-bold"
+                  expand-separator
+                  >
+                  <q-item-section side class="q-pl-lg">
+                    <!--:color="modulo.link_name==menuData.find(x=>x.link_name==router.currentRoute.path.substring(1)).link_name?'primary':undefined"-->
+                    <q-icon :name="modulo.icon" size="1rem"
+                      :color="(menuData.some(x=>x.link_name==router.currentRoute.path.substring(1)) && modulo.link_name==menuData.find(x=>x.link_name==router.currentRoute.path.substring(1)).link_name)?'primary':undefined" 
+                       />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label :title="modulo.comment">{{modulo.label}}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side v-if="(menuData.some(x=>x.link_name==router.currentRoute.path.substring(1)) && modulo.link_name==menuData.find(x=>x.link_name==router.currentRoute.path.substring(1)).link_name)">
+                    <q-icon name="fas fa-chevron-right" color="primary" size="xs" />
                   </q-item-section>
                 </q-item>
               </q-list>
             </q-card>
-          </q-menu>
-        </q-btn>
-      </q-toolbar>
-    </q-header>
+          </q-expansion-item>
+        </q-list>
+      </q-drawer>
 
-    <q-drawer elevated   v-model="leftDrawerOpen" >
-      <q-list class="text-grey-7"  >
-        <q-expansion-item
-          v-for="(root,index) in menuData.filter(x=>x.parent==null&&x.sys_link_id!=99&&x.sys_link_id!=98)" :key="index"
-          group="sameRootGroup"
-          :icon="root.icon"
-          :label="root.label"
-          :header-class="root.link_name==currentPath?'text-weight-bolder text-primary':'text-weight-bold'"
-          >
-          <q-card :dark="userColor=='blackDark'">
-            <q-list class="text-grey-7" bordered>
-              <q-item
-                v-for="(module,index) in menuData.filter(y=>y.parent==root.sys_link_id)" :key="index"
-                clickable @click="openModule(module)" dense
-                :active="module.link_name==currentPathModule"
-                active-class="text-primary text-weight-bold"
-                expand-separator
-                >
-                <q-item-section side class="q-pl-lg">
-                  <q-icon :name="module.icon" size="1rem" :color="module.link_name==currentPathModule?'primary':undefined" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label :title="module.comment" >{{module.label}}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card>
-        </q-expansion-item>
-      </q-list>
-    </q-drawer>
-
-    <!-- El style hace que la página siempre crezca lo máximo disponible para que el drawer se extienda automáticamente-->
-    <q-page-container style="height: calc(100vh - 2px)">
-      <transition  enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" mode="out-in" >
-      <router-view />
-      </transition>
-    </q-page-container>
-  </q-layout>
+      <!-- El style hace que la página siempre crezca lo máximo disponible para que el drawer se extienda automáticamente-->
+      <q-page-container style="height: calc(100vh); overflow-y: hidden;">
+        <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" mode="out-in" >
+          <router-view />
+        </transition>
+      </q-page-container>
+    </q-layout>
+  </div>
+  <div v-else style="height: calc(100vh - 80px)"  >
+    <q-inner-loading :showing="!isDefaultDataLoaded">
+        <q-spinner-facebook size="10%" color="primary" />
+    </q-inner-loading>
+  </div>
+</div>
 </template>
 
+<style lang="scss">
+  ::selection {
+    color: red;
+    background: yellow;
+  }
+  .dx-datagrid{  
+    font-weight: bold;
+  }
+  .dx-header-row > td[role="columnheader"]> div.dx-datagrid-text-content {  //controla que encabezado se vea con color azul (diferente a las filas)
+    font-size: 13px;  
+    font-weight: bold;
+    color: #2F74EB;
+  }
+  
+  .dx-datagrid-content .dx-datagrid-table .dx-row .dx-command-select{ //controla que checkbox en grids no se vea muy apretado a la derecha
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+  }
+
+  /*//los 2 hacen que la línea no se expanda al editar; pero mientras se está cambiando el valor de la celda, se abren 2 filas y se ve mal
+  .dx-datagrid .dx-row .dx-widget {  
+    height: 15px;  
+  }  
+  .dx-datagrid .dx-row .dx-widget input.dx-texteditor-input {  
+    height: 15px;  
+    min-height: 15px;  
+  }*/
+
+
+  //dxdatagrid selected row style
+  .dx-datagrid-rowsview .dx-selection.dx-row > td,  
+  .dx-datagrid-rowsview .dx-selection.dx-row:hover > td {  
+    background-color: #87adee !important; // //#5990EF //#4c87ee 
+    color: white !important;
+  }
+
+  //enlarge scrollbars vertical
+  .dx-scrollbar-vertical.dx-scrollbar-hoverable {  
+    width: 15px !important;
+  }  
+  .dx-scrollbar-vertical .dx-scrollable-scroll {  
+    width: 15px !important;
+  }
+
+  //enlarge scrollbars horizontal
+  .dx-scrollbar-horizontal.dx-scrollbar-hoverable {  
+    height: 15px !important;
+  }  
+  .dx-scrollbar-horizontal .dx-scrollable-scroll {  
+    height: 15px !important;
+  }
+
+  //always add top border to pager (so it visually separates rows from pager)
+  .dx-datagrid-pager {
+    border-top-style: solid !important;
+    border-top-color: #e0e0e0 !important;
+    border-top-width: 1px !important;
+  }
+
+  //Always make PopUp Title in primary color
+  .dx-popup-title{
+    color: #2F74EB !important;
+  }
+
+</style>
+
 <script>
+//import socketIO from 'socket.io-client'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { debounce, colors, SessionStorage, Notify } from 'quasar'
-//import socketIO from 'socket.io-client'
 import {version} from '../../package.json'
+
+//import 'components/dxComponents/dx.common.css'; esto se carga automáticamente en "created" basado en el color predeterminado del usuario
+//import 'components/dxComponents/dx.material.default.css'); esto se carga automáticamente en "created" basado en el color predeterminado del usuario
+import esMessages from "devextreme/localization/messages/es.json";
+import { locale, loadMessages } from 'devextreme/localization';
 
 export default {
   name: 'MainLayout',
-
+  /*components: {
+    DevExpress
+  },*/
+  
   data () {
     return {
-      router: this.$router, leftDrawerOpen: true, isNotificationBusy: false, unreadCount: 0, interval: null,
-      isWebSocketConnected: false, version: version
+      router: this.$router,
+      leftDrawerOpen: false,//arranca oculto, porque ahora existe el home que tiene un menú
+      isNotificationBusy: false,
+      unreadCount: 0,
+      interval: null,
+      version: version,
+      isDefaultDataLoaded: false, //se agregó para que al duplicar una pestaña NO se cargue el contenido, sino hasta que se haya recuperado la data
+      mainMenuSearchString: '',
+      //isWebSocketConnected: false,
     }
   },
 
   created(){
+    loadMessages(esMessages);//load Spanish Messages
+    locale('es');//apply Spanish message
+    
     this.$q.sessionStorage.set('pathname',window.location.pathname)
     this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
     if(! (this.$q.sessionStorage.getItem('sys_user_code') && this.$q.sessionStorage.getItem('sys_profile_id') && this.$q.sessionStorage.getItem('jwtToken') ) ){
@@ -280,37 +385,44 @@ export default {
         this.userColor = this.userColor//force theme to be applied
         this.$q.dark.set(this.userDarkMode)//force darkMode to be applied
 
+        if(this.userColor=='default'){ 
+          import('components/dxComponents/dx.common.css').then(common=>{
+            import('components/dxComponents/dx.material.default.css').then(x=>{
+              this.isDefaultDataLoaded=true//para que se haga visible la página porque YA se cargó datos básicos
+            });
+          });
+        }
+        if(this.userColor=='blackDark'){ 
+          import('components/dxComponents/dx.common.css').then(common=>{
+            import('components/dxComponents/dx.material.dark.css').then(x=>{
+              this.isDefaultDataLoaded=true//para que se haga visible la página porque YA se cargó datos básicos
+            });
+          });
+        }
+
         //check version
         this.checkVersion();
-
-        //navigate to user default init module, if exists
-        try{
-          if(this.userLinkID){
-            if(this.menuData.some(x=>x.sys_link_id==this.userLinkID)){
-              this.currentPath = this.menuData.find(x=>x.sys_link_id==this.menuData.find(x=>x.sys_link_id==this.userLinkID).parent).link_name
-              this.currentPathModule = this.menuData.find(x=>x.sys_link_id==this.userLinkID).link_name
-              if(this.router.currentRoute.path != '/'+this.menuData.find(x=>x.sys_link_id==this.userLinkID).link_name){
-                this.leftDrawerOpen = false;//hide menu when autoOpen exists
-                this.router.push('/'+this.menuData.find(x=>x.sys_link_id==this.userLinkID).link_name)
-              }
-            }
-          }else{
-            if(this.router.currentRoute&&this.router.currentRoute.path&&this.router.currentRoute.path.length>1){
-              let routes = this.router.currentRoute.path.split('/')
-              if(routes.length==3){
-                //this.currentPath = routes[1]
-                //this.currentPathModule = routes[1] + '/' + routes[2]
-                this.router.push({ path: '/' })//es mejor enviarlo al Root, para evitar datos pendientes de Vuex
-              }
+        
+        //navigate to startup module if exists
+        if(this.router.currentRoute.path=='/'){//controla que sea la ruta inicial, de lo contrario, se está duplicando el tab en el browser
+          if(this.userLinkID&&this.userLinkID.length>1){
+            let initialModule = this.menuData.find(x=>x.sys_link_id==this.userLinkID);
+            if(initialModule&&initialModule.link_name){
+              this.router.push('/' + initialModule.link_name)
             }
           }
-        }catch(ex){console.dir(ex)}
+        }
+        
+      }else{
+
       }
       this.$q.loading.hide()
+      
     }).catch((error) => {
       this.$q.loading.hide()
       console.error(error)
       console.dir(error.response)
+      this.isDefaultDataLoaded=true
       let mensaje = 'Hubo un eror de acceso al servidor'
       if(error && error.response && error.response.data && error.response.data.info && error.response.data.info.message){
           mensaje = mensaje + ': ' + error.response.data.info.message
@@ -326,147 +438,105 @@ export default {
   },
 
   mounted(){
-    //console.dir('mainLayout mounted')
     this.checkVersion();
+    //console.dir('aquí debería resettodefault, pero solo de los que tengo acceso')
+    /*
+      Object.keys(this.$store.state).filter(y=>y=='main').map(x=>{
+          this.$store.commit(x+'/resetToDefaultState')
+      })//Loop across all vuex states, and reset each state to its initial status
+    */
   },
   
   methods: {
-    openSameRoot(){
-      if(this.currentPathModule!=null && this.currentPathModule!=null){
-        this.router.push('/'+ this.currentPath)
-        this.currentPathModule = null
-      }
-    },
-    openRoot(module){
-      if(this.currentPath!=module.link_name){
-        //this.currentPath = this.moduleName
-        this.currentPath = module.link_name
-        this.currentPathModule = null
-        this.router.push('/'+module.link_name)
-      }
-    },
-    openModule(module){
-      if(this.currentPathModule!=module.link_name){
-        this.currentPath = this.menuData.find(x=>x.sys_link_id==module.parent).link_name //module.link_name
-        this.currentPathModule = module.link_name
-        this.router.push('/'+module.link_name)
-        if(this.shouldHideMenu){this.leftDrawerOpen = false}
-      }
-    },
-    gotoPreferences(){
-      if(this.currentPath != 'RootPreferences'){
-        this.currentPath = 'RootPreferences'
-        this.currentPathModule = null
-        this.router.push({ path: '/RootPreferences' })
-      }
-    },
-    gotoNotifications(selectedContact){
-      if(this.currentPath != 'RootNotifications'){
-        this.currentPath = 'RootNotifications'
-        this.currentPathModule = null
-        if(selectedContact&&selectedContact>0){
-          this.selectedContact = selectedContact
-        }
-        this.router.push({ path: '/RootNotifications' })
-      }
-    },
     changeCompany(company){
       this.userCompany = company.companyID
     },
     logOut(){
-      clearInterval(this.interval)
-      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
-        this.router.replace('/LoginENS'); //navigate to login
-      }
-      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
-        this.router.replace('/LoginSchoenstatt'); //navigate to login
-      }
-      if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
-        this.router.replace('/Login'); //navigate to login
-      }
-    },
-    /*poolNotifications(){
-      this.interval = setInterval(function () {
-        //this.loadNotifications();
-      }.bind(this), this.notificationInterval);
-    },*/
-    /*loadNotifications(){
-      this.isNotificationBusy = true;
-      this.$axios({
-        method: 'GET',
-        url: this.apiURL + 'spMyUnreadNotifications',
-        headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-        params: {
-            userCode: this.userCode,
-            userCompany: this.userCompany,
-            userLanguage: 'es'
-        }
-      }).then((response) => {
-        this.isNotificationBusy = false;
-        this.unreadCount = response.data[0].unreadCount
-        this.unreadNotifications = JSON.parse(response.data[0].unreadNotifications)
-      }).catch((error) => {
-        this.isNotificationBusy = false;
-        console.error(error)
-        console.dir(error.response)
+      
+
+      this.$q.notify({ html: true, multiLine: false, color: 'purple'
+          ,message: "Vuelve pronto!"
+          ,timeout: 1500, progress: false , icon: "fas fa-exclamation-circle"
+          ,actions: [ { icon: 'fas fa-smile', color: 'white' } ]
       })
-    },*/
-    /*openWebSocketConnection(){
-      if(this.userCode && this.userCode > 0){
-        const socket = new WebSocket(this.URL_ws+'?userid:'+this.userCode);
-        socket.onopen = evento => {
-          this.wsConnection = socket
-          this.$q.notify({color: 'primary', message: 'Se ha conectado del servicio de Notificaciones' , timeout: 500, icon: 'fas fa-plug' });
-          this.isWebSocketConnected = true
-        }
-        socket.onmessage = evento => {
-          console.dir('MESSAGE here!!!!!!!!!')
-          console.dir(evento)
-          console.dir(evento.data)
-          this.$q.notify({color: 'primary', message: evento.data , timeout: 500 });
-        }
-        socket.onerror = evento => {
-          console.dir('Websocket error!!!!!!!!!')
-          console.dir(evento)
-          this.$q.notify({color: 'red', message: 'Lo sentimos, se produjo un error en el servicio de Notificaciones: ' + JSONS.stringify(evento) , timeout: 0 });
-        }
-        socket.onclose = evento => {
-          console.dir('Websocket disconnected!!!!!!!!!')
-          console.dir(evento)
-          this.$q.notify({color: 'red', message: 'Se ha desconectado del servicio de Notificaciones' , timeout: 500, icon: 'fas fa-unlink' });
-          this.isWebSocketConnected = false
-        }
-      }else{
-        this.$q.notify({color: 'red', message: 'userCode es inválido'});
+      this.isDefaultDataLoaded = false;
+
+      
+      
+
+      if(!(this.router.currentRoute.path=='/')){
+        this.router.replace('/'); //navigate to home, para evitar mensajes de error es computedcolumns usados en módulos (main o editforms)
       }
-    },*/
-    /*closeWebSocketConnection(){
-      if(this.wsConnection){
-        this.wsConnection.close(1000,this.userCode);
-        this.isWebSocketConnected = false;
-      }
-    },*/
-    /*sendMessage(){
-      if(this.wsConnection){
-        if(this.wsConnection.readyState){
-          console.dir('readyState')
-          console.dir(this.wsConnection.readyState)
-          try{
-            this.wsConnection.send('Message after button clicked from ' + this.userID + '(' + this.userCode + ')');
-          }catch(ex){
-            console.dir('Exception')
+
+      setTimeout(()=>{ 
+          if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
+            this.router.replace('/LoginENS'); //navigate to login
           }
+          if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
+            this.router.replace('/LoginSchoenstatt'); //navigate to login
+          }
+          if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
+            this.router.replace('/Login'); //navigate to login
+          }
+          clearInterval(this.interval)
+          localStorage.clear();//clear dxdatagrid states
+
+          Object.keys(this.$store.state).map(x=>{
+            this.$store.commit(x+'/resetToDefaultState')
+          })
+      }, 900);
+
+
+      
+    },
+    userColorChange(){
+      this.isDefaultDataLoaded = false;
+      this.$q.loading.show()
+      this.$axios.post(this.apiURL+'spSysUsersPreferencesUpdate',
+        {
+            sys_user_code: this.userCode,
+            user_data: JSON.stringify({
+                  userName: this.userName
+                ,userLastName: this.userLastName
+                ,userMail: this.userMail
+                ,userColor: this.userColor
+                ,userDarkMode: this.userDarkMode
+                ,userDateFormat: this.userDateFormat
+                ,userTimeFormat: this.userTimeFormat
+                ,userMoneyFormat: this.userMoneyFormat
+                ,userUsersFormat: this.userUsersFormat
+                ,userLinkID: this.userLinkID
+                ,userRowsPerPage: this.userRowsPerPage
+                ,userTableLines: this.userTableLines
+                ,userRowsToRender: this.userRowsToRender
+                ,user_password_1: this.user_password_1
+                ,userCompany: this.userCompany
+                ,shouldHideMenu: this.shouldHideMenu
+                ,shouldHideTableButtons: this.shouldHideTableButtons
+                ,shouldWrapCellText: this.shouldWrapCellText
+                ,notificationInterval: this.notificationInterval
+            }),
         }
-      }
-    },*/
-    /*changeWebSocketStatus(){
-      this.isWebSocketConnected = !this.isWebSocketConnected
-      if(this.isWebSocketConnected){//true, entonces conectar
-        this.openWebSocketConnection()
-      }else{//false, entonces desconectado
-        this.closeWebSocketConnection()
-      }
-    },*/
+        ,{headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }},
+        ).then((response) => {
+            this.$q.loading.hide()
+            this.$router.go()
+        }).catch((error) => {
+            console.error(error)
+            this.$q.loading.hide()
+            let mensaje = ''
+            if(error.message){ mensaje = error.message }
+            if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+            if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+            this.$q.notify({ html: true, multiLine: false, color: 'red'
+                ,message: "Lo sentimos, no se pudo realizar acción.<br/>" + mensaje
+                ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+            })
+            this.$router.go()
+        })
+      
+    },
     checkVersion(){
       if(this.sysVersion&& this.sysVersion.length>0){
         this.sysVersion.filter(x=>x.platformName=='desktop').map(y=>{
@@ -501,10 +571,19 @@ export default {
         })
       }
       //
-    }
+    },
+    filteredMainMenuDetails(rootID){
+      if(this.mainMenuSearchString.trim().length==0){
+        return this.menuData.filter(x=>x.parent==rootID)
+      }else{
+        return this.menuData.filter(x=>x.parent==rootID&&x.sys_link_id.length==4&&x.label.toLowerCase().includes(this.mainMenuSearchString.toLowerCase()))
+      }
+    },
+    focusSearchMenuInput(){
+      this.$refs['mainMenuSearchStringInput'].focus()
+    } 
+     
   },
-
-  
 
   computed:{
     userColor: {
@@ -517,16 +596,16 @@ export default {
         result=result + 'bg-primary text-white'
 
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
-          console.dir('Branding ENS')
+          //console.dir('Branding ENS')
           colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0
         }
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
-          console.dir('Branding Schoenstatt')
+          //console.dir('Branding Schoenstatt')
           colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0 //FBC42A
         }
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
-          console.dir('Branding Framework')
-          colors.setBrand('primary', '#1867C0') //#1976D2 //1867C0 //389ffd
+          //console.dir('Branding Framework')
+          colors.setBrand('primary', '#2F74EB') //#1976D2 //ANTES:1867C0 //389ffd //2A68D3 //2F74EB nuevo
         }
 
         this.$q.dark.set(false)
@@ -584,9 +663,24 @@ export default {
     shouldHideMenu: { get () { return this.$store.state.main.shouldHideMenu }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideMenu', value: val}) } },
     shouldHideTableButtons: { get () { return this.$store.state.main.shouldHideTableButtons }, set (val) { this.$store.commit('main/updateState', {key: 'shouldHideTableButtons', value: val}) } },
     shouldWrapCellText: { get () { return this.$store.state.main.shouldWrapCellText }, set (val) { this.$store.commit('main/updateState', {key: 'shouldWrapCellText', value: val}) } },
+    ruta: { get () { 
+        let ruta = this.router.currentRoute.path.split('/').filter(x=>isNaN(x)).map(y=>y).join('/')
+        return ruta
+      } },
+    rutaRoot: { get () { 
+        let ruta = null
+        try{
+          ruta = this.router.currentRoute.path.split('/').filter(x=>isNaN(x)).filter(y=>y.length>0)[0]
+        }catch(ex){}
+        return ruta
+      } },
     disableCompanyChange:{ get() { 
       let result = false; 
-      try{result = this.router.currentRoute.path.indexOf('Edit') > 0}catch(ex){} 
+      try{
+        result = this.router.currentRoute.path.indexOf('Edit') > 0
+        if(this.router.currentRoute.params.id){ result = true}
+        
+      }catch(ex){} 
       return result; } },
     isOSdarkMode: { get() {
       let result = false
@@ -594,19 +688,24 @@ export default {
         result = true
       }
       return result
-    }}
-    
-  },
-
-  watch: {
+    }},
+    filteredMainMenu:{
+      get(){
+        if(this.mainMenuSearchString.trim().length==0){
+          return this.menuData.filter(x=>x.parent==null&&x.sys_link_id!=99&&x.sys_link_id!=98)
+        }else{
+          let initialData = this.menuData.filter(x=>x.sys_link_id!=99&&x.sys_link_id!=98);
+          let detailsData = initialData.filter(x=>x.parent&&x.sys_link_id.length==4&&x.label.toLowerCase().includes(this.mainMenuSearchString.toLowerCase()))
+          let parentData = initialData.filter(x=>x.parent==null&&(detailsData.some(y=>y.parent==x.sys_link_id)))
+          return parentData
+        }
+      }
+    },
+  }
+  /*watch: {
     userCode: function(val){
       console.dir('cambio en userCode')
-      //this.openWebSocketConnection()
-    }
-    /*notificationInterval: function (val) {
-      clearInterval(this.interval)
-      this.poolNotifications();//inicia intervalo de lectura de notificaciones (con Intervalo actualizado)
-    },*/
-  }
+    },
+  }*/
 }
 </script>

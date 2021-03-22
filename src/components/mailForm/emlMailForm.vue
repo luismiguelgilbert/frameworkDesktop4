@@ -25,7 +25,7 @@
                 </q-input>
                 <q-editor 
                     v-model="senderData.bodyText" 
-                    min-height="5rem" max-height="8rem"  />
+                    min-height="calc(100vh - 300px)" max-height="calc(100vh - 300px)"  />
                 <q-list v-for="file in attachmentsData" :key="file.fileName" dense >
                     <q-item clickable @click="downloadTempFile(file)">
                         <q-item-section side>

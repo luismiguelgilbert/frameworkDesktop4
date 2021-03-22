@@ -1,4 +1,6 @@
-import index from './index'
+import typicalInitState from './../typicalInitState'
+import Vue from 'vue'
+
 export const updateState = (state, value) => {
     state[value.key] = value.value
 }
@@ -7,28 +9,16 @@ export const updateEditData = (state, value) => {
     state.editData[value.section][value.key] = value.value
 }
 
-export const updateEditDataContacts = (state, value) => {
-    state.editData.contacts = value
+export const updateEditDataAttribute = (state, value) => {
+    state.editData[value.key] = value.value
 }
 
 export const updateEditDataFiles = (state, value) => {
   state.editData.files = value
 }
 
-export const updateEditDataOwners = (state, value) => {
-  state.editData.owners = value
-}
-
-export const updateEditDataPricelists = (state, value) => {
-    state.editData.pricelists = value
-}
-
-export const updateEditDataPaytermns = (state, value) => {
-    state.editData.payterms = value
-}
-
 export const resetToDefaultState = (state) => {
-    Object.keys(index.intialState).map(x=>{
-        state[x] = index.intialState[x]
+    Object.keys(typicalInitState()).forEach(key => {
+        Vue.set(state, key, typicalInitState()[key])
     })
 }

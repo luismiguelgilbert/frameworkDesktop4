@@ -1,123 +1,81 @@
 <template>
 <div style="margin: -16px;">
-  <q-table
-    ref="mainTable"
-    :data="files"
-    :table-style="editMode==true?'min-height: calc(100vh - 193px); max-height: calc(100vh - 193px);' : 'min-height: calc(100vh - 193px); max-height: calc(100vh - 193px);'"
-    row-key="attach_id"
-    :separator="userTableLines"
-    :rows-per-page-options="[0]"
-    hide-bottom dense flat
-    virtual-scroll
-    :class="tableLastLine"
-    :filter="filterString"
-    :columns="[
-      //{ name: 'phoneID', required: true, label: 'ID', align: 'left', field: row => row.phoneID, sortable: true },
-      { name: 'uploaded', required: true, label: 'Descargar', align: 'center', field: row => row.uploaded, sortable: true },
-      { name: 'original_file_name', required: true, label: 'Archivo', align: 'left', field: row => row.original_file_name, sortable: true },
-      { name: 'file_size', required: true, label: 'Tamaño (KB)', align: 'left', field: row => row.file_size, sortable: true },
-      { name: 'file_type', required: true, label: 'Tipo', align: 'left', field: row => row.file_type, sortable: true },
-      { name: 'sys_user_fullname', required: true, label: 'Usuario', align: 'center', field: row => row.sys_user_fullname, sortable: true },
-      { name: 'audit_last_date', required: true, label: 'Fecha', align: 'center', field: row => row.audit_last_date, sortable: true },
-      { name: 'estado', required: true, label: 'Activo?', align: 'center', field: row => row.estado, sortable: true },
-    ]"
-
-
+  <q-toolbar class="no-padding">
+    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" flat stretch />
+    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
+  </q-toolbar>
+  <q-separator />
+  <DxDataGrid
+    ref="mainviewtableDxDataGrid"
+    height="calc(100vh - 170px)"
+    width="100%"
+    column-resizing-mode="widget"
+    :data-source="files"
+    :allow-column-resizing="true" 
+    :allow-column-reordering="true"
+    :show-borders="false"
+    :show-column-lines="userTableLinesDXcols"
+    :show-row-lines="userTableLinesDXrows"
+    key-expr="attach_id"
+    :selected-row-keys="selectedRowKeys" @selection-changed="onSelectionChanged"
     >
-    <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="uploaded" :props="props">
-              <q-btn v-if="props.row.uploaded" color="primary" icon="fas fa-download" size="xs" dense flat @click="downloadFile(props.row)" />
-            </q-td>
-            <q-td key="original_file_name" :props="props">
-              {{ props.row.original_file_name }}
-            </q-td>
-            <q-td key="file_size" :props="props" :title="getFileSizeInMB(props.row.file_size)">
-              {{ props.row.file_size }}
-            </q-td>
-            <q-td key="file_type" :props="props">
-              {{ props.row.file_type }}
-            </q-td>
-            <q-td key="sys_user_fullname" :props="props">
-              {{ props.row.sys_user_fullname }}
-            </q-td>
-            <q-td key="audit_last_date" :props="props" :title="dateName(props.row.audit_last_date)">
-              {{ props.row.audit_last_date }}
-            </q-td>
+    <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
+    <DxPaging :enabled="true" :page-size="userRowsPerPage" />
+    <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
+    <DxPager :visible="true" :show-page-size-selector="false" :allowed-page-sizes="allowedPageSizes" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="false" :showPageSizeSelector="false" />
+    <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+    <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
+    
+      <DxColumn  caption="Nombre" data-field="original_file_name" data-type="string" /> 
+      <DxColumn  caption="Tipo" data-field="file_type" data-type="string" /> 
+      <DxColumn  caption="Tamaño (KB)" data-field="file_size" data-type="number" alignment="left" :calculate-cell-value="calculateSizeCellValue" :calculateSortValue="calculateSizeSortValue" />
+      <DxColumn  caption="Fecha Modif." data-field="audit_last_date" data-type="date" format="dd MMMM yyyy HH:MM" /> 
+      <DxColumn  caption="Responsable" data-field="sys_user_fullname" data-type="string" /> 
+      <DxColumn  caption="Descargar" cell-template="cellTemplate" />
+      
+      <template #cellTemplate="{ data }">
+        <q-btn icon="fas fa-download" flat color="primary" @click="downloadFile(data.data)" />
+      </template>
+  </DxDataGrid>
 
-            <q-td key="estado" :props="props">
-              <q-toggle :value="props.row.estado" color="positive" icon="fas fa-check" size="sm" dense @input="updateRow(!props.row.estado,'estado',props.row)" />
-            </q-td>
-
-
-          </q-tr>
-    </template>
-    <template v-slot:top>
-        <q-btn label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" no-caps />
-        <q-space />
-        <q-input borderless dense v-model="filterString" placeholder="Buscar...">
-          <template v-slot:append>
-            <q-icon :name="filterString?'fas fa-times':'fas fa-search'" @click="filterString?filterString='':undefined" />
-          </template>
-        </q-input>
-    </template>
-    <template v-slot:bottom-row >
-      <q-tr></q-tr>
-    </template>
-  </q-table>
-  <q-dialog v-model="dialogVisible">
+  <q-dialog v-model="dialogVisible" square>
     <q-card>
       <q-uploader
-
-                @added="getNewFileName"
-                :factory="factoryFn"
-                ref="uploaderComponent"
-                style="max-height: calc(50vh); max-width: 100%;"
-                label="Buscar Archivo (Máximo 20MB)"
-                :max-file-size="20971520"
-                @finish="finish"
-                hide-upload-btn
-            />
+            @added="getNewFileName"
+            :factory="factoryFn"
+            ref="uploaderComponent"
+            style="max-height: calc(50vh); max-width: 100%;"
+            label="Buscar Archivo (Máximo 20MB)"
+            :max-file-size="20971520"
+            @finish="finish"
+            hide-upload-btn
+        />
     </q-card>
   </q-dialog>
 </div>
 
 </template>
 
-<style lang="scss">
-  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
-  .q-virtual-scroll__padding{ visibility: hidden;}
-  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
-  .my-sticky-header-table{
-    .q-table thead tr:first-child th{ background-color: white }
-  }
-  .my-sticky-header-table-LastLine{
-    .q-table thead tr:first-child th{ background-color: white }
-    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
-  }
-  .my-sticky-header-table-dark{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-  }
-  .my-sticky-header-table-dark-LastLine{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-    .q-table td{ border-bottom-width: 1px }
-  }
-</style>
+
 <script>
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { DxDataGrid, DxColumn, DxScrolling, DxPaging, DxPager, DxSorting, DxHeaderFilter, DxSelection, DxButton } from 'devextreme-vue/data-grid';
+//import Vue from 'vue';
+//import Vuex from 'vuex';
 import { date } from 'quasar';
 
 export default ({
     props: {
         moduleName: { type: String, required: true }
-        //row_id: { type: Number, required: true },
     },
     data () {
         return {
             //row_id: 31/*=31mktPR*/, 
-            filterString: '', dialogVisible: false
+            filterString: '', dialogVisible: false,
+            selectedRowKeys: []
         }
+    },
+    components:{
+      DxDataGrid, DxColumn, DxScrolling, DxPaging, DxPager, DxSorting, DxHeaderFilter, DxSelection, DxButton
     },
     methods:{
       getMax(arr, prop) {
@@ -127,6 +85,40 @@ export default ({
                   max = arr[i];
           }
           return max;
+      },
+      onSelectionChanged({ selectedRowKeys, selectedRowsData }) {
+          this.selectedRowKeys = selectedRowKeys;
+      },
+      deleteSelectedRows(){
+        if(this.selectedRowKeys.length > 0){
+            this.$q.dialog({ 
+                title: 'Confirmación'
+                ,persistent: false
+                ,message: 'Desea eliminar las líneas seleccionadas?'
+                ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true, color: 'red', flat: true }
+                ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
+            }
+            ).onOk(() => {
+                let newRows = JSON.parse(JSON.stringify(this.files.filter(x=>!this.selectedRowKeys.some(y=>y==x.attach_id))))
+                this.files = newRows;
+                this.selectedRowKeys = []//limpia selección para evitar problema de referencia a filas que no existan
+            })
+        }
+      },
+      calculateSizeCellValue(e){
+        let units = 'KB'
+        let size = 0
+        if(parseFloat(e.file_size) / 1024 < 1000){
+          units = 'KB'
+          size = parseFloat(e.file_size / 1024).toFixed(2)
+        }else{
+          units = 'MB'
+          size = parseFloat(e.file_size / 1024 / 1024).toFixed(2)
+        }
+        return size + ' ' + units;
+      },
+      calculateSizeSortValue(e){
+        return e.file_size
       },
       updateRow(newVal, colName, row){
         let newRows = JSON.parse(JSON.stringify(this.files))
@@ -212,7 +204,7 @@ export default ({
         this.dialogVisible=false
       },
       downloadFile(file){
-        console.dir('downloadFile')
+        //console.dir('downloadFile')
         console.dir(file)
         this.$axios({
               method: 'GET',
@@ -257,39 +249,57 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userTableLines: { get () { return this.$store.state.main.userTableLines } },
         allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
         allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         serverFilesPath: { get () { return this.$q.sessionStorage.getItem('serverFilesPath') } },
-        tableLastLine: {
-        get () { 
-            let resultado = ''
-            if(this.userColor=='blackDark'){
-              if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-              {
-                  resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
-              }else{
-                  resultado = 'my-sticky-header-table-dark bg-grey-10 '
-              }
-              }
-              if(this.userColor!='blackDark'){
-                  if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-                  {
-                      resultado = 'my-sticky-header-table-LastLine '
-                  }else{
-                      resultado = 'my-sticky-header-table '
-                  }
-              }
-              return resultado
-          }
-        },
-        files: {
+        /*files: {
             get () { return this.$store.state[this.moduleName].editData.files },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataFiles', val) }
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+        },*/
+        files: {
+            get () { return this.$store.state[this.moduleName].editData.files },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'files', value: val}) }
+        },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
+        userTableLinesDXcols: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+                return result
+            } 
+        },
+        userTableLinesDXrows: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+                return result
+            } 
+        },
+        userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
+        allowedPageSizes:{
+            get () { 
+                let resultado = []
+                resultado.push(this.userRowsPerPage)
+                return resultado
+            },
+        },
+        editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
         },
         /*
         sys_user_color: {

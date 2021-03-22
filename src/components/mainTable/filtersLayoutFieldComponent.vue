@@ -1,6 +1,6 @@
 <template>
 <div class="q-pl-sm q-pr-sm">
-    <q-input
+    <q-input dense
         ref="inputField"
         :label="field.label" 
         :label-color="isFieldFiltered?'positive':null"
@@ -14,8 +14,8 @@
         </template>
     </q-input>
 
-    <q-dialog v-model="isDialogVisible" @show="loadFieldData">
-        <q-card>
+    <q-dialog v-model="isDialogVisible" @show="loadFieldData" >
+        <q-card >
             <q-bar class="bg-primary q-pr-xs text-white">
                 {{field.label}}
                 <q-space />
@@ -23,7 +23,9 @@
             </q-bar>
             <!--No me gusta.. mejor dekarla el q-card-section sin el style="min-height: 200px;"-->
             <q-card-section class="q-pa-sm" >
-                <q-input v-if="field.ux_type!=='date'&&field.ux_type!=='datetime'" v-model="searchString" dense autofocus placeholder="Buscar.." >
+                <q-input v-if="field.ux_type!=='date'&&field.ux_type!=='datetime'" v-model="searchString" dense autofocus 
+                    placeholder="Buscar.."
+                    input-class="q-pl-sm" >
                     <template v-slot:append>
                         <q-icon v-if="searchString===''" name="fas fa-search" />
                         <q-btn flat dense round v-if="searchString!==''" icon="fas fa-times" @click="searchString=''" />
@@ -40,7 +42,7 @@
                 <q-table v-if="field.ux_type!=='date'&&field.ux_type!=='datetime'"
                     ref="gridSearch"
                     :data="gridData"
-                    dense
+                    dense flat square bordered
                     row-key="value"
                     selection="multiple"
                     :selected.sync="selectedRows"

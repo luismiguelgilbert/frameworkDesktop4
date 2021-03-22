@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
       <q-toggle class="col-12 col-md-4"
         tabindex="-1"
@@ -208,84 +208,7 @@
                 this.sri_sustento=row.value;
             }"
         />
-    
-    
-    <div>
-        <q-toolbar class="bg-primary text-white shadow-2">
-            <q-toolbar-title>
-                <q-icon name="fas fa-percentage" color="white" size="xs" /> Impuestos
-            </q-toolbar-title>
-            <q-btn flat icon-right="fas fa-plus"  label="Agregar Impuesto" no-caps @click="isTaxesDialog=true" />
-        </q-toolbar>
-        <q-list bordered>
-            <q-item v-for="linea in taxes" :key="linea.value" >
-                <q-item-section>
-                    <q-item-label class="text-bolder text-primary">{{linea.short_name_es}}</q-item-label>
-                    <q-item-label caption>{{linea.label}}</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                    <q-btn flat icon="fas fa-trash"  color="primary" round @click="removeTaxLine(linea)" />
-                </q-item-section>
-            </q-item>
-            <q-item v-if="taxes.length<=0">
-                <q-item-section>
-                    <q-item-label class="text-bolder text-primary">No se ha agregado impuestos</q-item-label>
-                </q-item-section>
-            </q-item>
-        </q-list>
-    </div>
-    
 
-
-    <q-dialog v-model="isSearchDialog">
-        <mainLookup 
-            titleBar="Buscar Cuenta Contable"
-            :data="this.lookup_accounts"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :predefinedValue="mainLookupPredefinedValue"
-            :columns="[
-                     { name: 'code_es', required: true, label: 'Código', align: 'left', field: row => row.code_es , sortable: false, style: 'min-width: 100px; max-width: 100px;' }
-                    ,{ name: 'label', required: true, label: 'Cuenta Contable', align: 'left', field: row => `${'     '.repeat(row.account_level) + row.label} `, sortable: false,    }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            boldIfChildrenFielname="account_has_children"
-            @onCancel="isSearchDialog=false"
-            @onSelect="(selectedRows)=>{updateValues(selectedRows, 'value', 'fullLabel')}"
-        />
-    </q-dialog>
-
-    <q-dialog v-model="isTaxesDialog">
-        <mainLookup 
-            titleBar="Buscar Impuesto"
-            :data="this.lookup_taxes"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :columns="[
-                     { name: 'label', required: true, label: 'Impuesto', align: 'left', field: row => row.label, sortable: false,    }
-                    ,{ name: 'short_name_es', required: true, label: 'Código', align: 'left', field: row => row.short_name_es , sortable: true }
-                    //,{ name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false, style: 'max-width: 75px;', }
-                    ]"
-            @onCancel="isTaxesDialog=false"
-            @onSelect="(selectedRows)=>{addTax(selectedRows)}"
-        />
-    </q-dialog>
-
-    <q-dialog v-model="isSustentosDialog">
-        <mainLookup 
-            titleBar="Buscar Sustento"
-            :data="this.lookup_sri_sustentos"
-            :predefinedValue="this.sri_sustento"
-            :dataRowKey="'value'"
-            :selectionMode="'single'"
-            :columns="[
-                     //{ name: 'value', required: true, label: 'Código', align: 'left', field: row => row.value , sortable: true }
-                    { name: 'label', required: true, label: 'Sustento Tributario', align: 'left', field: row => row.label, sortable: false, style: 'min-width: 600px; white-space: none !important;'   }
-                    ]"
-            @onCancel="isSustentosDialog=false"
-            @onSelect="(selectedRows)=>{updateSustento(selectedRows)}"
-        />
-    </q-dialog>
 
     <br><br>
 </q-form>
@@ -297,13 +220,16 @@ import mainLookup from '../../../components/mainLookup/mainLookup.vue'
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },
     components: {
         mainLookup: mainLookup
         ,selectSearchable: selectSearchable
     },
     data () {
         return {
-            moduleName: "invMasterGroups", isSearchDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
+            isSearchDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
             ,isTaxesDialog: false, isSustentosDialog: false,
         }
     },
@@ -318,8 +244,8 @@ export default ({
             this.isSearchDialog = true
         },
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField]
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField]
             this.isSearchDialog = false
         },
         applyNewGroup(){
@@ -359,8 +285,8 @@ export default ({
             this.taxes = newTaxes
         },
         updateValues(selectedRows, lookupValueField, lookupLabelField){
-            this[this.mainLookupUpdateFieldValueName] = selectedRows[0].[lookupValueField]
-            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0].[lookupLabelField]
+            this[this.mainLookupUpdateFieldValueName] = selectedRows[0][lookupValueField]
+            this[this.mainLookupUpdateFieldLabelName] = selectedRows[0][lookupLabelField]
             this.isSearchDialog = false
         },
         addTax(selectedRows){
@@ -379,11 +305,41 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         groupID: {
             get () { return this.$store.state[this.moduleName].editData.basic.groupID },

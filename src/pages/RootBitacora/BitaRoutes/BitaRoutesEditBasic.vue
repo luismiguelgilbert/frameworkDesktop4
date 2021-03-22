@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">    
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <q-toggle
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />

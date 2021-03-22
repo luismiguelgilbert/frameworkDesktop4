@@ -1,20 +1,20 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
-      <q-toggle class="col-3"
+      <q-toggle class="col-12 col-md-3"
         tabindex="-1"
         v-model="estado" icon="fas fa-check" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
 
-      <q-toggle class="col-3"
+      <q-toggle class="col-12 col-md-3"
         tabindex="-1"
         v-model="is_customer" icon="fas fa-tag" color="blue-6" label="Es Cliente?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-      <q-toggle class="col-3"
+      <q-toggle class="col-12 col-md-3"
         tabindex="-1"
         v-model="is_vendor" icon="fas fa-shopping-cart" color="light-blue-6" label="Es Proveedor?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-    <q-toggle class="col-3"
+    <q-toggle class="col-12 col-md-3"
         tabindex="-1"
         v-model="is_foreign" icon="fas fa-flag" color="light-blue-6" label="Es Extranjero?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
@@ -41,6 +41,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-id-card" /></template>
     </q-input>
+
     <q-input
         ref="partner_ruc" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Escriba el Número de Identificación / RUC del socio (*)" label="Número de Identificación / RUC (*)" filled
@@ -78,6 +79,7 @@
     </q-input>
 
     <selectSearchable 
+        autocomplete="off"
         prependIcon="fas fa-globe"
         labelText="País (*)" labelSearchText="Buscar País"
         :optionsList="this.lookup_countries"
@@ -103,7 +105,7 @@
     </q-select>-->
 
     <selectSearchable 
-        prependIcon="fas fa-city"
+        prependIcon="fas fa-city" class="q-pt-sm"
         labelText="Ciudad" labelSearchText="Buscar Ciudad"
         :optionsList="this.lookup_cities"
         rowValueField="value" optionsListLabel="label"
@@ -128,54 +130,79 @@
         <template v-slot:prepend><q-icon name="fas fa-city" /></template>
     </q-select>-->
 
-    <q-input
+    <q-input class="q-pt-sm"
         label="Comentarios" placeholder="Ingrese comentarios sobre este Socio" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="comments"
         />
 
-    <br><br>
+    <br><br><br><br>
 </q-form>
 </template>
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
+*/
 import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
+    props: {
+        moduleName: { type: String , required: true },
+    },
     components: {
         selectSearchable: selectSearchable
     },
-    data () {
-        return {
-            moduleName: "Partners"
-        }
-    },
-    mounted(){
-        this.$refs.formulario.validate()
-    },
     methods:{
-      changeMonth(){
-        /*if(this.parent_id){
-          let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id)
-          this.code_es = temporal.code_es + '.xxx'
-          this.account_type_root = temporal.account_type_root
-          this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
-        }else{
-          this.code_es = ''
-          this.account_type_root = 1
-          this.account_level = 0
-        }*/
-      }
+        someHandler(e){
+            //console.dir('someHandler')
+            let newEditConfig = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].editConfig));
+            newEditConfig.moduleTabs.find(x=>x.tabName=='priceLists').isTabDisable = !(e);
+            this.editConfig = newEditConfig
+        },
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        editConfig: {
+            get () { return this.$store.state[this.moduleName].editConfig },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editConfig', value: val})  }
+        },
         estado: {
             get () { return this.$store.state[this.moduleName].editData.basic.estado },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'estado', value: val}) }
@@ -189,8 +216,8 @@ export default ({
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_vendor', value: val}) }
         },
         is_customer:  {
-            get () { return this.$store.state[this.moduleName].editData.basic.is_customer },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_customer', value: val}) }
+            get () { return this.$store.state[this.moduleName].editData.basic.is_customer; },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'is_customer', value: val})  }
         },
         is_foreign:  {
             get () { return this.$store.state[this.moduleName].editData.basic.is_foreign },
@@ -238,5 +265,13 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.lookup_cities },
         },
     },
+    watch: {
+        is_customer(newValue, oldValue) {
+            let newEditConfig = JSON.parse(JSON.stringify(this.$store.state[this.moduleName].editConfig));
+            newEditConfig.moduleTabs.find(x=>x.tabName=='priceLists').isTabDisable = !(newValue);
+            newEditConfig.moduleTabs.find(x=>x.tabName=='owners').isTabDisable = !(newValue);
+            this.editConfig = newEditConfig
+        },
+    }
 })
 </script>

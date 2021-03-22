@@ -32,5 +32,8 @@ export default function () {
     ,unreadNotifications: []
     ,wsConnection: null
     ,sysVersion: []
+    ,currentHomeTab: null
+    ,editFormLeftCollapsed: false
+    ,splitterModel: 200
   }
 }

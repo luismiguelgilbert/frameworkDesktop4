@@ -214,7 +214,8 @@ export default({
                     {
                         link_name: this.moduleName,
                         sys_user_code: this.userCode,
-                        filter_id: filtro.value
+                        filter_id: filtro.value,
+                        is_system: filtro.is_system
                     }
                     , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
                 ).then((response) => {
@@ -252,7 +253,8 @@ export default({
                     {
                         link_name: this.moduleName,
                         sys_user_code: this.userCode,
-                        filter_id: 0//cuando 0, el SP elimina el filtro predeterminado
+                        filter_id: 0,//cuando 0, el SP elimina el filtro predeterminado
+                        is_system: 0
                     }
                     , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
                 ).then((response) => {

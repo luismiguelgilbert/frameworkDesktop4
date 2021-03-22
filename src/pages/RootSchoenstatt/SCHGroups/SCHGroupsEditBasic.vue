@@ -1,5 +1,5 @@
 <template>
-<q-form ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm">
+<q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div>
       <q-toggle
         tabindex="-1"
@@ -17,91 +17,139 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-users" /></template>
     </q-input>
-    <q-select
-        label="Ciudad (*)" placeholder="Seleccione la Ciudad a la que pertenece el Grupo (*)" emit-value map-options filled
-        :options="lookup_cities" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="cityID"
-        ref="cityID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-city" /></template>
-    </q-select>
-    <q-select
-        label="Sector (*)" placeholder="Seleccione el Sector a la que pertenece el Grupo (*)" emit-value map-options filled
-        :options="lookup_sectores" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="sectorID"
-        ref="sectorID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-map-marker-alt" /></template>
-    </q-select>
-    <q-select
-        label="Monitor 1 (*)" placeholder="Seleccione el Primer Monitor del Grupo (*)" emit-value map-options filled
-        :options="lookup_users" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="monitor_user_code_1"
-        ref="monitor_user_code_1"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-user-tie" /></template>
-    </q-select>
-    <q-select
-        label="Monitor 2 (*)" placeholder="Seleccione el Segundo Monitor del Grupo (*)" emit-value map-options filled
-        :options="lookup_users" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        :option-disable="opt => !opt.estado"
-        v-model="monitor_user_code_2"
-        ref="monitor_user_code_2"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-user-tie" /></template>
-    </q-select>
+    
+    <selectSearchable 
+        autocomplete="off"
+        prependIcon="fas fa-city"
+        labelText="Ciudad (*)" labelSearchText="Buscar Ciudad"
+        :optionsList="lookup_cities"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="cityID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Ciudad', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.cityID=row.value;
+            }"
+        />
 
+    <selectSearchable 
+        class="q-mt-lg"
+        autocomplete="off"
+        prependIcon="fas fa-map-marker-alt"
+        labelText="Sector (*)" labelSearchText="Buscar Sector"
+        :optionsList="lookup_sectores"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="sectorID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Sector', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.sectorID=row.value;
+            }"
+        />
+
+     <selectSearchable 
+        class="q-mt-lg"
+        autocomplete="off"
+        prependIcon="fas fa-user-tie"
+        labelText="Monitor 1 (*)" labelSearchText="Buscar Monitor"
+        :optionsList="lookup_users"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="monitor_user_code_1"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Sector', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.monitor_user_code_1=row.value;
+            }"
+        />
+
+    <selectSearchable 
+        class="q-mt-lg"
+        autocomplete="off"
+        prependIcon="fas fa-user-tie"
+        labelText="Monitor 2 (*)" labelSearchText="Buscar Monitor"
+        :optionsList="lookup_users"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="false" 
+        :isDisable="false" 
+        :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :initialValue="monitor_user_code_2"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Sector', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.monitor_user_code_2=row.value;
+            }"
+        />
 
     <br><br>
 </q-form>
 </template>
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
-
+*/
+import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
 
 export default ({
-    data () {
-        return {
-            moduleName: "SCHGroups"
-        }
+    props: {
+        moduleName: { type: String , required: true },
+    },
+    components:{
+        selectSearchable,
     },
     mounted(){
         this.$refs.formulario.validate()
     },
-    methods:{
-      changeMonth(){
-        /*if(this.parent_id){
-          let temporal = this.lookup_accounts.find(x=>x.value == this.parent_id)
-          this.code_es = temporal.code_es + '.xxx'
-          this.account_type_root = temporal.account_type_root
-          this.account_level = temporal.account_level?parseInt(temporal.account_level+1):1
-        }else{
-          this.code_es = ''
-          this.account_type_root = 1
-          this.account_level = 0
-        }*/
-      }
-    },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         estado: {
             get () { return this.$store.state[this.moduleName].editData.basic.estado },

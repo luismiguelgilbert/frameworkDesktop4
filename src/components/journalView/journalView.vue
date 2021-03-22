@@ -1,46 +1,101 @@
 <template>
 <div style="margin: -16px;">
     <div class="row q-col-gutter-xs q-ma-md">
-        <q-input class="col-sm-12 col-md-3"
+        <q-input class="col-sm-12 col-md-4"
             label="Asiento Contable #"  filled readonly
             :value="accountHeader.accMoveID"
             >
                 <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
         </q-input>
-        <q-input class="col-sm-12 col-md-3" 
+        <q-input class="col-sm-12 col-md-4" 
             label="Fecha del Asiento (aaaa/mm/dd)"  filled readonly
-            :value="accountHeader.accMoveDateNew" :title="showDateName(accountHeader.accMoveDateNew)"
+            :value="accountHeader.accMoveDateNew" 
             >
                 <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
                 <template v-slot:append v-if="accountHeader.accMoveDate&&accountHeader.accMoveDateNew!=accountHeader.accMoveDate"><q-icon name="fas fa-edit" color="red" :title="`Modificado \n Fecha Original: ${accountHeader.accMoveDate}`" /></template>
         </q-input>
-      <q-input class="col-sm-12 col-md-3"
+      <q-input class="col-sm-12 col-md-4"
           label="Tipo de Diario"  filled readonly
           v-model="accountHeader.journalName"
           >
             <template v-slot:prepend><q-icon name="fas fa-book" /></template>
       </q-input>
-      <q-field filled class="col-sm-12 col-md-3" readonly>
-        <template v-slot:prepend>
-          <q-icon name="fas fa-search" />
-        </template>
-          <template v-slot:control>
-            <q-checkbox v-model="accMoveGrouped"  color="primary" label="Agrupado por Cuenta?" left-label />
-          </template>
-      </q-field>
       
     </div>
 
     <q-separator />
+
+  <!-- accMoveGrouped?accountLinesGrouped:accountLines -->
+  <DxDataGrid
+    ref="dxgrid"
+    height="calc(100vh - 212px)"
+    width="100%"
+    column-resizing-mode="widget"
+    :data-source="accountLines"
+    :allow-column-resizing="true" 
+    :allow-column-reordering="true"
+    :show-borders="true"
+    :show-column-lines="userTableLinesDXcols"
+    :show-row-lines="userTableLinesDXrows"
+    :stateStoring="{ ignoreColumnOptionNames: [] }"
+    key-expr="accLineID"
+    >
+      <DxGrouping :auto-expand-all="false"/>
+      <DxColumnChooser  mode="select" />
+      <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
+      <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+      <DxScrolling mode="virtual" :useNative="false" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      
+      <DxColumn caption="accLineID" data-field="accLineID" name="accLineID" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
+      <DxColumn caption="Cuenta Contable" data-field="account_id" name="account_id" data-type="number" :allow-editing="false" alignment="left" :minWidth="200"
+        :group-index="0">
+        <DxLookup value-expr="value" :display-expr="(row)=>{return row.code_es + ' - ' + row.label }" :data-source="lookup_accounts" />
+      </DxColumn>
+      <DxColumn caption="Observaciones" data-field="comments" name="comments" data-type="string" :allow-editing="true" alignment="left" :minWidth="200" :visible="true" />
+      <DxColumn caption="Debe" data-field="debit" name="debit" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
+      <DxColumn caption="Haber" data-field="credit" name="credit" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
+      
+      <!--
+      <DxColumn caption="Cantidad" data-field="quantity" name="quantity" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }"/>
+      <DxColumn caption="Precio" data-field="price" name="price" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" />
+      <DxColumn caption="Suman" data-field="lineSubtotal" name="lineSubtotal" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
+      <DxColumn caption="Descuento %" data-field="lineDiscntPrcnt" name="lineDiscntPrcnt" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0, max:100 }"  />
+      <DxColumn caption="Descuento $" data-field="lineDiscntAmount" name="lineDiscntAmount" data-type="number" :allow-editing="false" alignment="right" :width="100" :format="userMoneyFormat" :visible="false" />
+      <DxColumn caption="Subtotal" data-field="lineUntaxed" name="lineUntaxed" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat"
+         />
+      
+      
+      
+      <DxColumn caption="Fecha Entrega" data-field="expectedDate" name="expectedDate" data-type="date" :allow-editing="true" alignment="left" :width="120" format="dd-MMM-yyyy" :visible="true" />
+      <DxColumn caption="Tipo Entrega" data-field="transportTypeID" name="transportTypeID" data-type="number" :allow-editing="true" alignment="left" :width="200" :visible="false" >
+        <DxLookup value-expr="value" display-expr="label" :data-source="lookup_transports" />
+      </DxColumn>
+      <DxColumn caption="# Requisición" data-field="mktPRHeader" name="mktPRHeader" data-type="number" :allow-editing="false" alignment="right" :width="120" :visible="false" cssClass="text-primary" />
+      <DxColumn caption="# Req. Línea" data-field="mktPRlineID" name="mktPRlineID" data-type="number" :allow-editing="false" alignment="right" :width="120" :visible="false" cssClass="text-primary" />
+      
+      
+      
+      
+         -->
+      <DxSummary >
+        <DxTotalItem column="invID" summary-type="count"/>
+        <DxTotalItem column="debit" summary-type="sum" cssClass="q-mr-none" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxTotalItem column="credit" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxGroupItem :show-in-group-footer="false" :align-by-column="true" column="debit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
+        <DxGroupItem :show-in-group-footer="false" :align-by-column="true" column="credit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
+      </DxSummary>
+      
+      
+      />
+  </DxDataGrid>
     
-    <q-table
+  <!--  <q-table
         ref="mainTable"
         :data="accMoveGrouped?accountLinesGrouped:accountLines"
         table-style="min-height: calc(100vh - 233px); max-height: calc(100vh - 233px)"
         row-key="lineID"
         hide-bottom
         dense flat
-        :class="tableLastLine"
         :separator="userTableLines"
         :rows-per-page-options="[0]"
         dense
@@ -58,11 +113,6 @@
           //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
         ]"
     >
-    <!--<template v-slot:top>
-      <div class="q-table__title">Detalle Contable</div>
-      <q-space />
-      <q-toggle v-model="accMoveGrouped" class="text-right" color="primary" label="Agrupado por Cuenta?" />
-    </template>-->
 
     <template v-slot:body="props">
       <q-tr :props="props" v-if="props.row.account_id>0" >
@@ -98,6 +148,7 @@
         <q-tr></q-tr>
     </template>
   </q-table>
+  -->
 
   
 </div>
@@ -105,36 +156,41 @@
 </template>
 
 
-<style lang="scss">
-  .q-table__bottom{ padding: 0px; padding-left: 10px; padding-right: 10px; }
-  .q-virtual-scroll__padding{ visibility: hidden;}
-  .q-table thead tr:first-child th{ position: sticky; top: 0; opacity: 1; z-index: 1; padding-left: 5px; font-weight: bolder; color: $primary; }
-  .my-sticky-header-table{
-    .q-table thead tr:first-child th{ background-color: white }
-  }
-  .my-sticky-header-table-LastLine{
-    .q-table thead tr:first-child th{ background-color: white }
-    .q-table .q-virtual-scroll__content td{ border-bottom-width: 1px }
-  }
-  .my-sticky-header-table-dark{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-  }
-  .my-sticky-header-table-dark-LastLine{
-    .q-table thead tr:first-child th{ background-color: $grey-10 }
-    .q-table td{ border-bottom-width: 1px }
-  }
-</style>
-
 <script>
+/*
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { date } from 'quasar';
+*/ 
+
+
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxGroupItem, DxSortByGroupSummaryInfo, DxValueFormat, DxColumnChooser, DxGrouping } from 'devextreme-vue/data-grid';
 
 export default ({
     props: {
         moduleName: { type: String, required: true },
-        accountHeader: { type: Object, required: true },
-        accountLines: { type: Array, required: true },
+        //accountHeader: { type: Object, required: true },
+        //accountLines: { type: Array, required: true },
+    },
+    components: {
+      DxDataGrid,
+      DxColumn,
+      DxColumnFixing,
+      DxScrolling,
+      DxStateStoring,
+      DxSorting,
+      DxPaging,
+      DxHeaderFilter,
+      DxSelection,
+      DxEditing,
+      DxLookup,
+      DxSummary,
+      DxGroupItem, 
+      DxSortByGroupSummaryInfo,
+      DxTotalItem,
+      DxValueFormat,
+      DxColumnChooser,
+      DxGrouping
     },
     data () {
         return {
@@ -142,20 +198,6 @@ export default ({
         }
     },
     methods:{
-        showDateName(value){
-            let resultado = '...'
-            try{
-                resultado = date.formatDate(value, this.userDateFormat,
-                    {
-                    days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-                    daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
-                    months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                    monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-                    }
-                )
-            }catch(ex){console.dir(ex)}
-            return resultado;
-        },
         accountLinesComputed(){
             let resultado = []
             console.dir('calcular accountLinesComputed con ' + this.accMoveGrouped)
@@ -203,35 +245,44 @@ export default ({
       */
     },
     computed:{
+        console: () => console,
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
-        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
+        userMoneyFormat: { get () { 
+          let resultado ="#0.000000";
+          if(this.$store.state.main.userMoneyFormat==0){ resultado = "#0" }
+          if(this.$store.state.main.userMoneyFormat==1){ resultado = "#0.0" }
+          if(this.$store.state.main.userMoneyFormat==2){ resultado = "#0.00" }
+          if(this.$store.state.main.userMoneyFormat==3){ resultado = "#0.000" }
+          if(this.$store.state.main.userMoneyFormat==4){ resultado = "#0.0000" }
+          if(this.$store.state.main.userMoneyFormat==5){ resultado = "#0.00000" }
+          if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
+          return resultado }
+        },
         userColor: { get () { return this.$store.state.main.userColor }  },
         userTableLines: { get () { return this.$store.state.main.userTableLines } },
-        tableLastLine: {
-          get () { 
-              let resultado = ''
-              if(this.userColor=='blackDark'){
-                if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-                {
-                    resultado = 'my-sticky-header-table-dark-LastLine bg-grey-10 '
-                }else{
-                    resultado = 'my-sticky-header-table-dark bg-grey-10 '
-                }
-                }
-                if(this.userColor!='blackDark'){
-                    if(this.userTableLines=='horizontal'||this.userTableLines=='cell')
-                    {
-                        resultado = 'my-sticky-header-table-LastLine '
-                    }else{
-                        resultado = 'my-sticky-header-table '
-                    }
-                }
-                return resultado
-            }
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
+        userTableLinesDXcols: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+                return result
+            } 
         },
+        userTableLinesDXrows: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+                return result
+            } 
+        },
+        userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
         lookup_accounts: {
             get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+        },
+        accountHeader: {
+            get () { return this.$store.state[this.moduleName].editData.accountHeader },
+        },
+        accountLines: {
+            get () { return this.$store.state[this.moduleName].editData.accountLines },
         },
         accountLinesGrouped:{
             get () { 
