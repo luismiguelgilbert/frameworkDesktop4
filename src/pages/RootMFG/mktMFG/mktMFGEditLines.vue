@@ -2,7 +2,8 @@
 <div style="margin: -16px;">
   <q-toolbar class="no-padding">
     <q-btn label="Nuevo" icon="fas fa-plus" color="primary" flat stretch @click="isListDialog=true" :disable="!allow_row_insert" />
-    <q-btn label="Lista de Materiales (BoM)" icon="fas fa-file-invoice-dollar" color="primary" flat stretch @click="isRequisicionesDialog=true" :disable="!allow_row_insert" />
+    <q-btn label="Lista de Materiales (BoM)" icon="fas fa-boxes" color="primary" no-caps flat stretch @click="isRequisicionesDialog=true" :disable="!allow_row_insert" />
+    <q-btn label="Presupuesto de Materiales" icon="fas fa-file-invoice-dollar" no-caps color="primary" flat stretch @click="isBudgetDialog=true" :disable="!allow_row_insert" />
     <q-btn label="Eliminar" icon="fas fa-trash-alt" color="red" flat stretch :disable="maingridSelectedRowKeys.length<=0" @click="removeRows" />
     <q-btn color="primary" flat stretch label="Opciones" icon-right="fas fa-chevron-down" no-caps>
       <q-menu>
@@ -271,13 +272,76 @@
                 </DxDataGrid>
             </q-card-section>
             <q-card-actions align="around">
-                <q-btn  flat label="Cancelar (ESC)" no-caps color="primary" @click="isBoMDialogOpen=false" />
+                <q-btn  flat label="Cancelar (ESC)" no-caps color="primary" @click="isRequisicionesDialog=false" />
                 <q-btn icon-right="fas fa-check-circle" label="Seleccionar" no-caps color="primary" 
                 :disable="BoMDialogSelection==null" @click="appendBoMRows"
                 />
             </q-card-actions>
         </q-card>
-    </q-dialog>
+  </q-dialog>
+
+  <q-dialog v-model="isBudgetDialog"  @show="clearBudgetSelection">
+    <q-card style="min-width: 80%;" >
+        <q-card-section class="no-padding" >
+            <selectSearchable class="col-12"
+                prependIcon="fas fa-file-invoice-dollar"
+                labelText="Orden de Producción" labelSearchText="Buscar Orden de Producción"
+                :optionsList="lookup_mfgOrders"
+                rowValueField="value" optionLabelField="label" optionsListCaption="mfgProduct" optionsListLabel="label" optionDisableField="estado"
+                :isRequired="false" 
+                :isDisable="false" 
+                :isReadonly="false"
+                
+                :tableSearchColumns="[
+                    { name: 'mfgTypeName', label: 'Tipo', field: 'mfgTypeName', align: 'left'}
+                    ,{ name: 'invName', label: 'Producto', field: 'invName', align: 'left'}
+                    ,{ name: 'quantity', label: 'Cantidad', field: 'quantity', align: 'right'}
+                    ,{ name: 'comments', label: 'Comentarios', field: 'comments', align: 'left'}
+                    ]"
+                @onItemSelected="(row)=>{
+                        this.budgetDialogSelection = row.value
+                    }"
+                />
+        </q-card-section>
+        <q-card-section class="no-padding">
+            <DxDataGrid
+                ref="dxGridSearchBudgetList"
+                height="calc(75vh - 115px)"
+                width="100%"
+                column-resizing-mode="widget"
+                :data-source="lookup_mfgOrders_details.filter(x=>x.orderID==this.budgetDialogSelection)"
+                :allow-column-resizing="true" 
+                :allow-column-reordering="true"
+                :show-borders="false"
+                :show-column-lines="userTableLinesDXcols"
+                :show-row-lines="userTableLinesDXrows"
+                key-expr="invID"
+                >
+                <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" />
+                <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
+                
+                <DxColumn caption="Item" data-field="invID" name="invID" data-type="number" :allow-editing="false" alignment="left" :minWidth="250">
+                  <DxLookup value-expr="value" display-expr="label" :data-source="lookup_items" />
+                </DxColumn>
+                <DxColumn caption="Cantidad" data-field="quantity" data-type="number" :allow-editing="false" alignment="right" :visible="true" :width="130"  />
+                <DxColumn caption="Costo" data-field="price" data-type="number" :allow-editing="false" alignment="right" :visible="true" :width="130" :format="userMoneyFormat" />
+                <DxColumn caption="Subtotal" data-field="lineSubtotal" data-type="number" :allow-editing="false" alignment="right" :visible="true" :width="130" :format="userMoneyFormat" />
+
+                <DxSummary >
+                    <DxTotalItem column="invID" summary-type="count"/>
+                    <DxTotalItem column="lineSubtotal" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+                </DxSummary>
+
+            </DxDataGrid>
+        </q-card-section>
+        <q-card-actions align="around">
+            <q-btn  flat label="Cancelar (ESC)" no-caps color="primary" @click="isBudgetDialog=false" />
+            <q-btn icon-right="fas fa-check-circle" label="Seleccionar" no-caps color="primary" 
+            :disable="budgetDialogSelection==null" @click="appendBudgetRows"
+            />
+        </q-card-actions>
+    </q-card>
+  </q-dialog>
 
 
   <q-dialog v-model="dialogWH">
@@ -376,12 +440,14 @@ export default ({
       maingridDeleteBtnDisabled: true,
       internalLines: [],
       isRequisicionesDialog: false,
+      isBudgetDialog: false,
       dialogWH: false, dialogWHValue: null,
       dialogExpected: false, dialogExpectedValue: null,
       dialogTransport: false, dialogTransportValue: null,
       dialogOP: false, dialogOPValue: null,
       requisicionesSelectedRowKeys: [],
-      BoMDialogSelection: null
+      BoMDialogSelection: null,
+      budgetDialogSelection: null,
     }
   },
   created(){
@@ -521,6 +587,67 @@ export default ({
           })
         this.internalLines = newGridData;
         this.isRequisicionesDialog = false;
+      }
+      
+    },
+    appendBudgetRows(){
+      if(this.budgetDialogSelection&&this.budgetDialogSelection>0){
+        //GetMaxId
+        let max_id = 0
+        let temp = null
+        if(this.internalLines.length > 0){
+          temp = this.getMax(this.internalLines, "lineID");
+          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+        }
+        
+        //Iterate selected Items
+        let newGridData = JSON.parse(JSON.stringify(this.internalLines));
+        
+        console.dir(this.budgetDialogSelection)
+        console.dir(this.lookup_mfgOrders_details)
+        console.dir(this.lookup_mfgOrders_details.filter(x=>x.orderID==this.budgetDialogSelection))
+        
+        this.lookup_mfgOrders_details.filter(x=>x.orderID==this.budgetDialogSelection).map(row =>{
+          max_id++;
+          //ADD ITEM
+            const newRow = {
+              lineID: max_id,
+              uploaded: false,
+              invID: row.invID,
+              quantity: row.quantity,
+              quantityCancel: 0,
+              quantityCancelNew: 0,
+              quantityRcvd: 0,
+              price: row.price,
+              lineSubtotal: row.lineSubtotal,
+              lineDiscntPrcnt: 0,
+              lineDiscntAmount: 0,
+              lineUntaxed: row.lineSubtotal,
+              whID: this.defaultWhID,
+              mfg_orderID: this.default_mfg_orderID,
+              estado: true,
+              creation_date: null,
+              debit_account_id: row.debit_account_id,
+              credit_account_id: row.credit_account_id,
+              taxAmount: 0,
+              lineTotal: 0,
+              quantityOpen: 0,
+              quantityReturned: 0,
+              prjID: 0,
+              expectedDate: null,
+              quantity_isEditDisabled: false,
+              price_isEditDisabled: false,
+              lineDiscntPrcnt_isEditDisabled: false,
+              taxes_isEditDisabled: false,
+              whID_isEditDisabled: false,
+              expectedDate_isEditDisabled: false,
+              quantityCancelNew_isEditDisabled: false,
+              mfg_orderID_isEditDisabled: false,
+            }
+            newGridData.push(newRow)
+          })
+        this.internalLines = newGridData;
+        this.isBudgetDialog = false;
       }
       
     },
@@ -787,11 +914,12 @@ export default ({
       this.isRequisicionesDialog = false
     },
     clearBoMSelection(){
-      //console.dir('clearBoMSelection')
-      //this.appendBoMRows = false;
-      //this.isRequisicionesDialog = 
       this.BoMDialogSelection = null
+    },
+    clearBudgetSelection(){
+      this.budgetDialogSelection = null
     }
+     
   },
   computed:{
       console: () => console,
@@ -924,6 +1052,9 @@ export default ({
       },
       lookup_bom_details: {
           get () { return this.$store.state[this.moduleName].editData.lookup_bom_details },
+      },
+      lookup_mfgOrders_details:{
+        get () { return this.$store.state[this.moduleName].editData.lookup_mfgOrders_details },
       },
       default_mfg_orderID: {
             get () { return this.$store.state[this.moduleName].editData.basic.default_mfg_orderID },

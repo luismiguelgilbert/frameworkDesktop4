@@ -2,7 +2,7 @@
     <q-avatar size="20px">
         <q-icon v-if="data.value == null" name="fas fa-camera" :color="userColor=='blackDark'?'white':'grey-7'" />
         <q-img v-if="data.value != null" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]">
-            <q-tooltip anchor="top left" self="top left" content-class="bg-primary text-white">
+            <q-tooltip anchor="top left" self="top left" :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" >
                 <q-img  style="width: 250px" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]" />
             </q-tooltip>
         </q-img>

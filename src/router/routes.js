@@ -73,7 +73,7 @@ const routes = [
       }
       ,{ path: 'RootBitacora/Bitaevents', component: () => import('pages/RootBitacora/Bitaevents/main.vue')
         ,children: [
-           { path: '/', component: () => import('../components/mainView/mainView.vue') }
+           { path: '/', component: () => import('pages/RootBitacora/Bitaevents/mainView.vue') } /*especial, porque tiene un filtro extra*/
           ,{ path: ':id', component: () => import('pages/RootBitacora/Bitaevents/edit.vue') }
         ] 
       }

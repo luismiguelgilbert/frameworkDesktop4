@@ -11,12 +11,12 @@
                     <q-item-label>{{line.invName}}</q-item-label>
                     <q-item-label caption>
                         <div v-if="editStatus.editMode=='create'">
-                            Entregar: {{line.newQuantity}}
-                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                            Entregar: {{line.newQuantity.toFixed(2)}}
+                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0).toFixed(2) }}
                         </div>
                         <div v-if="editStatus.editMode=='edit'">
                             Entregado: {{line.quantityRcvdThisMove}}
-                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0).toFixed(2) }}
                         </div>
                     </q-item-label>
                     <!--Antes // Lotes: {{lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}-->
@@ -73,7 +73,9 @@
                     //{ name: 'value', required: true, label: 'Código', align: 'left', field: row => row.short_name_es , sortable: true }
                     { name: 'name_es', required: true, label: '# Lote', align: 'left', field: row => row.name_es, sortable: false,    }
                     ,{ name: 'expirationDate', required: true, label: 'Fecha Expiración', align: 'left', field: row => row.expirationDate, sortable: false}
-                    ,{ name: 'lastRcvdDate', required: true, label: 'Última Movimiento', align: 'left', field: row => row.lastRcvdDate, sortable: false}
+                    ,{ name: 'firstRcvdDate', required: true, label: 'Primer Movimiento', align: 'left', field: row => row.firstRcvdDate, sortable: false}
+                    ,{ name: 'lastRcvdDate', required: true, label: 'Último Movimiento', align: 'left', field: row => row.lastRcvdDate, sortable: false}
+                    
                     //{ name: 'warrantyDate', required: true, label: 'Fecha Garantía', align: 'left', field: row => row.warrantyDate, sortable: false,    }
                     ,{ name: 'quantityAvailable', required: true, label: 'Cantidad Disponible', align: 'right', field: row => row.quantityAvailable, sortable: false, style: 'max-width: 75px;', }
                     ]"

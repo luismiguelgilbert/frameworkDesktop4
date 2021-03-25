@@ -11,12 +11,12 @@
                     <q-item-label>{{line.invName}}</q-item-label>
                     <q-item-label caption>
                         <div v-if="editStatus.editMode=='create'">
-                            Recibir: {{line.newQuantity}}
-                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                            Recibir: {{line.newQuantity.toFixed(2)}}
+                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0).toFixed(2) }}
                         </div>
                         <div v-if="editStatus.editMode=='edit'">
-                            Recibido: {{line.quantityRcvdThisMove}}
-                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}
+                            Recibido: {{line.quantityRcvdThisMove.toFixed(2)}}
+                            // Lotes: {{lots.filter(x=>x.stockID==line.stockID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0).toFixed(2)}}
                         </div>
                     </q-item-label>
                     <!--Antes // Lotes: {{lots.filter(x=>x.lineID==line.lineID).reduce(function(acc,record){return acc + parseFloat(record.quantity) },0)}}-->

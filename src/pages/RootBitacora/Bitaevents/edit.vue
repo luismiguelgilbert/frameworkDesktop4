@@ -18,44 +18,26 @@ export default ({
     },
     mounted(){//NO debe ser created, porque aun NO estaría creado el componente editForm
         let newEditConfig = {
-            spSelectName: 'spBitaplacesSelectEdit',
-            spUpdateName: 'spBitaplacesUpdate',
-            toolbarTitle: "Punto de Control",
+            spSelectName: 'spBitaeventsSelectEdit',
+            spUpdateName: 'spBitaeventsUpdate',
+            toolbarTitle: "Evento",
             startTab: 'basic',
             moduleTabs: [
-                { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Punto de Control', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitaplaces/BitaplacesEditBasic.vue' },
-                { tabName: 'picture', iconName: 'fas fa-camera', textLabel: 'Foto de Perfil', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormPicture.vue', pictureConfig: { section: 'basic', upload_file_name: 'upload_file_name', attach_id: 'picture_attach_ID'} },
-                { tabName: 'users', iconName: 'fas fa-users', textLabel: 'Usuarios Asignados', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormGrid.vue',
+                { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Evento', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitaevents/BitaeventsEditBasic.vue' },
+                //{ tabName: 'picture', iconName: 'fas fa-camera', textLabel: 'Foto de Perfil', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormPicture.vue', pictureConfig: { section: 'basic', upload_file_name: 'upload_file_name', attach_id: 'picture_attach_ID'} },
+                /*{ tabName: 'places', iconName: 'fas fa-map-marked-alt', textLabel: 'Puntos de Control Asignados', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormGrid.vue',
                     tabConfig: { 
-                        dataName: 'users', 
-                        keyColumn: 'sys_user_code',  listKeyColumn: 'sys_user_code',
-                        insertAllowed: true, insertType: 'list',  insertList: 'lookup_users',
+                        dataName: 'places', 
+                        keyColumn: 'placeID',  listKeyColumn: 'placeID',
+                        insertAllowed: true, insertType: 'list',  insertList: 'lookup_places',
                         deleteAllowed: true,
                         columns: [
                             //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'sys_user_code', listDataField: 'sys_user_code', dataType: 'number', visible: false },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Nombres', dataField: 'sys_user_name', listDataField: 'sys_user_name', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Apellidos', dataField: 'sys_user_lastname', listDataField: 'sys_user_lastname', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Login', dataField: 'sys_user_id', listDataField: 'sys_user_id', dataType: 'string', visible: true },
+                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'placeID', listDataField: 'placeID', dataType: 'number', visible: false },
+                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Punto de Control', dataField: 'name_es', listDataField: 'name_es', dataType: 'string', visible: true },
                         ],
                     }
-                },
-                { tabName: 'cars', iconName: 'fas fa-truck', textLabel: 'Vehículos Asignados', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormGrid.vue',
-                    tabConfig: { 
-                        dataName: 'cars', 
-                        keyColumn: 'carID',  listKeyColumn: 'carID',
-                        insertAllowed: true, insertType: 'list',  insertList: 'lookup_cars',
-                        deleteAllowed: true,
-                        columns: [
-                            //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'carID', listDataField: 'carID', dataType: 'number', visible: false },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Placa', dataField: 'placa', listDataField: 'placa', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Marca', dataField: 'marca', listDataField: 'marca', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Modelo', dataField: 'modelo', listDataField: 'modelo', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Color', dataField: 'color', listDataField: 'color', dataType: 'string', visible: true },
-                        ],
-                    }
-                },
+                },*/
                 { tabName: 'files', iconName: 'fas fa-paperclip', textLabel: 'Archivos Adjuntos', isTabDisable: false, rootPath:'components', importPath: 'filesView/filesView' },
                 { tabName: 'history', iconName: 'fas fa-history', textLabel: 'Auditoría de Cambios', isTabDisable: false, rootPath:'components', importPath: 'historyView/historyView' }
             ],
@@ -64,8 +46,6 @@ export default ({
             //fields sirve para enviar específicamente los campos indicados (si es null entonces envía todos)
             editDataSaveProperties: [
                 { name: 'basic', filterBy: null, fields: null },
-                { name: 'users', filterBy: null, fields: ['sys_user_code'] },
-                { name: 'cars', filterBy: null, fields: ['carID'] },
                 { name: 'files', filterBy: null, fields: ['attach_id'] }
             ],
             //hide Tabs if something happens

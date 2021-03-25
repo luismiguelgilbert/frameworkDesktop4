@@ -2,6 +2,7 @@
 <div style="margin: -16px;">
   <q-toolbar class="no-padding">
     <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" flat stretch />
+    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" label="Cargar Foto" @click="addPicture" icon="fas fa-camera" color="primary" flat stretch />
     <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
   </q-toolbar>
   <q-separator />
@@ -26,15 +27,29 @@
     <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
     <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
     
-      <DxColumn  caption="Nombre" data-field="original_file_name" data-type="string" /> 
-      <DxColumn  caption="Tipo" data-field="file_type" data-type="string" /> 
-      <DxColumn  caption="Tamaño (KB)" data-field="file_size" data-type="number" alignment="left" :calculate-cell-value="calculateSizeCellValue" :calculateSortValue="calculateSizeSortValue" />
-      <DxColumn  caption="Fecha Modif." data-field="audit_last_date" data-type="date" format="dd MMMM yyyy HH:MM" /> 
-      <DxColumn  caption="Responsable" data-field="sys_user_fullname" data-type="string" /> 
-      <DxColumn  caption="Descargar" cell-template="cellTemplate" />
+      <DxColumn  caption="" data-field="uploadFileName" data-type="string" alignment="center" :allowFiltering="false" :allowSorting="false" cell-template="imagePreviewTemplate" width="80" />
+      <DxColumn  caption="Nombre" data-field="original_file_name" data-type="string" width="350" />
+      <DxColumn  caption="Tipo" data-field="file_type" data-type="string" :visible="false" /> 
+      <DxColumn  caption="Tamaño" data-field="file_size" data-type="number" alignment="left" :calculate-cell-value="calculateSizeCellValue" :calculateSortValue="calculateSizeSortValue" />
+      <DxColumn  caption="Fecha Modif." data-field="audit_last_date" data-type="date" format="dd-MMM-yyyy" /> 
+      <DxColumn  caption="Responsable" data-field="sys_user_fullname" data-type="string" width="200"  /> 
+      <DxColumn  caption="Descargar" cell-template="cellTemplate" width="90" alignment="center" />
       
       <template #cellTemplate="{ data }">
-        <q-btn icon="fas fa-download" flat color="primary" @click="downloadFile(data.data)" />
+        <q-btn icon="fas fa-download" flat color="primary" @click="downloadFile(data.data)" stretch />
+      </template>
+
+      <template #imagePreviewTemplate="{ data }">
+        <q-avatar size="40px" :title="!(data.row.data.file_type.includes('image'))?data.row.data.file_type:undefined">
+          <q-icon v-if="!(data.row.data.file_type.includes('image'))" 
+            :name="getIcon(data.row.data.file_type)"
+            :color="userColor=='blackDark'?'white':'grey-7'" />
+          <q-img v-if="data.row.data.file_type.includes('image')" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]">
+              <q-tooltip anchor="top left" self="top left" :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" >
+                  <q-img  style="width: 250px" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]" />
+              </q-tooltip>
+          </q-img>
+        </q-avatar>
       </template>
   </DxDataGrid>
 
@@ -52,6 +67,12 @@
         />
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="camDialogVisible" square class="rounded-borders" >
+    <q-card>
+      <cameraComponent @pictureclicked="uploadPicture" />
+    </q-card>
+  </q-dialog>
 </div>
 
 </template>
@@ -59,6 +80,7 @@
 
 <script>
 import { DxDataGrid, DxColumn, DxScrolling, DxPaging, DxPager, DxSorting, DxHeaderFilter, DxSelection, DxButton } from 'devextreme-vue/data-grid';
+import cameraComponent from '../cameraComponent/cameraComponent'
 //import Vue from 'vue';
 //import Vuex from 'vuex';
 import { date } from 'quasar';
@@ -70,22 +92,17 @@ export default ({
     data () {
         return {
             //row_id: 31/*=31mktPR*/, 
-            filterString: '', dialogVisible: false,
+            filterString: '', 
+            dialogVisible: false,
+            camDialogVisible: false,
             selectedRowKeys: []
         }
     },
     components:{
-      DxDataGrid, DxColumn, DxScrolling, DxPaging, DxPager, DxSorting, DxHeaderFilter, DxSelection, DxButton
+      DxDataGrid, DxColumn, DxScrolling, DxPaging, DxPager, DxSorting, DxHeaderFilter, DxSelection, DxButton,
+      cameraComponent: cameraComponent
     },
     methods:{
-      getMax(arr, prop) {
-          var max;
-          for (var i=0 ; i<arr.length ; i++) {
-              if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
-                  max = arr[i];
-          }
-          return max;
-      },
       onSelectionChanged({ selectedRowKeys, selectedRowsData }) {
           this.selectedRowKeys = selectedRowKeys;
       },
@@ -120,44 +137,41 @@ export default ({
       calculateSizeSortValue(e){
         return e.file_size
       },
-      updateRow(newVal, colName, row){
-        let newRows = JSON.parse(JSON.stringify(this.files))
-        newRows.find(x=>x.attach_id==row.attach_id)[colName] = newVal
-        this.files = newRows
-      },
       addRow(){
         this.dialogVisible = true
       },
-      dateName(fecha){
-        //
-        return date.formatDate(fecha, 'dddd, D-MMMM-YYYY', {
-            days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-            //daysShort: ['Dum', 'Lun', /* and all the rest of days - remember starting with Sunday */],
-            months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            //monthsShort: ['Ian', 'Feb', /* and all the rest of months */]
-          }
-        )
+      addPicture(){
+        this.camDialogVisible = true
       },
-      getAge(fecha){
-        return date.getDateDiff(new Date(), fecha, 'years')
-      },
-      getNewFileName(files){
-            this.$q.loading.show({ delay: 0, message: 'Subiendo..', spinner: 'QSpinnerIos', messageColor: 'white', spinnerColor: 'white' })
-            this.$axios.post(this.apiURL+'spAttachGenerateID',
-                {
-                  userCode: this.userCode,
-                  userCompany: this.userCompany,
-                  original_file_name: files[0].name,
-                  file_type: files[0].type,
-                  file_size: files[0].size,
-                  //row_id: this.row_id
-                  moduleName: this.moduleName
-                }
-            , {headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
-            ).then((response) => {
-                this.fileToUpload = response.data[0]
-                this.$refs.uploaderComponent.upload()
-            }).catch((error) => {
+      uploadPicture(picture){
+        this.$q.loading.show({ delay: 0, message: 'Subiendo..', spinner: 'QSpinnerIos', messageColor: 'white', spinnerColor: 'white' })
+        this.$axios.post(this.apiURL+'spAttachGenerateID',
+            {
+              userCode: this.userCode,
+              userCompany: this.userCompany,
+              original_file_name: "webcamphoto.jpeg",
+              file_type: "image/jpeg",
+              file_size: parseInt((picture.length * (3/4)) - 1),
+              //row_id: this.row_id
+              moduleName: this.moduleName
+            }
+        , {headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
+        ).then((response) => {
+            this.fileToUpload = response.data[0]
+            //Convert base64 image to blob
+            const formData = new FormData();
+            fetch(picture)
+            .then(res => res.blob())
+            .then(result => {
+              formData.append('webcamphoto.jpeg', result); //append blob to formData
+              //post data using formData
+              this.$axios.post(this.apiURL+'uploadFile' + '?attach_id=' + this.fileToUpload.attach_id +'' + '&upload_file_name=' + this.fileToUpload.upload_file_name
+              ,formData
+              ,{headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
+              ).then((secondResponse) => {
+                this.finish();
+                this.camDialogVisible = false;
+              }).catch((error) => {
                 console.error(error)
                 this.$q.loading.hide()
                 let mensaje = ''
@@ -169,19 +183,62 @@ export default ({
                     ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
                     ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
                 })
+              })
             })
+
+        }).catch((error) => {
+          console.error(error)
+          this.$q.loading.hide()
+          let mensaje = ''
+          if(error.message){ mensaje = error.message }
+          if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+          if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          this.$q.notify({ html: true, multiLine: false, color: 'red'
+              ,message: "Lo sentimos, no se pudo realizar acción.<br/>" + mensaje
+              ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+              ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+          })
+        })
+      },
+      getNewFileName(files){
+        this.$q.loading.show({ delay: 0, message: 'Subiendo..', spinner: 'QSpinnerIos', messageColor: 'white', spinnerColor: 'white' })
+        this.$axios.post(this.apiURL+'spAttachGenerateID',
+            {
+              userCode: this.userCode,
+              userCompany: this.userCompany,
+              original_file_name: files[0].name,
+              file_type: files[0].type,
+              file_size: files[0].size,
+              //row_id: this.row_id
+              moduleName: this.moduleName
+            }
+        , {headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
+        ).then((response) => {
+            this.fileToUpload = response.data[0]
+            this.$refs.uploaderComponent.upload()
+        }).catch((error) => {
+              console.error(error)
+              this.$q.loading.hide()
+              let mensaje = ''
+              if(error.message){ mensaje = error.message }
+              if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+              if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+              this.$q.notify({ html: true, multiLine: false, color: 'red'
+                  ,message: "Lo sentimos, no se pudo realizar acción.<br/>" + mensaje
+                  ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                  ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+              })
+          })
       },
       factoryFn(files){
-            return new Promise((resolve) => {
-                resolve({
-                    url: this.apiURL+'uploadFile'
-                    + '?attach_id='+this.fileToUpload.attach_id+''+'&upload_file_name=' + this.fileToUpload.upload_file_name,//agregar attach_id usado por API para marcar attachment como uploaded, y se envía Nombre de archivo a guardar en disco
-                    method: 'POST',
-                    headers: [
-                    { name: 'Authorization', value: 'Bearer ' + this.$q.sessionStorage.getItem('jwtToken')}
-                    ],
-                })
+        return new Promise((resolve) => {
+            resolve({
+                url: this.apiURL+'uploadFile'
+                + '?attach_id='+this.fileToUpload.attach_id+''+'&upload_file_name=' + this.fileToUpload.upload_file_name,//agregar attach_id usado por API para marcar attachment como uploaded, y se envía Nombre de archivo a guardar en disco
+                method: 'POST',
+                headers: [ { name: 'Authorization', value: 'Bearer ' + this.$q.sessionStorage.getItem('jwtToken')} ],
             })
+        })
       },
       finish(){
         this.$q.loading.hide()
@@ -241,9 +298,18 @@ export default ({
           resultado = ((size / 1024)/1024)
         }catch(ex){}
         return resultado.toFixed(2) + ' MB';
-      }
+      },
+      getIcon(fileType){
+        let icono = 'fas fa-paperclip'
+        if(fileType.includes('pdf')){icono='fas fa-file-pdf'}
+        if(fileType.includes('text/plain')){icono='fas fa-file-alt'}
+        if(fileType.includes('wordprocessing')){icono='fas fa-file-word'}
+        if(fileType.includes('spreadsheet')){icono='fas fa-file-excel'}
+        return icono
+      },
     },
     computed:{
+        console: () => console,
         userCode: { get () { return this.$store.state.main.userCode } },
         userCompany: { get () { return this.$store.state.main.userCompany } },
         userColor: { get () { return this.$store.state.main.userColor }  },
