@@ -77,6 +77,19 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootBitacora/Bitaevents/edit.vue') }
         ] 
       }
+      ,{ path: 'RootBitacora/Bitapeople', component: () => import('pages/RootBitacora/Bitapeople/main.vue')
+        ,children: [
+           { path: '/', component: () => import('pages/RootBitacora/Bitapeople/mainView.vue') } /*especial, porque tiene un filtro extra*/
+          ,{ path: ':id', component: () => import('pages/RootBitacora/Bitapeople/edit.vue') }
+        ] 
+      }
+      ,{ path: 'RootBitacora/Bitarides', component: () => import('pages/RootBitacora/Bitarides/main.vue')
+        ,children: [
+           { path: '/', component: () => import('pages/RootBitacora/Bitarides/mainView.vue') } /*especial, porque tiene un filtro extra*/
+          ,{ path: ':id', component: () => import('pages/RootBitacora/Bitarides/edit.vue') }
+        ] 
+      }
+      
       ,{ path: 'RootBitacora/BitaRoutes', component: () => import('pages/RootBitacora/BitaRoutes/main.vue')
         ,children: [
            { path: '/', component: () => import('../components/mainView/mainView.vue') }

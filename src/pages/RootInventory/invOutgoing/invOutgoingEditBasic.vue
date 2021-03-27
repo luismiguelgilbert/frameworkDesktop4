@@ -49,7 +49,7 @@
 
     <q-select
         label="Tipo de Documento de Entrega(*)" placeholder="Seleccione el Tipo de Documento con el que se entrega (*)" emit-value map-options filled
-        :options="lookup_invDocTypes" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        :options="lookup_invDocTypes" :readonly="(!editStatus.editMode=='edit'&&!allow_edit)||(editStatus.editMode=='create'&&!allow_insert)"
         :option-disable="opt => !opt.estado" 
         v-model="invDocTypeID"
         ref="invDocTypeID"
@@ -63,7 +63,8 @@
     <q-select
         label="Establecimiento (*)" placeholder="Seleccione el Establecimiento correspondiente al despacho los Items (*)" emit-value map-options filled
         :options="lookup_establecimientos" 
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
+        :option-disable="opt => !opt.estado" 
+        :readonly="!(partnerID>=0&&editStatus.editMode=='create')"
         v-model="sys_location_id"
         ref="sys_location_id" @input="sys_location_pos_id=null"
         :rules="[
@@ -76,7 +77,7 @@
     <q-select
         label="Punto de Emisión (*)" placeholder="Seleccione el Punto de Emisión correspondiente al despacho los Items (*)" emit-value map-options filled
         :options="sys_location_id>0?lookup_pos.filter(x=>x.sys_location_id==sys_location_id):[]"
-        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editMode)"
+        :option-disable="opt => !opt.estado" :readonly="!(partnerID>=0&&editStatus.editMode=='create')"
         v-model="sys_location_pos_id"
         ref="sys_location_pos_id"
         :rules="[
@@ -97,7 +98,7 @@
 
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Ingreso" filled
-        type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        type="textarea" :readonly="(!editStatus.editMode=='edit'&&!allow_edit)||(editStatus.editMode=='create'&&!allow_insert)"
         v-model="comments"
         />
 

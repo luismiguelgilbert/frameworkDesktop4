@@ -1,6 +1,6 @@
 <template>
 <div>
-    <q-layout v-if="(whLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;">
+    <q-layout v-if="(whLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px);  overflow-y: hidden !important;">
         
         <q-toolbar :class="toolbarComponentClass">
             <q-icon name="fas fa-map-marked-alt" color="primary" class="q-ml-md q-mr-md" />
@@ -14,7 +14,9 @@
                 @input="loadData"
                 :display-value="`${(placeID&&placeID>0)? lookup_places.find(x=>x.value==placeID).label : 'Selecciona Punto de Control'}`"
                 />
-            <q-btn flat stretch label="Registrar Evento" color="positive" icon="fas fa-plus" no-caps @click="openNewForm" />
+            <q-btn flat stretch label="Registrar Ingreso" color="positive" icon="fas fa-plus" no-caps @click="openNewForm" />
+            <q-space />
+            <div class="text-primary text-subtitle2">Visitantes: {{gridData.length}}</div>
             <q-space />
                 
             <q-input 
@@ -50,7 +52,6 @@
         <DxDataGrid
             ref="mainviewtableDxDataGrid"
             height="calc(100vh - 110px)"
-            width="calc(100vw)"
             column-resizing-mode="widget"
             :data-source="gridData"
             :allow-column-resizing="true" 
@@ -64,11 +65,13 @@
             >
                 
                 
-                <DxColumn name="record_id" data-field="record_id" data-type="number" caption="Código" :width="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="false" />
-                <DxColumn name="upload_file_name" data-field="upload_file_name" data-type="string" caption="Imagen" :width="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" cell-template="imageCellTemplate" />
-                <DxColumn name="fullname" data-field="fullname" data-type="string" caption="Usuario" :minWidth="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
-                <DxColumn name="is_critical" data-field="is_critical" data-type="boolean" caption="Crítico?" :width="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" cell-template="criticalCellTemplate" />
-                <DxColumn name="start_date" data-field="start_date" data-type="date" caption="Fecha"  :minWidth="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" format="dd-MMM-yyyy HH:mm" />
+                <DxColumn name="record_id" data-field="record_id" data-type="number" caption="Código" :width="100" alignment="left" :allowFiltering="false" :allowSorting="true" :visible="false" />
+                <DxColumn name="upload_file_name" data-field="upload_file_name" data-type="string" caption="Imagen" :width="65" alignment="center" :allowFiltering="false" :allowSorting="false" :visible="true" cell-template="imageCellTemplate" />
+                <DxColumn name="visitor_name" data-field="visitor_name" data-type="string" caption="Visitante" :minWidth="250" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="visitor_number" data-field="visitor_number" data-type="string" caption="# Identificación" :minWidth="140" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="start_date" data-field="start_date" data-type="date" caption="Fecha Ingreso"  :minWidth="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" format="dd-MMM-yyyy HH:mm" />
+                <DxColumn name="reason_name" data-field="reason_name" data-type="string" caption="Motivo" :minWidth="120" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="hasVehiculo" data-field="hasVehiculo" data-type="bool" caption="Vehículo?" :minWidth="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" cell-template="hasVehiculoCellTemplate" />
                 <DxColumn name="comments" data-field="comments" data-type="string" caption="Comentario" :minWidth="400" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
                 
                 <!--<DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> --> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
@@ -79,11 +82,14 @@
                 
                 <DxSelection select-all-mode="page" show-check-boxes-mode="always" mode="single" :deferred="false"/>
                 <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
-                <DxStateStoring :enabled="true" type="sessionStorage" storage-key="BitaeventsMain" :savingTimeout="200" />
+                <DxStateStoring :enabled="true" type="sessionStorage" storage-key="BitapeopleMain" :savingTimeout="200" />
 
                     
-                <template #criticalCellTemplate="{ data }">
-                    <q-icon color="red" name="fas fa-exclamation-triangle" v-if="data.value" class="q-ml-lg" />
+                <template #hasVehiculoCellTemplate="{ data }">
+                    <div style="display: inline-block;">
+                        <q-icon color="primary" name="fas fa-car" v-if="data.value"  style="display: inline-block;" />
+                        <div class="q-pl-md" style="display: inline-block;" >{{data.row.data.vehiculo_placa}}</div>
+                    </div>
                 </template>
 
                 <template #imageCellTemplate="{ data }">
@@ -154,7 +160,7 @@ export default ({
     },
     data () {
         return {
-            moduleName: "Bitaevents",
+            moduleName: "Bitapeople",
             lookup_places: [],
             placeID: null,
             //placeName: null,
@@ -198,6 +204,7 @@ export default ({
     methods:{
         loadUserPlaces(){
             this.whLoaded = false;
+            //load places
             this.$axios({
                 method: 'GET',
                 url: this.apiURL + 'spBitaPlacesByUser',
@@ -245,7 +252,7 @@ export default ({
 
                 this.$axios({
                     method: 'GET',
-                    url: this.apiURL + 'spBitaEventsByUserByPLace',
+                    url: this.apiURL + 'spBitaPeopleByUserByPlace',
                     headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
                     params: {
                         userCode: this.userCode,
@@ -254,7 +261,11 @@ export default ({
                         userLanguage: 'es',
                     }
                 }).then((response) => {
-                    this.gridData = response.data;
+                    this.gridData = JSON.parse(response.data[0].details);
+                    this.lookup_reasons = JSON.parse(response.data[0].lookup_reasons);
+                    this.lookup_visitors = JSON.parse(response.data[0].lookup_visitors);
+                    this.lookup_cars = JSON.parse(response.data[0].lookup_cars);
+                    this.lookup_visited = JSON.parse(response.data[0].lookup_visited);
                 }).catch((error) => {
                     console.dir(error.message)
                     let mensaje = ''
@@ -298,6 +309,23 @@ export default ({
                 ];
             }
         },
+        exportData(){
+            const context = this;
+            const workbook = new ExcelJS.Workbook();
+            const workSheet = workbook.addWorksheet('Visitantes');
+            const component = this.$refs['mainviewtableDxDataGrid'].instance;
+            exportDataGrid({
+                worksheet: workSheet,
+                component: component,
+                topLeftCell: { row: 1, column: 1 },
+                //customizeCell: ({ gridCell, excelCell }) => { setAlternatingRowsBackground(gridCell, excelCell); }
+            }).then(() => {
+                workbook.xlsx.writeBuffer().then((buffer) => {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Visitantes.xlsx');
+                })
+            })
+            
+        },
     },
     computed: {
         userCode: { get () { return this.$store.state.main.userCode }  },
@@ -339,6 +367,22 @@ export default ({
         editStatus: {
             get () { return this.$store.state[this.moduleName].editStatus },
             set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
+        },
+        lookup_reasons: {
+            get () { return this.$store.state[this.moduleName].lookup_reasons },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'lookup_reasons', value: val})  }
+        },
+        lookup_visitors: {
+            get () { return this.$store.state[this.moduleName].lookup_visitors },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'lookup_visitors', value: val})  }
+        },
+        lookup_cars: {
+            get () { return this.$store.state[this.moduleName].lookup_cars },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'lookup_cars', value: val})  }
+        },
+        lookup_visited: {
+            get () { return this.$store.state[this.moduleName].lookup_visited },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'lookup_visited', value: val})  }
         },
     },
     watch: {

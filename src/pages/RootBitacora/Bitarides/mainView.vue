@@ -1,6 +1,6 @@
 <template>
 <div>
-    <q-layout v-if="(whLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;">
+    <q-layout v-if="(whLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px);">
         
         <q-toolbar :class="toolbarComponentClass">
             <q-icon name="fas fa-map-marked-alt" color="primary" class="q-ml-md q-mr-md" />
@@ -14,7 +14,6 @@
                 @input="loadData"
                 :display-value="`${(placeID&&placeID>0)? lookup_places.find(x=>x.value==placeID).label : 'Selecciona Punto de Control'}`"
                 />
-            <q-btn flat stretch label="Registrar Evento" color="positive" icon="fas fa-plus" no-caps @click="openNewForm" />
             <q-space />
                 
             <q-input 
@@ -49,7 +48,7 @@
         
         <DxDataGrid
             ref="mainviewtableDxDataGrid"
-            height="calc(100vh - 110px)"
+            height="calc(100vh - 130px)"
             width="calc(100vw)"
             column-resizing-mode="widget"
             :data-source="gridData"
@@ -59,17 +58,24 @@
             :show-column-lines="userTableLinesDXcols"
             :show-row-lines="userTableLinesDXrows"
             :cache-enabled="false"
-            keyExpr="record_id"
+            keyExpr="carID"
             @context-menu-preparing="showOptions"
             >
                 
                 
-                <DxColumn name="record_id" data-field="record_id" data-type="number" caption="Código" :width="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="false" />
-                <DxColumn name="upload_file_name" data-field="upload_file_name" data-type="string" caption="Imagen" :width="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" cell-template="imageCellTemplate" />
-                <DxColumn name="fullname" data-field="fullname" data-type="string" caption="Usuario" :minWidth="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
-                <DxColumn name="is_critical" data-field="is_critical" data-type="boolean" caption="Crítico?" :width="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" cell-template="criticalCellTemplate" />
-                <DxColumn name="start_date" data-field="start_date" data-type="date" caption="Fecha"  :minWidth="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" format="dd-MMM-yyyy HH:mm" />
-                <DxColumn name="comments" data-field="comments" data-type="string" caption="Comentario" :minWidth="400" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="carID" data-field="carID" data-type="number" caption="Código" :width="100" alignment="left" :allowFiltering="false" :allowSorting="true" :visible="false" />
+                <DxColumn name="record_id" data-field="record_id" data-type="bool" caption="Disponible?" :width="90" alignment="center" :allowFiltering="false" :allowSorting="false" :visible="true" cell-template="isAvailableCellTemplate" />
+                <DxColumn name="placa" data-field="placa" data-type="string" caption="Placa" :width="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="marca" data-field="marca" data-type="string" caption="Marca" :width="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="modelo" data-field="modelo" data-type="string" caption="Modelo" :width="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="color" data-field="color" data-type="string" caption="Color" :width="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="out_responsable" data-field="out_responsable" data-type="string" caption="Responsable" :width="200" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="reason_name" data-field="reason_name" data-type="string" caption="Motivo" :width="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <DxColumn name="out_comments" data-field="out_comments" data-type="string" caption="Comentario"  alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                <!--
+                <DxColumn name="start_date" data-field="start_date" data-type="date" caption="Fecha Ingreso"  :minWidth="150" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true" format="dd-MMM-yyyy HH:mm" />
+                <DxColumn name="reason_name" data-field="reason_name" data-type="string" caption="Motivo" :minWidth="120" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="true"  />
+                -->
                 
                 <!--<DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> --> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
                 <DxPaging :page-size="50" />
@@ -79,11 +85,16 @@
                 
                 <DxSelection select-all-mode="page" show-check-boxes-mode="always" mode="single" :deferred="false"/>
                 <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
-                <DxStateStoring :enabled="true" type="sessionStorage" storage-key="BitaeventsMain" :savingTimeout="200" />
+                <DxStateStoring :enabled="true" type="sessionStorage" storage-key="BitaridesMain" :savingTimeout="200" />
 
                     
-                <template #criticalCellTemplate="{ data }">
-                    <q-icon color="red" name="fas fa-exclamation-triangle" v-if="data.value" class="q-ml-lg" />
+                <template #isAvailableCellTemplate="{ data }">
+                    <div >
+                        <q-icon 
+                            :color="data.value?'red':'positive'"
+                            :name="data.value?'fas fa-ban':'fas fa-check'"
+                            />
+                    </div>
                 </template>
 
                 <template #imageCellTemplate="{ data }">
@@ -110,11 +121,6 @@
 </div>
 </template>
 
-<style >
-.q-layout-container .q-layout{
-    overflow-y: hidden !important;
-}
-</style>
 
 <script>
 import Vue from 'vue';
@@ -154,7 +160,7 @@ export default ({
     },
     data () {
         return {
-            moduleName: "Bitaevents",
+            moduleName: "Bitarides",
             lookup_places: [],
             placeID: null,
             //placeName: null,
@@ -198,6 +204,7 @@ export default ({
     methods:{
         loadUserPlaces(){
             this.whLoaded = false;
+            //load places
             this.$axios({
                 method: 'GET',
                 url: this.apiURL + 'spBitaPlacesByUser',
@@ -245,7 +252,7 @@ export default ({
 
                 this.$axios({
                     method: 'GET',
-                    url: this.apiURL + 'spBitaEventsByUserByPLace',
+                    url: this.apiURL + 'spBitaRidesByUserByPlace',
                     headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
                     params: {
                         userCode: this.userCode,
@@ -254,7 +261,9 @@ export default ({
                         userLanguage: 'es',
                     }
                 }).then((response) => {
-                    this.gridData = response.data;
+                    this.gridData = JSON.parse(response.data[0].details);
+                    this.lookup_reasons = JSON.parse(response.data[0].lookup_reasons);
+                    this.lookup_chofer = JSON.parse(response.data[0].lookup_chofer);
                 }).catch((error) => {
                     console.dir(error.message)
                     let mensaje = ''
@@ -271,15 +280,6 @@ export default ({
             
             }
         },
-        openNewForm(){
-            this.editStatus = {
-                editMode: 'create'
-                ,copyRecord: 0
-                ,navigateToRecord: 0
-                ,placeID: this.placeID
-            }
-            this.$router.push(this.$router.currentRoute.path+'/'+this.editStatus.navigateToRecord) //navigate to Record
-        },
         showOptions(e){
             if(e.row.rowType=='data'){
                 e.component.selectRows(e.row.key);
@@ -289,7 +289,7 @@ export default ({
                         let newStatus = { 
                             editMode: 'edit',
                             copyRecord: 0,
-                            navigateToRecord: e.row.data.record_id,
+                            navigateToRecord: e.row.data.carID,
                             placeID: this.placeID
                         }
                         this.editStatus = newStatus;
@@ -297,6 +297,23 @@ export default ({
                     } }
                 ];
             }
+        },
+        exportData(){
+            const context = this;
+            const workbook = new ExcelJS.Workbook();
+            const workSheet = workbook.addWorksheet('Visitantes');
+            const component = this.$refs['mainviewtableDxDataGrid'].instance;
+            exportDataGrid({
+                worksheet: workSheet,
+                component: component,
+                topLeftCell: { row: 1, column: 1 },
+                //customizeCell: ({ gridCell, excelCell }) => { setAlternatingRowsBackground(gridCell, excelCell); }
+            }).then(() => {
+                workbook.xlsx.writeBuffer().then((buffer) => {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Visitantes.xlsx');
+                })
+            })
+            
         },
     },
     computed: {
@@ -339,6 +356,14 @@ export default ({
         editStatus: {
             get () { return this.$store.state[this.moduleName].editStatus },
             set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
+        },
+        lookup_reasons: {
+            get () { return this.$store.state[this.moduleName].lookup_reasons },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'lookup_reasons', value: val})  }
+        },
+        lookup_chofer: {
+            get () { return this.$store.state[this.moduleName].lookup_chofer },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'lookup_chofer', value: val})  }
         },
     },
     watch: {

@@ -1,6 +1,7 @@
 <template>
-<div>
-    <q-layout v-if="(whLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px);">
+<div >
+    <q-layout v-if="(whLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;" >
+
         <q-toolbar :class="toolbarComponentClass">
             <q-icon name="fas fa-warehouse" color="primary" class="q-ml-md q-mr-md" />
             <q-select
@@ -48,7 +49,6 @@
         <DxDataGrid
             ref="mainviewtableDxDataGrid"
             height="calc(100vh - 107px)"
-            width="calc(100vw)"
             column-resizing-mode="widget"
             :data-source="gridData"
             :allow-column-resizing="true" 
@@ -196,6 +196,13 @@
 </div>
 </template>
 
+<style >
+
+.q-layout-container .q-layout{
+    overflow-y: hidden !important;
+}
+
+</style>
 
 <script>
 import Vue from 'vue';

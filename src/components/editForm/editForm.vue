@@ -20,7 +20,7 @@
                         icon="fas fa-save" 
                         color="primary"  stretch >
                         <q-list>
-                            <q-item clickable v-ripple v-close-popup :class="userColor=='blackDark'?'text-white':'text-primary'" @click="saveData(false)">
+                            <q-item :disable="editConfig.disableSaveButton" clickable v-ripple v-close-popup :class="userColor=='blackDark'?'text-white':'text-primary'" @click="saveData(false)">
                                 <q-item-section avatar>
                                     <q-icon :color="userColor=='blackDark'?'white':'primary'" name="fas fa-save" />
                                 </q-item-section>
@@ -327,7 +327,7 @@ export default ({
                     this.$q.notify({ html: true, multiLine: false, color: 'red'
                         ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                         ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                        ,actions: [ { icon: 'fas fa-times', color: 'white', } ]
                     })
                     this.dataLoaded = true;
                 })

@@ -11,10 +11,12 @@ import Companies from './Companies' //Roles Companies
 import Modules from './Modules' //Roles Companies
 import Bitaplaces from './Bitaplaces' //Bitacora Places Companies
 import Bitacars from './Bitacars' //Bitacars
-import Bitaevents from './Bitaevents' //Bitacora Places Companies
-import Bitaconsola from './Bitaconsola' //Bitacora Consola
-import BitaRoutes from './BitaRoutes' //Bitacora Routes GPS
-import BitaRounds from './BitaRounds' //Bitacora Rounds
+import Bitaevents from './Bitaevents' //Bitacora
+import Bitapeople from './Bitapeople' //Ingresos y Salidas
+import Bitarides from './Bitarides' //Ingresos y Salidas
+//import Bitaconsola from './Bitaconsola' //Bitacora Consola
+//import BitaRoutes from './BitaRoutes' //Bitacora Routes GPS
+//import BitaRounds from './BitaRounds' //Bitacora Rounds
 import Notifications from './Notifications' //Notifications
 import Employees from './Employees' //Employees
 import Equipistas from './Equipistas' //Equipistas
@@ -83,9 +85,14 @@ export default function (/* { ssrContext } */) {
       ,Bitaplaces
       ,Bitacars
       ,Bitaevents
+      ,Bitapeople
+      ,Bitarides
+      /*
       ,Bitaconsola
       ,BitaRoutes
       ,BitaRounds
+      */
+
       //Others
       ,Notifications
       ,Employees
