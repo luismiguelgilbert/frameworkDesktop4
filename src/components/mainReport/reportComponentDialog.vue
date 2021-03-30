@@ -2,7 +2,8 @@
 <!--<q-dialog square  v-model="isVisible" @show="showEvent">-->
 <div style="margin: -16px;">    
     <iframe
-        class="full-width" style="min-height: calc(100vh - 146px); max-height: calc(100vh - 146px);" frameborder="0"
+        class="full-width" frameborder="0"
+        :style="rptType.toLowerCase()=='ssrs'?'min-height: calc(100vh - 86px); max-height: calc(100vh - 86px);':'min-height: calc(100vh - 92px); max-height: calc(100vh - 92px);'" 
         v-if="isURLready"
         :src="reportURL"
         />
@@ -38,6 +39,7 @@ export default ({
         rptLink: { type: String , required: true },
         rptLinkCompany: { type: Boolean , required: true },
         rptType: { type: String , required: true },
+        rptPowerBiExtraFilter: { type: String  },
     },
     data () {
         return {
@@ -82,6 +84,9 @@ export default ({
                 this.reportURL += '?rs:embed=true' 
                 this.reportURL += '&filter=sys_users/sys_user_code eq ' + this.$q.sessionStorage.getItem('sys_user_code')
                 this.reportURL += ' and sys_companies/sys_company_id eq ' + this.$q.sessionStorage.getItem('sys_user_company')
+                if(this.rptPowerBiExtraFilter&&this.rptPowerBiExtraFilter.length>0){
+                    this.reportURL += this.rptPowerBiExtraFilter
+                }
                 this.isURLready = true
                 console.dir(this.reportURL)
             }

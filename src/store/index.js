@@ -14,6 +14,7 @@ import Bitacars from './Bitacars' //Bitacars
 import Bitaevents from './Bitaevents' //Bitacora
 import Bitapeople from './Bitapeople' //Ingresos y Salidas
 import Bitarides from './Bitarides' //Ingresos y Salidas
+import Bitadashboard from './Bitadashboard' //Ingresos y Salidas
 //import Bitaconsola from './Bitaconsola' //Bitacora Consola
 //import BitaRoutes from './BitaRoutes' //Bitacora Routes GPS
 //import BitaRounds from './BitaRounds' //Bitacora Rounds
@@ -87,6 +88,7 @@ export default function (/* { ssrContext } */) {
       ,Bitaevents
       ,Bitapeople
       ,Bitarides
+      ,Bitadashboard
       /*
       ,Bitaconsola
       ,BitaRoutes

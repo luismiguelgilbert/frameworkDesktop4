@@ -380,7 +380,11 @@ export default {
           }catch(ex){
             this[x] = response.data[0][x]
           }
+          if(x=='userCompany'){
+            this.$q.sessionStorage.set('sys_user_company', response.data[0][x]) //sys_user_company
+          }
         })
+        
         this.computedDataLoaded=true;//para que se cargue el router-view IF computedData is loaded
         this.userColor = this.userColor//force theme to be applied
         this.$q.dark.set(this.userDarkMode)//force darkMode to be applied
@@ -450,6 +454,7 @@ export default {
   methods: {
     changeCompany(company){
       this.userCompany = company.companyID
+      this.$q.sessionStorage.set('sys_user_company', company.companyID) //sys_user_company
     },
     logOut(){
       

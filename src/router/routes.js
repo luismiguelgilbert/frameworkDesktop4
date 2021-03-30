@@ -89,6 +89,12 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootBitacora/Bitarides/edit.vue') }
         ] 
       }
+      ,{ path: 'RootBitacora/Bitadashboard', component: () => import('pages/RootBitacora/Bitadashboard/main.vue')
+        /*,children: [
+           { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
+        ]*/
+      }
+
       
       ,{ path: 'RootBitacora/BitaRoutes', component: () => import('pages/RootBitacora/BitaRoutes/main.vue')
         ,children: [

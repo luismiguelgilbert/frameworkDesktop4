@@ -113,7 +113,7 @@ export default {
                 }).then((response) => {
                     if(response.data.length > 0){
                         this.$q.sessionStorage.set('jwtToken', response.data[0].jwtToken) //token, indispensable
-                        this.$q.sessionStorage.set('sys_user_code', response.data[0].sys_user_code) //sys_user_code
+                        this.$q.sessionStorage.set('sys_user_code', response.data[0].sys_user_code) //sys_user_code                        
                         this.$q.sessionStorage.set('sys_profile_id', response.data[0].sys_profile_id) //sys_profile_id
                         this.$q.loading.hide()
                         console.dir('Welcome to BITT!')

@@ -71,13 +71,12 @@
             :selectionMode="'single'"
             :columns="[
                     //{ name: 'value', required: true, label: 'Código', align: 'left', field: row => row.short_name_es , sortable: true }
-                    { name: 'name_es', required: true, label: '# Lote', align: 'left', field: row => row.name_es, sortable: false,    }
-                    ,{ name: 'expirationDate', required: true, label: 'Fecha Expiración', align: 'left', field: row => row.expirationDate, sortable: false}
-                    ,{ name: 'firstRcvdDate', required: true, label: 'Primer Movimiento', align: 'left', field: row => row.firstRcvdDate, sortable: false}
-                    ,{ name: 'lastRcvdDate', required: true, label: 'Último Movimiento', align: 'left', field: row => row.lastRcvdDate, sortable: false}
-                    
+                     { name: 'name_es', required: true, label: '# Lote', align: 'left', field: row => row.name_es, sortable: false,    }
+                    ,{ name: 'expirationDate', required: true, label: 'Fecha Expiración', align: 'left', field: row => row.expirationDate, sortable: true}
+                    ,{ name: 'firstRcvdDate', required: true, label: 'Primer Movimiento', align: 'left', field: row => row.firstRcvdDate, sortable: true}
+                    ,{ name: 'lastRcvdDate', required: true, label: 'Último Movimiento', align: 'left', field: row => row.lastRcvdDate, sortable: true}
                     //{ name: 'warrantyDate', required: true, label: 'Fecha Garantía', align: 'left', field: row => row.warrantyDate, sortable: false,    }
-                    ,{ name: 'quantityAvailable', required: true, label: 'Cantidad Disponible', align: 'right', field: row => row.quantityAvailable, sortable: false, style: 'max-width: 75px;', }
+                    ,{ name: 'quantityAvailable', required: true, label: 'Cantidad Disponible', align: 'right', field: row => row.quantityAvailable, sortable: true, style: 'max-width: 75px;', }
                     ]"
             @onCancel="newLineDialog=false"
             @onSelect="(selectedRows)=>{addRow(selectedRows)}"
