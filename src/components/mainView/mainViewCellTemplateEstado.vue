@@ -2,7 +2,7 @@
     <div style="padding-left: 5px; padding-right: 5px;">
         <q-icon
             :color="data.value?'positive':'red'"
-            :name="data.value?'fas fa-check-circle':'fas fa-times-circle'"
+            :name="data.column.dataField.includes('sex')?(data.value?('fas fa-male'):'fas fa-female'):(data.value?('fas fa-check-circle'):'fas fa-times-circle')"
             />
         {{data.displayValue}}
     </div>

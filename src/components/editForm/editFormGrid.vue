@@ -3,6 +3,7 @@
         <q-toolbar class="no-padding">
             <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='form' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addForm" />
             <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='list' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addList" />
+            <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='listRepeated' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addList" />
             <q-btn v-if="tabRecord.tabConfig.deleteAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
         </q-toolbar>
         <q-separator />
@@ -36,7 +37,7 @@
                 :visible="columna.visible"
                 :allow-editing="columna.allowEditing"
                 :format="columna.format?columna.format:undefined"
-                alignment="left"
+                :alignment="columna.alignment?columna.alignment:'left'"
                 >
                 <DxLookup v-if="columna.lookupOptions"
                         value-expr="value" display-expr="label"
@@ -135,10 +136,13 @@
                     <q-separator />
                     
                     <q-card-actions align="around">
-                        <q-btn icon="fas fa-save" flat color="primary" label="Agregar" @click="listSave" :disable="!listSelectedRowKeys.length>0" />
+                        <q-btn v-if="tabRecord.tabConfig.insertType=='list'" icon="fas fa-save" flat color="primary" label="Agregar" @click="listSave" :disable="!listSelectedRowKeys.length>0" />
+                        <q-btn v-if="tabRecord.tabConfig.insertType=='listRepeated'" icon="fas fa-save" flat color="primary" label="Agregar.." @click="listSaveRepeat" :disable="!listSelectedRowKeys.length>0" />
+                            
                     </q-card-actions>
                 </div>
         </DxPopup>
+        
 
     </div>
 </template>
@@ -292,6 +296,7 @@ export default ({
             this.listSelectedRowKeys = selectedRowKeys;
         },
         listSave(){
+            //similar a [listSaveRepeat] pero permite 1 sola vez cada registros de la lista
             let newGridData = JSON.parse(JSON.stringify(this.gridData));
             //Iterate selected Items
             this.listData.filter(x=>this.listSelectedRowKeys.some(y=>y==x[this.tabRecord.tabConfig.listKeyColumn])).map(row=>{
@@ -315,7 +320,36 @@ export default ({
             })
             this.gridData = newGridData;
             this.isListDialog = false
-        }
+        },
+        listSaveRepeat(){
+            //similar a [listSave] pero permite múltiples veces el mismo registro de la lista y usa un PK distinto
+            let newGridData = JSON.parse(JSON.stringify(this.gridData));
+            //Iterate selected Items
+            this.listData.filter(x=>this.listSelectedRowKeys.some(y=>y==x[this.tabRecord.tabConfig.listKeyColumn])).map(row=>{
+                //ADD item to list, haciendo una conversión de datos (entre lista lookup y lista de datos, porque no siempre los nombres de las columnas son iguales)
+                let newRow =  {}
+                //Agrega índice
+                let newKeyValue = 1;
+                if(this.gridData.length > 0){
+                    let temp = this.getMax(this.gridData, this.tabRecord.tabConfig.keyColumn);
+                    newKeyValue = parseInt(temp[this.tabRecord.tabConfig.keyColumn]) + parseInt(1);
+                }
+                newRow[this.tabRecord.tabConfig.keyColumn] = newKeyValue;
+                //this.tabRecord.tabConfig.columns.filter(z=>z.listDataField).map(col=>{
+                this.tabRecord.tabConfig.columns.map(col=>{
+                    if(row[col.listDataField]){
+                        newRow[col.dataField] = row[col.listDataField]
+                    }else{//no existe en el lookupList, entonces si tiene un campo x default lo agrego
+                        if(!(col.defaultValue==undefined)){
+                            newRow[col.dataField] = col.defaultValue
+                        }
+                    }
+                })
+                newGridData.push(newRow)
+            })
+            this.gridData = newGridData;
+            this.isListDialog = false
+        },
 
     },
     computed:{
