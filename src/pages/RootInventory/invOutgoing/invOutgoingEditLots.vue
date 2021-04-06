@@ -185,7 +185,7 @@ export default ({
             //rowOrderTake == 0 => desde primer movimiento hacia último movimiento
             //rowOrderTake == 1 => desde último movimiento hacia primer movimiento
             let newRows = JSON.parse(JSON.stringify(this.lots))
-            let selectedRowsData = this.lookup_lots.filter(x=> selectedRows.some(y=> x.lotID==y && x.invID == selectedColumn.invID));//pendiente
+            let selectedRowsData = this.lookup_lots.filter(x=> selectedRows.some(y=> x.lotID==y && x.invID == this.selectedColumn.invID));//pendiente
             console.dir()
             let matchQty = this.selectedColumn.newQuantity
             let rowQty = 0
