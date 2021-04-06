@@ -94,8 +94,6 @@ const routes = [
            { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
         ]*/
       }
-
-      
       ,{ path: 'RootBitacora/BitaRoutes', component: () => import('pages/RootBitacora/BitaRoutes/main.vue')
         ,children: [
            { path: '/', component: () => import('../components/mainView/mainView.vue') }
@@ -114,7 +112,6 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootBitacora/Bitaconsola/edit.vue') }
         ] 
       }
-      
       ,{ path: 'RootBitacora/Bitacars', component: () => import('pages/RootBitacora/Bitacars/main.vue')
         ,children: [
            { path: '/', component: () => import('../components/mainView/mainView.vue') }
@@ -173,16 +170,17 @@ const routes = [
       }
 
       //ENS
-      ,{ path: 'RootENS/Equipistas', component: () => import('pages/RootENS/Equipistas/main.vue')
+      ,{ path: 'RootENS/ENSEquipistas', component: () => import('pages/RootENS/ENSEquipistas/main.vue')
         ,children: [
            { path: '/', component: () => import('../components/mainView/mainView.vue') }
-          ,{ path: ':id', component: () => import('pages/RootENS/Equipistas/edit.vue') }
+          ,{ path: ':id', component: () => import('pages/RootENS/ENSEquipistas/edit.vue') }
         ] 
       }
-      ,{ path: 'RootENS/Equipista', component: () => import('pages/RootENS/Equipista/main.vue')
+      ,{ path: 'RootENS/ENSEquipista', component: () => import('pages/RootENS/ENSEquipista/main.vue')
         ,children: [
-           { path: '/', component: () => import('../components/mainView/mainView.vue') }
-          ,{ path: ':id', component: () => import('pages/RootENS/Equipista/edit.vue') }
+           //{ path: '/', component: () => import('../components/mainView/mainView.vue') }
+           { path: '/', component: () => import('pages/RootENS/ENSEquipista/edit.vue') }
+          //,{ path: ':id', component: () => import('pages/RootSchoenstatt/SCHPersona/edit.vue') }
         ] 
       }
       

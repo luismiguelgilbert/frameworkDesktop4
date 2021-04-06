@@ -20,8 +20,10 @@ import Bitadashboard from './Bitadashboard' //Ingresos y Salidas
 //import BitaRounds from './BitaRounds' //Bitacora Rounds
 import Notifications from './Notifications' //Notifications
 import Employees from './Employees' //Employees
-import Equipistas from './Equipistas' //Equipistas
-import Equipista from './Equipista' //Equipista
+//import Equipistas from './Equipistas' //Equipistas
+//import Equipista from './Equipista' //Equipista
+import ENSEquipistas from './ENSEquipistas' //ENSEquipistas
+import ENSEquipista from './ENSEquipista' //ENSEquipista
 import ChartAccount from './ChartAccount' //ChartAccount
 import Taxes from './Taxes' //Taxes
 import TaxesMaster from './TaxesMaster' //TaxesMaster
@@ -98,8 +100,11 @@ export default function (/* { ssrContext } */) {
       //Others
       ,Notifications
       ,Employees
-      ,Equipista
-      ,Equipistas
+      //ENS
+      ,ENSEquipistas
+      ,ENSEquipista
+      //,Equipista
+      //,Equipistas
       //FINANCES
       ,ChartAccount
       ,Taxes

@@ -15,9 +15,9 @@ export default ({
     },
     data () {
         return {
-            moduleName: "SCHPersonas", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
+            moduleName: "ENSEquipistas", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
             moduleMainRoute: '/RootENS/ENSEquipistas',
-            rptName_: 'Datos de Miembro', rptLink_: 'sysUser', rptLinkCompany_: true, rptType_: 'ssrs',
+            rptName_: 'Equipistas', rptLink_: 'ENSEquipistas', rptLinkCompany_: true, rptType_: 'ssrs',
         }
     },
     computed:{
