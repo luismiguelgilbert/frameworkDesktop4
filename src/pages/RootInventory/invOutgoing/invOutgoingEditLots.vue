@@ -182,12 +182,17 @@ export default ({
             return max;
         },
         addRow(selectedRows,rowOrderTake){
+            
             //rowOrderTake == 0 => desde primer movimiento hacia último movimiento
             //rowOrderTake == 1 => desde último movimiento hacia primer movimiento
             let newRows = JSON.parse(JSON.stringify(this.lots))
             let selectedRowsData = this.lookup_lots.filter(x=> selectedRows.some(y=> x.lotID==y && x.invID == this.selectedColumn.invID));//pendiente
-            console.dir()
             let matchQty = this.selectedColumn.newQuantity
+            let existingQTy = 0
+            this.lots.filter(x=>x.invID == this.selectedColumn.invID).map(y=>{
+                existingQTy = parseFloat(existingQTy) + parseFloat(y.quantity)
+            })
+            matchQty = parseFloat(matchQty) - parseFloat(existingQTy)
             let rowQty = 0
             
 

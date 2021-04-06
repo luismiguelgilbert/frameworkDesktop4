@@ -27,7 +27,7 @@ export default ({
         this.columnKeyName = 'sys_user_code';
         let newEditConfig = {
             hideCloseButton: true,//specific in this module
-            spSelectName: 'spEnsPersonasSelectEdit',
+            spSelectName: 'spEnsPersonaSelectEdit', //notar que es específico para este módulo (en vez de spEnsPersonasSelectEdit que lleva s)
             spUpdateName: 'spEnsPersonasUpdate',
             toolbarTitle: "Mi Perfil",
             startTab: 'basic',
