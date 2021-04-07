@@ -18,28 +18,12 @@ export default ({
     },
     mounted(){//NO debe ser created, porque aun NO estaría creado el componente editForm
         let newEditConfig = {
-            spSelectName: 'spBitaeventsSelectEdit',
-            spUpdateName: 'spBitaeventsUpdate',
-            toolbarTitle: "Evento",
+            spSelectName: 'spEnsTeamsSelectEdit',
+            spUpdateName: 'spEnsTeamsUpdate',
+            toolbarTitle: "Equipo",
             startTab: 'basic',
-            disableSaveButton: true,//hides save button from dropwn save and dropwn down save and close
             moduleTabs: [
-                { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Evento', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitaevents/BitaeventsEditBasic.vue' },
-                //{ tabName: 'picture', iconName: 'fas fa-camera', textLabel: 'Foto de Perfil', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormPicture.vue', pictureConfig: { section: 'basic', upload_file_name: 'upload_file_name', attach_id: 'picture_attach_ID'} },
-                /*{ tabName: 'places', iconName: 'fas fa-map-marked-alt', textLabel: 'Puntos de Control Asignados', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormGrid.vue',
-                    tabConfig: { 
-                        dataName: 'places', 
-                        keyColumn: 'placeID',  listKeyColumn: 'placeID',
-                        insertAllowed: true, insertType: 'list',  insertList: 'lookup_places',
-                        deleteAllowed: true,
-                        columns: [
-                            //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'placeID', listDataField: 'placeID', dataType: 'number', visible: false },
-                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Punto de Control', dataField: 'name_es', listDataField: 'name_es', dataType: 'string', visible: true },
-                        ],
-                    }
-                },*/
-                { tabName: 'files', iconName: 'fas fa-paperclip', textLabel: 'Archivos Adjuntos', isTabDisable: false, rootPath:'components', importPath: 'filesView/filesView' },
+                { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Equipo', isTabDisable: false, rootPath:'pages', importPath: 'RootENS/ENSTeams/ENSTeamsEditBasic.vue' },
                 { tabName: 'history', iconName: 'fas fa-history', textLabel: 'Auditoría de Cambios', isTabDisable: false, rootPath:'components', importPath: 'historyView/historyView' }
             ],
             //name es el nombre del property en el editData (vuex)
@@ -47,7 +31,6 @@ export default ({
             //fields sirve para enviar específicamente los campos indicados (si es null entonces envía todos)
             editDataSaveProperties: [
                 { name: 'basic', filterBy: null, fields: null },
-                { name: 'files', filterBy: null, fields: ['attach_id'] }
             ],
             //hide Tabs if something happens
             tabStatusChange:[

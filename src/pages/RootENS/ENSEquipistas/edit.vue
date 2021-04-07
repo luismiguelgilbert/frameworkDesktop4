@@ -136,7 +136,7 @@ export default ({
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Cobertura (Ciudades)', dataField: 'jobPlaces', dataType: 'string', visible: true },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Descripción del Cargo (Conocimientos)', dataField: 'jobSkills', dataType: 'textArea', visible: true },
                             //{alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Descripción del Cargo (Conocimientos)', dataField: 'jobSkills', dataType: 'string', visible: true },
-                            {alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Activo?', dataField: 'estado', dataType: 'boolean', visible: true, defaultValue: true },
+                            //{alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Activo?', dataField: 'estado', dataType: 'boolean', visible: true, defaultValue: true },
                         ],
                     }
                 },

@@ -22,6 +22,7 @@ export default ({
             spUpdateName: 'spBitapeopleUpdate',
             toolbarTitle: "Ingreso",
             startTab: this.editStatus.editMode=='create'?'basic':'exit',
+            disableSaveButton: true,//hides save button from dropwn save and dropwn down save and close
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Ingreso', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitapeople/BitapeopleEditBasic.vue' },
                 { tabName: 'exit', iconName: 'fas fa-sign-out-alt', textLabel: 'Registrar Salida', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitapeople/BitapeopleEditExit.vue' },

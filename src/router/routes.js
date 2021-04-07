@@ -178,9 +178,30 @@ const routes = [
       }
       ,{ path: 'RootENS/ENSEquipista', component: () => import('pages/RootENS/ENSEquipista/main.vue')
         ,children: [
-           //{ path: '/', component: () => import('../components/mainView/mainView.vue') }
-           { path: '/', component: () => import('pages/RootENS/ENSEquipista/edit.vue') }
-          //,{ path: ':id', component: () => import('pages/RootSchoenstatt/SCHPersona/edit.vue') }
+          { path: '/', component: () => import('pages/RootENS/ENSEquipista/edit.vue') }
+        ] 
+      }
+      ,{ path: 'RootENS/ENSTeams', component: () => import('pages/RootENS/ENSTeams/main.vue')
+        ,children: [
+           { path: '/', component: () => import('../components/mainView/mainView.vue') }
+          ,{ path: ':id', component: () => import('pages/RootENS/ENSTeams/edit.vue') }
+        ] 
+      }
+      ,{ path: 'RootENS/ENSServicios', component: () => import('pages/RootENS/ENSServicios/main.vue')
+        ,children: [
+           { path: '/', component: () => import('../components/mainView/mainView.vue') }
+          ,{ path: ':id', component: () => import('pages/RootENS/ENSServicios/edit.vue') }
+        ] 
+      }
+      ,{ path: 'RootENS/ENSLibros', component: () => import('pages/RootENS/ENSLibros/main.vue')
+        ,children: [
+           { path: '/', component: () => import('../components/mainView/mainView.vue') }
+          ,{ path: ':id', component: () => import('pages/RootENS/ENSLibros/edit.vue') }
+        ] 
+      }
+      ,{ path: 'RootENS/ENSJobSearch', component: () => import('pages/RootENS/ENSJobSearch/main.vue')
+        ,children: [
+          { path: '/', component: () => import('pages/RootENS/ENSJobSearch/edit.vue') }
         ] 
       }
       

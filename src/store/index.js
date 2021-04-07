@@ -24,6 +24,10 @@ import Employees from './Employees' //Employees
 //import Equipista from './Equipista' //Equipista
 import ENSEquipistas from './ENSEquipistas' //ENSEquipistas
 import ENSEquipista from './ENSEquipista' //ENSEquipista
+import ENSTeams from './ENSTeams' //ENSTeams
+import ENSServicios from './ENSServicios' //ENSServicios
+import ENSLibros from './ENSLibros' //ENSLibros
+import ENSJobSearch from './ENSJobSearch' //ENSJobSearch
 import ChartAccount from './ChartAccount' //ChartAccount
 import Taxes from './Taxes' //Taxes
 import TaxesMaster from './TaxesMaster' //TaxesMaster
@@ -103,6 +107,10 @@ export default function (/* { ssrContext } */) {
       //ENS
       ,ENSEquipistas
       ,ENSEquipista
+      ,ENSTeams
+      ,ENSServicios
+      ,ENSLibros
+      ,ENSJobSearch
       //,Equipista
       //,Equipistas
       //FINANCES

@@ -20,7 +20,7 @@
                         icon="fas fa-save" 
                         color="primary"  stretch >
                         <q-list>
-                            <q-item :disable="editConfig.disableSaveButton" clickable v-ripple v-close-popup :class="userColor=='blackDark'?'text-white':'text-primary'" @click="saveData(false)">
+                            <q-item v-if="!(editConfig.disableSaveButton==true)" clickable v-ripple v-close-popup :class="userColor=='blackDark'?'text-white':'text-primary'" @click="saveData(false)">
                                 <q-item-section avatar>
                                     <q-icon :color="userColor=='blackDark'?'white':'primary'" name="fas fa-save" />
                                 </q-item-section>

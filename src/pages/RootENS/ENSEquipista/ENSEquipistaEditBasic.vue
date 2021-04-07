@@ -1,11 +1,11 @@
 <template>
 <q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
-    <div>
+    <!--<div>
       <q-toggle
         tabindex="-1"
         v-model="estado" color="positive" label="Estado" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         />
-    </div>
+    </div>-->
 
     <div>
       <q-toggle

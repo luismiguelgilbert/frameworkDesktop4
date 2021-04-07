@@ -22,7 +22,7 @@ export default ({
             spUpdateName: 'spBitaridesUpdate',
             toolbarTitle: "Vehículo",
             startTab: 'basic',
-            disableSaveButton: true,//disable save button from dropwn save and dropwn down save and close
+            disableSaveButton: true,//hides save button from dropwn save and dropwn down save and close
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-sign-out-alt', textLabel: 'Registro de Viaje', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitarides/BitaridesEditBasic.vue' },
                 //{ tabName: 'picture', iconName: 'fas fa-camera', textLabel: 'Foto de Perfil', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormPicture.vue', pictureConfig: { section: 'basic', upload_file_name: 'upload_file_name', attach_id: 'picture_attach_ID'} },

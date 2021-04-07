@@ -47,8 +47,11 @@
             <DxEditing 
                 :allow-updating="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" 
                 mode="cell" :select-text-on-edit-start="true" start-edit-action="click" /> <!-- me gustan: cell, row, popup -->
-        
-      />
+            />
+            
+            <DxSummary>
+                <DxTotalItem :key="index" v-for="(row,index) in tabRecord.tabConfig.summarycolumns" :column="row.columnName" :summary-type="row.summaryType" > <DxValueFormat type="#.00" /> </DxTotalItem>
+            </DxSummary>
         </DxDataGrid>
 
         <!--Dialog para cuando es Formulario-->
@@ -148,7 +151,7 @@
 </template>
 
 <script>
-import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxPager, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup /*, DxSearchPanel*/ } from 'devextreme-vue/data-grid';
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxPager, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxValueFormat /*, DxSearchPanel*/ } from 'devextreme-vue/data-grid';
 import DxPopup, { DxToolbarItem  } from 'devextreme-vue/popup';
 import DxTextBox from 'devextreme-vue/text-box';
 
@@ -192,7 +195,10 @@ export default ({
         DxPopup,
         DxLookup,
         DxToolbarItem,
-        DxTextBox
+        DxTextBox,
+        DxSummary,
+        DxTotalItem, 
+        DxValueFormat
         //DxSearchPanel
     },
     methods: {
