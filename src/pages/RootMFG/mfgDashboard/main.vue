@@ -45,8 +45,9 @@
                         rptLink="mfgDashboard"
                         :rptLinkCompany="false"
                         rptType="PBIRS"
+                        :rptPowerBiExtraFilter="' and mfgOrders_Dash_Headers_view/sys_company_id eq ' + userCompany "
                         />
-                        <!-- :rptPowerBiExtraFilter="' and bitaPlacesUsers/sys_company_id eq ' + userCompany + ' and bitaPlacesUsers/sys_user_code eq ' + userCode " -->
+                        
                         <!-- :rptPowerBiExtraFilter="' and bitaPlacesUsers_view/sys_company_id eq 1 and bitaPlacesUsers_view/sys_user_code eq 1 '" -->
                 </div>
             </div>
