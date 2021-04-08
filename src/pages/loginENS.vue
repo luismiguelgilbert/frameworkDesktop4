@@ -67,7 +67,7 @@ export default {
         
         colors.setBrand('primary', '#2F74EB') //#1976D2 //ANTES:1867C0 //389ffd //2A68D3 //2F74EB nuevo
         this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
-        this.$q.dark.set(this.isOSdarkMode)//this.$q.dark.set(false)//force darkMode to be off always
+        //this.$q.dark.set(this.isOSdarkMode)//this.$q.dark.set(false)//force darkMode to be off always
         this.$axios.get('config.json')
         .then((response) => {
             if(response && response.data){
