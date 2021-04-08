@@ -114,7 +114,7 @@
                                             <template v-slot:prepend><q-icon name="fas fa-user" /></template>
                                         </q-input>
                                         <q-input
-                                            label="Habilidades" readonly filled v-model="job.jobSkills"
+                                            label="Habilidades" readonly filled v-model="job.jobSkills" type="textarea"
                                             >
                                             <template v-slot:prepend><q-icon name="fas fa-briefcase" /></template>
                                         </q-input>

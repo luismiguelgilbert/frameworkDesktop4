@@ -32,8 +32,24 @@
             :title="$q.screen.gt.xs?menuData.find(x=>x.link_name==ruta).label:undefined"
             
             menu-anchor="bottom left" menu-self="top left"  no-caps >
-            <q-menu square v-if="router.currentRoute.path!='/RootPreferences'">
-              <q-list class="text-grey-7">
+            <q-menu square v-if="router.currentRoute.path!='/RootPreferences'" @show="scrolltoOption">
+              <q-virtual-scroll ref="dropdownMenuList" style="height: 250px;" :items="menuData.filter(y=>y.parent == menuData.find(x=>x.link_name==ruta).parent)"  class="text-grey-7">
+                <template v-slot="{ item, index }">
+                  <q-item :key="index"
+                    clickable :to="'/'+item.link_name"
+                    :active="item.link_name==menuData.find(x=>x.link_name==ruta).link_name"
+                    active-class="bg-primary text-white text-weight-bold"
+                    :title="item.comment">
+                    <q-item-section avatar>
+                      <q-icon :name="item.icon" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label >{{item.label}}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-virtual-scroll>
+              <!--<q-list class="text-grey-7">
                   <q-item
                     v-for="(menuItem,index) in menuData.filter(y=>y.parent == menuData.find(x=>x.link_name==ruta).parent)" :key="index"
                     clickable :to="'/'+menuItem.link_name"
@@ -48,7 +64,7 @@
                       <q-item-label >{{menuItem.label}}</q-item-label>
                     </q-item-section>
                   </q-item>
-              </q-list>
+              </q-list>-->
             </q-menu>
           </q-btn>
 
@@ -581,16 +597,29 @@ export default {
       if(this.mainMenuSearchString.trim().length==0){
         return this.menuData.filter(x=>x.parent==rootID)
       }else{
-        return this.menuData.filter(x=>x.parent==rootID&&x.sys_link_id.length==4&&x.label.toLowerCase().includes(this.mainMenuSearchString.toLowerCase()))
+        return this.menuData.filter(x=>x.parent==rootID&&x.sys_link_id.length==4&&(x.label.toLowerCase().includes(this.mainMenuSearchString.toLowerCase())||x.comment.toLowerCase().includes(this.mainMenuSearchString.toLowerCase()))  )
       }
     },
     focusSearchMenuInput(){
       this.$refs['mainMenuSearchStringInput'].focus()
-    } 
+    },
+    scrolltoOption(e){
+      let indice = 0
+      try{
+        indice = this.menuData.filter(y=>y.parent == this.menuData.find(x=>x.link_name==this.ruta).parent).findIndex(k => k.link_name==this.ruta)
+        indice++;
+        if(indice>0){
+          this.$refs.dropdownMenuList.scrollTo(indice)
+        }
+      }
+      catch(ex){}
+      
+    }
      
   },
 
   computed:{
+    console: () => console,
     userColor: {
       get () { return this.$store.state.main.userColor },
       set (val) { this.$store.commit('main/updateState', {key: 'userColor', value: val}) }
@@ -700,7 +729,7 @@ export default {
           return this.menuData.filter(x=>x.parent==null&&x.sys_link_id!=99&&x.sys_link_id!=98)
         }else{
           let initialData = this.menuData.filter(x=>x.sys_link_id!=99&&x.sys_link_id!=98);
-          let detailsData = initialData.filter(x=>x.parent&&x.sys_link_id.length==4&&x.label.toLowerCase().includes(this.mainMenuSearchString.toLowerCase()))
+          let detailsData = initialData.filter(x => x.parent&&x.sys_link_id.length==4&&(x.label.toLowerCase().includes(this.mainMenuSearchString.toLowerCase() || x.comment.toLowerCase().includes(this.mainMenuSearchString.toLowerCase()) ) ))
           let parentData = initialData.filter(x=>x.parent==null&&(detailsData.some(y=>y.parent==x.sys_link_id)))
           return parentData
         }
