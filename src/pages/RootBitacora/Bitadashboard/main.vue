@@ -98,7 +98,7 @@ export default ({
         this.rptLink = this.rptLink_;
         this.rptLinkCompany = this.rptLinkCompany_;
         this.rptType = this.rptType_;
-        this.loadUserPlaces();
+        //this.loadUserPlaces();
     },
     data () {
         return {
@@ -110,44 +110,6 @@ export default ({
         }
     },
     methods:{
-        loadUserPlaces(){
-            this.whLoaded = false;
-            this.$axios({
-                method: 'GET',
-                url: this.apiURL + 'spBitaPlacesByUser',
-                headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-                params: {
-                    userCode: this.userCode,
-                    userCompany: this.userCompany,
-                    userLanguage: 'es',
-                }
-            }).then((response) => {
-                this.lookup_places = response.data
-                if(!(this.editStatus.placeID)){
-                    if(response.data&&response.data.length>0){
-                        this.placeID = response.data[0].value;
-                        this.dataLoaded = true;
-                    }
-                }else{
-                    this.placeID = this.editStatus.placeID;
-                    this.loadData();
-                    this.dataLoaded = true;
-                }
-            }).catch((error) => {
-                this.whLoaded = true;
-                console.dir(error.message)
-                let mensaje = ''
-                if(error.message){ mensaje = error.message }
-                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                this.$q.notify({ html: true, multiLine: false, color: 'red'
-                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                })
-                this.maindataLoaded = true;
-            })
-        },
         openReportForm(reporte){
             if(reporte==1){
                 this.reportData = { name_es: 'Reporte de Visitas', link_name:'sp_RPT_bita_records_details', report_type: 'ssrs' }
