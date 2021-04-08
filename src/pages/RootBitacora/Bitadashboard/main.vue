@@ -89,6 +89,7 @@ export default ({
         reportComponent
     },
     created(){
+        this.dataLoaded = false;
         if(!(this.$store.state[this.moduleName].columnsUser)){//NO existe, entonces inicializo
             this.$store.commit(this.moduleName+'/resetToDefaultState')
         }
@@ -99,6 +100,7 @@ export default ({
         this.rptLinkCompany = this.rptLinkCompany_;
         this.rptType = this.rptType_;
         //this.loadUserPlaces();
+        this.dataLoaded = true;
     },
     data () {
         return {
