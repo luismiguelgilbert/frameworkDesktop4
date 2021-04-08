@@ -270,7 +270,7 @@ export default ({
                 if(x.dataType=='string'){ newRow[x.dataField] = this.formDialogData[x.dataField] }
                 if(x.dataType=='textArea'){ newRow[x.dataField] = this.formDialogData[x.dataField] }
                 if(x.dataType=='date'){ newRow[x.dataField] = this.formDialogData[x.dataField] }
-                if(x.dataType=='number'){ newRow[x.dataField] = this.formDialogData[x.dataField] ? parseInt(this.formDialogData[x.dataField]) : 0 }
+                if(x.dataType=='number'){ newRow[x.dataField] = this.formDialogData[x.dataField] ? parseFloat(this.formDialogData[x.dataField]) : 0 }
                 if(x.dataType=='boolean'){ newRow[x.dataField] = this.formDialogData[x.dataField] ? this.formDialogData[x.dataField] : true}
             })
             //Add Data
