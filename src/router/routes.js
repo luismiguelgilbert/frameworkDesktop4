@@ -481,6 +481,12 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootMFG/mfgBOM/edit.vue') }
         ] 
       }
+      ,{ path: 'RootMFG/mfgDashboard', component: () => import('pages/RootMFG/mfgDashboard/main.vue')
+        /*,children: [
+           { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
+        ]*/
+      }
+      
     ]
   },
 
