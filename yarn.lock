@@ -1441,10 +1441,22 @@
     untildify "^4.0.0"
     update-notifier "^4.1.0"
 
+"@quasar/quasar-app-extension-qcalendar@^3.3.4":
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/@quasar/quasar-app-extension-qcalendar/-/quasar-app-extension-qcalendar-3.3.4.tgz#3c0e2fe0d29e24edd0d0146216b03dae04620dbd"
+  integrity sha512-d+a6mJn89LZ6LGl0jrJ2/mDGIL3hq3PuwGg38t6eruXY7WLzP2tImHDOTWeStIrUTO1IXbB1CtZp6A+sQ+CBtQ==
+  dependencies:
+    "@quasar/quasar-ui-qcalendar" "^3.3.4"
+
 "@quasar/quasar-app-extension-qpdfviewer@^1.0.0-beta.8":
   version "1.0.0-beta.8"
   resolved "https://registry.yarnpkg.com/@quasar/quasar-app-extension-qpdfviewer/-/quasar-app-extension-qpdfviewer-1.0.0-beta.8.tgz#61dd8549251585ea7105cb3a4e19b0671388ccb9"
   integrity sha512-WtH1qeGtDvq9CZ+lcoYJw91bqkCRHpU1aV3s8nggYqBy4qj9numamP8LCTSc9CT1b86hjmwvlMEnwjFT9xk8KA==
+
+"@quasar/quasar-ui-qcalendar@^3.3.4":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@quasar/quasar-ui-qcalendar/-/quasar-ui-qcalendar-3.3.5.tgz#4fed965045a98fb5da6294acf1d1285dc9af8dc6"
+  integrity sha512-quNHMyPhxrATJ1pTpTYesLBc44C8vcbguk7ysjN68EKvEP3mn0HrSez28QeMKJqqUp3BZ8qD+TLEFVSmxhtRFA==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"

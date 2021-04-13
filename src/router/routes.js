@@ -199,9 +199,20 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootENS/ENSLibros/edit.vue') }
         ] 
       }
+      ,{ path: 'RootENS/ENSMeet', component: () => import('pages/RootENS/ENSMeet/main.vue')
+        ,children: [
+           { path: '/', component: () => import('../components/mainView/mainView.vue') }
+          ,{ path: ':id', component: () => import('pages/RootENS/ENSMeet/edit.vue') }
+        ] 
+      }
       ,{ path: 'RootENS/ENSJobSearch', component: () => import('pages/RootENS/ENSJobSearch/main.vue')
         ,children: [
           { path: '/', component: () => import('pages/RootENS/ENSJobSearch/edit.vue') }
+        ] 
+      }
+      ,{ path: 'RootENS/ENSCalendar', component: () => import('pages/RootENS/ENSCalendar/main.vue')
+        ,children: [
+          { path: '/', component: () => import('pages/RootENS/ENSCalendar/edit.vue') }
         ] 
       }
       

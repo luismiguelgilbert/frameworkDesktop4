@@ -28,6 +28,9 @@ import ENSTeams from './ENSTeams' //ENSTeams
 import ENSServicios from './ENSServicios' //ENSServicios
 import ENSLibros from './ENSLibros' //ENSLibros
 import ENSJobSearch from './ENSJobSearch' //ENSJobSearch
+import ENSMeet from './ENSMeet' //ENSJobSearch
+import ENSCalendar from './ENSCalendar' //ENSCalendar
+
 import ChartAccount from './ChartAccount' //ChartAccount
 import Taxes from './Taxes' //Taxes
 import TaxesMaster from './TaxesMaster' //TaxesMaster
@@ -111,8 +114,8 @@ export default function (/* { ssrContext } */) {
       ,ENSServicios
       ,ENSLibros
       ,ENSJobSearch
-      //,Equipista
-      //,Equipistas
+      ,ENSMeet
+      ,ENSCalendar
       //FINANCES
       ,ChartAccount
       ,Taxes

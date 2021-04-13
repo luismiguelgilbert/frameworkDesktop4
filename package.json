@@ -1,6 +1,6 @@
 {
   "name": "frameworkdesktop4",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "description": "Framework by BITT",
   "productName": "Framework",
   "author": "BITT (Luis Miguel Gilbert)",
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@quasar/app": "^2.2.3",
+    "@quasar/quasar-app-extension-qcalendar": "^3.3.4",
     "@quasar/quasar-app-extension-qpdfviewer": "^1.0.0-beta.8"
   },
   "browserslist": [

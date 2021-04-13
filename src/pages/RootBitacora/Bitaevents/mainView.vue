@@ -12,7 +12,7 @@
                 borderless
                 placeholder="Seleccione Punto de Control"
                 @input="loadData"
-                :display-value="`${(placeID&&placeID>0)? lookup_places.find(x=>x.value==placeID).label : 'Selecciona Punto de Control'}`"
+                :display-value="`${(placeID&&placeID>0&&lookup_places.length>0)? lookup_places.find(x=>x.value==placeID).label : 'Selecciona Punto de Control'}`"
                 />
             <q-btn flat stretch label="Registrar Evento" color="positive" icon="fas fa-plus" no-caps @click="openNewForm" />
             <q-space />

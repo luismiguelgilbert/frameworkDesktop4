@@ -12,7 +12,7 @@
                 borderless
                 placeholder="Seleccione Punto de Control"
                 @input="loadData"
-                :display-value="`${(placeID&&placeID>0)? lookup_places.find(x=>x.value==placeID).label : 'Selecciona Punto de Control'}`"
+                :display-value="`${(placeID&&placeID>0&&lookup_places.length>0)? lookup_places.find(x=>x.value==placeID).label : 'Selecciona Punto de Control'}`"
                 />
             <q-btn flat stretch label="Registrar Ingreso" color="positive" icon="fas fa-plus" no-caps @click="openNewForm" />
             <q-space />
@@ -227,6 +227,8 @@ export default ({
                     this.loadData();
                     this.whLoaded = true;
                 }
+                //console.dir('aqui')
+                //console.dir(this.placeID)
             }).catch((error) => {
                 this.whLoaded = true;
                 console.dir(error.message)
