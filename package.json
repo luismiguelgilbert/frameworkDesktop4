@@ -9,7 +9,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@quasar/extras": "^1.9.20",
+    "@quasar/extras": "^1.10.3",
     "@quasar/icongenie": "^2.3.1",
     "axios": "^0.18.1",
     "core-js": "^3.6.5",
@@ -17,7 +17,7 @@
     "devextreme-vue": "20.2.5",
     "exceljs": "^4.2.0",
     "file-saver": "^2.0.5",
-    "quasar": "^1.15.7",
+    "quasar": "^1.15.10",
     "socket.io-client": "^2.3.1",
     "vue-googlemaps": "^0.1.2",
     "vue-i18n": "^8.0.0",
@@ -28,7 +28,7 @@
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
-    "@quasar/app": "^2.2.3",
+    "@quasar/app": "^2.2.4",
     "@quasar/quasar-app-extension-qcalendar": "^3.3.4",
     "@quasar/quasar-app-extension-qpdfviewer": "^1.0.0-beta.8"
   },
