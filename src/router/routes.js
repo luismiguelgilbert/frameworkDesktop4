@@ -215,6 +215,11 @@ const routes = [
           { path: '/', component: () => import('pages/RootENS/ENSCalendar/edit.vue') }
         ] 
       }
+      ,{ path: 'RootENS/ENSDashboard', component: () => import('pages/RootENS/ENSDashboard/main.vue')
+        /*,children: [
+           { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
+        ]*/
+      }
       
       //FINANZAS
       ,{ path: 'RootAccounting/ChartAccount', component: () => import('pages/RootAccounting/ChartAccount/main.vue')
