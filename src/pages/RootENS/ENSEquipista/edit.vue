@@ -162,7 +162,7 @@ export default ({
                 { name: 'address', filterBy: null, fields: ['countryID','cityID', 'addressName', 'tipo'] },
                 { name: 'mails', filterBy: null, fields: ['mailAddress'] },
                 { name: 'children', filterBy: null, fields: ['childrenName','sexo', 'birthday'] },
-                { name: 'servicios', filterBy: null, fields: ['servicioID','fechaInicio', 'comments'] },
+                { name: 'servicios', filterBy: null, fields: ['servicioID','fechaInicio', 'fechaSalida', 'comments'] },
                 { name: 'jobs', filterBy: null, fields: ['companyName','jobPosition', 'jobStartDate','jobStopDate','jobSkills','jobPlaces'] }
             ],
             //hide Tabs if something happens
