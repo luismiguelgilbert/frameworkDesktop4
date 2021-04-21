@@ -1,6 +1,22 @@
 <template>
-  <div class="fixed-center text-center">
-    <p>
+  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
+    <div>
+      <div class="text-h4" style="opacity:.4">
+        Sorry, that modules doesn't exist...<strong>(404)</strong> Click the button to go back
+        <br>  Lo sentimos, ese módulo no existe...<strong>(404)</strong> Clic en el botón para regresar
+      </div>
+
+      <q-btn
+        class="q-mt-xl"
+        color="white"
+        text-color="blue"
+        unelevated
+        to="/"
+        label="Go Home / Ir a Inicio"
+        no-caps
+      />
+    </div>
+    <!--<p>
       <img
         src="sad.svg"
         style="width:30vw;max-width:150px;"
@@ -16,6 +32,7 @@
       @click="goHome"
       icon="fas fa-arrow-circle-left"
     />
+    -->
   </div>
 </template>
 
