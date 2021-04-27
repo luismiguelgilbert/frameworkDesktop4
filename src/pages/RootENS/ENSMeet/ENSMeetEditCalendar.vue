@@ -30,7 +30,6 @@
                     <br>
                     <span class="q-pl-sm">{{ event.eventPlace }}</span>
                 </q-btn>
-            </q-badge>
             </template>
         </template>
     </q-calendar>

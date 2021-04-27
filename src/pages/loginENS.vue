@@ -33,7 +33,8 @@
                         />
                 </center>
             </q-card-section>
-            <q-card-actions align="right">
+            <q-card-actions align="between">
+                <q-btn flat icon="fab fa-youtube" label="Cómo resetear mi contraseña?" no-caps size="sm" @click="helpDialog=true" color="primary" />
                 <q-btn flat size="sm" label="No puedes ingresar?"  :class="$q.screen.lt.md?'q-mr-xl':undefined"
                 to="/forgotPassword" 
                 icon="img:data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAACsklEQVRoge2XTUhUURTHf/fNzMZBxSARMgj6oGWLCKJF2rJJivzAslWEipCQq4gW7qJNX8KoCxcJNioZhUa7pHYVbVpVaAQKuYhsqCnI8R0X7zmpb3w+efeNM/B+m3lzzuH+z7n3vnvPg5CQkJCdRDksE68TiAwCewqfjivziLTTXPdirdFwhIkMUHzJA9Si1OBGYzRvINBwYF/gGW2HyZmvAHs32p0rUGKUfAH5tpAzSCku1VRSXxVHgOnFDCMLabIiBfH7LqCtppLz1RW5/43288NvPwvid8PTFjpVFXfadsUL5nfDUwH5FtKUwvnd8FTA9GLG1Ra03w1P78DIQhqAenuppxczPLJthfC74WwlHr8SKNqLDJpOrsu55O+Bki8g3zswD9Tmlqy4mNtoyNeNtmMVUWzMYZjtO51ESIhn+lP36e0N/JQLUqCbmsMTDE6WBagR8D0gco7l3y/pH64OSsLZSvihf7gaot0oI4HIkTWeL0jkNF0tn7Tq4bGZ80RytBnMIVDlePiS0oWeLZQcbUbJGKhy4BkidTmf8AaWjgcx+6BjC1nbZsaaea7TdeG2ZU8JSj1FxdvoaPjzPz5VRyzygSstP3xro2UFot25mV9NHkCpeyx8bFyf/NgJ4DnZbId/XVvd/xDqDAAid9eZO1uvOUJNiWNQhqnOArf8a+t5B/YDINH3W0b++/sWAMVBDbqAlgK2ceREYqb9pO3081+AMmatkZaPbhkbM1ZjZn3r2uhYgSnrR/VsGarsGJFJ/7oW/guQpT6QXyhpIJm6sWlcMnUTIQGkidDnW9dGTysxkGpCGLfHm8I07oB6B4CRPYZSPXbyglJNdLY+0aKLzl7IKmIIqNgkIo1Sl3UmD7qbuQfju4ktXwUSwCHb+hmRKSL00XHxu1a9kJCQkB1nBdtiGOor5WJRAAAAAElFTkSuQmCC"
@@ -41,6 +42,15 @@
             </q-card-actions>
         </q-card>
     </q-layout>
+
+    <q-dialog v-model="helpDialog">
+        <q-card class="no-padding" style="height: 315px; width: 560px;">
+            <q-video :ratio="16/9" src="https://www.youtube.com/embed/boEBmfjsNFg?autoplay=1" />
+        </q-card>
+        <!--<q-card>
+            <q-video src="https://youtu.be/boEBmfjsNFg"/>
+        </q-card>-->
+    </q-dialog>
 </div>
 </template>
 <script>
@@ -55,6 +65,7 @@ export default {
         return {
             username: '', password: '',
             router: this.$router,
+            helpDialog: false,
         }
     },
     created(){

@@ -18,6 +18,7 @@ export default ({
             moduleName: "mktPO", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
             moduleMainRoute: '/RootPurchase/mktPO',
             rptName_: 'Orden de Compra', rptLink_: 'mktPO', rptLinkCompany_: true, rptType_: 'ssrs',
+            //rptName_: 'Orden de Compra', rptLink_: 'mktPO', rptLinkCompany_: true, rptType_: 'pbirs',
         }
     },
     computed:{
