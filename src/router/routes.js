@@ -220,6 +220,12 @@ const routes = [
            { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
         ]*/
       }
+      ,{ path: 'RootENS/ENSVideoHelp', component: () => import('pages/RootENS/ENSVideoHelp/main.vue')
+        /*,children: [
+           { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
+        ]*/
+      }
+      
       
       //FINANZAS
       ,{ path: 'RootAccounting/ChartAccount', component: () => import('pages/RootAccounting/ChartAccount/main.vue')
