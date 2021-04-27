@@ -19,6 +19,24 @@
           <img height="25" src="/logoTransparent.png">
         </q-btn>
       </q-page-sticky>
+
+      <q-page-sticky position="bottom-left" :offset="[10, 10]" v-if="currentHomeTab=='97'" class="no-padding">
+          <q-btn  
+            style="width: 100%; max-width: 100px;"
+            no-caps padding="none" flat color="red" @click="helpDialog=true"
+            >
+            <q-card flat bordered class="no-padding">
+              <q-card-section class="text-center text-subtitle2 q-pt-sm q-pb-none q-pl-none q-pr-none">
+                <q-icon name="fab fa-youtube" color="red" size="1.5rem" />
+                Video
+              </q-card-section>
+              <q-card-section class="no-padding" style="font-size: 9px;">
+                Cómo usar la Nueva Plataforma ENS?
+              </q-card-section>
+            </q-card>
+          </q-btn>
+      </q-page-sticky>
+
       <div class="q-pa-md row justify-center q-gutter-lg q-mb-xl">
         <q-btn  
           v-for="modulo in menuData.filter(x=>x.parent==currentHomeTab)" :key="modulo.sys_link_id" 
@@ -41,12 +59,23 @@
       </div>
     </div>
 
+    <q-dialog v-model="helpDialog">
+        <q-card class="no-padding" style="height: 315px; width: 560px;">
+            <q-video :ratio="16/9" src="https://www.youtube.com/embed/_FDtTrHlCgc?autoplay=1" />
+        </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
 <script>
 export default {
   name: 'PageIndex',
+  data() {
+    return {
+      helpDialog: false,
+    }
+  },
   
   mounted(){
     try{
