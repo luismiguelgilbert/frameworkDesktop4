@@ -1,6 +1,6 @@
 <template>
     <div>
-        <q-card class="q-ma-sm rounder-corners shadow-8"  style="min-height: 200px; height: calc(100vh - 68px); overflow-y: hidden;" >
+        <q-card class="q-ma-sm rounder-corners shadow-8"  style="min-height: 200px; height: calc(100vh - 68px);" >
             <div v-if="dataLoaded">
                 <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
                     <q-toolbar-title class="text-weight-bolder">Tablero Gerencial para Visitas y Bitácora</q-toolbar-title>

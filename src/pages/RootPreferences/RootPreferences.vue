@@ -337,7 +337,8 @@
         <br><br><br><br>
     </q-form>
     <q-page-sticky position="bottom-right" :offset="[35, 18]">
-        <q-btn fab icon="fas fa-save" color="positive" :disable="isError" @click="saveUserPreferences" title="Guardar" />
+        <q-btn fab v-if="isError" icon="fas fa-exclamation" color="red"  title="Guardar" @click="checkError"  />
+        <q-btn fab v-if="!isError" icon="fas fa-save" color="positive" title="Guardar" @click="saveUserPreferences" />
 
     </q-page-sticky>
 </q-page>
@@ -454,6 +455,9 @@ methods: {
       this.userPhoto = this.fileToUpload.upload_file_name
       this.$q.notify({multiLine: false, color: 'positive', message: "Archivo recibido" , timeout: 1200, icon: "fas fa-check", progress: true,})
     },
+    checkError(){
+        this.$q.notify({color: 'red', message: 'Revise que todos los campos estén llenos, y que las contraseñas coincidan' , timeout: 1500, icon: "fas fa-exclamation" });
+    }
 },
 
 computed:{

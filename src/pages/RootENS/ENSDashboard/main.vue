@@ -1,6 +1,6 @@
 <template>
     <div>
-        <q-card class="q-ma-sm rounder-corners shadow-8"  style="min-height: 200px; height: calc(100vh - 68px); overflow-y: hidden;" >
+        <q-card class="q-ma-sm rounder-corners shadow-8"  style="min-height: 200px; height: calc(100vh - 68px);" >
             <div v-if="dataLoaded">
                 <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
                     <q-toolbar-title class="text-weight-bolder">Tablero Gerencial del Movimiento</q-toolbar-title>
@@ -38,7 +38,7 @@
                     -->
                 </q-toolbar>
                 <q-separator />
-                <div style="width: calc(100vw - 16px); overflow: hidden;">
+                <!--<div style="width: calc(100vw - 16px); ">-->
                     <reportComponent
                         :moduleName="moduleName"
                         rptName="Tablero Gerencial del Movimiento"
@@ -49,7 +49,7 @@
                         />
                         
                         <!-- :rptPowerBiExtraFilter="' and bitaPlacesUsers_view/sys_company_id eq 1 and bitaPlacesUsers_view/sys_user_code eq 1 '" -->
-                </div>
+                <!--</div>-->
             </div>
             <div v-else style="height: calc(100vh - 80px)"  >
                 <q-inner-loading :showing="!dataLoaded">

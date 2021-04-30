@@ -1,13 +1,19 @@
 <template>
 <!--<q-dialog square  v-model="isVisible" @show="showEvent">-->
-<div style="margin: -16px;">    
+<!--<div style="margin: -16px;">-->
+<div :style="rptType.toLowerCase()=='ssrs'?'margin: -16px;':'margin: 0px;'">
     <iframe
+        name="bittrpt"
         class="full-width" frameborder="0"
-        :style="rptType.toLowerCase()=='ssrs'?'min-height: calc(100vh - 86px); max-height: calc(100vh - 86px);':'min-height: calc(100vh - 92px); max-height: calc(100vh - 92px);'" 
+        :style="rptType.toLowerCase()=='ssrs'?'min-height: calc(100vh - 86px); max-height: calc(100vh - 86px);':'min-height: calc(100vh - 119px); max-height: calc(100vh - 119px);'" 
         v-if="isURLready"
         :src="reportURL"
+        @load="checkHeight"
         />
-    <!--<q-card :style="isFullSize?'minWidth: 95%; minHeight: 95%;':'minWidth: 45%; minHeight: 45%;'">
+        
+    <!--
+         calc(100vh - 92px)
+        <q-card :style="isFullSize?'minWidth: 95%; minHeight: 95%;':'minWidth: 45%; minHeight: 45%;'">
         <q-bar class="bg-primary text-white">
           <div>Reporte: {{rptName}}</div>
           <q-space />
@@ -29,6 +35,15 @@
 </div>
 <!--</q-dialog>-->
 </template>
+<!--
+<style lang="scss">
+  .report{
+    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
+  }
+</style>
+-->
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
@@ -65,7 +80,7 @@ export default ({
             if(this.rptType.toLowerCase()=='ssrs'){
                 this.reportURL = this.$q.sessionStorage.getItem('ReportServer_Path')
                 this.reportURL += this.reportLinkFull
-                this.reportURL += '?rs:embed=true' 
+                this.reportURL += '?rs:Embed=true' 
                 this.reportURL += '&sys_user_code=' + this.userCode
                 this.reportURL += '&sys_user_language=es'
                 this.reportURL += '&sys_user_company=' + this.userCompany
@@ -81,7 +96,8 @@ export default ({
             }else{//PBIRS
                 this.reportURL += this.$q.sessionStorage.getItem('ReportServer_BI_Path');
                 this.reportURL += this.reportLinkFull
-                this.reportURL += '?rs:embed=true' 
+                this.reportURL += '?rs:Embed=true'
+                //this.reportURL += '&filterPaneEnabled=true&navContentPaneEnabled=true'
                 this.reportURL += '&filter=sys_users/sys_user_code eq ' + this.$q.sessionStorage.getItem('sys_user_code')
                 this.reportURL += ' and sys_companies/sys_company_id eq ' + this.$q.sessionStorage.getItem('sys_user_company')
                 if(this.rptPowerBiExtraFilter&&this.rptPowerBiExtraFilter.length>0){
@@ -90,6 +106,36 @@ export default ({
                 this.isURLready = true
                 console.dir(this.reportURL)
             }
+        },
+        checkHeight(e){
+            //console.dir('checkHeight')
+            //console.dir(e)
+            //console.dir(e.path)
+            //console.dir(e.path.filter(x=>x.localName=='iframe'))
+            let element = e.path.filter(x=>x.localName=='iframe')
+            element.map(x=>{
+                console.dir(x)
+                //console.dir(x.contentWindow)
+            })
+            //console.dir(element)
+            //console.dir(element[0].contentWindow)
+            //console.dir(element[0].style)
+            
+            /*
+            element[0].style.height = "calc(92vh)";//"300px";
+            element[0].style.minHeight = "calc(92vh)";//"300px";
+            element[0].style.maxHeight = "calc(92vh)";//"300px";
+            */
+            
+            /*
+            height: 300px !important;
+            min-height: 300px !important;
+            max-height: 300px !important;
+            */
+            //var iframe = document.getElementById("bittrpt");
+            //console.dir(iframe)
+            //var elmnt = iframe.contentWindow.document.getElementsByTagName("H1")[0];
+            //elmnt.style.display = "none"; 
         }
     },
     mounted(){
