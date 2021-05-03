@@ -45,10 +45,10 @@
                         rptLink="mfgDashboard"
                         :rptLinkCompany="false"
                         rptType="PBIRS"
-                        :rptPowerBiExtraFilter="' and mfgOrders_Dash_Headers_view/sys_company_id eq ' + userCompany "
+                        :rptPowerBiExtraFilter="' and mfgOrders_Dash_Costs_view_companies/sys_company_id eq ' + userCompany "
                         />
                         
-                        <!-- :rptPowerBiExtraFilter="' and bitaPlacesUsers_view/sys_company_id eq 1 and bitaPlacesUsers_view/sys_user_code eq 1 '" -->
+                        <!-- :rptPowerBiExtraFilter="' and mfgOrders_Dash_Headers_view/sys_company_id eq userCompany" -->
                 </div>
             </div>
             <div v-else style="height: calc(100vh - 80px)"  >
