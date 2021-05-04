@@ -40,6 +40,8 @@
                 <q-separator />
                 <div style="width: calc(100vw - 16px); overflow: hidden;">
                     <reportComponent
+                        :key="reportComponentKey"
+                        ref="dashboardComponent"
                         :moduleName="moduleName"
                         rptName="Tablero Gerencial de Producción"
                         rptLink="mfgDashboard"
@@ -68,6 +70,7 @@
                 </q-bar>
                 <q-card-section>
                     <reportComponent
+                        :key="reportComponentKey"
                         :moduleName="moduleName"
                         :rptName="reportData.name_es"
                         :rptLink="reportData.link_name"
@@ -109,7 +112,8 @@ export default ({
             moduleMainRoute: '/RootBitacora/Bitadashboard',
             rptName_: 'Ingreso', rptLink_: 'Bitadashboard', rptLinkCompany_: true, rptType_: 'ssrs',
             dataLoaded: false, lookup_places: [], placeID: null,
-            isreportDialog: false, reportData: null
+            isreportDialog: false, reportData: null,
+            reportComponentKey: 0
         }
     },
     methods:{
@@ -162,6 +166,11 @@ export default ({
             get () { return this.$store.state[this.moduleName].editStatus },
             set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
         },
-    }    
+    },
+    watch: {
+        userCompany: function(val){
+            this.reportComponentKey += 1;
+        },
+    }
 })
 </script>
