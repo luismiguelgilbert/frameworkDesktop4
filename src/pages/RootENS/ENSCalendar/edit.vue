@@ -194,6 +194,7 @@
                                 <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
                                 <DxColumn caption="Nombres" data-field="sys_user_name" alignment="left" />
                                 <DxColumn caption="Apellidos" data-field="sys_user_lastname" alignment="left" />
+                                <DxColumn caption="Espos@" data-field="relatedName" alignment="left" />
                                 <DxColumn caption="Equipo" data-field="teamName" alignment="left" />
                                 <DxColumn caption="Servicios" data-field="servicios" alignment="left" />
                             </DxDataGrid>
