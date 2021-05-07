@@ -185,6 +185,7 @@
                                 key-expr="sys_user_code"
                                 :selected-row-keys.sync="selectedRowKeys"
                                 >
+                                <DxSearchPanel :visible="true" :highlight-case-sensitive="true" />
                                 <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
                                 <DxPaging :enabled="true" :page-size="100" />
                                 <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
@@ -375,8 +376,8 @@ export default ({
             }
         },
         saveMeeting(){
-            console.dir(this.currentData)
-            console.dir(this.selectedRowKeys)
+            //console.dir(this.currentData)
+            //console.dir(this.selectedRowKeys)
             if(
                 !(
                     (this.currentData.eventID>0&&this.currentData.eventTypeID==1&&this.allow_meeting_team==false) || 
