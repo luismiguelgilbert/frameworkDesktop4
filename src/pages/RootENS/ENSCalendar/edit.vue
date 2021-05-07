@@ -1,153 +1,233 @@
 <template>
 <q-layout container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px);">
-    <q-header>
+    <!--<q-header>
         <q-toolbar :class="toolbarComponentClass">
-            <!--<q-btn label="Nueva Reunión"  icon="fas fa-calendar-plus" color="primary" flat stretch no-caps @click="initializeFormData(null)" />-->
-            
             <q-btn color="primary" flat stretch icon="fas fa-chevron-left"  @click="onPrev" />
             <q-btn color="primary" flat stretch :label="title" />
             <q-btn color="primary" flat stretch icon="fas fa-chevron-right" @click="onNext" />
             <q-space />
             <q-btn color="primary" flat no-caps no-wrap stretch icon="fas fa-sync" label="Actualizar" @click="loadData" />
         </q-toolbar>
-        <!--<q-toolbar >
-            <q-btn color="primary" stretch flat no-caps no-wrap icon="fas fa-calendar-plus" label="Agendar Reunión" />
-            <q-space />
-            
-        </q-toolbar>-->
 
         <q-separator color="grey-4" />
-    </q-header>
+    </q-header>-->
 
     <q-page-container>
-        <q-calendar
-            ref="calendar"
-            v-model="selectedDate"
-            view="month"
-            locale="es-ec"
-            height="250" bordered animated
-            enable-outside-days
-            :selected-dates="selectedDates"
-            @change="onChange"
+        <DxScheduler
+            :data-source="ensEvents"
+            startDateExpr="startDateTime"
+            endDateExpr="EndDate"
+            textExpr="eventName"
+            descriptionExpr="eventPlace"
+            :views="['month']"
+            height="calc(100vh - 51px)"
+            :start-day-hour="9"
+            current-view="month"
+            
+            appointment-template="appointmentTemplate"
+            appointment-tooltip-template="appointmentTooltipTemplate"
+            :on-appointment-form-opening="onAppointmentFormOpening"
+            :on-appointment-updating="onAppointmentUpdating"
             >
-            <template #day="{ timestamp }">
-                <template v-for="(event, index) in ensEvents.filter(x => x.startDate.replaceAll('/','-')==timestamp.date)">
-                    <q-btn color="primary" no-caps size="sm" @click.stop="openMeeting(event)" >
-                        <span class="q-pl-sm">{{ event.eventName }}</span>
-                        <br>
-                        <span class="q-pl-sm">{{ event.eventPlace }}</span>
-                    </q-btn>
-                </q-badge>
-                </template>
+            <!-- :on-appointment-adding="onAppointmentAdding" -->
+            <DxResource
+                :dataSource="ensEventsTypes"
+                fieldExpr="eventTypeID" 
+                label="Tipo"
+            />
+            <!--fieldExpr es el campo del datasource principal del DxScheduler (tipo lookup field). En el DxResource, siempre deben ir los campos como "id" , "text" , "color"-->
+            <!--label es el título que se muestra al editar un evento-->
+
+            <template #appointmentTemplate="{ data }">
+                <div>{{data.appointmentData.displayText}}</div>
             </template>
-        </q-calendar>
+            <template #appointmentTooltipTemplate="{ data }">
+                <q-item>
+                    <q-item-section>
+                        <q-item-label class="text-subtitle2 text-left">{{data.appointmentData.eventName}}</q-item-label>
+                        <q-item-label class="text-left" caption>Tipo: {{data.appointmentData.eventTypeName}}</q-item-label>
+                        <q-item-label class="text-left" caption>Lugar: {{data.appointmentData.eventPlace}}</q-item-label>
+                        <q-item-label class="text-left" caption>Inicio: {{data.appointmentData.startDateName}} {{data.appointmentData.startTimeName}}</q-item-label>
+                        <q-item-label class="text-left" caption>{{data.appointmentData.eventComments}}</q-item-label>
+                    </q-item-section>
+                </q-item>
+            </template>
+            
+        </DxScheduler>
+
     </q-page-container>
 
-    <q-dialog v-model="dialogVisible" @hide="hideDialog" >
-        <q-card style="min-height: 500px;">
-            <q-toolbar>
-                <q-toolbar-title class="text-primary">Agendar Reunión de Equipo</q-toolbar-title>
-            </q-toolbar>
-            <q-card-section>
-                <q-form >
-                    
-                    <q-input
-                        ref="startDate" 
-                        mask="date" :rules="['date']"
-                        placeholder="Ingrese la fecha de la Próxima Reunión (*)" label="Fecha de Próxima Reunión (*)" filled
-                        v-model="currentData.startDate"
-                        >
-                        <template v-slot:append>
-                        <q-icon name="event" class="cursor-pointer">
-                            <q-popup-proxy  ref="qDateProxy_startDate" transition-show="scale" transition-hide="scale">
-                            <q-date v-model="currentData.startDate">
-                                <div class="row items-center justify-end">
-                                <q-btn v-close-popup label="Seleccionar" color="primary" flat />
-                                </div>
-                            </q-date>
-                            </q-popup-proxy>
-                        </q-icon>
-                        </template>
-                        <template v-slot:prepend><q-icon name="fas fa-calendar" color="primary" /></template>
-                    </q-input>
-
-                    <q-input class="q-mb-md"
-                        v-model="currentData.startTime" mask="time" 
-                        :rules="['time']" hide-bottom-space
-                        placeholder="Ingrese la hora de Próxima Reunión (HH:MM)" label="Hora de Próxima Reunión (HH:MM) (*)" filled >
-                        <template v-slot:append>
-                        <q-icon name="access_time" class="cursor-pointer">
-                            <q-popup-proxy transition-show="scale" transition-hide="scale">
-                            <q-time v-model="currentData.startTime">
-                                <div class="row items-center justify-end">
-                                <q-btn v-close-popup label="Close" color="primary" flat />
-                                </div>
-                            </q-time>
-                            </q-popup-proxy>
-                        </q-icon>
-                        </template>
-                        <template v-slot:prepend><q-icon name="fas fa-clock" color="primary" /></template>
-                    </q-input>
-
-                    
-                    <DxAutocomplete
-                        :data-source="lookup_places"
-                        v-model:value="currentData.eventPlace"
-                        placeholder="Lugar de la Próxima Reunión"
-                        :deferRendering="true"
-                        stylingMode="filled" height="60px"
-                        :maxItemCount="10" :minSearchLength="0"
-                        :openOnFieldClick="true"
-                        >
-                        <!-- @value-changed="(e) =>{ console.dir('pruebas') }" -->
-                        <DxAutocompleteButton location="before" name="lookup_visitors_names_autocomplete" :options="{ icon: 'fas fa-home', type: 'default', stylingMode: 'text', }" />
-                        <DxAutocompleteButton location="after" name="lookup_visitors_names_autocomplete_txt" :options="{ text: 'Lugar de Próxima Reunión', type: 'default', stylingMode: 'text', disabled: true }" />
-                    </DxAutocomplete>
-
-                    
-
-                    <DxAutocomplete
-                        :data-source="lookup_books" style="margin-top: 20px;"
-                        v-model:value="currentData.eventName"
-                        placeholder="Tema de Estudio de Próxima Reunión"
-                        :deferRendering="true"
-                        stylingMode="filled" height="60px"
-                        :maxItemCount="10" :minSearchLength="0"
-                        :openOnFieldClick="true"
-                        >
-                        <!-- @value-changed="(e) =>{ console.dir('pruebas') }" -->
-                        <DxAutocompleteButton location="before" name="lookup_books_names_autocomplete" :options="{ icon: 'fas fa-book', type: 'default', stylingMode: 'text', }" />
-                        <DxAutocompleteButton location="after" name="lookup_books_names_autocomplete_txt" :options="{ text: 'Tema de Estudio de Próxima Reunión', type: 'default', stylingMode: 'text', disabled: true }" />
-                    </DxAutocomplete>
-
-                    
-                    <q-input
-                        label="Comentarios para Próxima Reunión" placeholder="Ingrese comentarios, para Próxima Reunión" filled
-                        type="textarea"  autogrow
-                        v-model="currentData.eventComments" class="q-mt-md"
-                        />
-                </q-form>
+    <q-dialog v-model="dialogVisible" v-if="currentData" >
+        <q-card style="min-width: 900px;">
+            <q-tabs dense v-model="tab" align="justify" class="bg-primary text-white shadow-2">
+                <q-tab name="info" icon="fas fa-info-circle" label="Evento" no-caps />
+                <q-tab name="user" icon="fas fa-user" label="Particpantes" no-caps />
+            </q-tabs>
+            <q-separator />
+            <q-card-section class="no-padding">
+                <q-tab-panels v-model="tab" animated  >
+                    <q-tab-panel name="info" style="height: calc(100vh - 170px);">
+                        <div class="row">
+                            <q-select class="col-10 q-pa-xs"  filled label="Tipo" :options="ensEventsTypes" v-model="currentData.eventTypeID" option-value="id" option-label="text" option-disable="disabled" map-options emit-value 
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)" >
+                                <template v-slot:prepend><q-icon name="fas fa-users" /></template>
+                            </q-select>
+                            <q-toggle class="col-2 q-pa-xs" v-model="currentData.estado" left-label label="Estado" color="primary" />
+                            <q-input class="col-12 q-pa-xs"  filled v-model="currentData.eventName" label="Asunto" 
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)">
+                                <template v-slot:prepend><q-icon name="fas fa-book" /></template>
+                            </q-input>
+                            <q-input class="col-12 q-pa-xs"  filled v-model="currentData.eventPlace" label="Lugar" 
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)">
+                                <template v-slot:prepend><q-icon name="fas fa-map-marked-alt" /></template>
+                            </q-input>
+                            <q-input
+                                 class="col-6 q-pa-xs" ref="fecha" mask="date" 
+                                :rules="['date']" hide-bottom-space
+                                placeholder="Ingrese la fecha de Inicio (aaaa/mm/dd)" label="Fecha de Inicio (aaaa/mm/dd) (*)" filled
+                                v-model="currentData.startDate"
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)"
+                                >
+                                <template v-slot:append>
+                                    <q-icon name="event" class="cursor-pointer">
+                                        <q-popup-proxy ref="qDateProxy_fecha" transition-show="scale" transition-hide="scale" disable>
+                                        <!--cuando se cambia la fecha de inicio, también se cambia la fecha de fin-->
+                                        <q-date :locale="myQDateLocale" minimal v-model="currentData.startDate" 
+                                            @input="currentData.EndDateName = currentData.startDate"
+                                            :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)"  >
+                                            <div class="row items-center justify-end">
+                                            <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                                            </div>
+                                        </q-date>
+                                        </q-popup-proxy>
+                                    </q-icon>
+                                </template>
+                                <template v-slot:prepend><q-icon name="fas fa-calendar-check" /></template>
+                            </q-input>
+                            <q-input 
+                                class="col-6 q-pa-xs"  v-model="currentData.startTimeName" mask="time" 
+                                :rules="['time']" hide-bottom-space
+                                placeholder="Ingrese la hora de Inicio (HH:MM)" label="Hora de Inicio (HH:MM) (*)" filled 
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)" >
+                                <template v-slot:append>
+                                <q-icon name="access_time" class="cursor-pointer">
+                                    <q-popup-proxy transition-show="scale" transition-hide="scale">
+                                    <q-time v-model="currentData.startTimeName" 
+                                        :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)"  >
+                                        <div class="row items-center justify-end">
+                                            <q-btn v-close-popup label="Close" color="primary" flat />
+                                        </div>
+                                    </q-time>
+                                    </q-popup-proxy>
+                                </q-icon>
+                                </template>
+                                <template v-slot:prepend><q-icon name="fas fa-clock" /></template>
+                            </q-input>
+                            <q-input
+                                class="col-6 q-pa-xs" ref="fecha" mask="date"
+                                :rules="['date']" hide-bottom-space
+                                placeholder="Ingrese la fecha de Fin (aaaa/mm/dd)" label="Fecha de Fin (aaaa/mm/dd) (*)" filled
+                                v-model="currentData.EndDateName"
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)"
+                                >
+                                <template v-slot:append>
+                                    <q-icon name="event" class="cursor-pointer">
+                                        <q-popup-proxy ref="qDateProxy_fecha" transition-show="scale" transition-hide="scale" disable>
+                                        <q-date :locale="myQDateLocale" minimal v-model="currentData.EndDateName"  
+                                            :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)"  >
+                                            <div class="row items-center justify-end">
+                                            <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                                            </div>
+                                        </q-date>
+                                        </q-popup-proxy>
+                                    </q-icon>
+                                </template>
+                                <template v-slot:prepend><q-icon name="fas fa-calendar-times" /></template>
+                            </q-input>
+                            <q-input 
+                                class="col-6 q-pa-xs" v-model="currentData.EndTimeName" mask="time" 
+                                :rules="['time']" hide-bottom-space
+                                placeholder="Ingrese la hora de Fin (HH:MM)" label="Hora de Fin (HH:MM) (*)" filled 
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)" >
+                                <template v-slot:append>
+                                <q-icon name="access_time" class="cursor-pointer">
+                                    <q-popup-proxy transition-show="scale" transition-hide="scale">
+                                    <q-time v-model="currentData.EndTimeName" 
+                                        :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)"  >
+                                        <div class="row items-center justify-end">
+                                            <q-btn v-close-popup label="Close" color="primary" flat />
+                                        </div>
+                                    </q-time>
+                                    </q-popup-proxy>
+                                </q-icon>
+                                </template>
+                                <template v-slot:prepend><q-icon name="fas fa-clock" /></template>
+                            </q-input>
+                            <q-input class="col-12 q-pa-xs"  dense filled v-model="currentData.eventComments" label="Comentarios" type="textarea" 
+                                :readonly="(currentData.eventID>0&&currentData.eventTypeID==1&&allow_meeting_team==false) || (currentData.eventID>0&&currentData.eventTypeID==2&&allow_meeting_pilot==false) || (currentData.eventID>0&&currentData.eventTypeID==3&&allow_meeting_work==false) || (currentData.eventID>0&&currentData.eventTypeID==4&&allow_meeting_event==false)">
+                                <template v-slot:prepend><q-icon name="fas fa-comment" /></template>
+                            </q-input>
+                        </div>
+                    </q-tab-panel>
+                    <q-tab-panel name="user" style="height: calc(100vh - 170px);">
+                        <div>
+                            <DxDataGrid
+                                ref="mainviewtableDxDataGrid"
+                                height="calc(100vh - 190px)"
+                                width="100%"
+                                column-resizing-mode="widget"
+                                :data-source="(currentData.eventTypeID==3||currentData.eventTypeID==4)?lookup_users:lookup_users.filter(x=>x.tipo==1)"
+                                :allow-column-resizing="true" 
+                                :allow-column-reordering="true"
+                                :show-borders="true"
+                                :show-column-lines="true"
+                                :show-row-lines="true"
+                                key-expr="sys_user_code"
+                                :selected-row-keys.sync="selectedRowKeys"
+                                >
+                                <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
+                                <DxPaging :enabled="true" :page-size="100" />
+                                <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
+                                <DxPager :visible="false" :show-page-size-selector="false" :allowed-page-sizes="allowedPageSizes" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="false" :showPageSizeSelector="false" />
+                                <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+                                <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
+                                <DxColumn caption="Nombres" data-field="sys_user_name" alignment="left" />
+                                <DxColumn caption="Apellidos" data-field="sys_user_lastname" alignment="left" />
+                                <DxColumn caption="Equipo" data-field="teamName" alignment="left" />
+                                <DxColumn caption="Servicios" data-field="servicios" alignment="left" />
+                            </DxDataGrid>
+                        </div>
+                    </q-tab-panel>
+                </q-tab-panels>
             </q-card-section>
-            <q-card-actions align="around">
-                <q-btn v-if="!currentData.isNew" color="red" label="Eliminar" icon="fas fa-trash-alt" @click="deleteMeeting" />
-                <q-btn color="primary" label="Guardar" icon="fas fa-calendar-plus" @click="saveMeeting" 
-                     />
+            <q-card-actions align="around" >
+                <q-btn color="primary" label="Cancelar" icon="fas fa-times" flat @click="dialogVisible=false" />
+                <q-btn color="primary" label="Guardar" icon="fas fa-save" @click="saveMeeting" />
             </q-card-actions>
         </q-card>
     </q-dialog>
 
+
+    
+
 </q-layout>
 </template>
+<style>
+.dx-overlay-wrapper {
+    z-index: 999999 !important;
+}
+</style>
 <script>
 import Vue from 'vue'
-import Plugin from '@quasar/quasar-ui-qcalendar'
-import '@quasar/quasar-ui-qcalendar/dist/index.css'
-Vue.use(Plugin)
+//import Plugin from '@quasar/quasar-ui-qcalendar'
+//import '@quasar/quasar-ui-qcalendar/dist/index.css'
+//Vue.use(Plugin)
 
 import { date } from 'quasar'
 import { DxAutocomplete, DxButton as DxAutocompleteButton } from 'devextreme-vue/autocomplete';
 import { DxTextBox, DxButton as DxTextBoxButton } from 'devextreme-vue/text-box';
-
+import DxScheduler, { DxResource } from 'devextreme-vue/scheduler';
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxPager, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxLookup, DxSearchPanel } from 'devextreme-vue/data-grid';
 
 
 export default ({
@@ -155,7 +235,8 @@ export default ({
         moduleName: { type: String , required: true },
     },
     components: {
-        DxAutocomplete, DxAutocompleteButton, DxTextBox, DxTextBoxButton
+        DxAutocomplete, DxAutocompleteButton, DxTextBox, DxTextBoxButton, DxScheduler, DxResource
+        ,DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxPager, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxLookup, DxSearchPanel
     },
     mounted(){//NO debe ser created, porque aun NO estaría creado el componente editForm
         let newEditStatus = JSON.parse(JSON.stringify(this.editStatus));
@@ -166,24 +247,24 @@ export default ({
     },
     data () {
         return {
-            //Confirmed
             router: this.$router,
             ensEvents: [],
-            selectedDate: '',
-            selectedDates: [],
-            title: '',
+            ensEventsTypes: [],
+            groups: ["eventTypeID"],
             dialogVisible: false,
-            currentData: {
-                eventTypeID: 1
-                ,startDate: ''
-                ,startTime: ''
-                ,eventPlace: ''
-                ,eventName: ''
-                ,eventComments: '' 
-                ,isNew: true
+            currentData: null,
+            selectedRowKeys: [],
+            tab: 'info',
+            myQDateLocale: {
+                /* starting with Sunday */
+                days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
+                daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
+                months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+                monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
+                firstDayOfWeek: 1
             },
-            lookup_places: [],
-            lookup_books: [],
+            lookup_users: [],
+            security: [],
         }
     },
     methods:{
@@ -199,8 +280,9 @@ export default ({
                 }
             }).then((response) => {
                 this.ensEvents = JSON.parse(response.data[0].basic)
-                this.lookup_places = JSON.parse(response.data[0].lookup_places)
-                this.lookup_books = JSON.parse(response.data[0].lookup_books)
+                this.ensEventsTypes = JSON.parse(response.data[0].ensEventsTypes)
+                this.security = JSON.parse(response.data[0].security)
+                this.lookup_users = JSON.parse(response.data[0].lookup_users)
             }).catch((error) => {
                 console.dir(error)
                 let mensaje = ''
@@ -215,71 +297,148 @@ export default ({
                 this.loadingData = false
             })
         },
-        onPrev () {
-            this.$refs.calendar.prev()
-        },
-        onNext () {
-            this.$refs.calendar.next()
-        },
-        onChange ({ start }) {
-            //le agrego 1 día para que el título del año/mes sea más consistente al navegar
-            this.title = date.formatDate( date.addToDate(start.date, { days: 1 }) , 'MMMM-YYYY',
-                {
-                    days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-                    daysShort: ['Dom', 'Lun', 'Mar', 'Mier', 'Jue', 'Vier', 'Sab'],
-                    months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                    monthsShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+        onAppointmentFormOpening(e){
+            ////////////////////////////////////
+            //Limpia Selección, y Vuelve a Seleccionar los registros guardados de la orden. Luego reubica en tab inicial, y cancel devextreme popup
+            ////////////////////////////////////
+            this.selectedRowKeys = [];
+            try{
+                this.selectedRowKeys = e.appointmentData.users.split(',');
+            }catch(ex){}
+            this.tab = 'info';
+            e.cancel = true
+            ////////////////////////////////////
+            //Aplica valores iniciales
+            ////////////////////////////////////
+            if(e.appointmentData.eventTypeID){//EDITANDO
+                this.currentData = {
+                    eventID:  e.appointmentData.eventID
+                    ,estado:  e.appointmentData.estado
+                    ,startDateTime: e.appointmentData.startDateTime
+                    ,eventTypeID: e.appointmentData.eventTypeID
+                    ,eventName: e.appointmentData.eventName
+                    ,eventPlace: e.appointmentData.eventPlace
+                    ,startDate: e.appointmentData.startDate
+                    ,startTimeName: e.appointmentData.startTimeName
+                    ,EndDateName: e.appointmentData.EndDateName
+                    ,EndTimeName: e.appointmentData.EndTimeName
+                    ,eventComments: e.appointmentData.eventComments
                 }
-            )
-        },
-        openMeeting(event){
-            this.currentData = {
-                value: event.value
-                ,eventTypeID: event.eventTypeID
-                ,startDate: event.startDate
-                ,startTime: event.startTime
-                ,eventPlace: event.eventPlace
-                ,eventName: event.eventName
-                ,eventComments: event.eventComments
-                ,isNew: false
+            }else{
+                this.currentData = {
+                    eventID: 0
+                    ,estado:  true
+                    ,startDateTime: e.appointmentData.startDateTime
+                    ,eventTypeID: null
+                    ,eventName: ''
+                    ,eventPlace: ''
+                    ,startDate: e.appointmentData.startDateTime.substring(0,10).replace(/-/g,'/')
+                    ,startTimeName: '19:00'
+                    ,EndDateName: e.appointmentData.startDateTime.substring(0,10).replace(/-/g,'/')
+                    ,EndTimeName: '22:00'
+                    ,eventComments: ''
+                }
             }
             this.dialogVisible = true
         },
-        hideDialog(){
-            this.selectedDates = [];//para que visualmente se borre el cuadro pintado del día en qcalendar
+        onAppointmentUpdating(e){
+            //console.dir('onAppointmentUpdating')
+            //console.dir(e)
+            if( 
+                    (e.oldData.eventTypeID==1&&this.allow_meeting_team==false)  //Tipo 1 = Reunión de Equipo > NO permitido entonces bloquear todo
+                || (e.oldData.eventTypeID==2&&this.allow_meeting_pilot==false) //Tipo 2 = Reunión de Pilotaje > NO permitido entonces bloquear todo
+                || (e.oldData.eventTypeID==3&&this.allow_meeting_work==false)  //Tipo 3 = Reunión de Trabajo > NO permitido entonces bloquear todo
+                || (e.oldData.eventTypeID==4&&this.allow_meeting_event==false)  //Tipo 4 = Evento ENS > NO permitido entonces bloquear todo
+            ){
+                e.cancel=true;
+                this.$q.notify({ html: true, multiLine: false, color: 'red'
+                    ,message: "Lo sentimos, no puede editar registro"
+                    ,timeout: 1500, progress: false , icon: "fas fa-exclamation-circle"
+                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                })
+            }else{
+                this.currentData = {
+                    eventID:  e.newData.eventID
+                    ,estado:  e.newData.estado
+                    ,startDateTime: e.newData.startDateTime
+                    ,eventTypeID: e.newData.eventTypeID
+                    ,eventName: e.newData.eventName
+                    ,eventPlace: e.newData.eventPlace
+                    ,startDate: e.newData.startDateTime.substring(0,10).replace(/-/g,'/')
+                    ,startTimeName: e.newData.startTimeName
+                    ,EndDateName: e.newData.EndDate.substring(0,10).replace(/-/g,'/')
+                    ,EndTimeName: e.newData.EndTimeName
+                    ,eventComments: e.newData.eventComments
+                }
+                this.selectedRowKeys = e.newData.users;
+                this.saveMeeting()
+            }
         },
         saveMeeting(){
-            if(this.currentData.isNew==true){
-                let newEvents = JSON.parse(JSON.stringify(this.ensEvents))
-                newEvents.push(this.currentData);
-                this.ensEvents = newEvents;
+            console.dir(this.currentData)
+            console.dir(this.selectedRowKeys)
+            if(
+                !(
+                    (this.currentData.eventID>0&&this.currentData.eventTypeID==1&&this.allow_meeting_team==false) || 
+                    (this.currentData.eventID>0&&this.currentData.eventTypeID==2&&this.allow_meeting_pilot==false) || 
+                    (this.currentData.eventID>0&&this.currentData.eventTypeID==3&&this.allow_meeting_work==false) || 
+                    (this.currentData.eventID>0&&this.currentData.eventTypeID==4&&this.allow_meeting_event==false)
+                )
+                
+            ){
+                try{
+                    let newEditData = this.currentData;
+                    newEditData.basic = JSON.stringify(this.currentData);
+                    newEditData.users = JSON.stringify(this.selectedRowKeys);
+                    this.$q.loading.show({ delay: 0, message: 'Guardando..', spinner: 'QSpinnerIos', messageColor: 'white', spinnerColor: 'white' })
+                    this.$axios.post(this.apiURL+'spEnsEventsUpdate',
+                        {
+                            userCode: this.userCode,
+                            userCompany: this.userCompany,
+                            row_id: this.currentData.eventID?this.currentData.eventID:0,
+                            "editRecord": JSON.stringify(newEditData),
+                        }
+                    , {headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
+                    ).then((response) => {
+                        this.dialogVisible = false;
+                        this.$q.loading.hide()
+                        this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
+                        this.loadData();
+                    }).catch((error) => {
+                        console.error(error)
+                        this.$q.loading.hide()
+                        let mensaje = ''
+                        if(error.message){ mensaje = error.message }
+                        if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
+                        if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                        this.$q.notify({ html: true, multiLine: false, color: 'red'
+                            ,message: "Lo sentimos, no se pudo realizar acción.<br/>" + mensaje
+                            ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                            ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                        })
+                    })
+                }catch(ex){
+                    this.$q.loading.hide()
+                    this.$q.notify({ html: true, multiLine: false, color: 'red'
+                        ,message: "Lo sentimos, no se pudo realizar acción.<br/>" + ex.message
+                        ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
+                        ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                    })
+                }
             }else{
-                let newEvents = JSON.parse(JSON.stringify(this.ensEvents))
-                newEvents.map(x=>{
-                    if(x.value==this.currentData.value){
-                        x.value = x.value;
-                        x.eventTypeID = x.eventTypeID;
-                        x.startDate = this.currentData.startDate;
-                        x.startTime = this.currentData.startTime;
-                        x.eventPlace = this.currentData.eventPlace;
-                        x.eventName = this.currentData.eventName;
-                        x.eventComments = this.currentData.eventComments;
-                        x.isNew = x.isNew
-                    }
-                });
-                this.ensEvents = newEvents;
+                this.$q.notify({ html: true, multiLine: false, color: 'red'
+                    ,message: "Lo sentimos, no puede editar registro"
+                    ,timeout: 1500, progress: false , icon: "fas fa-exclamation-circle"
+                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
+                })
             }
-            this.dialogVisible = false;
+            
         },
-        deleteMeeting(){
-            let newEvents = JSON.parse(JSON.stringify(this.ensEvents))
-            newEvents = newEvents.filter(x=>x.value != this.currentData.value);
-            this.ensEvents = newEvents;
-            this.dialogVisible = false;
-        }
     },
     computed:{
+        console: () => console,
         userCode: { get () { return this.$store.state.main.userCode } },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
         userColor: { get () { return this.$store.state.main.userColor }  },
         editStatus: {
             get () { return this.$store.state[this.moduleName].editStatus },
@@ -292,6 +451,35 @@ export default ({
         editData: {
             get () { return this.$store.state[this.moduleName].editData },
         },
+        allow_meeting_team: { get () { 
+            let resultado = false;
+            this.security.filter(x=>x.label=='allow_meeting_team').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_meeting_pilot: { get () { 
+            let resultado = false;
+            this.security.filter(x=>x.label=='allow_meeting_pilot').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_meeting_work: { get () { 
+            let resultado = false;
+            this.security.filter(x=>x.label=='allow_meeting_work').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_meeting_event: { get () { 
+            let resultado = false;
+            this.security.filter(x=>x.label=='allow_meeting_event').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+
         toolbarComponentClass: { get () {
             let result = 'no-padding '
             if(this.$store.state.main.userColor=='default'){
