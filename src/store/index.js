@@ -28,7 +28,8 @@ import ENSTeams from './ENSTeams' //ENSTeams
 import ENSServicios from './ENSServicios' //ENSServicios
 import ENSLibros from './ENSLibros' //ENSLibros
 import ENSJobSearch from './ENSJobSearch' //ENSJobSearch
-import ENSMeet from './ENSMeet' //ENSJobSearch
+import ENSMeet from './ENSMeet' //ENSMeet
+import ENSMeetPilot from './ENSMeetPilot' //ENSMeetPilot
 import ENSCalendar from './ENSCalendar' //ENSCalendar
 
 import ChartAccount from './ChartAccount' //ChartAccount
@@ -115,6 +116,7 @@ export default function (/* { ssrContext } */) {
       ,ENSLibros
       ,ENSJobSearch
       ,ENSMeet
+      ,ENSMeetPilot
       ,ENSCalendar
       //FINANCES
       ,ChartAccount
