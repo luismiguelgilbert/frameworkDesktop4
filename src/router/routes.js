@@ -211,6 +211,12 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootENS/ENSMeetPilot/edit.vue') }
         ] 
       }
+      ,{ path: 'RootENS/ENSMeetWork', component: () => import('pages/RootENS/ENSMeetWork/main.vue')
+        ,children: [
+           { path: '/', component: () => import('../components/mainView/mainView.vue') }
+          ,{ path: ':id', component: () => import('pages/RootENS/ENSMeetWork/edit.vue') }
+        ] 
+      }
       ,{ path: 'RootENS/ENSJobSearch', component: () => import('pages/RootENS/ENSJobSearch/main.vue')
         ,children: [
           { path: '/', component: () => import('pages/RootENS/ENSJobSearch/edit.vue') }

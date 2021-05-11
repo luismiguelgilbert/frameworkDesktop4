@@ -69,6 +69,8 @@
         v-model="meetingComments" class="q-mt-md"
         />
 
+    <q-toggle v-model="estado" color="positive" label="Activa?" />
+
 
     <br><br>
 </q-form>
@@ -146,6 +148,10 @@ export default ({
             return resultado }, 
         },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        estado: {
+            get () { return this.$store.state[this.moduleName].editData.basic.estado },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'estado', value: val}) }
+        },
         teamID: {
             get () { return this.$store.state[this.moduleName].editData.basic.teamID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'teamID', value: val}) }

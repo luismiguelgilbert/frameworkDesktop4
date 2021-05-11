@@ -1,18 +1,6 @@
 <template>
 <q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     
-    <q-select class="q-mt-lg"
-        label="Equipo (*)" placeholder="Seleccione su equipo (*)" emit-value map-options filled
-        :options="lookup_teams" readonly
-        v-model="teamID"
-        ref="teamID"
-        :rules="[
-                val => val!= null || '* Requerido',
-        ]"
-        >
-        <template v-slot:prepend><q-icon name="fas fa-users" color="primary" /></template>
-    </q-select>
-
     <q-input
         ref="meetingDate" 
         mask="date" :rules="['date']"
@@ -61,13 +49,27 @@
         <template v-slot:prepend><q-icon name="fas fa-stopwatch" color="primary" /></template>
     </q-select>
     
+    <div class="text-subtitle2 text-primary">Temas Tratados:</div>
+    <q-editor
+        v-model="meetingComments"
+        :dense="$q.screen.lt.md"
+        :toolbar="[
+            ['bold', 'underline']
+            ,['left', 'center', 'right', 'justify']
+            ,['unordered', 'ordered', 'outdent', 'indent']
+        ]"
+      />
 
-   
-    <q-input
-        label="Comentarios para el Movimiento" placeholder="Ingrese comentarios, avisos, o mensajes importantes que desee informar al Movimiento" filled
-        type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-        v-model="meetingComments" class="q-mt-md"
-        />
+    <div class="text-subtitle2 text-primary">Acuerdos Realizados:</div>
+    <q-editor
+        v-model="meetingPending"
+        :dense="$q.screen.lt.md"
+        :toolbar="[
+            ['bold', 'underline']
+            ,['left', 'center', 'right', 'justify']
+            ,['unordered', 'ordered', 'outdent', 'indent']
+        ]"
+      />
 
     <q-toggle v-model="estado" color="positive" label="Activa?" />
 
@@ -172,11 +174,12 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.meetingComments }, 
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'meetingComments', value: val}) }  
         },
+        meetingPending: { 
+            get () { return this.$store.state[this.moduleName].editData.basic.meetingPending }, 
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'meetingPending', value: val}) }  
+        },
         lookup_places: {
             get () { return [...new Set(this.$store.state[this.moduleName].editData.lookup_places.map(row=>row.name))]  },
-        },
-        lookup_teams: {
-            get () {  return this.$store.state[this.moduleName].editData.lookup_teams }, 
         },
         lookup_meetingLengths: {
             get () {  return this.$store.state[this.moduleName].editData.lookup_meetingLengths }, 
