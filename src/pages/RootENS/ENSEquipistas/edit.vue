@@ -129,8 +129,8 @@ export default ({
                         columns: [
                             //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime' | 'textArea'
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'recordID', dataType: 'number', visible: false },
-                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Compañía', dataField: 'companyName', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Cargo', dataField: 'jobPosition', dataType: 'string', visible: true },
+                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Compañía / Institución', dataField: 'companyName', dataType: 'string', visible: true },
+                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Cargo / Profesión', dataField: 'jobPosition', dataType: 'string', visible: true },
                             {alignment: 'left', allowEditing: true, isDataRequired: false, caption: 'Desde', dataField: 'jobStartDate',  dataType: 'date', visible: true, format: 'dd-MMM-yyyy' },
                             {alignment: 'left', allowEditing: true, isDataRequired: false, caption: 'Hasta', dataField: 'jobStopDate',  dataType: 'date', visible: true, format: 'dd-MMM-yyyy' },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Cobertura (Ciudades)', dataField: 'jobPlaces', dataType: 'string', visible: true },
