@@ -1,7 +1,7 @@
 <template>
 <div>
     <q-layout view="hHh lpr lFf" > <!-- :class="isOSdarkMode?'bg-grey-10':'bg-grey-2'"  -->
-        <q-card :flat="$q.screen.lt.md" flat :square="$q.screen.lt.md" :class="' ' + ($q.screen.gt.xs?'fixed-center':'fixed-top')" style="min-width: 400px;" >
+        <q-card :flat="$q.screen.lt.md" flat :square="$q.screen.lt.md" :class="' ' + ($q.screen.gt.xs?'fixed-center':'fixed-top')" style="min-width: 200px;" >
             <q-toolbar class="text-primary">
                 <q-space />
                 <q-img src="ens.png" width="100px" class="q-mt-sm" />
@@ -9,7 +9,7 @@
                 
             </q-toolbar>
             <q-separator />
-            <q-card-section class="text-primary q-pa-xl">
+            <q-card-section class="text-primary q-pl-xl q-pr-xl">
                 <center>
                     <q-form spellcheck="false" autocorrect="off" autocapitalize="off">
                         <q-input class="text-white" :autofocus="$q.screen.gt.sm?true:false" placeholder="Ingrese su usuario" v-model="username" aria-required required > <!-- :input-class="isOSdarkMode?'text-white':undefined" -->
@@ -33,14 +33,14 @@
                         />
                 </center>
             </q-card-section>
-            <q-card-actions align="between">
+            <q-card-actions align="around">
                 <q-btn flat icon="fab fa-youtube" label="Cómo resetear mi contraseña?" no-caps size="sm" @click="helpDialog=true" color="primary" />
-                <q-btn flat size="sm" label="No puedes ingresar?"  :class="$q.screen.lt.md?'q-mr-xl':undefined"
+                <q-btn flat size="sm" label="No puedes ingresar?"  
                 to="/forgotPassword" 
                 icon="img:data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAACsklEQVRoge2XTUhUURTHf/fNzMZBxSARMgj6oGWLCKJF2rJJivzAslWEipCQq4gW7qJNX8KoCxcJNioZhUa7pHYVbVpVaAQKuYhsqCnI8R0X7zmpb3w+efeNM/B+m3lzzuH+z7n3vnvPg5CQkJCdRDksE68TiAwCewqfjivziLTTXPdirdFwhIkMUHzJA9Si1OBGYzRvINBwYF/gGW2HyZmvAHs32p0rUGKUfAH5tpAzSCku1VRSXxVHgOnFDCMLabIiBfH7LqCtppLz1RW5/43288NvPwvid8PTFjpVFXfadsUL5nfDUwH5FtKUwvnd8FTA9GLG1Ra03w1P78DIQhqAenuppxczPLJthfC74WwlHr8SKNqLDJpOrsu55O+Bki8g3zswD9Tmlqy4mNtoyNeNtmMVUWzMYZjtO51ESIhn+lP36e0N/JQLUqCbmsMTDE6WBagR8D0gco7l3y/pH64OSsLZSvihf7gaot0oI4HIkTWeL0jkNF0tn7Tq4bGZ80RytBnMIVDlePiS0oWeLZQcbUbJGKhy4BkidTmf8AaWjgcx+6BjC1nbZsaaea7TdeG2ZU8JSj1FxdvoaPjzPz5VRyzygSstP3xro2UFot25mV9NHkCpeyx8bFyf/NgJ4DnZbId/XVvd/xDqDAAid9eZO1uvOUJNiWNQhqnOArf8a+t5B/YDINH3W0b++/sWAMVBDbqAlgK2ceREYqb9pO3081+AMmatkZaPbhkbM1ZjZn3r2uhYgSnrR/VsGarsGJFJ/7oW/guQpT6QXyhpIJm6sWlcMnUTIQGkidDnW9dGTysxkGpCGLfHm8I07oB6B4CRPYZSPXbyglJNdLY+0aKLzl7IKmIIqNgkIo1Sl3UmD7qbuQfju4ktXwUSwCHb+hmRKSL00XHxu1a9kJCQkB1nBdtiGOor5WJRAAAAAElFTkSuQmCC"
                 />
             </q-card-actions>
-            <q-card-actions align="between">
+            <q-card-actions align="around">
                 <q-btn flat @click="openGooglePlay"><img src="googlePlay.png" width="150"   /></q-btn>
                 <q-btn flat disable title="Próximamente" ><img src="appStore.png" width="150" /></q-btn>
             </q-card-actions>
