@@ -34,8 +34,8 @@ export default ({
                             //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'customerID', listDataField: 'customerID', dataType: 'number', visible: false },
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Proveedor', dataField: 'label', listDataField: 'label', dataType: 'string', visible: true },
-                            {alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'RUC', dataField: 'partner_ruc', listDataField: 'partner_ruc', dataType: 'string', visible: true, defaultValue: false },
-                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Nombre Comercial', dataField: 'short_name_es', listDataField: 'short_name_es', dataType: 'string', visible: true },//en el lookup NO va
+                            {alignment: 'center', allowEditing: false, isDataRequired: true, caption: 'RUC', dataField: 'partner_ruc', listDataField: 'partner_ruc', dataType: 'string', visible: true, defaultValue: false },
+                            {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Nombre Comercial', dataField: 'short_name_es', listDataField: 'short_name_es', dataType: 'string', visible: true },//en el lookup NO va
                         ],
                     }
                 },

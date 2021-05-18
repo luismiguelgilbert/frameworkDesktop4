@@ -244,7 +244,7 @@
       </q-drawer>
 
       <!-- El style hace que la página siempre crezca lo máximo disponible para que el drawer se extienda automáticamente-->
-      <q-page-container style="height: calc(100vh); overflow-y: hidden;">
+      <q-page-container style="height: calc(100vh); overflow-y: hidden;" ><!--background-color: #F2F6F9;-->
         <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" mode="out-in" >
           <router-view />
         </transition>
@@ -293,7 +293,7 @@
   //dxdatagrid selected row style
   .dx-datagrid-rowsview .dx-selection.dx-row > td,  
   .dx-datagrid-rowsview .dx-selection.dx-row:hover > td {  
-    background-color: #87adee !important; // //#5990EF //#4c87ee 
+    background-color: #2F74EB !important; // //#5990EF //#4c87ee //#87adee //#673AB7
     color: white !important;
   }
 
@@ -323,6 +323,12 @@
   //Always make PopUp Title in primary color
   .dx-popup-title{
     color: #2F74EB !important;
+  }
+  .dx-checkbox-checked .dx-checkbox-icon{
+    background-color: #2196F3 !important; //#03A9F4
+  }
+  .dx-checkbox-indeterminate .dx-checkbox-icon{
+    background-color: #64B5F6 !important; 
   }
 
 </style>
@@ -628,6 +634,7 @@ export default {
       let result = 'no-padding '
       if(this.$store.state.main.userColor=='default'){
         result=result + 'bg-primary text-white'
+        //result=result + 'bg-white text-primary'
 
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
           //console.dir('Branding ENS')

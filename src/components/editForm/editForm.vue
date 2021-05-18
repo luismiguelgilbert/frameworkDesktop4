@@ -42,11 +42,11 @@
                     
                 </q-toolbar>
                 <q-separator />
-                <q-splitter v-model="splitterModel" unit="px">
-                    <template v-slot:before  >
-                        <div style="height:  calc(100vh - 119px); overflow-y: auto; overflow-x: hidden;" >
+               
+                <q-splitter v-model="splitterModel" unit="px" >
+                    <template v-slot:before >
+                        <div style="height:  calc(100vh - 119px); overflow-y: auto; overflow-x: hidden;">
                             <q-list >
-                                <!--:disable="tabRecord.isTabDisable"-->
                                 <q-item 
                                     v-for="tabRecord in editConfig.moduleTabs" :key="tabRecord.tabName"
                                     clickable v-ripple 
@@ -54,18 +54,14 @@
                                     v-if="!(tabRecord.isTabDisable)"
                                     @click="tab=tabRecord.tabName" 
                                     :active="tab==tabRecord.tabName" active-class="bg-primary text-white" >
-                                    <q-item-section side>
-                                        <q-icon :name="tabRecord.iconName" :color="tab==tabRecord.tabName?'white':'grey-7'" />
-                                    </q-item-section>
-                                    <q-item-section v-if="!editFormLeftCollapsed&&$q.screen.gt.xs">
-                                        <q-item-label :class="'text-subtitle2 '+(tab==tabRecord.tabName?'text-white':'text-grey-7')">{{tabRecord.textLabel}}</q-item-label>
-                                    </q-item-section>
-                                    <!--<q-item-section side v-if="editFormLeftCollapsed&&tab==tabRecord.tabName && $q.screen.gt.sm">
-                                        <q-icon name="fas fa-chevron-right" color="white" />
-                                    </q-item-section>-->
-                                    <!--<q-item-section>
-                                        moduleName={{moduleName}} - tabRecord={{!tabRecord}}
-                                    </q-item-section>-->
+                                    
+                                        <q-item-section side>
+                                            <q-icon :name="tabRecord.iconName" :color="tab==tabRecord.tabName?'white':'grey-7'" />
+                                        </q-item-section>
+                                    
+                                        <q-item-section v-if="!editFormLeftCollapsed&&$q.screen.gt.xs">
+                                            <q-item-label :class="'text-subtitle2 '+(tab==tabRecord.tabName?'text-white':'text-grey-7')">{{tabRecord.textLabel}}</q-item-label>
+                                        </q-item-section>
                                 </q-item>
                             </q-list>
                         </div>
@@ -88,9 +84,9 @@
                             >
                             <q-tab-panel
                                 v-for="tabRecord in  editConfig.moduleTabs" :key="tabRecord.tabName"
-                                :name="tabRecord.tabName" 
+                                :name="tabRecord.tabName"
+                                
                                 >
-                                <!--<div style="maxHeight: calc(100vh - 135px);" >-->
                                 <div style="maxHeight: calc(100vh - 135px);" >
                                     <keep-alive >
                                         <component

@@ -129,6 +129,7 @@ export default ({
                         ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
                         ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
                     })
+                    this.$router.go(-1)
                 })
         },
         companyChange(){

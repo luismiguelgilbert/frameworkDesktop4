@@ -4,6 +4,7 @@
             <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='form' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addForm" />
             <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='list' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addList" />
             <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='listRepeated' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addList" />
+            <q-btn v-if="tabRecord.tabConfig.insertAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Editar Todos" color="primary" icon="fas fa-edit" :disable="!selectedRowKeys.length>0" @click="updateBatch" />
             <q-btn v-if="tabRecord.tabConfig.deleteAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
         </q-toolbar>
         <q-separator />
@@ -64,12 +65,12 @@
                 </q-bar>
                 <q-card-section style="height: calc(50vh); overflow-y: scroll;">
                     <q-form autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" class="q-gutter-md">
-                        <div v-for="campo in tabRecord.tabConfig.columns" :key="campo.dataField">
-                            <q-input v-if="campo.dataType=='number'&&campo.allowEditing&&!(campo.lookupOptions)" v-model="formDialogData[campo.dataField]" filled stack-label :label="campo.caption" type="number" />
+                        <div v-for="(campo, index) in tabRecord.tabConfig.columns" :key="campo.dataField">
+                            <q-input :autofocus="index==0||index==1" v-if="campo.dataType=='number'&&campo.allowEditing&&!(campo.lookupOptions)" v-model="formDialogData[campo.dataField]" filled stack-label :label="campo.caption" type="number" />
                             <q-select v-if="campo.dataType=='number'&&campo.allowEditing&&(campo.lookupOptions)" v-model="formDialogData[campo.dataField]" filled stack-label :label="campo.caption" :options="campo.lookupOptions" map-options emit-value />
-                            <q-input v-if="campo.dataType=='string'&&campo.allowEditing" v-model="formDialogData[campo.dataField]" filled stack-label :label="campo.caption" />
+                            <q-input :autofocus="index==0||index==1" v-if="campo.dataType=='string'&&campo.allowEditing" v-model="formDialogData[campo.dataField]" filled stack-label :label="campo.caption" />
                             <q-checkbox v-if="campo.dataType=='boolean'&&campo.allowEditing" v-model="formDialogData[campo.dataField]" :label="campo.caption" />
-                            <q-input v-if="campo.dataType=='date'&&campo.allowEditing" v-model="formDialogData[campo.dataField]" :ref="campo.dataField" mask="date" :rules="['date']" filled stack-label :label="campo.caption">
+                            <q-input :autofocus="index==0||index==1" v-if="campo.dataType=='date'&&campo.allowEditing" v-model="formDialogData[campo.dataField]" :ref="campo.dataField" mask="date" :rules="['date']" filled stack-label :label="campo.caption">
                                 <template v-slot:append>
                                     <q-icon name="event" class="cursor-pointer">
                                     <q-popup-proxy transition-show="scale" transition-hide="scale">
@@ -83,7 +84,7 @@
                                 </template>
                                 <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
                             </q-input>
-                            <q-input v-if="campo.dataType=='textArea'&&campo.allowEditing" v-model="formDialogData[campo.dataField]" type="textarea" filled stack-label :label="campo.caption" />
+                            <q-input :autofocus="index==0||index==1" v-if="campo.dataType=='textArea'&&campo.allowEditing" v-model="formDialogData[campo.dataField]" type="textarea" filled stack-label :label="campo.caption" />
                         </div>
                     </q-form>
                 </q-card-section>
@@ -145,6 +146,63 @@
                     </q-card-actions>
                 </div>
         </DxPopup>
+
+        <!--Batch Edit Dialog-->
+        <q-dialog v-model="isBatchEditDialog" square>
+            <q-card style="minWidth: calc(50%)">
+                <q-bar class="bg-primary text-white">
+                    Editar masivamente los registros seleccionados
+                    <q-space />
+                    <q-btn dense flat icon="close" v-close-popup />
+                </q-bar>
+                <q-card-section style="height: calc(50vh); overflow-y: scroll;">
+                    <q-form autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" class="q-gutter-md">
+                        <q-select 
+                            :options="tabRecord.tabConfig.columns.filter(x=>x.allowEditing==true)" 
+                            v-model="batchEditDialogSelectedField" 
+                            option-label="caption"
+                            label="Seleccione el campo que va a editar masivamente"
+                            filled stack-label
+                            @input="batchEditDialogNewData=null"
+                            />
+                            
+                        
+                            <q-input v-if="batchEditDialogSelectedField&&batchEditDialogSelectedField.dataType=='number'&&batchEditDialogSelectedField&&batchEditDialogSelectedField.allowEditing&&!(batchEditDialogSelectedField&&batchEditDialogSelectedField.lookupOptions)" v-model="batchEditDialogNewData" filled stack-label :label="batchEditDialogSelectedField&&batchEditDialogSelectedField.caption" type="number" >
+                                <template v-slot:prepend><q-icon name="fas fa-sort-numeric-up-alt" /></template>
+                            </q-input>
+                            <q-select v-if="batchEditDialogSelectedField&&batchEditDialogSelectedField.dataType=='number'&&batchEditDialogSelectedField&&batchEditDialogSelectedField.allowEditing&&(batchEditDialogSelectedField&&batchEditDialogSelectedField.lookupOptions)" v-model="batchEditDialogNewData" filled stack-label :label="batchEditDialogSelectedField&&batchEditDialogSelectedField.caption" :options="batchEditDialogSelectedField&&batchEditDialogSelectedField.lookupOptions" map-options emit-value />
+                            <q-input v-if="batchEditDialogSelectedField&&batchEditDialogSelectedField.dataType=='string'&&batchEditDialogSelectedField&&batchEditDialogSelectedField.allowEditing" v-model="batchEditDialogNewData" filled stack-label :label="batchEditDialogSelectedField&&batchEditDialogSelectedField.caption">
+                                <template v-slot:prepend><q-icon name="fas fa-signature" /></template>
+                            </q-input>
+                            <q-checkbox v-if="batchEditDialogSelectedField&&batchEditDialogSelectedField.dataType=='boolean'&&batchEditDialogSelectedField&&batchEditDialogSelectedField.allowEditing" v-model="batchEditDialogNewData" :label="batchEditDialogSelectedField&&batchEditDialogSelectedField.caption" />
+                            <q-input v-if="batchEditDialogSelectedField&&batchEditDialogSelectedField.dataType=='date'&&batchEditDialogSelectedField&&batchEditDialogSelectedField.allowEditing" v-model="batchEditDialogNewData" :ref="batchEditDialogSelectedField&&batchEditDialogSelectedField.dataField" mask="date" :rules="['date']" filled stack-label :label="batchEditDialogSelectedField&&batchEditDialogSelectedField.caption">
+                                <template v-slot:append>
+                                    <q-icon name="event" class="cursor-pointer">
+                                    <q-popup-proxy transition-show="scale" transition-hide="scale">
+                                        <q-date v-model="batchEditDialogNewData">
+                                        <div class="row items-center justify-end">
+                                            <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                                        </div>
+                                        </q-date>
+                                    </q-popup-proxy>
+                                    </q-icon>
+                                </template>
+                                <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+                            </q-input>
+                            <q-input v-if="batchEditDialogSelectedField&&batchEditDialogSelectedField.dataType=='textArea'&&batchEditDialogSelectedField&&batchEditDialogSelectedField.allowEditing" v-model="batchEditDialogNewData" type="textarea" filled stack-label :label="batchEditDialogSelectedField&&batchEditDialogSelectedField.caption">
+                                <template v-slot:prepend><q-icon name="fas fa-comment" /></template>
+                            </q-input>
+                    </q-form>
+                    
+                </q-card-section>
+                <q-separator />
+                <q-card-actions align="around" >
+                    <q-btn icon="fas fa-edit" flat color="primary" label="Actualizar" 
+                        :disable="batchEditDialogSelectedField==null||batchEditDialogNewData==null"
+                        @click="formBatchDialogSave" />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
         
 
     </div>
@@ -163,7 +221,8 @@ export default ({
     },
     data () {
         return {
-            selectedRowKeys: [], isFormDialog: false, formDialogData: {}, isListDialog: false, listSelectedRowKeys: [],
+            selectedRowKeys: [], isFormDialog: false, isBatchEditDialog: false, formDialogData: {}, isListDialog: false, listSelectedRowKeys: [],
+            batchEditDialogSelectedField: null, batchEditDialogNewData: null,
             searchTextBox: null,
             dxdialogSearchBoxOptions:{
                 placeholder: "Buscar...",
@@ -247,6 +306,9 @@ export default ({
         addForm(){
             this.isFormDialog = true
         },
+        updateBatch(){
+            this.isBatchEditDialog = true
+        },
         addList(){
             this.isListDialog = true
         },
@@ -297,6 +359,19 @@ export default ({
                 }
             })
             this.formDialogData = initialFormDialogData
+        },
+        formBatchDialogSave(){
+            let newRows = JSON.parse(JSON.stringify(this.gridData));
+            //Navega TODOS los registros
+            newRows.map(row=>{
+                //si el registro está seleccionado > entonces actualiza el campo
+                if(this.selectedRowKeys.some(y=>y==row[this.tabRecord.tabConfig.keyColumn])){
+                    row[this.batchEditDialogSelectedField.dataField] = this.batchEditDialogNewData
+                }
+            })
+            //let newRows = JSON.parse(JSON.stringify(this.gridData.filter(x=>!this.selectedRowKeys.some(y=>y==x[this.tabRecord.tabConfig.keyColumn]))))
+            this.gridData = newRows;
+            this.isBatchEditDialog = false;
         },
         onListSelectionChanged({ selectedRowKeys, selectedRowsData }) {
             this.listSelectedRowKeys = selectedRowKeys;
