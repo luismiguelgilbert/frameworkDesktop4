@@ -233,6 +233,7 @@
                     ,{value: 'estado', label: 'estado'}
                     ,{value: 'image', label: 'image'}
                     ,{value: 'bool', label: 'bool'}
+                    ,{value: 'voided', label: 'voided'}
                   ]"
           :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
           :value="selectedColumn.cellComponent"

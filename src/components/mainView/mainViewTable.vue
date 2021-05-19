@@ -62,6 +62,9 @@
             <template #mainViewCellTemplateNormal="{ data }">
                 <mainViewCellTemplateNormal :data="data" />
             </template>
+            <template #mainViewCellTemplateVoided="{ data }">
+                <mainViewCellTemplateVoided :data="data" />
+            </template>
 
         </DxDataGrid>
     </q-card>
@@ -77,7 +80,7 @@ import mainViewCellTemplateLookup from './mainViewCellTemplateLookup'
 import mainViewCellTemplateEstado from './mainViewCellTemplateEstado'
 import mainViewCellTemplateImage from './mainViewCellTemplateImage'
 import mainViewCellTemplateNormal from './mainViewCellTemplateNormal'
-
+import mainViewCellTemplateVoided from './mainViewCellTemplateVoided'
 
 
 export default ({
@@ -105,7 +108,8 @@ export default ({
         mainViewCellTemplateLookup,
         mainViewCellTemplateEstado,
         mainViewCellTemplateImage,
-        mainViewCellTemplateNormal
+        mainViewCellTemplateNormal,
+        mainViewCellTemplateVoided
     },
     data() {
         return {
