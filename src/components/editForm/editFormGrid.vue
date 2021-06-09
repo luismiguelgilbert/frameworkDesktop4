@@ -326,8 +326,6 @@ export default ({
             newRow[this.tabRecord.tabConfig.keyColumn] = newKeyValue;
             //Agrega valores (excepto columna key) y además valida si el campo es requerido (y NO es boolean)
             this.tabRecord.tabConfig.columns.filter(y=>y.dataField!=this.tabRecord.tabConfig.keyColumn).map(x=>{
-                console.dir('Columna ' + x.dataField +  ' es de Tipo ' + x.dataType + ' y tiene un valor de ' + this.formDialogData[x.dataField])
-                //if(x.dataType!='boolean'&&x.isDataRequired&&!(this.formDialogData[x.dataField])){
                 if(x.isDataRequired){
                     if(x.dataType=='boolean'){
                         if( this.formDialogData[x.dataField] === null ){
