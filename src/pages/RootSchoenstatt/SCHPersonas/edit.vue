@@ -67,8 +67,8 @@ export default ({
                             //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'addressID', dataType: 'number', visible: false },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Dirección', dataField: 'addressName', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'País', dataField: 'countryID', dataType: 'number', visible: true, lookupOptions: this.editData.lookup_countries },
-                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Ciudad', dataField: 'cityID', dataType: 'number', visible: true, lookupOptions: this.editData.lookup_cities },
+                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'País', dataField: 'countryID', dataType: 'number', visible: true, lookupOptions: 'this.editData.lookup_countries' },
+                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Ciudad', dataField: 'cityID', dataType: 'number', visible: true, lookupOptions: 'this.editData.lookup_cities' },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Tipo', dataField: 'tipo', dataType: 'number', visible: true, lookupOptions: [{value: 1, label: 'Trabajo'}, {value: 2, label: 'Domicilio'}] },
                             //{alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Principal?', dataField: 'is_default', dataType: 'boolean', visible: true, defaultValue: false },
                         ],

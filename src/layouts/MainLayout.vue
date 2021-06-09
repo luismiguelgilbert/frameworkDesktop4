@@ -266,6 +266,10 @@
   }
   .dx-datagrid{  
     font-weight: bold;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
   }
   .dx-header-row > td[role="columnheader"]> div.dx-datagrid-text-content {  //controla que encabezado se vea con color azul (diferente a las filas)
     font-size: 13px;  
@@ -330,6 +334,17 @@
   .dx-checkbox-indeterminate .dx-checkbox-icon{
     background-color: #64B5F6 !important; 
   }
+
+
+  /*.dx-datagrid-borders > .dx-datagrid-headers {  
+    border-top-left-radius: 15px;  
+    border-top-right-radius: 15px;  
+  }  
+  .dx-datagrid-borders > .dx-datagrid-total-footer,  
+  .dx-datagrid-borders > .dx-datagrid-rowsview {  
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }*/
 
 </style>
 

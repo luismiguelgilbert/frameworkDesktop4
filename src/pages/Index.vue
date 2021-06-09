@@ -3,7 +3,7 @@
   <q-page>
     <q-tabs
         v-model="currentHomeTab" align="justify"
-        :class="userColor=='default'?'bg-grey-2 text-primary':'bg-grey-10 text-white'"
+        :class="userColor=='default'?'bg-white text-primary':'bg-grey-10 text-white'"
         :breakpoint="0" animated
       >
         <q-tab animated

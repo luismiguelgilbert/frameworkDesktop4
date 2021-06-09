@@ -100,6 +100,8 @@
                                             :rptLinkCompany="rptLinkCompany"
                                             :rptType="rptType"
 
+                                            @onRunMethod="runMethod"
+
                                             />
                                     </keep-alive>
                                 </div>
@@ -158,6 +160,24 @@ export default ({
                     newEditData[x] = JSON.parse(response.data[0][x])
                 })
                 this.editData = newEditData;
+                //Fix LookupColumns
+                let newEditConfig = JSON.parse(JSON.stringify(this.editConfig))
+                newEditConfig.moduleTabs.map(tab=>{
+                    try{
+                        if(tab.tabConfig&&tab.tabConfig.columns){
+                            tab.tabConfig.columns.map(columna=>{
+                                if(columna.lookupOptions){
+                                    if(typeof(columna.lookupOptions)=='string'){
+                                        let newlookupoptions = this[columna.lookupOptions.split('.')[1]][columna.lookupOptions.split('.')[2]]
+                                        columna.lookupOptions = newlookupoptions
+                                    }
+                                }
+                            })
+                        }
+                    }catch(ex){console.dir('se cayó: '); console.dir(ex)}
+                    return tab
+                })
+                this.editConfig = newEditConfig;
                 this.$emit('onLoadedData')
                 this.dataLoaded = true
             }).catch((error) => {
@@ -339,12 +359,17 @@ export default ({
         },
         changeLeftMenu(){ 
             if(this.editFormLeftCollapsed){
-                this.splitterModel = 200
+                this.splitterModel = 230//210
                 this.editFormLeftCollapsed = false;
             }else{
                 this.splitterModel = 55//55
                 this.editFormLeftCollapsed = true;
             }
+        },
+        runMethod(receivedData){
+            try{
+                this.$refs['tab_'+receivedData.tabName][0][receivedData.methodName]();
+            }catch(ex){}
         }
     },
     computed:{

@@ -7,12 +7,13 @@
             />
         <q-toggle class="col-12 col-md-4"
             tabindex="-1"
-            v-model="voided" icon="fas fa-ban" color="red" label="Anulado?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+            v-model="voided" icon="fas fa-ban" color="red" label="Anulado?" :disable="(!editStatus.editMode&&!allow_edit)||(editStatus.editMode&&!allow_insert)"
             />
         <q-file class="col-12 col-md-4"
+            v-if="editStatus.editMode=='create'"
             tabindex="-1"
-            v-model="xmlFile" label="Cargar XML" filled @input="readXmlFile" dense
-            accept=".xml" :disable="!editMode"
+            v-model="xmlFile" label="Cargar desde XML" filled @input="readXmlFile" dense
+            accept=".xml" 
             >
             <template v-slot:prepend><q-icon name="fas fa-upload" /></template>
         </q-file>
@@ -27,17 +28,37 @@
         rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :isReadonly="(editStatus.editMode==false) || (allow_edit==false && allow_insert==false)"
         :initialValue="partnerID"
         :tableSearchColumns="[
                  { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
                 ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
             ]"
         @onItemSelected="(row)=>{
+                this.$emit('onRunMethod',{tabName: 'lines', methodName: 'clearRows'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
                 this.partnerID=row.value;
                 this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
-                this.account_id=row.account_id
-                this.$emit('onAccMoveCompute')
+                this.account_id=row.account_id;
+                this.$emit('onRunMethod',{tabName: 'lines', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
+            }"
+        />
+
+    <selectSearchable 
+        prependIcon="fas fa-book"
+        labelText="Cuenta Contable (*)" labelSearchText="Buscar Cuenta Contable"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(editStatus.editMode==false) || (allow_edit==false && allow_insert==false) || (allow_accounting == false)"
+        :initialValue="account_id"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                ,{ name: 'code_es', label: '# Identificación', field: 'code_es', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.account_id=row.value;
+                this.$emit('onRunMethod',{tabName: 'lines', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
             }"
         />
     
@@ -80,7 +101,7 @@
     </q-input>
 
     <q-input
-        ref="numeroDoc" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        ref="numeroDoc" :readonly="(editStatus.editMode==false) || (allow_edit==false && allow_insert==false)"
         placeholder="Ingrese el Número del Documento (*)" label="Número del Documento (*)" filled
         v-model="numeroDoc" counter
         mask="### - ### - #########" unmasked-value
@@ -92,7 +113,7 @@
     </q-input>
 
     <q-input
-        ref="autorizacionDoc" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        ref="autorizacionDoc" :readonly="(editStatus.editMode==false) || (allow_edit==false && allow_insert==false)"
         placeholder="Ingreso el Número de Autorización del Documento (*)" label="Número de Autorización (*)" filled
         v-model="autorizacionDoc" counter
         mask="##################################################"
@@ -120,10 +141,47 @@
             }"
         />
 
+    <selectSearchable 
+        prependIcon="fas fa-credit-card"
+        labelText="Plazo de Pago" labelSearchText="Buscar Plazo de Pago"
+        :optionsList="this.lookup_payterms"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false)"
+        :initialValue="paytermID"
+        :tableSearchColumns="[
+                { name: 'label', label: 'Forma de Pago', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.paytermID=row.value;
+            }"
+        />
+
+    <q-input
+        ref="dueDate" 
+        mask="date" :rules="['date']"
+        placeholder="Ingrese la fecha máxima de Pago (aaaa/mm/dd)" label="Fecha Máxima de Pago (aaaa/mm/dd) (*)" filled
+        v-model="dueDate" :title="dateName(dueDate)"
+        >
+        <template v-slot:append>
+          <q-icon name="event" class="cursor-pointer">
+            <q-popup-proxy ref="qDateProxy_dueDate" transition-show="scale" transition-hide="scale">
+              <q-date :locale="myQDateLocale" minimal v-model="dueDate" >
+                <div class="row items-center justify-end">
+                  <q-btn v-close-popup label="Seleccionar" color="primary" flat />
+                </div>
+              </q-date>
+            </q-popup-proxy>
+          </q-icon>
+        </template>
+        <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
+    </q-input>
+
     
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Pedido" filled
-        type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        type="textarea" :readonly="(!editStatus.editMode&&!allow_edit)||(editStatus.editMode&&!allow_insert)"
         v-model="comments"
         />
     <br><br>
@@ -197,6 +255,7 @@ export default ({
         readXmlFile(file){
             const reader = new FileReader();
             var parser = new xml2js.Parser();
+            this.$emit('onRunMethod',{tabName: 'lines', methodName: 'clearRows'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
             reader.addEventListener('load', (event) => {
                 parser.parseString(event.target.result, (err, result)=>{//lee XML
                     if(err){ console.error(err); return;}
@@ -249,13 +308,14 @@ export default ({
                                             fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(3,5) + '/'
                                             fechaemision += resultA.factura.infoFactura[0].fechaEmision[0].substring(0,2)
                                             this.headerDate = fechaemision
+                                            this.dueDate = fechaemision
                                             //aplica Proveedor
                                             if(this.lookup_partners.some(x=>x.partner_ruc==ruc)){
                                                 let partner = this.lookup_partners.find(x=>x.partner_ruc==ruc);
                                                 this.partnerID = partner.value
                                                 this.partnerName = partner.label
                                                 this.account_id = partner.account_id;//usado para calcular el asiento contable
-                                                this.$emit('onAccMoveCompute')
+                                                this.$emit('onRunMethod',{tabName: 'lines', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
                                             }
                                             //arma comentarios
                                             let resultado = ''
@@ -269,9 +329,10 @@ export default ({
                                 }
                             })
                         }catch(ex){
+                            console.dir(ex)
                             this.xmlFile = null
                             this.$q.notify({ html: true, multiLine: false, color: 'red'
-                                ,message: "No se pudo obtener datos del archivo.<br/>Verifique que corresponda a un XML de una factura."
+                                ,message: "No se pudo obtener datos del archivo.<br/>Verifique que corresponda a un XML de una factura.<br/>"
                                 ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
                                 ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
                             })
@@ -282,15 +343,64 @@ export default ({
         }
     },
     computed:{
+        console: () => console,
         userColor: { get () { return this.$store.state.main.userColor }  },
         userCompany: { get () { return this.$store.state.main.userCompany } },
         userCompanies: { get () { return this.$store.state.main.userCompanies } },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_view: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_report: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_row_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_row_insert').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_accounting: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_accounting').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+        editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
+        },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
@@ -319,6 +429,10 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.formaPagoID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'formaPagoID', value: val}) }
         },
+        paytermID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.paytermID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'paytermID', value: val}) }
+        },
         numeroDoc: {
             get () { return this.$store.state[this.moduleName].editData.basic.numeroDoc },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'numeroDoc', value: val}) }
@@ -344,8 +458,12 @@ export default ({
             set (val) { 
                 this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerDate', value: val}) //actualiza campo
                 this.$store.commit((this.moduleName)+'/updateEditData', {section: 'accountHeader', key: 'accMoveDateNew', value: val}) //actualiza también nueva fecha de asiento
-                this.$emit('onAccMoveCompute')
+                this.$emit('onRunMethod',{tabName: 'lines', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
             }
+        },
+        dueDate: {
+            get () { return this.$store.state[this.moduleName].editData.basic.dueDate },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'dueDate', value: val}) }
         },
         comments:  {
             get () { return this.$store.state[this.moduleName].editData.basic.comments },
@@ -369,6 +487,12 @@ export default ({
         lookup_partners: {
             get () { return this.$store.state[this.moduleName].editData.lookup_partners },
         },
+        lookup_payterms: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_payterms },
+        },
+        lookup_accounts: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+      },
     },
 })
 </script>

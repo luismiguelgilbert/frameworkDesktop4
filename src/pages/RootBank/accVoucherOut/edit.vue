@@ -27,16 +27,14 @@ export default ({
     },
     mounted(){//NO debe ser created, porque aun NO estaría creado el componente editForm
         let newEditConfig = {
-            spSelectName: 'spPartnerMasterSelectEdit',
-            toolbarTitle: "Socio",
+            spSelectName: 'spAccvoucherOutSelectEdit',
+            toolbarTitle: "Pago",
             moduleTabs: [
-                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Socio', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditBasic.vue' }
-                ,{ tabName: 'account', iconName: 'fas fa-book', textLabel: 'Configuración Contable', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditAccount.vue' }
-                ,{ tabName: 'picture', iconName: 'fas fa-camera', textLabel: 'Logo del Socio', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditPicture.vue' }
-                ,{ tabName: 'contacts', iconName: 'fas fa-address-book', textLabel: 'Contactos del Socio', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditContacts.vue' }
-                ,{ tabName: 'owners', iconName: 'fas fa-user-tie', textLabel: 'Vendedores Asignados', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditSales.vue' }
-                ,{ tabName: 'files', iconName: 'fas fa-paperclip', textLabel: 'Archivos Adjuntos', isTabDisable: false, rootPath:'components', importPath: 'filesView/filesView' }
-                ,{ tabName: 'history', iconName: 'fas fa-history', textLabel: 'Auditoría de Cambios', isTabDisable: false, rootPath:'components', importPath: 'historyView/historyView' }
+                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Pago', isTabDisable: false, rootPath:'pages', importPath: 'RootBank/accVoucherOut/accVoucherOutEditBasic.vue' }
+                ,{ tabName: 'payments', iconName: 'fas fa-info-circle', textLabel: 'Información del Pago', isTabDisable: false, rootPath:'pages', importPath: 'RootBank/accVoucherOut/accVoucherOutEditBasic.vue' }
+                //,{ tabName: 'account', iconName: 'fas fa-book', textLabel: 'Configuración Contable', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditAccount.vue' }
+                //,{ tabName: 'files', iconName: 'fas fa-paperclip', textLabel: 'Archivos Adjuntos', isTabDisable: false, rootPath:'components', importPath: 'filesView/filesView' }
+                //,{ tabName: 'history', iconName: 'fas fa-history', textLabel: 'Auditoría de Cambios', isTabDisable: false, rootPath:'components', importPath: 'historyView/historyView' }
                 //,{ tabName: 'print', iconName: 'fas fa-print', textLabel: 'Imprimir Documento', isTabDisable: false, rootPath:'components', importPath: 'mainReport/reportComponentDialog' }
                 //,{ tabName: 'share', iconName: 'fas fa-envelope', textLabel: 'Enviar Documento', isTabDisable: false, rootPath:'components', importPath: 'mailForm/mailFormDialog' }
             ],

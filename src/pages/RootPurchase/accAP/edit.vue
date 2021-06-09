@@ -3,19 +3,10 @@
         v-if="editReady"
         ref="editFormComponent" 
         :moduleName="moduleName"
+        @onLoadedData="updateTabStatus"
         />
 </template>
-        <!--:toolbarTitle="toolbarTitle"
-        :moduleTabs="moduleTabs"
-        :startTab="startTab"
-        :rptName="rptName"
-        :rptLink="rptLink"
-        :rptLinkCompany="rptLinkCompany"
-        :rptType="rptType"
-        @loadData="loadData"-->
 <script>
-//import Vue from 'vue';
-//import Vuex from 'vuex';
 import editFormComponent from '../../../components/editForm/editForm'
 
 export default ({
@@ -27,20 +18,37 @@ export default ({
     },
     mounted(){//NO debe ser created, porque aun NO estaría creado el componente editForm
         let newEditConfig = {
-            spSelectName: 'spPartnerMasterSelectEdit',
-            toolbarTitle: "Socio",
+            spSelectName: 'spAccAPSelectEdit',
+            spUpdateName: 'spAccAPUpdate',
+            toolbarTitle: "Documento x Pagar",
+            startTab: 'basic',
+            splitterModel: 250,
             moduleTabs: [
-                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Socio', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditBasic.vue' }
-                ,{ tabName: 'account', iconName: 'fas fa-book', textLabel: 'Configuración Contable', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditAccount.vue' }
-                ,{ tabName: 'picture', iconName: 'fas fa-camera', textLabel: 'Logo del Socio', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditPicture.vue' }
-                ,{ tabName: 'contacts', iconName: 'fas fa-address-book', textLabel: 'Contactos del Socio', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditContacts.vue' }
-                ,{ tabName: 'owners', iconName: 'fas fa-user-tie', textLabel: 'Vendedores Asignados', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditSales.vue' }
-                ,{ tabName: 'files', iconName: 'fas fa-paperclip', textLabel: 'Archivos Adjuntos', isTabDisable: false, rootPath:'components', importPath: 'filesView/filesView' }
-                ,{ tabName: 'history', iconName: 'fas fa-history', textLabel: 'Auditoría de Cambios', isTabDisable: false, rootPath:'components', importPath: 'historyView/historyView' }
-                //,{ tabName: 'print', iconName: 'fas fa-print', textLabel: 'Imprimir Documento', isTabDisable: false, rootPath:'components', importPath: 'mainReport/reportComponentDialog' }
-                //,{ tabName: 'share', iconName: 'fas fa-envelope', textLabel: 'Enviar Documento', isTabDisable: false, rootPath:'components', importPath: 'mailForm/mailFormDialog' }
+                { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Datos del Documento', isTabDisable: false, rootPath:'pages', importPath: 'RootPurchase/accAP/accAPEditBasic.vue' },
+                { tabName: 'lines', iconName: 'fas fa-list-ol', textLabel: 'Detalle de Compra', isTabDisable: false, rootPath:'pages', importPath: 'RootPurchase/accAP/accAPEditLines.vue' },
+                //{ tabName: 'status', iconName: 'fas fa-shipping-fast', textLabel: 'Mi Pedido', isTabDisable: false, rootPath:'pages', importPath: 'RootPurchase/accAP/mktPOEditWH.vue' },
+                //{ tabName: 'print', iconName: 'fas fa-print', textLabel: 'Imprimir Documento', isTabDisable: false, rootPath:'components', importPath: 'mainReport/reportComponentDialog' },
+                //{ tabName: 'print', iconName: 'fas fa-print', textLabel: 'Ver Comprobante', isTabDisable: false, rootPath:'components', importPath: 'mainReport/reportComponentPDF' },
+                //{ tabName: 'share', iconName: 'fas fa-envelope', textLabel: 'Enviar Documento', isTabDisable: false, rootPath:'components', importPath: 'mailForm/mailFormDialog' },
+                { tabName: 'payments', iconName: 'fas fa-money-check-alt', textLabel: 'Pagos Aplicados', isTabDisable: false, rootPath:'components', importPath: 'paymentsView/paymentsList' },
+                { tabName: 'account', iconName: 'fas fa-book', textLabel: 'Asiento Contable', isTabDisable: false, rootPath:'components', importPath: 'journalView/journalView' },
+                { tabName: 'files', iconName: 'fas fa-paperclip', textLabel: 'Archivos Adjuntos', isTabDisable: false, rootPath:'components', importPath: 'filesView/filesView' },
+                { tabName: 'history', iconName: 'fas fa-history', textLabel: 'Auditoría de Cambios', isTabDisable: false, rootPath:'components', importPath: 'historyView/historyView' }
             ],
-            startTab: 'basic'
+            //name es el nombre del property en el editData (vuex)
+            //filterBY sirve para enviar al server solamente registros donde el campo filtrado sea verdadero
+            //fields sirve para enviar específicamente los campos indicados (si es null entonces envía todos)
+            editDataSaveProperties: [
+                { name: 'basic', filterBy: null, fields: null },
+                { name: 'lines', filterBy: null, fields: null },
+                //{ name: 'accountHeader', filterBy: null, fields: null },
+                { name: 'accountLines', filterBy: null, fields: null },
+                { name: 'files', filterBy: null, fields: ['attach_id'] },
+            ],
+            //hide Tabs if something happens
+            tabStatusChange:[
+                //{ tabName: 'priceLists', dataCheckSection: 'basic', dataCheckField: 'is_customer', dataCheckCondition: 'equal', dataCheckValue: false },
+            ]
         }
         this.editConfig = newEditConfig;
         this.editReady = true;
@@ -50,171 +58,47 @@ export default ({
             //Confirmed
             router: this.$router,
             editReady: false,
-            ///////////////////////////////////////////
-            //Yet to be confirmed
-            //,tab: 'basic'/*'basic'*/, splitterModel: 250
-            //,reportComponent_isVisible: false
-            //,reportComponent_isFullSize: true
-            //,reportComponent_linkName: "mktPO" //custom: report name in SQL Report Server (BI Server)
-            //,reportComponent_shouldAddCompany: true //custom: when "true" reportComponent will add _1 to linkName
-            //,reportComponent_reportName: "Orden de Compra" //custom
-            //,reportComponent_reportType: "ssrs" // custom String "ssrs" or "pbirs"
         }
     },
-  
-  methods:{
-    saveData(shouldReload){
-        try{
-            //this.loadingData = true
-            let promise1 = this.$refs.basicComponent.$refs.formulario.validate() //valida tab BASIC
-            Promise.all([promise1]).then((resultados)=>{
-                if(resultados.filter(x=>x==false).length>0){
-                    //this.loadingData = false
-                    this.$q.notify({ html: true, multiLine: false, color: 'red', message: "Revise el formulario" ,timeout: 1000, progress: true , icon: "fas fa-exclamation-circle"})
-                    if(resultados[0]==false){this.tab='basic'}
-                }else{//NO hay errores, entonces guardar
-                    //this.loadingData = false//xq usuario puede cancelar en la confirmación del diálogo
-                    this.saveDataExec(shouldReload);
-                }
-            })
-        }catch(ex){
-            //this.loadingData = false
-            this.$q.notify({ html: true, multiLine: false, color: 'red', message: "Se produjo el siguiente error:<br/>"+ex.message ,timeout: 1000, progress: true , icon: "fas fa-exclamation-circle"})
-        }
-    },
-    saveDataExec(shouldReload, shouldConfirm){
-        this.$q.dialog({
-                title: 'CONFIRMACIÓN',
-                message: 'Desea guardar los datos?',
-                ok: {  label: 'Sí', flat: true, icon: 'fas fa-save', color: 'primary', "no-caps": true },
-                cancel: {  label: 'No',  flat: true, color: 'primary', "no-caps": true },
-                persistent: true
-            }).onOk(() => {
-                //this.loadingData = true
-
-                let newEditData = {
-                     basic: this.editData.basic
-                    ,lines: this.editData.lines
-                    ,linesTaxes: this.editData.linesTaxes
-                    ,files: this.editData.files
-                    //,address: this.editData.address.filter(x=>x.is_allowed).map(x=>x.headerID_ux)
-                }
-                //console.dir(this.editData)
-                //console.dir(newEditData)
-                this.$axios.post( this.apiURL + 'spMktPOUpdate', {
-                    userCode: this.userCode,
-                    userCompany: this.userCompany,
-                    //"sys_user_language": this.$q.sessionStorage.getItem('sys_user_language'),
-                    //"row_id": this.editMode?0:this.editRecord.row.headerID_ux,
-                    row_id: this.editMode?0:this.router.currentRoute.params.id,
-                    "editRecord": JSON.stringify(newEditData),
-                }
-            , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
-            ).then((response) => {
-                this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
-                //this.loadingData = false;
-                try{
-                    //pre-seleccionar el nuevo registro en VUEX
-                    let newSelectedRow = [];
-                    newSelectedRow.push(response.data[0])
-                    this.selectedRows = newSelectedRow;
-                    //pre-seleccionar el nuevo registro en VUEX
-                    /*let selectedRow = {
-                        value: response.data[0].value//value: props.value
-                        ,row: response.data[0]//,row: props.row
+    methods:{
+        updateTabStatus(){
+            //Si es que el dato de la [sección][columna] es igual al valor, entonces deshabilita la pestaña
+            let newConfig = JSON.parse(JSON.stringify(this.editConfig));
+            newConfig.moduleTabs.map(x=>{
+                if(this.editConfig.tabStatusChange.some(y=>y.tabName == x.tabName)){
+                    let check = this.editConfig.tabStatusChange.find(y=>y.tabName == x.tabName)
+                    if(check.dataCheckCondition=='equal'){
+                        if(this.editData[check.dataCheckSection][check.dataCheckField]==check.dataCheckValue){
+                            x.isTabDisable = true;
+                        }
                     }
-                    this.editRecord = selectedRow*/
-                    //agregado para que funcione el AutoScroll en cada módulo
-                    this.lastRecord = response.data[0].value
-                    //porque NO importa cómo estaba, ahora pasa a estar editando
-                    this.editMode = false 
-                }catch(ex){}
-                if(shouldReload){//shouldReload es TRUE entonces recarga datos
-                    this.loadData();//recarga datos
-                }else{//shouldReload es FALSE entonces regresa a página principal (igual que hasta versión 4.6.1)
-                    //this.editRecord = null;
-                    //this.router.replace('/'+this.currentPathModule); //navigate to previous Main module
-                    this.router.push(this.mainRoute)
+                    if(check.dataCheckCondition=='distinct'){
+                        if(this.editData[check.dataCheckSection][check.dataCheckField]!=check.dataCheckValue){
+                            x.isTabDisable = true;
+                        }
+                    }
                 }
-            }).catch((error) => {
-                console.dir(error)
-                let mensaje = ''
-                if(error.message){ mensaje = error.message }
-                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                this.$q.notify({ html: true, multiLine: false, color: 'red'
-                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                })
-                this.router.push(this.mainRoute);
-                //this.loadingData = false
             })
-        })
-    },
-  },
-  computed:{
-    rptName: { get () { return this.$store.state[this.moduleName].rptName }, },
-    rptLink: { get () { return this.$store.state[this.moduleName].rptLink }, },
-    rptLinkCompany: { get () { return this.$store.state[this.moduleName].rptLinkCompany }, },
-    rptType: { get () { return this.$store.state[this.moduleName].rptType }, },
-    editStatus: {
-        get () { return this.$store.state[this.moduleName].editStatus },
-        set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
-    },
-    editConfig: {
-        get () { return this.$store.state[this.moduleName].editConfig },
-        set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editConfig', value: val})  }
-    },
-    //////////////
-    //yet to be confirmed
-    mainRoute: { get () { return this.$store.state[this.moduleName].mainRoute }, }, 
-    dataRows: {
-        get () { return this.$store.state[this.moduleName].dataRows },
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'dataRows', value: val}) }
-    },
-    userCode: { get () { return this.$store.state.main.userCode } },
-    userCompany: { get () { return this.$store.state.main.userCompany } },
-    selectedRows: {
-      get () { return this.$store.state[this.moduleName].selectedRows },
-      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'selectedRows', value: val}) }
-    },
-    lastRecord:{
-      get () { return this.$store.state[this.moduleName].lastRecord },
-      set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'lastRecord', value: val}) }
-    },
-    editData: {
-        get () { return this.$store.state[this.moduleName].editData },
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editData', value: val}) }
-    },
-    editMode: {
-        get () { return this.$store.state[this.moduleName].editMode },
-        set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'editMode', value: val}) }
-    },
-    //allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-    //allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-    //allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-    //allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-    //allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
-    apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
-    
-    //currentPath: { get () { return this.$store.state.main.currentPath }, set (val) { this.$store.commit('main/updateState', {key: 'currentPath', value: val}) } },
-    //currentPathModule: { get () { return this.$store.state.main.currentPathModule }, set (val) { this.$store.commit('main/updateState', {key: 'currentPathModule', value: val}) } },
-    //userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
-    /*tableContextMenu: {
-      get () { return this.$store.state[this.moduleName].tableContextMenu },
-    },*/
-    /*lines: {
-          get () { return this.$store.state[this.moduleName].editData.lines },
-    },*/
-  },
-  watch: {
-    '$route.params.id': function (val) {
-        if(val){
-            console.dir('cambiando ID')
-            this.loadData();
+            this.editConfig = newConfig;
         }
     },
-  }
+    computed:{
+        rptName: { get () { return this.$store.state[this.moduleName].rptName }, },
+        rptLink: { get () { return this.$store.state[this.moduleName].rptLink }, },
+        rptLinkCompany: { get () { return this.$store.state[this.moduleName].rptLinkCompany }, },
+        rptType: { get () { return this.$store.state[this.moduleName].rptType }, },
+        editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
+        },
+        editConfig: {
+            get () { return this.$store.state[this.moduleName].editConfig },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editConfig', value: val})  }
+        },
+        editData: {
+            get () { return this.$store.state[this.moduleName].editData },
+        },
+    },
+
 })
 </script>

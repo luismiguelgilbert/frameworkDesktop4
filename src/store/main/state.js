@@ -34,6 +34,6 @@ export default function () {
     ,sysVersion: []
     ,currentHomeTab: null
     ,editFormLeftCollapsed: false
-    ,splitterModel: 200
+    ,splitterModel: 230
   }
 }

@@ -52,8 +52,9 @@
         <DxLookup value-expr="value" :display-expr="(row)=>{return row.code_es + ' - ' + row.label }" :data-source="lookup_accounts" />
       </DxColumn>
       <DxColumn caption="Observaciones" data-field="comments" name="comments" data-type="string" :allow-editing="true" alignment="left" :minWidth="200" :visible="true" />
-      <DxColumn caption="Debe" data-field="debit" name="debit" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
-      <DxColumn caption="Haber" data-field="credit" name="credit" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
+      <DxColumn caption="Debe" data-field="debit" name="debit" data-type="number" :allow-editing="false" alignment="right" :width="120" :minWidth="120" :format="userMoneyFormat" />
+      <DxColumn caption="Haber" data-field="credit" name="credit" data-type="number" :allow-editing="false" alignment="right" :width="120" :minWidth="120" :format="userMoneyFormat" />
+      <DxColumn caption="Balance" data-field="calculated" name="calculated" data-type="number" :allow-editing="false" alignment="right" :width="110" :minWidth="110" :format="userMoneyFormat" :calculate-cell-value="calculateBalanceAmount" :visible="false" />
       
       <!--
       <DxColumn caption="Cantidad" data-field="quantity" name="quantity" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }"/>
@@ -75,93 +76,32 @@
       
       
       
-      
+      accLineID
          -->
+          
       <DxSummary >
         <DxTotalItem column="invID" summary-type="count"/>
         <DxTotalItem column="debit" summary-type="sum" cssClass="q-mr-none" > <DxValueFormat type="#.00" /> </DxTotalItem>
         <DxTotalItem column="credit" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
-        <DxGroupItem :show-in-group-footer="false" :align-by-column="true" column="debit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
-        <DxGroupItem :show-in-group-footer="false" :align-by-column="true" column="credit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
+        <DxTotalItem showInColumn="comments" column="calculated" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+
+        <DxGroupItem name="totalDebit" :show-in-group-footer="false" :align-by-column="true" column="debit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
+        <DxGroupItem name="totalCredit" :show-in-group-footer="false" :align-by-column="true" column="credit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
       </DxSummary>
+      <DxSortByGroupSummaryInfo  summary-item="totalCredit" sort-order="desc" />
+      <DxSortByGroupSummaryInfo  summary-item="totalDebit" sort-order="desc" />
       
       
       />
   </DxDataGrid>
-    
-  <!--  <q-table
-        ref="mainTable"
-        :data="accMoveGrouped?accountLinesGrouped:accountLines"
-        table-style="min-height: calc(100vh - 233px); max-height: calc(100vh - 233px)"
-        row-key="lineID"
-        hide-bottom
-        dense flat
-        :separator="userTableLines"
-        :rows-per-page-options="[0]"
-        dense
-        :filter="filterString"
-        :columns="[
-          //{ name: 'stockID', required: true, label: 'ID', align: 'left', field: row => row.stockID, sortable: true },
-          //{ name: 'lineID', required: true, label: 'línea', align: 'right', field: row => row.lineID, sortable: false, style: 'min-width: 150px;' },
-          { name: 'account_id', required: true, label: 'Cuenta Contable', align: 'left', field: row => row.account_id, sortable: true, style: 'min-width: 100px;' },
-          { name: 'debit', required: true, label: 'DEBE', align: 'right', field: row => row.debit, sortable: true, style: 'min-width: 200px;' },
-          { name: 'credit', required: true, label: 'HABER', align: 'right', field: row => row.credit, sortable: true, style: 'max-width: 70px;', headerStyle: 'padding-right: 20px;' },
-          { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, headerStyle: 'padding-right: 20px;' },
-          
-          //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
-          //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
-          //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
-        ]"
-    >
 
-    <template v-slot:body="props">
-      <q-tr :props="props" v-if="props.row.account_id>0" >
-        <q-td key="account_id" :props="props" :tabindex="(props.key*10)+1" >
-          {{lookup_accounts.find(x=>x.value==props.row.account_id).code_es}} - {{lookup_accounts.find(x=>x.value==props.row.account_id).label}}
-        </q-td>
-        <q-td key="debit" :props="props" >
-          {{ props.row.debit.toFixed(userMoneyFormat) }}
-        </q-td>
-        <q-td key="credit" :props="props" >
-          {{ props.row.credit.toFixed(userMoneyFormat) }}
-        </q-td>
-        <q-td key="comments" :props="props" >
-          {{ props.row.comments }}
-        </q-td>
-      </q-tr>
-    </template>
-
-    <template v-slot:bottom-row>
-        <q-tr>
-          <q-td class="text-right text-subtitle2 text-primary" >
-            Suma:
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary">
-            {{accountLines.reduce((total,item)=>{return total + item.debit}, 0).toFixed(userMoneyFormat)}}
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary">
-            {{accountLines.reduce((total,item)=>{return total + item.credit}, 0).toFixed(userMoneyFormat)}}
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary">
-          </q-td>
-        </q-tr>
-        <q-tr></q-tr>
-    </template>
-  </q-table>
-  -->
-
-  
 </div>
 
 </template>
 
 
 <script>
-/*
-import Vue from 'vue';
-import Vuex from 'vuex';
-import { date } from 'quasar';
-*/ 
+
 
 
 import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxGroupItem, DxSortByGroupSummaryInfo, DxValueFormat, DxColumnChooser, DxGrouping } from 'devextreme-vue/data-grid';
@@ -202,6 +142,9 @@ export default ({
             let resultado = []
             console.dir('calcular accountLinesComputed con ' + this.accMoveGrouped)
             return this.accMoveGrouped?this.accountLines:this.accountLinesGrouped
+        },
+        calculateBalanceAmount(rowData){
+          return rowData.debit - rowData.credit;
         }
       /*rowTitleInventory(fila){
         let resultado = 'Seleccionar...'

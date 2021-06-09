@@ -105,7 +105,7 @@
     <!--accRevenue-->
     <selectSearchable 
         prependIcon="fas fa-file-invoice-dollar"
-        labelText="Cuenta de Ingresos (*)" labelSearchText="Buscar Cuenta Contable"
+        labelText="Cuenta de Ingresos x Venta (*)" labelSearchText="Buscar Cuenta Contable"
         title="Por ejemplo, va al HABER cuando se emite Factura de Venta de Inventario"
         :optionsList="this.lookup_accounts"
         rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" 

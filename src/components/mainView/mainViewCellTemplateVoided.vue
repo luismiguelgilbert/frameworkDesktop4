@@ -1,5 +1,5 @@
 <template>
-    <div style="padding-left: 5px; padding-right: 5px;">
+    <div style="padding-left: 5px; padding-right: 5px;" class="text-center">
         <q-icon
             v-if="data.value"
             color="red"

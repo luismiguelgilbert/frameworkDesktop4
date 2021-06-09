@@ -1,5 +1,5 @@
 <template>
-    <div style="margin: -16px;">
+    <div v-if="tabRecord" style="margin: -16px;">
         <q-toolbar class="no-padding">
             <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='form' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addForm" />
             <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='list' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addList" />
@@ -8,6 +8,7 @@
             <q-btn v-if="tabRecord.tabConfig.deleteAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
         </q-toolbar>
         <q-separator />
+        
         <DxDataGrid
             ref="mainviewtableDxDataGrid"
             height="calc(100vh - 170px)"
@@ -325,16 +326,38 @@ export default ({
             newRow[this.tabRecord.tabConfig.keyColumn] = newKeyValue;
             //Agrega valores (excepto columna key) y además valida si el campo es requerido (y NO es boolean)
             this.tabRecord.tabConfig.columns.filter(y=>y.dataField!=this.tabRecord.tabConfig.keyColumn).map(x=>{
-                if(x.dataType!='boolean'&&x.isDataRequired&&!(this.formDialogData[x.dataField])){
-                    hasError = true;
-                    errorFields.push(x.caption)
+                console.dir('Columna ' + x.dataField +  ' es de Tipo ' + x.dataType + ' y tiene un valor de ' + this.formDialogData[x.dataField])
+                //if(x.dataType!='boolean'&&x.isDataRequired&&!(this.formDialogData[x.dataField])){
+                if(x.isDataRequired){
+                    if(x.dataType=='boolean'){
+                        if( this.formDialogData[x.dataField] === null ){
+                            hasError = true;
+                            errorFields.push(x.caption)
+                        }
+                    }
+                    if(x.dataType=='number'){
+                        if( this.formDialogData[x.dataField] === null ){
+                            hasError = true;
+                            errorFields.push(x.caption)
+                        }
+                    }
+                    if(     !(x.dataType=='boolean'||x.dataType=='number')  ){
+                        if( !(this.formDialogData[x.dataField]) ){
+                            hasError = true;
+                            errorFields.push(x.caption)
+                        }
+                        
+                    }
                 }
+
+                //Asigna valores
                 if(x.dataType=='string'){ newRow[x.dataField] = this.formDialogData[x.dataField] }
                 if(x.dataType=='textArea'){ newRow[x.dataField] = this.formDialogData[x.dataField] }
                 if(x.dataType=='date'){ newRow[x.dataField] = this.formDialogData[x.dataField] }
                 if(x.dataType=='number'){ newRow[x.dataField] = this.formDialogData[x.dataField] ? parseFloat(this.formDialogData[x.dataField]) : 0 }
                 if(x.dataType=='boolean'){ newRow[x.dataField] = this.formDialogData[x.dataField] ? this.formDialogData[x.dataField] : true}
             })
+            
             //Add Data
             if(hasError){
                 this.$q.notify({ html: true, multiLine: false, color: 'red'

@@ -15,6 +15,7 @@
             :autofocus="autofocus"
             :dense="isDense"
             :option-disable="(item) => (this.optionDisableField) ? !(item[this.optionDisableField]) : undefined"
+            :square="square"
             @keyup.keyCodes.113="openSearch"
             @filter="filterList"
             :clearable="!isRequired"
@@ -120,6 +121,7 @@ export default({
         isReadonly: { type: Boolean, required: false, default: false },
         isDisable: { type: Boolean, required: false, default: false },
         isDense: { type: Boolean, required: false, default: false },
+        square: { type: Boolean, required: false, default: false },
         initialValue: { required: false, default: null },
         rowValueField: { type: String, required: true, default: 'value' },
         showSelectButton: { type: Boolean, required: false, default: false },

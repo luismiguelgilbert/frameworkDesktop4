@@ -15,9 +15,9 @@ export default ({
     },
     data () {
         return {
-            moduleName: "Partners", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
-            moduleMainRoute: '/RootMaster/Partners',
-            rptName_: 'Detalle de Socios', rptLink_: 'mktPO', rptLinkCompany_: true, rptType_: 'ssrs',
+            moduleName: "accVoucherOut", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
+            moduleMainRoute: '/RootBank/accVoucherOut',
+            rptName_: 'Documento de Pago', rptLink_: 'accVoucherOut', rptLinkCompany_: true, rptType_: 'ssrs',
         }
     },
     computed:{

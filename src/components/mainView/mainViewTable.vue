@@ -1,5 +1,5 @@
 <template>
-    <q-card style="margin: 10px;" class="shadow-8">
+    <q-card style="margin: 10px;" class="shadow-8 rounded-borders">
         <DxDataGrid
             v-if="columnsUser&&columnsUser.length>0"
             ref="mainviewtableDxDataGrid"

@@ -12,7 +12,7 @@
         :optionsList="this.lookup_taxes"
         rowValueField="value" optionsListLabel="label" optionDisableField="estado"
         :isRequired="true"
-        :isDisable="false" 
+        :isDisable="editStatus.editMode=='create'?false:true"
         :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         :initialValue="taxID"
         :tableSearchColumns="[
@@ -219,6 +219,10 @@ export default ({
               resultado = y.value;  
             }).value; 
             return resultado }, 
+        },
+        editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
         },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         estado: {
