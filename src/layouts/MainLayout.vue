@@ -284,6 +284,13 @@
     padding-bottom: 0px !important;
   }
 
+  .dx-treelist{  
+    font-weight: bold !important;
+    /*border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;*/
+  }
   /*//los 2 hacen que la línea no se expanda al editar; pero mientras se está cambiando el valor de la celda, se abren 2 filas y se ve mal
   .dx-datagrid .dx-row .dx-widget {  
     height: 15px;  
@@ -300,6 +307,14 @@
     background-color: #2F74EB !important; // //#5990EF //#4c87ee //#87adee //#673AB7
     color: white !important;
   }
+
+  //Agregado para que al usar lookups en datagrids dentro de q-dialogs, los lookupEditors SI se muestren por encima
+  .dx-dropdownlist-popup-wrapper {
+    z-index: 6000 !important;
+  }
+  /*.dx-overlay-wrapper .dx-dropdowneditor-overlay .dx-popup-wrapper .dx-dropdownlist-popup-wrapper .dx-selectbox-popup-wrapper {
+    z-index: 6000 !important;
+  }*/
 
   //enlarge scrollbars vertical
   .dx-scrollbar-vertical.dx-scrollbar-hoverable {  
@@ -383,6 +398,16 @@ export default {
   created(){
     loadMessages(esMessages);//load Spanish Messages
     locale('es');//apply Spanish message
+
+
+    //Allow Tab Copy using sessionStorage Data
+    let variables = this.$q.localStorage.getAllKeys()
+    //Copy localStorage to sessionStorage
+    variables.map(x=>{
+      this.$q.sessionStorage.set(x,this.$q.localStorage.getItem(x))
+    })
+    //borrar localStorage
+    this.$q.localStorage.clear();
     
     this.$q.sessionStorage.set('pathname',window.location.pathname)
     this.$q.loading.show({ delay: 0, message: 'Cargando configuración..', messageColor: 'white', spinnerColor: 'white' })
@@ -570,6 +595,7 @@ export default {
             if(error.message){ mensaje = error.message }
             if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
             if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+            mensaje = mensaje.replace('Request failed with status code 400<br/>','')
             this.$q.notify({ html: true, multiLine: false, color: 'red'
                 ,message: "Lo sentimos, no se pudo realizar acción.<br/>" + mensaje
                 ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -652,16 +678,13 @@ export default {
         //result=result + 'bg-white text-primary'
 
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('ens')){
-          //console.dir('Branding ENS')
           colors.setBrand('primary', '#2F74EB') //#1976D2 //1867C0
         }
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('schoenstatt')){
-          //console.dir('Branding Schoenstatt')
           colors.setBrand('primary', '#2F74EB') //#1976D2 //1867C0 //FBC42A
         }
         if(this.$q.sessionStorage.getItem('pathname').toLowerCase().includes('framework') || this.$q.sessionStorage.getItem('pathname')=='/'){
-          //console.dir('Branding Framework')
-          colors.setBrand('primary', '#2F74EB') //#1976D2 //ANTES:1867C0 //389ffd //2A68D3 //2F74EB nuevo
+          colors.setBrand('primary', '#2F74EB') //#1976D2 //ANTES:1867C0 //389ffd //2A68D3 //2F74EB nuevo //framework
         }
 
         this.$q.dark.set(false)

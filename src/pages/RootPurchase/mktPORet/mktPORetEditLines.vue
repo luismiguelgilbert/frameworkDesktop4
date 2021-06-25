@@ -144,37 +144,7 @@
       <DxColumn caption="# OC" data-field="mktPO_headerID" name="mktPO_headerID" data-type="number" :allow-editing="false" alignment="right" :width="80" :visible="true" cssClass="text-primary" />
       <DxColumn caption="# OC Línea" data-field="mktPO_lineID" name="mktPO_lineID" data-type="number" :allow-editing="false" alignment="right" :width="110" :visible="true" cssClass="text-primary" />
       <DxColumn caption="Cantidad" data-field="quantity" name="quantity" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'" />
-      <!--
-      <DxColumn caption="Precio" data-field="price" name="price" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" />
-      <DxColumn caption="Suman" data-field="lineSubtotal" name="lineSubtotal" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
-      <DxColumn caption="Descuento %" data-field="lineDiscntPrcnt" name="lineDiscntPrcnt" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0, max:100 }"  />
-      <DxColumn caption="Descuento $" data-field="lineDiscntAmount" name="lineDiscntAmount" data-type="number" :allow-editing="false" alignment="right" :width="100" :format="userMoneyFormat" :visible="false" />
-      <DxColumn caption="Subtotal" data-field="lineUntaxed" name="lineUntaxed" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat"
-         />
-      <DxColumn caption="Impuestos" data-field="taxes" name="taxes" :allow-editing="true" alignment="left" :width="100" edit-cell-template="tagBoxEditor" 
-        :cell-template="(container, options)=>{ container.textContent = lookup_taxes.filter(x=>options.value.some(y=>x.taxID==y)).map(z=>z.short_name_es).join(', ') }"
-        />
-        <template #tagBoxEditor="{ data: cellInfo }">
-          <div>
-            <mktPREditLinesTaxSelector v-if="!cellInfo.row.data.quantityCancelNew_isEditDisabled"
-              :moduleName="moduleName"
-              :selectedRowKeys="cellInfo.value"
-              :lookupData="lookup_taxes.filter(x=>x.es_retencion==false)"
-              :currentLine="cellInfo"
-              @onSelection="(selectedKeys)=>{
-                  cellInfo.data.taxes = selectedKeys;
-                  updateTaxes(cellInfo.data); //update row data and vuex
-                  cellInfo.component.closeEditCell(); //remove focus from editor 
-                }"
-              />
-              <div v-if="cellInfo.row.data.quantityCancelNew_isEditDisabled" class="text-red">Bloqueado
-              </div>
-          </div>
-        </template>
-
-      <DxColumn caption="Impuestos $" data-field="taxAmount" name="taxAmount" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" :visible="false" />
-      <DxColumn caption="Total" data-field="lineTotal" name="lineTotal" data-type="number" :allow-editing="false" alignment="right" :width="120" :format="userMoneyFormat" />
-      -->
+      
       <DxColumn caption="Cancelado" data-field="quantityCancel" name="quantityCancel" data-type="number" :allow-editing="false" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :visible="true" cssClass="text-red" />
       <DxColumn caption="Cancelar" data-field="quantityCancelNew" name="quantityCancelNew" data-type="number" :allow-editing="true" alignment="right" :width="100" :format="userMoneyFormat" :editor-options="{ min: 0 }" :visible="true" cssClass="text-red" />
       <DxColumn caption="Cant. Egresos" data-field="quantityRcvd" name="quantityRcvd" data-type="number" :allow-editing="false" alignment="right" :width="120" :visible="true" cssClass="text-positive" />
@@ -540,6 +510,7 @@ export default ({
           if(error.message){ mensaje = error.message }
           if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
           if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          mensaje = mensaje.replace('Request failed with status code 400<br/>','')
           this.$q.notify({ html: true, multiLine: false, color: 'red'
               ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
               ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -567,6 +538,7 @@ export default ({
           if(error.message){ mensaje = error.message }
           if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
           if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          mensaje = mensaje.replace('Request failed with status code 400<br/>','')
           this.$q.notify({ html: true, multiLine: false, color: 'red'
               ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
               ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -627,6 +599,7 @@ export default ({
           if(error.message){ mensaje = error.message }
           if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
           if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          mensaje = mensaje.replace('Request failed with status code 400<br/>','')
           this.$q.notify({ html: true, multiLine: false, color: 'red'
               ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
               ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"

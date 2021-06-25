@@ -3,8 +3,9 @@
         v-if="editReady"
         ref="editFormComponent" 
         :moduleName="moduleName"
+        :parametersData="{ editStatus: editStatus, editConfig: editConfig, editData: editData }"
         @onLoadedData="updateTabStatus"
-        />
+        /><!--parametersData es opcional-->
 </template>
 <script>
 import editFormComponent from '../../../components/editForm/editForm'
@@ -33,9 +34,8 @@ export default ({
             //fields sirve para enviar específicamente los campos indicados (si es null entonces envía todos)
             editDataSaveProperties: [
                 { name: 'basic', filterBy: null, fields: null },
-                { name: 'system', filterBy: null, fields: null },
-                { name: 'password', filterBy: null, fields: null },
-                { name: 'companies', filterBy: null, fields: ['value', 'is_default'] }
+                { name: 'lines', filterBy: null, fields: null },
+                { name: 'files', filterBy: null, fields: ['attach_id'] },
             ],
             //hide Tabs if something happens
             tabStatusChange:[

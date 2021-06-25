@@ -90,7 +90,6 @@ export default ({
             //this.lines=[];//clearSelectedLines
             this.lines = this.lines.filter(x=>x.mfg_orderID==this.default_mfg_orderID);//clearSelectedLines
             this.default_orderBudget = [];//clearBudget
-            //alert('Encerar presupuesto, Cargar Presupuesto + Consumo + Basado en Bodega de: ' + this.defaultWhID + ' || ' + this.default_mfg_orderID)
             this.$q.loading.show();
             this.$axios({
                 method: 'GET',

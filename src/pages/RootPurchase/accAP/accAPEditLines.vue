@@ -470,11 +470,9 @@ export default ({
           valueExpr: "id",
           placeholder: "Filtrar registros",
           /*onInitialized: (e)=>{
-            console.dir('dxdialogRequisicionesSelectBoxOptions onInitialized!!!!!!!!!!')
             e.component.option('value',1)//pre-filter data
           },*/
           onSelectionChanged: (e)=>{
-            console.dir('dxdialogRequisicionesSelectBoxOptions onSelectionChanged XXXXXXXXXXXX')
             this.applyRequisicionesFilter(e)
           },
       },
@@ -650,7 +648,8 @@ export default ({
           ,prjID: 0
           ,stockID: 0
           ,mktLineID: 0
-          ,comments: this.partnerName
+          //,comments: this.partnerName  + ' - ' + this.numeroDoc
+          ,comments: this.numeroDoc //no se puso partner, porque se guarda en el campo partnerID y ya se muestra
           ,mktTypeID: 0
           ,headerID: 0
           ,lineID: 0
@@ -687,7 +686,6 @@ export default ({
       this.$refs['dxgrid'].instance.clearSelection();
     },
     updateVuex(){
-      console.dir('accAPEditLines updateVuex')
       this.updateAccountMove();//actualiza asiento contable antes de guardar y/o al cambiar de tab
       //esto realmente lo usa editForm.vue para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
       this.lines = JSON.parse(JSON.stringify(this.internalLines))
@@ -776,6 +774,7 @@ export default ({
           if(error.message){ mensaje = error.message }
           if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
           if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          mensaje = mensaje.replace('Request failed with status code 400<br/>','')
           this.$q.notify({ html: true, multiLine: false, color: 'red'
               ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
               ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -803,6 +802,7 @@ export default ({
           if(error.message){ mensaje = error.message }
           if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
           if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          mensaje = mensaje.replace('Request failed with status code 400<br/>','')
           this.$q.notify({ html: true, multiLine: false, color: 'red'
               ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
               ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -862,6 +862,7 @@ export default ({
           if(error.message){ mensaje = error.message }
           if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
           if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+          mensaje = mensaje.replace('Request failed with status code 400<br/>','')
           this.$q.notify({ html: true, multiLine: false, color: 'red'
               ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
               ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -1236,6 +1237,10 @@ export default ({
       partnerName: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
+        },
+      numeroDoc: {
+            get () { return this.$store.state[this.moduleName].editData.basic.numeroDoc },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'numeroDoc', value: val}) }
         },
       partner_account_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id },

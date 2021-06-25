@@ -11,11 +11,10 @@
 
     <selectSearchable 
         prependIcon="fas fa-handshake"
-        :labelText="(initialTypeID==1||initialTypeID==2)?'Proveedor(*)':'Proveedor'" labelSearchText="Buscar Proveedor"
+        labelText="Proveedor(*)" labelSearchText="Buscar Proveedor"
         :optionsList="this.lookup_partners"
         rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
-        :isRequired="(initialTypeID==1||initialTypeID==2)?true:false" 
-        :class="(initialTypeID==3)?'q-pb-md':undefined"
+        :isRequired="true" 
         :isDisable="dialogMode?true:false" 
         :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         :initialValue="partnerID"
@@ -36,7 +35,6 @@
         />
     
     
-
     <selectSearchable 
         prependIcon="fas fa-money-check"
         labelText="Medio de Pago (*)" labelSearchText="Buscar Medio de Pago"
@@ -74,9 +72,9 @@
     </q-input>
 
     <q-input
-        ref="amount" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        ref="amountTotal" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         placeholder="Monto del Pago (*)" label="Monto del Pago (*)" filled
-        v-model="amount" :min="0" :max="amountUnpaid"
+        v-model="amountTotal" :min="0" :max="amountTotal"
         :disable="!dialogMode"
         type="number" class="q-pb-md"
         >
@@ -218,11 +216,24 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userCompany: { get () { return this.$store.state.main.userCompany } },
         userCompanies: { get () { return this.$store.state.main.userCompanies } },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        //allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
+        //allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
+        //allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
+        
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },
@@ -248,6 +259,10 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
         },
+        partnerName: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerName', value: val}) }
+        },
         account_id_invoice: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id_invoice },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id_invoice', value: val}) }
@@ -272,10 +287,6 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.numeroDoc },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'numeroDoc', value: val}) }
         },
-        initialTypeID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.initialTypeID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'initialTypeID', value: val}) }
-        },
         voided: {
             get () { return this.$store.state[this.moduleName].editData.basic.voided },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'voided', value: val}) }
@@ -296,9 +307,9 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.printName },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printName', value: val}) }
         },
-        amount:  {
-            get () { return this.$store.state[this.moduleName].editData.basic.amount },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'amount', value: val}) }
+        amountTotal:  {
+            get () { return this.$store.state[this.moduleName].editData.basic.amountTotal },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'amountTotal', value: val}) }
         },
         comments:  {
             get () { return this.$store.state[this.moduleName].editData.basic.comments },

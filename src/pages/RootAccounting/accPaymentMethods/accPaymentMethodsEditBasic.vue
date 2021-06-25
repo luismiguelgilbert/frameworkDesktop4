@@ -17,8 +17,8 @@
         :isReadonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         :initialValue="paymentTypeID"
         :tableSearchColumns="[
-                 { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
-                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+                 { name: 'value', label: 'Código', field: 'value', align: 'left'}
+                ,{ name: 'label', label: 'Tipo', field: 'label', align: 'left'}
                 //,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
             ]"
         @onItemSelected="(row)=>{
@@ -27,6 +27,18 @@
                 }
             }"
         />
+    
+    <q-select
+        v-if="paymentTypeID==1"
+        v-model="formatID"
+        :options="lookup_payment_formats"
+        map-options emit-value
+        label="Formato de Impresión del Documento (*)" filled
+        class="q-mb-md"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-print" /></template>
+    </q-select>
+    
     <q-input
         ref="name_es" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         placeholder="Ingrese la Descripción del Medio de Pago/Cobro (*)" label="Descripción (*)" filled
@@ -70,6 +82,8 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
+
+    
     <selectSearchable 
         prependIcon="fas fa-book"
         labelText="Cuenta Contable (*)" labelSearchText="Buscar Cuenta Contable"
@@ -188,6 +202,10 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.paymentTypeID },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'paymentTypeID', value: val}) }
         },
+        formatID: {
+            get () { return this.$store.state[this.moduleName].editData.basic.formatID },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'formatID', value: val}) }
+        },
         name_es: {
             get () { return this.$store.state[this.moduleName].editData.basic.name_es },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'name_es', value: val}) }
@@ -216,6 +234,9 @@ export default ({
         },
         lookup_accounts: {
             get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+        },
+        lookup_payment_formats: {
+            get () { return this.$store.state[this.moduleName].editData.lookup_payment_formats },
         },
     },
 })

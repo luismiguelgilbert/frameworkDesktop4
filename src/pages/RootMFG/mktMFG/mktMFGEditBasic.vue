@@ -128,7 +128,6 @@ export default ({
             //this.lines=[];//clearSelectedLines
             this.lines = this.lines.filter(x=>x.mfg_orderID==this.default_mfg_orderID);//clearSelectedLines
             this.default_orderBudget = [];//clearBudget
-            //alert('Encerar presupuesto, Cargar Presupuesto + Consumo + Basado en Bodega de: ' + this.defaultWhID + ' || ' + this.default_mfg_orderID)
             this.$q.loading.show();
             this.$axios({
                 method: 'GET',
@@ -149,6 +148,7 @@ export default ({
                 if(error.message){ mensaje = error.message }
                 if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                 if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                 this.$q.notify({ html: true, multiLine: false, color: 'red'
                     ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                     ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"

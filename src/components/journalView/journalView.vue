@@ -245,73 +245,8 @@ export default ({
               return resultado;
             }
         },
-        /*
-        userCode: { get () { return this.$store.state.main.userCode } },
-        userCompany: { get () { return this.$store.state.main.userCompany } },
         
-        
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
-        
-        apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
-        serverFilesPath: { get () { return this.$q.sessionStorage.getItem('serverFilesPath') } },
-        lines: {
-            get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-        },
-        accountLines: {
-            get () { return this.$store.state[this.moduleName].editData.accountLines },
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-        },
-        accMoveID: {
-            get () { 
-              let resultado = 0;
-              try{
-                resultado = this.$store.state[this.moduleName].editData.accountLines[0].accMoveID
-              }catch(ex){}
-              return resultado;
-            }
-        },
-        moveDate: {
-            get () { 
-              let resultado = '';
-              try{
-                resultado = this.$store.state[this.moduleName].editData.accountLines[0].moveDate
-              }catch(ex){}
-              return resultado;
-            }
-        },
-        
-        journalName: {
-            get () { 
-              let resultado = '';
-              try{
-                resultado = this.$store.state[this.moduleName].editData.accountLines[0].journalName
-              }catch(ex){}
-              return resultado;
-            }
-        },
-        partnerID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
-        },
-        partner_account_id: {
-            get () { return this.$store.state[this.moduleName].editData.basic.partner_account_id },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partner_account_id', value: val}) }
-        },
-        sys_user_color: {
-            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
-        },
-        */
     },
-    /*watch: { 
-        accountMove: function(newVal, oldVal) { // update component display value when changed happend from outside component (e.g. programatically)
-            console.dir('component data has changed')
-            this.componentData=newVal
-        }
-    }*/
+    
 })
 </script>

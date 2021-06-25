@@ -1,145 +1,121 @@
 <template>
-<div class="row ">
-  <q-table
-        ref="mainTable"
-        :data="accMoveGrouped?linesGrouped:lines"
-        :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-        table-style="min-height: calc(100vh - 230px); max-height: calc(100vh - 230px)"
-        row-key="lineID"
-        :rows-per-page-options="[0]"
-        hide-bottom dense
-        selection="multiple" :selected.sync="selected"
-        :filter="filterString"
-        :columns="[
-          //{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },
-          { name: 'account_id', required: true, label: 'Cuenta', align: 'left', field: row => row.account_id, sortable: true, style: 'min-width: 300px;' },
-          { name: 'debit', required: true, label: 'DEBE', align: 'right', field: row => row.debit, sortable: true, style: 'max-width: 100px;', headerStyle: 'padding-right: 20px;' },
-          { name: 'credit', required: true, label: 'HABER', align: 'right', field: row => row.credit, sortable: true , style: 'max-width: 100px;' , headerStyle: 'padding-right: 20px;' },
-          { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, headerStyle: 'padding-right: 20px;' },
-          //{ name: 'lineSubtotal', required: true, label: 'Suman', align: 'right', field: row => row.lineSubtotal, sortable: true , style: 'max-width: 100px;' },
-          //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
-          //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
-          //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
-        ]"
+<div style="margin: -16px;">
+  <q-toolbar class="no-padding">
+    <q-btn label="Agregar Líneas" no-caps icon="far fa-plus-square" color="primary" flat stretch :disable="journalID!=1" @click="addRows" /> 
+    <q-space />
+    <q-btn title="Ayuda" color="primary" icon="fas fa-info-circle" flat stretch>
+        <q-tooltip>
+                Al crear o copiar un asiento, solamente podrá usar el diario "Contabilidad".
+          <br />No podrá editar el detalle del asiento cuando corresponda a un diario diferente a "Contabilidad".
+          <br />Si necesitar realizar cambios en asientos de diarios distintos a "Contabilidad", modifique directamente en el módulo correspondiente.
+          <br />Al guardar el documento se valida que el balance del asiento sea cero.
+        </q-tooltip>
+      </q-btn>
+ </q-toolbar>
+
+ <DxDataGrid
+    ref="dxgrid"
+    key="maindatagrid"
+    height="calc(100vh - 208px)"
+    width="100%"
+    column-resizing-mode="widget"
+    :data-source="internalLines"
+    :allow-column-resizing="true" 
+    :allow-column-reordering="true"
+    :show-borders="true"
+    :show-column-lines="userTableLinesDXcols"
+    :show-row-lines="userTableLinesDXrows"
+    key-expr="lineID"
     >
+      <DxGrouping :auto-expand-all="journalID==1?true:false"/>
+      <DxColumnChooser  mode="select" />
+      <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
+      <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+      <DxEditing :allow-updating="journalID==1" mode="cell" :useIcons="false" :select-text-on-edit-start="true" start-edit-action="click" /> <!-- me gustan: cell, row, popup, batch mejora rendimiento pero NO calcula en línea y muestra un toolbar extra -->
+      <DxScrolling mode="standard" :useNative="true" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      <DxPaging :enabled="false" /> 
 
-    <template v-slot:body="props">
-      <q-tr :props="props" >
-        <q-td auto-width>
-          <q-checkbox v-model="props.selected" size="sm" dense :title="props.row.lineID" />
-        </q-td>
-        <q-td key="account_id" :props="props" class="no-padding" :tabindex="(props.key*10)+1" >
-          <q-input class="no-padding" style="height: 20px !important;" :ref="'lineItem'+(props.key*10)+1"
-              :value="props.row.account_name" dense item-aligned borderless
-              :rules="[val => !!val || 'Requerido']"
-              @input="(value)=>{updateRow(value,'account_name',props.row)}"
-              @keyup.keyCodes.113="openSearchItems(props.row)"
-              >
-              <template v-slot:prepend><q-btn icon="fas fa-search" title="Buscar (F2)" size="xs" round color="primary" flat @click="openSearchItems(props.row)" /></template>
-          </q-input>
-        </q-td>
-        <q-td key="debit" :props="props" :tabindex="(props.key*10)+2">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.debit" type="number" :min="0"
-              dense item-aligned borderless input-class="text-right"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @focus="$event.target.select()"
-              @input="(value)=>{updateRow(value,'debit',props.row)}" />
-        </q-td>
-        <q-td key="credit" :props="props" :tabindex="(props.key*10)+2">
-          <q-input class="no-padding" style="height: 20px !important;"
-              :value="props.row.credit" type="number" :min="0"
-              dense item-aligned borderless input-class="text-right"
-              :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-              @focus="$event.target.select()"
-              @input="(value)=>{updateRow(value,'credit',props.row)}" />
-        </q-td>
-        <q-td key="comments" :props="props">{{ props.row.comments }}</q-td>
-        <!--pendiente-->
-        <q-td key="partnerID" :props="props">{{ props.row.partnerName }}</q-td>
-        <q-td key="invID" :props="props">{{ props.row.invName }}</q-td>
-        <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
-        <q-td key="stockID" :props="props">{{ props.row.stockID }}</q-td>
-      </q-tr>
-    </template>
-    <template v-slot:top >
-        <q-btn v-if="!(allow_edit==false || allow_insert==false || journalID!=1)" :label="$q.screen.gt.sm?'Agregar':''" title="Agregar línea" @click="addRow" icon="fas fa-plus" color="primary"  no-caps />
-        <!--<q-btn v-if="!(allow_edit==false || allow_insert==false || journalID!=1)" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Ítems" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>-->
-        <q-btn v-if="!(allow_edit==false || allow_insert==false || journalID!=1)" :disable="selected.length<=0" :label="$q.screen.gt.sm?'Quitar':''" title="Eliminar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" no-caps  class="q-ml-sm"  />
-        <q-space />
-        <q-toggle v-model="accMoveGrouped" class="text-right" color="primary" label="Agrupado por Cuenta?" />
-    </template>
+      <DxColumn caption="# Posición" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="50" :visible="false" />
+      <!--:group-index="0"-->
+      <DxColumn caption="Cuenta Contable" data-field="account_id" name="account_id" data-type="number" :allow-editing="true" alignment="left" :minWidth="200" calculate-display-value="account_name"
+            :group-index="editStatus.editMode=='edit'&&journalID!=1?0:undefined"
+            :editor-options="{ opened: true }"
+            :set-cell-value="setAccountValue"> <!--calculate-display-value hace que DxLookup NO se use mientras no se esté editando la celda, y eso mejora rendimiento según devexpress-->
+            <DxLookup value-expr="value" display-expr="label" :data-source="lookup_accounts_paginated" />
+        </DxColumn><!--Si NO tiene pagos, entonces es editable-->
+      <!--calculate-display-value="account_name"-->
+      <DxColumn caption="Socio" data-field="partnerID" name="partnerID" data-type="number" :allow-editing="true" alignment="left" :minWidth="200" 
+            :editor-options="{ opened: true }"
+            > <!--calculate-display-value hace que DxLookup NO se use mientras no se esté editando la celda, y eso mejora rendimiento según devexpress-->
+            <DxLookup value-expr="value" display-expr="label" :data-source="lookup_partners" />
+        </DxColumn><!--Si NO tiene pagos, entonces es editable-->
+      <DxColumn caption="Comentario" data-field="comments" name="comments" data-type="string" :allow-editing="true" alignment="left" :minWidth="200" />
+      <DxColumn caption="Debe" data-field="debit" name="debit" data-type="number" :allow-editing="journalID==1" alignment="right" :width="120" :minWidth="120" :format="userMoneyFormat" />
+      <DxColumn caption="Haber" data-field="credit" name="credit" data-type="number" :allow-editing="journalID==1" alignment="right" :width="120" :minWidth="120" :format="userMoneyFormat" />
+      <DxColumn caption="Balance" data-field="calculated" name="calculated" data-type="number" :allow-editing="false" alignment="right" :width="110" :minWidth="110" :format="userMoneyFormat" :calculate-cell-value="calculateBalanceAmount" :visible="false" />
+      <DxColumn caption=" " name="voidButton" :allow-editing="false" alignment="left" :visible="true" cell-template="voidEditor" :width="57" />
+            <template #voidEditor="{ data: cellInfo }">
+                <q-btn v-if="journalID==1" icon="fas fa-trash-alt" color="red" flat stretch :title="'Anular Conciliación # ' + cellInfo.data.lineID" @click="eliminarLinea(cellInfo)"
+                    style="margin: -10px;"/>
+            </template>
 
-    <template v-slot:bottom-row>
-        <q-tr>
-          <q-td class="text-right text-subtitle2 text-primary" >
+      <DxSummary >
+        <DxTotalItem column="account_id" summary-type="count"/>
+        <DxTotalItem column="debit" summary-type="sum" cssClass="q-mr-none" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxTotalItem column="credit" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxTotalItem showInColumn="comments" column="calculated" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
 
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary" >
-            Suma: <!--{{lines.reduce((total,item)=>{return total + item.debit}, 0) - lines.reduce((total,item)=>{return total + item.credit}, 0) }}-->
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary">
-            {{lines.reduce((total,item)=>{return total + item.debit}, 0).toFixed(userMoneyFormat)}}
-          </q-td>
-          <q-td class="text-right text-subtitle2 text-primary">
-            {{lines.reduce((total,item)=>{return total + item.credit}, 0).toFixed(userMoneyFormat)}}
-          </q-td>
-          
-        </q-tr>
-    </template>
-  </q-table>
+        <DxGroupItem name="totalDebit" :show-in-group-footer="false" :align-by-column="true" column="debit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
+        <DxGroupItem name="totalCredit" :show-in-group-footer="false" :align-by-column="true" column="credit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
+      </DxSummary>
+      <DxSortByGroupSummaryInfo  summary-item="totalCredit" sort-order="desc" />
+      <DxSortByGroupSummaryInfo  summary-item="totalDebit" sort-order="desc" />
 
+ </DxDataGrid>
+ 
 </div>
 
 </template>
-<style lang="sass">
-  .q-table__bottom
-      padding: 0px
-  .my-sticky-header-usercompany
-    /* max height is important */
-    .q-table__middle
-      max-height: 50px
 
-    .q-table__top,
-    .q-table__bottom,
-    thead tr:first-child th /* bg color is important for th; just specify one */
-      background-color: white
-
-    thead tr:first-child th
-      position: sticky
-      top: 0
-      opacity: 1
-      z-index: 2
-
-  .my-sticky-header-usercompany-dark
-    /* max height is important */
-    .q-table__middle
-      max-height: 50px
-
-    .q-table__top,
-    .q-table__bottom,
-    thead tr:first-child th /* bg color is important for th; just specify one */
-      background-color: $grey-10
-
-    thead tr:first-child th
-      position: sticky
-      top: 0
-      opacity: 1
-      z-index: 2
-</style>
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
+
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxValueFormat, DxColumnChooser, DxGrouping, DxSortByGroupSummaryInfo, DxGroupItem } from 'devextreme-vue/data-grid';
 import { date } from 'quasar';
 
 export default ({
+  components: {
+      DxDataGrid,
+      DxColumn,
+      DxColumnFixing,
+      DxScrolling,
+      DxStateStoring,
+      DxSorting,
+      DxPaging,
+      DxHeaderFilter,
+      DxSelection,
+      DxEditing,
+      DxLookup,
+      DxSummary,
+      DxGroupItem, 
+      DxSortByGroupSummaryInfo,
+      DxTotalItem,
+      DxValueFormat,
+      DxColumnChooser,
+      DxGrouping
+    },
+
     data () {
       return {
-          moduleName: "AccMoves", filterString: '', selected: []
-        ,isItemsDialog: false, itemsDialogFilter: '', itemsDialogSelected: [], itemsDialogRowToUpdate: null, itemsDialogTableBusy: false
-        ,isItemsBatchDialog: false, itemsBatchDialogFilter: '', itemsBatchDialogSelected: [], itemsBatchDialogRowToUpdate: null, itemsBatchDialogTableBusy: false
-        ,accMoveGrouped: true
+        moduleName: "AccMoves",
+        internalLines: [],
+        lookup_accounts_paginated: null,
       }
+    },
+    created(){
+      this.internalLines = JSON.parse(JSON.stringify(this.lines));
+      this.lookup_accounts_paginated = { store: { type: 'array', data: this.lookup_accounts.filter(x=>x.account_has_children==false).map(y=> { return { value: y.value , label: y.code_es + ' - ' + y.label } }), key: 'value' }, pageSize: 10, paginate: true    }
     },
     methods:{
       getMax(arr, prop) {
@@ -150,236 +126,158 @@ export default ({
           }
           return max;
       },
-      updateRow(newVal, colName, row){
-        try{
-          //Actualiza las líneas
-          let newRows = JSON.parse(JSON.stringify(this.lines))
-          if(colName=="debit"||colName=="credit"){
-            newRows.find(x=>x.lineID==row.lineID)[colName] = parseFloat(newVal);
-          }else{
-            newRows.find(x=>x.lineID==row.lineID)[colName] = newVal
-          }
-          
-          /*let invID = newRows.find(x=>x.lineID==row.lineID).invID
-          let invName = invID?this.lookup_items.find(x => x.value == invID).label:''
-          let lineSubtotal = newRows.find(x=>x.lineID==row.lineID).price * newRows.find(x=>x.lineID==row.lineID).quantity;
-          let lineDiscntAmount = lineSubtotal * (  (newRows.find(x=>x.lineID==row.lineID).lineDiscntPrcnt) / 100  );
-          let lineUntaxed = lineSubtotal - lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineSubtotal = lineSubtotal
-          newRows.find(x=>x.lineID==row.lineID).lineDiscntAmount = lineDiscntAmount
-          newRows.find(x=>x.lineID==row.lineID).lineUntaxed = lineUntaxed
-          newRows.find(x=>x.lineID==row.lineID).invName = invName*/
-          this.lines = newRows
-
-        }catch(ex){
-          console.error(ex)
-        }
+      setAccountValue(newData, value, currentRowData){
+        const accountSelected = this.lookup_accounts.find(x=>x.value==value)
+        newData.account_id = value;
+        newData.account_name =  accountSelected.code_es + ' - ' + accountSelected.label;
       },
-      addRow(){
-        //Get Next LineID
-        let max_id = 1
-        if(this.lines.length > 0){
-          let temp = this.getMax(this.lines, "lineID");
-          max_id = parseInt(temp.lineID) + parseInt(1);
-        }
-        
-        //Add Line
-        let newRows = JSON.parse(JSON.stringify(this.lines))
-        let nuevaFila = {
-           lineID: max_id
-          ,account_id: 0
-          ,account_name: ''
-          ,partnerID: 0
-          ,partner_name: ''
-          ,invID: 0
-          ,invName: ''
-          ,prjID: 0
-          ,prjName: ''
-          ,stockID: 0
-          ,debit: parseFloat(0)
-          ,credit: parseFloat(0)
-          ,no_deducible: false
-          ,comments: ''
-        }
-        newRows.push(nuevaFila)
-        this.lines = newRows
-        this.openSearchItems(nuevaFila)//autoOpen Items Search
-      },
-      removeRows(){
-        if(this.selected.length > 0){
-          this.$q.dialog({ 
-            title: 'Confirmación'
-            ,message: 'Desea quitar las líneas seleccionadas?'
-            ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
-            ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
-          }
-          ).onOk(() => {
-            //Líneas
-            let newRows = JSON.parse(JSON.stringify(this.lines))
-            this.selected.map(row=>{
-              newRows = newRows.filter(x=>x.lineID!=row.lineID);
-            })
-            this.lines = newRows
-
-            this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
-          })
-        }
-      },
-      getAge(fecha){
-        return date.getDateDiff(new Date(), fecha, 'years')
-      },
-      openSearchItems(currentRow){
-        this.itemsDialogRowToUpdate = currentRow
-        this.isItemsDialog = true
-        if(currentRow&&currentRow.invID&&currentRow.invID>0){
-          this.itemsDialogTableBusy = true
-          try{
-            this.itemsDialogSelected = []
-            //this.itemsDialogSelected.push(this.lookup_items.find(x => x.value == currentRow.invID))
-            this.itemsDialogTableBusy = false
-          }catch(ex){
-            this.itemsDialogTableBusy = false
-          }
-        }
-        
-      },
-      itemsDialogSelectAction(){
-        if(this.itemsDialogSelected.length>0){
-          //Primero agrega los impuestos correspondientes al Item con su código de línea
-          let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))
-          newRowsTaxes = newRowsTaxes.filter(x=>x.lineID!=this.itemsDialogRowToUpdate.lineID)//remuevo los impuestos de la línea xq voy a agregarlos nuevamente
-          this.lookup_items_taxes.filter(x=>x.invID==this.itemsDialogSelected[0].value).forEach(impuesto=>{
-              newRowsTaxes.push({
-                 lineID: this.itemsDialogRowToUpdate.lineID
-                ,taxID: impuesto.taxID
-                ,taxName: impuesto.shortLabel
-                ,taxAmount: 0
-                ,isPercent: impuesto.isPercent
-                ,factor: impuesto.factor
-                ,factor_base: impuesto.factor_base
-              })
-            })
-          this.linesTaxes = newRowsTaxes
-
-          //Segundo, actualiza la fila por medio del método [updateRow] , el cual también actualiza las líneas del impuesto
-          if(this.itemsDialogSelected[0].estado==true){
-            this.updateRow(this.itemsDialogSelected[0].value, 'invID', this.itemsDialogRowToUpdate)
-            this.isItemsDialog = false
-          }
-        }
-      },
-      itemsDialogShown(){
-        if(this.itemsDialogSelected.length>0){
-          try{
-            this.$refs.itemsSearchTable.scrollTo(this.lookup_items.findIndex(x=>x.value == this.itemsDialogSelected[0].value))
-          }catch(ex){}
-        }
-        
-      },
-      addBatch(){
-        this.isItemsBatchDialog = true
-      },
-      itemsBatchDialogSelectAction(){
-        let max_id = 1
+      addRows(){
+        this.$q.loading.show()
+        //GetMaxId
+        let max_id = 0
         let temp = null
-        if(this.lines.length > 0){
-          temp = this.getMax(this.lines, "lineID");
-          max_id = parseInt(temp.lineID) + parseInt(1);
+        if(this.internalLines.length > 0){
+          temp = this.getMax(this.internalLines, "lineID");
+          max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
         }
-        let newRows = JSON.parse(JSON.stringify(this.lines))            //Líneas
-        let newRowsTaxes = JSON.parse(JSON.stringify(this.linesTaxes))  //Impuestos
-        if(this.itemsBatchDialogSelected.length>0){
-          this.itemsBatchDialogSelected.filter(x=>x.estado).map(row => {
-            max_id = parseInt(max_id) + parseInt(1);
-            //líneas
-            newRows.push({
-               lineID: max_id
-              ,invID: row.value
-              ,invName: row.label
-              ,quantity: 1
-              ,price: 1
-              ,lineSubtotal: 1
-              ,lineDiscntPrcnt: 0
-              ,lineDiscntAmount: 0
-              ,lineUntaxed: 1
-              ,whID: this.defaultWhID
-              ,whName: this.lookup_wh.find(x => x.value == this.defaultWhID).label
-              ,prjID: 0
-              ,prjName: ''
-              ,transportTypeID: this.defaultTransportID
-              ,transportTypeName: this.lookup_transports.find(x => x.value == this.defaultTransportID).label
-            })
-
-          })
-          this.lines = newRows
-          this.isItemsBatchDialog = false
+        
+        //Main variables
+        let newGridData = JSON.parse(JSON.stringify(this.internalLines));
+        const accountSelected = this.lookup_accounts.find(x=>x.value==this.account_id_advance)
+        //Iterate selected Items
+        max_id++;
+        const newRow = {
+          lineID: max_id,
+          uploaded: false,
+          /*
+          account_id: this.account_id_advance,
+          account_name: accountSelected.code_es + ' - ' + accountSelected.label,
+          */
+          account_id: 0,
+          account_name: 'Seleccionar Cuenta',
+          debit: 0,
+          credit: 0,
+          comments: '',
+          prjName: 0
         }
+        newGridData.push(newRow)
+        this.internalLines = newGridData;
+        this.$q.loading.hide()
       },
+      calculateBalanceAmount(rowData){
+        return rowData.debit - rowData.credit;
+      },
+      updateVuex(){
+        //this.updateAccountMove();//actualiza asiento contable antes de guardar y/o al cambiar de tab
+        //esto realmente lo usa editForm.vue para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
+        this.lines = JSON.parse(JSON.stringify(this.internalLines))
+      },
+      eliminarLinea(cellInfo){
+        this.internalLines = this.internalLines.filter(x=>x.lineID!=cellInfo.data.lineID)
+      }
+      
       
     },
     computed:{
-        userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return true }, },
-        allow_edit: { get () { return true }, },
-        allow_insert: { get () { return true }, },
-        allow_report: { get () { return true }, },
-        allow_disable: { get () { return true }, },
-        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        defaultWhID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.defaultWhID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultWhID', value: val}) }
+      console: () => console,
+      userColor: { get () { return this.$store.state.main.userColor }  },
+      userCode: { get () { return this.$store.state.main.userCode } },
+      userCompany: { get () { return this.$store.state.main.userCompany }  },
+      apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
+      userMoneyFormat: { get () { 
+        let resultado ="#0.000000";
+        if(this.$store.state.main.userMoneyFormat==0){ resultado = "#0" }
+        if(this.$store.state.main.userMoneyFormat==1){ resultado = "#0.0" }
+        if(this.$store.state.main.userMoneyFormat==2){ resultado = "#0.00" }
+        if(this.$store.state.main.userMoneyFormat==3){ resultado = "#0.000" }
+        if(this.$store.state.main.userMoneyFormat==4){ resultado = "#0.0000" }
+        if(this.$store.state.main.userMoneyFormat==5){ resultado = "#0.00000" }
+        if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
+        return resultado }
+      },
+      allow_view: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_edit: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_report: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_disable: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_row_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_row_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_accounting: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_accounting').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
         },
-        defaultTransportID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.defaultTransportID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'defaultTransportID', value: val}) }
+      editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
         },
-        paytermID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.paytermID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'paytermID', value: val}) }
+      userTableLines: { get () { return this.$store.state.main.userTableLines } },
+      userTableLines: { get () { return this.$store.state.main.userTableLines } },
+      userTableLinesDXcols: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+                return result
+            } 
         },
-        lines: {
-            get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'system', key: 'table_lines', value: val}) }
+      userTableLinesDXrows: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+                return result
+            } 
         },
-        linesGrouped:{
-            get () { 
-              let resultado = [];
-              this.lines.map(x=>{
-                if(resultado.some(y=>y.account_id==x.account_id)){
-                  resultado.find(y=>y.account_id==x.account_id).debit += x.debit
-                  resultado.find(y=>y.account_id==x.account_id).credit += x.credit
-                }else{
-                  resultado.push({
-                     account_id: x.account_id
-                    ,account_name: x.account_name
-                    ,debit: x.debit
-                    ,credit: x.credit 
-                  })
-                }
-              })
-              return resultado;
-            }
-        },
-        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
-        sys_user_color: {
-            get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color },
-        },
-        lookup_items: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_items },
-        },
-        lookup_accounts: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
-        },
-        lookup_prj: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_prj },
-        },
-        journalID:  {
+      userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
+      journalID: {
             get () { return this.$store.state[this.moduleName].editData.basic.journalID },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
         },
-        /*lookup_taxesByGroup: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_taxesByGroup },
-        },*/
+      lines: {
+          get () { return this.$store.state[this.moduleName].editData.lines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+      },
+      lookup_accounts: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+      },
+      lookup_partners: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_partners },
+      },
+
     }
 })
 </script>

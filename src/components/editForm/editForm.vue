@@ -90,6 +90,7 @@
                                 <div style="maxHeight: calc(100vh - 135px);" >
                                     <keep-alive >
                                         <component
+                                            
                                             :ref="'tab_'+tabRecord.tabName"
                                             :is="dynamicComponent"
                                             :moduleName="moduleName"
@@ -99,6 +100,8 @@
                                             :rptLink="rptLink"
                                             :rptLinkCompany="rptLinkCompany"
                                             :rptType="rptType"
+
+                                            :parametersData="parametersData"
 
                                             @onRunMethod="runMethod"
 
@@ -127,8 +130,19 @@ export default ({
     name: 'tableComponent',
     props: {
         moduleName: { type: String , required: true },
+        parametersData: { type: Object , required: false },
     },
     mounted(){
+        if(this.router&&this.router.currentRoute&&this.router.currentRoute.params&&this.router.currentRoute.params.id){
+            if(this.editStatus.editMode=='create'&&this.router.currentRoute.params.id!=0){
+                let newStatus = { 
+                    editMode: 'edit',
+                    copyRecord: 0,
+                    navigateToRecord: this.router.currentRoute.params.id,
+                }
+                this.editStatus = newStatus;
+            }
+        }
         this.tab = this.editConfig.startTab;
         this.loadData();
     },
@@ -186,6 +200,7 @@ export default ({
                 if(error.message){ mensaje = error.message }
                 if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                 if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                 this.$q.notify({ html: true, multiLine: false, color: 'red'
                     ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                     ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -250,6 +265,7 @@ export default ({
                 this.dataLoaded = false;
 
 
+                
                 /*
                 console.dir('!!! esto debe ocurrir antes de nada, para que NO se pierda la data en memoria al recargar información') ;
                 console.dir('barrerme tabs, y recuperar data final porque en grids pesados, NO se usa VUEX directamente xq hace lento los grids x ejemeplo') ;
@@ -257,14 +273,17 @@ export default ({
                 console.dir('PENDIENTE revisar cómo se comportan CASOS') ;
                 console.dir(this.$refs)
                 */
+                
                 Object.keys(this.$refs).map(x=>{
                     try{
                         this.$refs[x][0].updateVuex();
                     }catch(ex){}
                 })
 
+
                 //FIX DATA (remove unnecessary properties from vuex editData)
                 let newEditData = {}
+                
                 this.editConfig.editDataSaveProperties.map(x=>{
                     if(x.fields==null){//NO fields
                         if(x.filterBy==null){
@@ -322,7 +341,8 @@ export default ({
                     if(goBack){
                         this.$router.push(this.mainRoute) //navigate to main Data Grid
                     }else{//se mantiene en editForm (no regresa), entonces cargo data del registro navegando al ID (siempre y cuando se esté creando registro, es decir, si cambia el [this.editStatus.navigateToRecord] )
-                        if(response.data[0][this.columnKeyName] != this.editStatus.navigateToRecord){
+                        //agregado this.columnKeyName.length porque cuando NO existe this.columnKeyName es porque se copió tab en navegador
+                        if( this.columnKeyName.length > 1 && response.data[0][this.columnKeyName] != this.editStatus.navigateToRecord){
                             let newStatus = { 
                                 editMode: 'edit',
                                 copyRecord: 0,
@@ -340,6 +360,7 @@ export default ({
                     if(error.message){ mensaje = error.message }
                     if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                     if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                    mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                     this.$q.notify({ html: true, multiLine: false, color: 'red'
                         ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                         ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"

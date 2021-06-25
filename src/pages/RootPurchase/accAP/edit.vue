@@ -3,8 +3,9 @@
         v-if="editReady"
         ref="editFormComponent" 
         :moduleName="moduleName"
+        :parametersData="{ editStatus: editStatus, editConfig: editConfig, editData: editData }"
         @onLoadedData="updateTabStatus"
-        />
+        /><!--parametersData es opcional-->
 </template>
 <script>
 import editFormComponent from '../../../components/editForm/editForm'
@@ -30,7 +31,7 @@ export default ({
                 //{ tabName: 'print', iconName: 'fas fa-print', textLabel: 'Imprimir Documento', isTabDisable: false, rootPath:'components', importPath: 'mainReport/reportComponentDialog' },
                 //{ tabName: 'print', iconName: 'fas fa-print', textLabel: 'Ver Comprobante', isTabDisable: false, rootPath:'components', importPath: 'mainReport/reportComponentPDF' },
                 //{ tabName: 'share', iconName: 'fas fa-envelope', textLabel: 'Enviar Documento', isTabDisable: false, rootPath:'components', importPath: 'mailForm/mailFormDialog' },
-                { tabName: 'payments', iconName: 'fas fa-money-check-alt', textLabel: 'Pagos Aplicados', isTabDisable: false, rootPath:'components', importPath: 'paymentsView/paymentsList' },
+                { tabName: 'payments', iconName: 'fas fa-money-check-alt', textLabel: 'Pagos del Documento', isTabDisable: false, rootPath:'components', importPath: 'paymentsView/paymentsList' },
                 { tabName: 'account', iconName: 'fas fa-book', textLabel: 'Asiento Contable', isTabDisable: false, rootPath:'components', importPath: 'journalView/journalView' },
                 { tabName: 'files', iconName: 'fas fa-paperclip', textLabel: 'Archivos Adjuntos', isTabDisable: false, rootPath:'components', importPath: 'filesView/filesView' },
                 { tabName: 'history', iconName: 'fas fa-history', textLabel: 'Auditoría de Cambios', isTabDisable: false, rootPath:'components', importPath: 'historyView/historyView' }

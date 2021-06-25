@@ -75,7 +75,6 @@ export default ({
           console.dir(data)
           this.currentData = data;
           this.dialogVisible = true
-          //alert(JSON.stringify(data))
         },
         initializeFormData(){
             console.dir('initializeFormData')

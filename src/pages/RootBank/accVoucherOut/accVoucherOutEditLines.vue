@@ -1,648 +1,451 @@
 <template>
-<div>
-    <selectSearchable 
-        prependIcon="fas fa-hand-holding-usd"
-        labelText="Tipo de Pago (*)" labelSearchText="Buscar Tipo de Pago"
-        :optionsList="this.lookup_voucherInitialTypes"
-        rowValueField="value" optionsListLabel="label"
-        :isRequired="true" 
-        :isDisable="false" 
-        :isReadonly="(allow_edit==false && allow_insert==false)"
-        :initialValue="initialTypeID"
-        :tableSearchColumns="[
-                { name: 'label', label: 'Origen', field: 'label', align: 'left'}
-            ]"
-        @onItemSelected="(row)=>{
-                this.initialTypeID = row.value
-                this.clearLines()
-            }"
-        />
-    <q-table
-            ref="mainTable"
-            :data="lines"
-            :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-            table-style="min-height: calc(100vh - 300px); max-height: calc(100vh - 300px)"
-            row-key="lineID"
-            :separator="userTableLines"
-            :rows-per-page-options="[0]"
-            hide-bottom dense
-            selection="multiple" :selected.sync="selected"
-            :filter="filterString"
-            :columns="[
-            /*{ name: 'lineID', required: true, label: 'ID', align: 'left', field: row => row.lineID, sortable: true },*/
-            { name: 'line_account_id', required: true, label: 'Cuenta Conable', align: 'left', field: row => row.line_account_id, sortable: true, },
-            { name: 'amount', required: true, label: 'Monto', align: 'right', field: row => row.amount, sortable: true, },
-            { name: 'comments', required: true, label: 'Comentario', align: 'left', field: row => row.comments, sortable: true, style:'min-width:200px' },
-            { name: 'prjID', required: true, label: 'Obra/Proyecto', align: 'left', field: row => row.prjID, sortable: true },
-            //{ name: 'whID', required: true, label: 'Bodega', align: 'right', field: row => row.whID, sortable: true },
-            //{ name: 'prjID', required: true, label: 'Centro de Costo?', align: 'right', field: row => row.prjID, sortable: true },
-            //{ name: 'transportTypeID', required: true, label: 'Entrega?', align: 'right', field: row => row.transportTypeID, sortable: true },
-            ]"
-        >
+<div style="margin: -16px;">
+  <q-toolbar class="no-padding">
+    <q-btn label="Agregar Líneas" no-caps icon="far fa-plus-square" color="primary" flat stretch @click="addRows" :disable="editStatus.editMode=='edit'||partnerID==null||partnerID<=0" />
+    <q-space />
+    <q-btn title="Ayuda" color="primary" icon="fas fa-info-circle" flat stretch>
+        <q-tooltip>
+                Una vez que el documento ha sigo guardado, usted no puede agregar ni eliminar líneas.
+          <br />Una vez que el documento ha sigo guardado, usted no puede modificar los montos.
+          <br />La cuenta contable puede ser modificada en cualquier momento;
+          <br />No podrá guardar el documento si usted cambió la cuenta contable y existe un pago aplicado.
+        </q-tooltip>
+      </q-btn>
+ </q-toolbar>
 
-        <template v-slot:body="props">
-        <q-tr :props="props" >
-            <q-td auto-width>
-                <q-checkbox v-model="props.selected" size="md" dense :title="props.row.lineID" />
-            </q-td>
-            <!--<q-td key="lineID" :props="props">
-                {{props.row.lineID}}
-            </q-td>-->
-            <q-td key="line_account_id" :props="props">
-                {{lookup_accounts.filter(x=>x.value==props.row.line_account_id).map(y => {return y.code_es + " - " + y.label}).join("")}}
-            </q-td>
-            <q-td key="amount" :props="props" class="no-padding" :tabindex="(props.key*10)+2">
-                <q-input class="no-padding" style="height: 20px !important;"
-                    :value="props.row.amount" type="number" :readonly="(editMode==false)"
-                    :min="0" :max="props.row.maxValue?props.row.maxValue:undefined"
-                    dense item-aligned borderless input-class="text-right"
-                    :rules="[val => parseFloat(val)>=0 || 'Requerido']"
-                    debounce="1000" @input="(value)=>{updateRow(value,'amount',props.row)}" />
-            </q-td>
-            <q-td key="comments" :props="props">
-                <q-input class="no-padding" style="height: 20px !important;"
-                    :value="props.row.comments" debounce="1000"
-                    dense item-aligned borderless
-                    @input="(value)=>{updateRow(value,'comments',props.row)}" />
-            </q-td>
-            <q-td key="prjID" :props="props">{{ props.row.prjName }}</q-td>
-        </q-tr>
-        </template>
-        <template v-slot:top >
-            <q-btn :label="$q.screen.gt.sm?'Agregar':''" title="Agregar Cuenta" @click="()=>{isItemsBatchDialog=true}" icon="fas fa-plus" color="primary"  no-caps />
-            <q-btn v-if="initialTypeID==1" :label="$q.screen.gt.sm?'Documentos':''" title="Agregar Documentos por Pagar" @click="()=>{isDialogDocs=true}" icon="fas fa-file-invoice-dollar" color="primary" class="q-ml-md"  no-caps />
-            <q-btn :label="$q.screen.gt.sm?'Quitar':''" title="Quitar líneas seleccionadas" @click="removeRows" icon="fas fa-trash-alt" color="primary" class="q-ml-md"  no-caps />
-            <!--<q-btn :label="$q.screen.gt.sm?'Centro de Costos':''" title="Cambiar Centro de Costo a líneas seleccionadas" @click="isPrjDialog=true" icon="bookmarks" color="primary" class="q-ml-md" no-caps :disable="selected.length<=0" />-->
-            <!--<q-btn v-if="editMode==true" :label="$q.screen.gt.sm?'Buscar':''" title="Agregar Varios Servicios" @click="addBatch" icon="fas fa-search-plus" color="primary" no-caps  class="q-ml-sm"/>-->
-            
-        </template>
-        <template v-slot:bottom-row>
-            <q-tr>
-                <q-td class="text-right text-subtitle2 text-primary">
-                </q-td>
-                <q-td class="text-right text-subtitle2 text-primary" >
-                    Suma:
-                </q-td>
-                <q-td class="text-right text-subtitle2 text-primary">
-                    {{lines.reduce((total,item)=>{return total + item.amount}, 0).toFixed(userMoneyFormat)}}
-                </q-td>
-                <q-td class="text-right text-subtitle2 text-primary">
-                </q-td>
-                <q-td></q-td>
-            </q-tr>
-            <q-tr></q-tr>
-        </template>
-    </q-table>
-    <!--<isAccountComponent v-if="initialTypeID==1||initialTypeID==3" ref="isAccountComponent" @onAccMoveCompute="updateAccountMove" />
-    <isDocumentComponent v-if="initialTypeID==2" ref="isDocumentComponent" @onAccMoveCompute="updateAccountMove" />
-    -->
+  <q-separator />
+  <!--height="calc(100vh - 170px)"-->
+  <!--height="calc(100vh - 298px)"-->
+  <DxDataGrid
+    ref="dxgrid"
+    key="maindatagrid"
+    height="calc(100vh - 208px)"
+    width="100%"
+    column-resizing-mode="widget"
+    :data-source="internalLines"
+    :allow-column-resizing="true" 
+    :allow-column-reordering="true"
+    :show-borders="true"
+    :show-column-lines="userTableLinesDXcols"
+    :show-row-lines="userTableLinesDXrows"
+    key-expr="lineID"
+    >
+        <!--
+        :stateStoring="{ ignoreColumnOptionNames: [] }"
+        @row-updated="onRowUpdated"
+        @editor-preparing="checkIfCellEditable"
+        -->
 
-    <q-dialog v-model="isItemsBatchDialog" >
-        <q-card style="minWidth: 900px;">
-            <selectSearchable class="col-12"
-                prependIcon="account_tree" autofocus
-                labelText="Cuenta Contable (*)" labelSearchText="Buscar Cuenta Contable"
-                :optionsList="lookup_accounts"
-                rowValueField="value" optionLabelField="label" optionsListCaption="code_es" optionsListLabel="label" 
-                optionDisableField="estado"
-                :isRequired="false" 
-                :isDisable="false" 
-                :isReadonly="false"
-                :initialValue="account_id_advance"
-                :showSelectButton="true"
-                :tableSearchColumns="[
-                    { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
-                    ,{ name: 'label', label: 'Cuenta Contable', field: 'label', align: 'left'}
-                    ]"
-                @onItemSelected="(row)=>{
-                    this.addRow(row)
-                    }"
-            />
-        </q-card>
-    </q-dialog>
+      <!--<DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" :deferred="true" />--><!--:deferred="true"-->
+      <DxColumnChooser  mode="select" />
+      <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
+      <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
+      <DxEditing :allow-updating="true" mode="cell" :useIcons="false" :select-text-on-edit-start="true" start-edit-action="click" /> <!-- me gustan: cell, row, popup, batch mejora rendimiento pero NO calcula en línea y muestra un toolbar extra -->
+      <DxScrolling mode="standard" :useNative="true" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      <DxPaging :enabled="false" /> 
 
-    <q-dialog v-model="isDialogDocs" @show="loadPendingDocs" >
-        <q-card style="minWidth: 900px;">
-            <q-bar class="bg-primary text-white">
-                Buscar Documentos
-                <q-space />
-                <q-input input-class="text-white" borderless dense debounce="300" autofocus v-model="isDialogDocsFilter" placeholder="Buscar">
-                <template v-slot:append>
-                    <q-icon v-if="!isDialogDocsFilter" name="fas fa-search" flat round size="xs" color="white" />
-                    <q-btn v-if="isDialogDocsFilter" @click="isDialogDocsFilter=''" flat round icon="fas fa-times" size="xs" color="white" />
-                </template>
-                </q-input>
-            </q-bar>
-            <q-card-section class="no-padding">
-                <q-table
-                    ref="itemsSearchTable"
-                    :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-                    table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-                    @keydown.native.keyCodes.115="addInvoices(documentsBatchDialogSelected)"
-                    :data="lookup_accAP"
-                    :columns="[
-                        { name: 'tipoComprobanteName', required: true, label: 'Tipo Comprobante', align: 'left', field: row => row.tipoComprobanteName, sortable: true, style: 'max-width: 20px;' },
-                        { name: 'numeroDoc', required: true, label: '# Documento', align: 'left', field: row => row.numeroDoc, sortable: true, style: 'min-width: 250px;', },
-                        { name: 'headerDate', required: true, label: 'Fecha Documento', align: 'left', field: row => row.headerDate, sortable: true, style: 'min-width: 50px;', },
-                        { name: 'amountTotal', required: true, label: 'TOTAL', align: 'right', field: row => row.amountTotal, sortable: true, style: 'min-width: 50px;'},
-                        { name: 'amountUnpaid', required: true, label: 'Pendiente', align: 'right', field: row => row.amountUnpaid, sortable: true, style: 'min-width: 50px;'},
-                        //{ name: 'amountNew', required: true, label: 'Pagar', align: 'right', field: row => row.amountNew, sortable: true, style: 'min-width: 50px;'},
-                    ]"
-                    row-key="headerID"
-                    :rows-per-page-options="[0]"
-                    hide-bottom dense
-                    selection="multiple" :selected.sync="documentsBatchDialogSelected"
-                    :filter="isDialogDocsFilter"
-                    >
-                    <template v-slot:body="props">
-                        <q-tr :props="props" >
-                            <q-td auto-width>
-                                <q-checkbox v-model="props.selected" size="md" dense :title="props.row.headerID" />
-                            </q-td>
-                            <q-td key="tipoComprobanteName" :props="props">
-                                {{ props.row.tipoComprobanteName }}
-                            </q-td>
-                            <q-td key="numeroDoc" :props="props">
-                                {{ props.row.numeroDoc }}
-                            </q-td>
-                            <q-td key="headerDate" :props="props">
-                                {{ props.row.headerDate }}
-                            </q-td>
-                            <q-td key="amountTotal" :props="props">
-                                {{ props.row.amountTotal.toFixed(userMoneyFormat) }}
-                            </q-td>
-                            <q-td :class="userColor=='blackDark'?'bg-grey-9':'bg-grey-2'"  key="amountUnpaid" :props="props">
-                                {{ props.row.amountUnpaid.toFixed(userMoneyFormat) }}
-                            </q-td>
-                        </q-tr>
-                    </template>
-
-                    <template v-slot:bottom-row>
-                        <q-tr>
-                            <q-td>
-                            </q-td>
-                            <q-td>
-                            </q-td>
-                            <q-td>
-                            </q-td>
-                            <q-td class="text-right text-subtitle2 text-primary" >
-                                Suma:
-                            </q-td>
-                            <q-td class="text-right text-subtitle2 text-primary">
-                                {{lookup_accAP.reduce((total,item)=>{return total + item.amountTotal}, 0).toFixed(userMoneyFormat)}}
-                            </q-td>
-                            <q-td class="text-right text-subtitle2 text-primary">
-                                {{lookup_accAP.reduce((total,item)=>{return total + item.amountUnpaid}, 0).toFixed(userMoneyFormat)}}
-                            </q-td>
-                        </q-tr>
-                        <q-tr></q-tr>
-                    </template>
-
-                </q-table>
-            </q-card-section>
-            <q-card-actions align="around">
-                <q-btn icon-right="fas fa-check-circle" flat label="Seleccionar (F4)" no-caps color="primary" 
-                :disable="documentsBatchDialogSelected.length<=0" 
-                @click="addInvoices(documentsBatchDialogSelected)" ></q-btn>
-            </q-card-actions>
-            
-            <q-inner-loading :showing="isDialogDocsBusy" style="z-index: 10" >
-                <q-spinner-gears size="50px" color="primary" />
-            </q-inner-loading>
-        </q-card>
-    </q-dialog>
-
-    <!--<q-dialog v-model="isPrjDialog" >
-        <q-card style="min-width: 700px;" > 
-        <q-bar class="bg-primary text-white">
-            Centro de Costo
-            <q-space />
-            <q-input input-class="text-white" borderless dense debounce="300" autofocus v-model="prjDialogFilter" placeholder="Buscar">
-            <template v-slot:append>
-                <q-icon v-if="!prjDialogFilter" name="fas fa-search" flat round size="xs" color="white" />
-                <q-btn v-if="prjDialogFilter" @click="prjDialogFilter=''" flat round icon="fas fa-times" size="xs" color="white" />
+        <DxColumn caption="# Posición" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="50" :visible="true" />
+        <DxColumn caption="Cuenta Contable" data-field="line_account_id" name="line_account_id" data-type="number" :allow-editing="true" alignment="left" :minWidth="200" calculate-display-value="line_account_name"
+            :editor-options="{ opened: true }"
+            :set-cell-value="setAccountValue"> <!--calculate-display-value hace que DxLookup NO se use mientras no se esté editando la celda, y eso mejora rendimiento según devexpress-->
+            <DxLookup value-expr="value" display-expr="label" :data-source="lookup_accounts_paginated" />
+        </DxColumn><!--Si NO tiene pagos, entonces es editable-->
+        <DxColumn caption="Comentario" data-field="comments" name="comments" data-type="string" :allow-editing="true" alignment="left" :width="300" />
+        <DxColumn caption="Monto" data-field="amount" name="amount" data-type="number" :allow-editing="editStatus.editMode=='create'" alignment="right" :minWidth="80" :width="80" 
+            :format="userMoneyFormat" /><!--Si NO tiene pagos, entonces es editable-->
+        <DxColumn caption=" " name="voidButton" :allow-editing="false" alignment="left" :visible="true" cell-template="voidEditor" :width="57" />
+            <template #voidEditor="{ data: cellInfo }">
+                <q-btn v-if="editStatus.editMode=='create'" icon="fas fa-trash-alt" color="red" flat stretch :title="'Anular Conciliación # ' + cellInfo.data.lineID" @click="eliminarLinea(cellInfo)"
+                    style="margin: -10px;"/>
             </template>
-            </q-input>
-        </q-bar>
-        <q-card-section class="no-padding" >
-            <q-select
-                label="Centro de Costo (*)" placeholder="Seleccione el Centro de Costo que desea utilizar (*)" emit-value map-options filled
-                :options="lookup_prj.filter(x=>x.parent==null&&x.estado)" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
-                :option-disable="opt => !opt.estado" clearable
-                v-model="rootPrjIDSelected"
-                ref="rootPrjIDSelected"
-                
-                >
-                <template v-slot:prepend><q-icon name="bookmarks" /></template>
-            </q-select>
-            <q-separator />
-            <q-table
-                ref="prjSearchTable" square
-                :class="userColor=='blackDark'?'col-12 my-sticky-header-usercompany-dark bg-grey-10 ':'col-12 my-sticky-header-usercompany'"
-                table-style="min-height: calc(100vh - 270px); max-height: calc(100vh - 270px)"
-                @keydown.native.keyCodes.115="prjDialogSelectAction(prjDialogSelected)"
-                :data="lookup_prj.filter(x=>x.rootID == rootPrjIDSelected)"
-                :columns="[
-                    //{ name: 'prjID', required: true, label: 'ID', align: 'left', field: row => row.value, sortable: true, style: 'max-width: 20px;' },
-                    { name: 'code_es', required: true, label: 'Código', align: 'left', field: row => row.code_es, sortable: false, style: 'max-width: 75px;', },
-                    { name: 'label', required: true, label: 'Descripción', align: 'left', field: row => row.label, sortable: false, style: 'min-width: 250px;', },
-                    //{ name: 'row_has_children', required: true, label: 'row_has_children', align: 'left', field: row => row.row_has_children, sortable: true },
-                    //{ name: 'row_level', required: true, label: 'row_level', align: 'left', field: row => row.row_level, sortable: false },
-                    { name: 'estado', required: true, label: 'Estado', align: 'left', field: row => row.estado, sortable: false },
-                ]"
-                row-key="value"
-                virtual-scroll :rows-per-page-options="[0]"
-                hide-bottom dense
-                selection="single" :selected.sync="prjDialogSelected"
-                :filter="prjDialogFilter"
-                >
-                <template v-slot:body-cell-label="props">
-                    <q-td :props="props">
-                    <div :class="props.row.row_has_children?'text-bold':''">{{ '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(props.row.row_level) + props.value }}</div>
-                    </q-td>
-                </template>
-                <template v-slot:body-cell-estado="props">
-                    <q-td :props="props">
-                    <q-checkbox :value="props.value" color="primary" dense size="sm" />
-                    </q-td>
-                </template>
-            </q-table>
-        </q-card-section>
-        <q-card-actions align="around">
-            <q-btn  flat label="Cancelar (ESC)" no-caps color="primary" @click="isPrjDialog=false" />
-            <q-btn icon-right="fas fa-check-circle" label="Seleccionar (F4)" no-caps color="primary" 
-            :disable="(prjDialogSelected.length<=0||prjDialogSelected[0].row_has_children||prjDialogSelected[0].estado==false)" 
-            @click="prjDialogSelectAction(prjDialogSelected)"
-            />
-        </q-card-actions>
-        </q-card>
-    </q-dialog>-->
+      />
+  </DxDataGrid>
+
+  <q-list dense class="text-right" style="height: 35px; max-height: 35px; overflow-y: auto;">
+    <q-item v-for="linea in totalLines" :key="linea.indice" clickable>
+      <q-item-section side :class="linea.clase">{{linea.label}}</q-item-section>
+      <q-item-section :class="linea.claseValor">{{linea.valor}}</q-item-section>
+    </q-item>
+  </q-list>
+
 </div>
 </template>
+
 <script>
-import Vue from 'vue';
-import Vuex from 'vuex';
-import { date } from 'quasar';
-//import isAccountComponent from './accVoucherOutEditLinesAccounts'
-//import isDocumentComponent from './accVoucherOutEditLinesDocs'
-import selectSearchable from '../../../components/selectSearchable/selectSearchable.vue'
+
+import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxValueFormat, DxColumnChooser, DxGrouping, DxGroupPanel, DxGroupItem } from 'devextreme-vue/data-grid';
+import DxPopup, { DxToolbarItem  } from 'devextreme-vue/popup';
+import DxToolbar, { DxItem } from 'devextreme-vue/toolbar';
+
+//import DataSource from 'devextreme/data/data_source';
+//import ArrayStore from "devextreme/data/array_store";
+
+
 
 export default ({
-    components: {
-        selectSearchable: selectSearchable
-        /*isAccountComponent: isAccountComponent
-        ,isDocumentComponent: isDocumentComponent*/
-    },
-    data () {
-        return {
-            moduleName: "accVoucherOut"
-            ,selected: [], filterString: ''
-            ,isItemsBatchDialog: false
-            ,isPrjDialog: false, prjDialogFilter: '', prjDialogSelected: [], prjDialogTableBusy: false, rootPrjIDSelected: null, prjIDSelected: null
-            ,isDialogDocs: false, isDialogDocsBusy: false, isDialogDocsFilter: '', documentsBatchDialogSelected: []
-            //,isPartnerDialog: false, mainLookupUpdateFieldValueName: '', mainLookupUpdateFieldLabelName: '', mainLookupPredefinedValue: null
-            //,xmlFile: null
-            ,myQDateLocale: {
-                /* starting with Sunday */
-                days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
-                daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
-                months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
-                monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
-                firstDayOfWeek: 1
-            }
+  props: {
+    moduleName: { type: String , required: true },
+  },
+  components: {
+    DxDataGrid,
+    DxColumn,
+    DxColumnFixing,
+    DxScrolling,
+    DxStateStoring,
+    DxSorting,
+    DxPaging,
+    DxHeaderFilter,
+    DxSelection,
+    DxEditing,
+    DxPopup,
+    DxLookup,
+    DxToolbarItem,
+    DxSummary,
+    DxGrouping,
+    DxGroupPanel,
+    DxGroupItem,
+    DxTotalItem,
+    DxValueFormat,
+    DxColumnChooser,
+    DxToolbar,
+    DxItem
+  },
+  data () {
+    return {
+      isListDialog: false,
+      listSelectedRowKeys: [],
+      dxdialogSearchBoxOptions:{
+          placeholder: "Buscar...",
+          showClearButton: true,
+          onContentReady: (e)=>{
+              this.searchTextBox = e;
+              setTimeout(()=>{ 
+                  this.searchTextBox.component.focus();
+              }, 500);
+          },
+          onInput: (e)=>{
+              this.$refs['dxGridSearchList'].instance.searchByText(e.component.option('text'));
+          }
+      },
+      //maingridSelectedRowKeys: [],
+      maingridDeleteBtnDisabled: true,
+      internalLines: [],
+      isRequisicionesDialog: false,
+      dialogSustento: false, dialogSustentoValue: null,
+      dialogExpected: false, dialogExpectedValue: null,
+      dialogDiscount: false, dialogDiscountValue: null,
+      requisiciones: null,
+      requisicionesSelectedRowKeys: [],
+      lookup_items_paginated: null,
+      lookup_accounts_paginated: null,
+      gridScrollingMode: 'virtual', //standard || virtual
+      gridEditMode: 'row', //row || cell
+    }
+  },
+  created(){
+    this.internalLines = JSON.parse(JSON.stringify(this.lines));
+    this.lookup_accounts_paginated = { store: { type: 'array', data: this.lookup_accounts.filter(x=>x.account_has_children==false).map(y=> { return { value: y.value , label: y.code_es + ' - ' + y.label } }), key: 'value' }, pageSize: 10, paginate: true    }
+  },
+  mounted(){
+    this.internalLines = JSON.parse(JSON.stringify(this.lines));
+    this.$refs['dxgrid'].instance.option("stateStoring.ignoreColumnOptionNames", []);
+    let savedState = this.gridState.find(x=>x.gridName==[this.moduleName+'_lines']);
+    if(savedState&&savedState.gridState){
+      let estado = JSON.parse(savedState.gridState)
+      this.$refs['dxgrid'].instance.state(estado);
+    }
+  },
+  methods:{
+    getMax(arr, prop) {
+        var max;
+        for (var i=0 ; i<arr.length ; i++) {
+            if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
+                max = arr[i];
         }
+        return max;
     },
-    mounted(){
-        //this.$refs.formulario.validate()
+    addRows(){
+      this.$q.loading.show()
+      //GetMaxId
+      let max_id = 0
+      let temp = null
+      if(this.internalLines.length > 0){
+        temp = this.getMax(this.internalLines, "lineID");
+        max_id = parseInt(temp.lineID);//no es necesario incrementar en 1, porque lo hace luego 
+      }
+      
+      //Main variables
+      let newGridData = JSON.parse(JSON.stringify(this.internalLines));
+      const accountSelected = this.lookup_accounts.find(x=>x.value==this.account_id_advance)
+      //Iterate selected Items
+      max_id++;
+      const newRow = {
+        lineID: max_id,
+        uploaded: false,
+        line_account_id: this.account_id_advance,
+        line_account_name: accountSelected.code_es + ' - ' + accountSelected.label,
+        amount: 0,
+        comments: '',
+        prjName: 0
+      }
+      newGridData.push(newRow)
+      this.internalLines = newGridData;
+      this.$q.loading.hide()
     },
-    methods:{
-        dateName(fecha){
-            return date.formatDate(fecha, 'dddd, D-MMMM-YYYY', {
-                days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-                months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            }
-            )
-        },
-        getMax(arr, prop) {
-            var max;
-            for (var i=0 ; i<arr.length ; i++) {
-                if (max == null || parseInt(arr[i][prop]) > parseInt(max[prop]))
-                    max = arr[i];
-            }
-            return max;
-        },
-        addRow(row){
-            try{
-                if(row&&row.value){
-                    this.$q.loading.show()
-                    let newLineID = 0
-                    if(this.lines.length > 0){
-                        let temp = this.getMax(this.lines, "lineID");
-                        newLineID = parseInt(temp.lineID);
-                    }
-                    let newRows = JSON.parse(JSON.stringify(this.lines))
-                    newLineID++;
-                    let nuevaFila = {
-                         lineID: newLineID
-                        ,line_account_id: row.value
-                        ,amount: 0
-                        ,comments: ''
-                        ,prjID: 0
-                        //dummy for informative docs
-                        ,initialAccTypeID: null
-                        ,initialAccTypeName: null
-                        ,initialAccHeaderID: null
-                        ,maxValue: null
-                        //,docAccTypeID: null
-                        //,docHeaderID: null
-                        //,docAmountTotal: null
-                        //,docAmountUnpaid: null
-                        //,docDate: null
-                        //,docNum: null
-                        //,docComporbante: null
-                    }
-                    newRows.push(nuevaFila)
-                    this.lines = newRows
-                    this.isItemsBatchDialog=false;
-                    this.$q.loading.hide()
-                    this.$emit('onAccMoveCompute')
-                }    
-            }catch(ex){
-                console.dir(ex)
-                this.$q.loading.hide()  
-            }
-        },
-        updateRow(newVal, colName, row){
-            try{
-            this.$q.loading.show()
-            let newRows = JSON.parse(JSON.stringify(this.lines))
-            let newReconciliation = JSON.parse(JSON.stringify(this.reconciliation))
-            let newReconciliationLines = JSON.parse(JSON.stringify(this.reconciliationLines))
-            newRows.filter(x=>x.lineID==row.lineID).map(result=>{
-                if(colName=="amount"){
-                result[colName] = parseFloat(newVal);
-                }else{
-                result[colName] = newVal;
-                }
-                return result
-            })
-            newReconciliation.filter(x=>x.detailsLineID==row.lineID).map(result=>{
-                if(colName=="amount"){
-                    result[colName] = parseFloat(newVal);
-                }else{
-                    result[colName] = newVal;
-                }
-                return result
-            })
-            newReconciliationLines.map(result=>{
-                result.amount = newReconciliation.find(m=>m.headerID==result.headerID).amount
-                return result
-            })
-            
-            this.lines = newRows;
-            this.reconciliation = newReconciliation;
-            this.reconciliationLines = newReconciliationLines;
+    updateAccountMove(){
+      let internalAccountLines = [];
+      let newAccLineID = 1 //porque empieza en 2 por la autosuma de cada línea, y la #1 es la del HABER para el proveedor
+      let totalCreditAmount = 0
 
-            this.$q.loading.hide()
-            this.$emit('onAccMoveCompute')
-            }catch(ex){
-            console.error(ex)
-            this.$q.loading.hide()
-            }
+      //#region DEBE (Items)
+      this.internalLines.map(row=>{
+        newAccLineID++;
+        totalCreditAmount = parseFloat(totalCreditAmount) + parseFloat(parseFloat(row.amount).toFixed(6))
+        internalAccountLines.push({
+          accLineID: newAccLineID
+          ,lineID: row.lineID
+          ,taxLineID: 0
+          ,account_id: row.line_account_id
+          ,partnerID: this.partnerID
+          ,debit: row.amount
+          ,credit: 0
+          ,invID: 0
+          ,prjID: 0
+          ,stockID: 0
+          ,mktLineID: 0
+          //,comments: this.partnerName + ' - ' + row.comments
+          ,comments: this.lookup_accPaymentMethods.filter(x=>x.value == this.methodID).map(z=>z.label).join(', ') + ' #' +  this.numeroDoc
+          ,mktTypeID: 0
+          ,headerID: 0
+        })
+      })
+      //#endregion DEBE (Items)
+      
+      //#region HABER
+      internalAccountLines.push({
+          accLineID: 1 //porque los registros anteriores empiezan en 2
+          ,lineID: 999999
+          ,taxLineID: 0
+          ,account_id: this.account_id
+          ,partnerID: this.partnerID
+          ,debit: 0
+          ,credit: parseFloat(parseFloat(totalCreditAmount).toFixed(6))
+          ,invID: 0
+          ,prjID: 0
+          ,stockID: 0
+          ,mktLineID: 0
+          //,comments: this.lookup_accPaymentMethods.filter(x=>x.value == this.methodID).map(z=>z.paymentTypeName).join(', ') + ' #' +  this.numeroDoc
+          ,comments: this.lookup_accPaymentMethods.filter(x=>x.value == this.methodID).map(z=>z.label).join(', ') + ' #' +  this.numeroDoc
+          ,mktTypeID: 0
+          ,headerID: 0
+          ,lineID: 0
+      })
+      //#endregion HABER*/
+      this.accountLines = internalAccountLines
+    },
+    setAccountValue(newData, value, currentRowData){
+      const accountSelected = this.lookup_accounts.find(x=>x.value==value)
+      newData.line_account_id = value;
+      newData.line_account_name =  accountSelected.code_es + ' - ' + accountSelected.label;
+    },
+    updateVuex(){
+      this.updateAccountMove();//actualiza asiento contable antes de guardar y/o al cambiar de tab
+      //esto realmente lo usa editForm.vue para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
+      this.lines = JSON.parse(JSON.stringify(this.internalLines))
+    },
+    checkIfCellEditable(e){
+      if (e.parentType === 'dataRow' && e.dataField === 'quantity' && e.row.data.quantity_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'price' && e.row.data.price_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'lineDiscntPrcnt' && e.row.data.lineDiscntPrcnt_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'taxes' && e.row.data.taxes_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'sustentoID' && (e.row.data.sustentoID_isEditDisabled || !this.allow_accounting) ) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'account_id' && (e.row.data.accountID_isEditDisabled || !this.allow_accounting) ) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'transportTypeID' && e.row.data.transportTypeID_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if (e.parentType === 'dataRow' && e.dataField === 'quantityCancelNew' && e.row.data.quantityCancelNew_isEditDisabled) {
+        e.editorOptions.disabled = true
+      }
+      if(e.editorOptions.disabled){
+        this.$q.notify({color: 'red', message: 'No está permitido editar este campo', timeout: 500, icon: "fas fa-ban" });
+      }
+      
+      
+    },
+    eliminarLinea(cellInfo){
+      this.internalLines = this.internalLines.filter(x=>x.lineID!=cellInfo.data.lineID)
+    }
+  },
+  computed:{
+      console: () => console,
+      userColor: { get () { return this.$store.state.main.userColor }  },
+      userCode: { get () { return this.$store.state.main.userCode } },
+      userCompany: { get () { return this.$store.state.main.userCompany }  },
+      apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
+      userMoneyFormat: { get () { 
+        let resultado ="#0.000000";
+        if(this.$store.state.main.userMoneyFormat==0){ resultado = "#0" }
+        if(this.$store.state.main.userMoneyFormat==1){ resultado = "#0.0" }
+        if(this.$store.state.main.userMoneyFormat==2){ resultado = "#0.00" }
+        if(this.$store.state.main.userMoneyFormat==3){ resultado = "#0.000" }
+        if(this.$store.state.main.userMoneyFormat==4){ resultado = "#0.0000" }
+        if(this.$store.state.main.userMoneyFormat==5){ resultado = "#0.00000" }
+        if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
+        return resultado }
+      },
+      allow_view: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_view').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_edit: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_report: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_report').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_disable: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_row_insert: { get () { 
+          let resultado = false;
+          this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_row_insert').map(y=>{
+            resultado = y.value;  
+          }).value; 
+          return resultado }, 
+      },
+      allow_accounting: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_accounting').map(y=>{
+                resultado = y.value;  
+            }).value; 
+            return resultado }, 
         },
-        removeRows(){
-            if(this.selected.length > 0){
-                this.$q.dialog({ 
-                    title: 'Confirmación'
-                    ,message: 'Desea quitar las líneas seleccionadas?'
-                    ,ok: { icon: 'fas fa-trash-alt', label: 'Eliminar', noCaps: true }
-                    ,cancel: { label: 'Cancelar', noCaps: true, flat: true }
-                }
-                ).onOk(() => {
-                    //Líneas
-                    let newRows = JSON.parse(JSON.stringify(this.lines))
-                    let newReconciliation = JSON.parse(JSON.stringify(this.reconciliation))
-                    let newReconciliationLines = JSON.parse(JSON.stringify(this.reconciliationLines))
-                    this.selected.map(row=>{
-                        newRows = newRows.filter(x=>x.lineID!=row.lineID);
-                        newReconciliation = newReconciliation.filter(x=>x.detailsLineID!=row.lineID)
-                    })
-                    
-                    newReconciliationLines = newReconciliationLines.filter(x=> newReconciliation.some(y=>y.headerID==x.headerID))
-                    
-                    this.lines = newRows;
-                    this.reconciliation = newReconciliation;
-                    this.reconciliationLines = newReconciliationLines;
+        editStatus: {
+            get () { return this.$store.state[this.moduleName].editStatus },
+            set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
+        },
+      userTableLines: { get () { return this.$store.state.main.userTableLines } },
+      userTableLinesDXcols: { get () { 
+              let result = false;
+              if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+              return result
+          } 
+      },
+      userTableLinesDXrows: { get () { 
+              let result = false;
+              if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+              return result
+          } 
+      },
+      userRowsPerPage: { get () { return this.$store.state.main.userRowsPerPage }  },
+      allowedPageSizes:{
+          get () { 
+              let resultado = []
+              resultado.push(this.userRowsPerPage)
+              return resultado
+          },
+      },
 
-                    this.selected = []//limpia selección para evitar problema de referencia a filas que no existan
-                    this.$emit('onAccMoveCompute')
-                })
-            }
-        },
-        loadPendingDocs(){
-            this.isDialogDocsBusy = true
-            this.$axios({
-                method: 'GET',
-                url: this.apiURL + 'spAccvoucherOutSelectaccAP',
-                headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
-                params: {
-                    userCode: this.userCode,
-                    userCompany: this.userCompany,
-                    userLanguage: 'es',
-                    partnerID: this.partnerID
-                }
-            }).then((response) => {
-                this.lookup_accAP = response.data
-                this.isDialogDocsBusy = false;
-            }).catch((error) => {
-                console.dir(error)
-                let mensaje = ''
-                if(error.message){ mensaje = error.message }
-                if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
-                if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
-                this.$q.notify({ html: true, multiLine: false, color: 'red'
-                    ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
-                    ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
-                    ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
-                })
-                this.isDialogDocsBusy = false;
-            })
-        },
-        addInvoices(rows){
-            try{
-                this.$q.loading.show()
-                let newLineID = 0
-                if(this.lines.length > 0){
-                    let temp = this.getMax(this.lines, "lineID");
-                    newLineID = parseInt(temp.lineID);
-                }
-                let newReconciliationID = 0
-                if(this.reconciliation.length > 0){
-                    let temp = this.getMax(this.reconciliation, "headerID");
-                    newReconciliationID = parseInt(temp.headerID);
-                }
-                let newRows = JSON.parse(JSON.stringify(this.lines))
-                let newReconciliations = JSON.parse(JSON.stringify(this.reconciliation))
-                let newReconciliationLines = JSON.parse(JSON.stringify(this.reconciliationLines))
-                rows.map(row=>{
-                    if(!(newRows.some(x=>x.initialAccHeaderID==row.headerID&&x.initialAccTypeID==row.accTypeID))){//compara si ya existe la factura en este pago
-                        newLineID++;
-                        newReconciliationID++;
-                        console.dir('row')
-                        console.dir(row)
-                        //Agrega Líneas al Documento
-                        let nuevaFila = {
-                             lineID: newLineID
-                            ,line_account_id: row.account_id
-                            ,amount: row.amountUnpaid
-                            ,comments: row.tipoComprobanteName + ' ' + row.numeroDoc
-                            ,prjID: 0
-                            ,initialAccTypeID: row.accTypeID
-                            ,initialAccTypeName: row.accTypeName
-                            ,initialAccHeaderID: row.headerID
-                            ,maxValue: row.amountUnpaid
-                        }
-                        newRows.push(nuevaFila)
+      editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
+      
+      totalLines: {
+        get () {
+          let results = []
+          //1.- Subtotal
+          results.push({
+            indice: 1,
+            categoria: 'Suman',
+            label: 'Total del Documento',
+            clase: 'text-primary text-subtitle2',
+            claseValor: 'text-weight-bolder text-primary',
+            valor: parseFloat(this.internalLines.reduce((acc, linea) => acc + linea.amount, 0)).toFixed(2)
 
-                        //#region Agrega Conciliaciones
-                            //Build Date
-                            let fecha = new Date()
-                            let fechaTimeOffset = (fecha.getTimezoneOffset())
-                            if(fechaTimeOffset>0){//positivo entonces resto
-                                fecha = date.subtractFromDate(fecha, {minutes: fechaTimeOffset} )
-                            }else{//negativo entonces sumo
-                                fecha = date.addToDate(fecha, {minutes: (fechaTimeOffset*-1)} )
-                            }
-                            let nuevaConciliacion = {
-                                uploaded: false
-                                ,headerID: newReconciliationID
-                                ,headerDate: date.formatDate(fecha,'YYYY/MM/DD')//get current date in user pc (exact date no matter timezone)
-                                ,headerUser: this.userName + ' ' + this.userLastName
-                                ,amount: row.amountUnpaid
-                                ,voided: false
-                                ,detailsLineID: newLineID//para poder tener una sincronización entre las líneas y las conciliaciones
-                            }
-                            newReconciliations.push(nuevaConciliacion)
-
-                            let tempAccHeaderNumeroDoc = ''
-                            this.lookup_accPaymentMethods.filter(x=>x.value==this.methodID).map(y=> {
-                                tempAccHeaderNumeroDoc = y.label + ' - ' + this.numeroDoc;
-                            })
-                            //Agrega Detalle de Conciliaciones (Este Pago)
-                            newReconciliationLines.push({
-                                headerID: newReconciliationID
-                                ,lineID: 1//va quemado
-                                ,accTypeID: 3//va quemado 3=Pago
-                                ,accHeaderID: this.editRecord&&this.editRecord.row&&this.editRecord.row.headerID_ux?this.editRecord.row.headerID_ux:0//nuevo pago, pero debería ir el ID
-                                ,accHeaderNumeroDoc: tempAccHeaderNumeroDoc
-                                ,account_id: row.account_id//aquí viene la cuenta del Documento que se está conciliando
-                                ,amount: row.amountUnpaid
-                                ,isDebit_isCredit: false//true=Debit, false=Credit > como es la línea del Pago (plata que sale)
-                            })
-                            //Agrega Detalle de Conciliaciones (Documento)
-                            newReconciliationLines.push({
-                                headerID: newReconciliationID
-                                ,lineID: 2
-                                ,accTypeID: row.accTypeID//accTypeID del documento de la Cuenta x Pagar
-                                ,accHeaderID: row.headerID//headerID del documento de la Cuenta x Pagar
-                                ,accHeaderNumeroDoc: row.tipoComprobanteName + ' ' + row.numeroDoc
-                                ,account_id: row.account_id
-                                ,amount: row.amountUnpaid
-                                ,isDebit_isCredit: true//true=Debit, false=Credit > como es la línea del Documento (plata que entra)
-                            })
-                        //#endregion
-                    }
-                })
-                this.lines = newRows;
-                this.reconciliation = newReconciliations;
-                this.reconciliationLines = newReconciliationLines;
-                this.isDialogDocs=false;
-                this.$q.loading.hide()
-                this.selected = []
-                this.$emit('onAccMoveCompute')
-            }catch(ex){
-                console.dir(ex)
-                this.$q.loading.hide()  
-            }
-        },
-        updateAccountMove(){
-            //como este componente "contiene" a 2 subcomponentes
-            //entonces simplemente re-emite el evento hacia accVoucherOutEdit
-            //que es donde SÍ se actualiza asiento contable
-            this.$emit('onAccMoveCompute')
-        },
-        clearLines(){
-            this.lines = []
-            this.reconciliation = []
-            this.reconciliationLines = []
-            this.$emit('onAccMoveCompute')
+          })
+          //Devuelve resultado Final
+          return results
         }
-    },
-    computed:{
-        userColor: { get () { return this.$store.state.main.userColor }  },
-        userCompany: { get () { return this.$store.state.main.userCompany } },
-        userCompanies: { get () { return this.$store.state.main.userCompanies } },
-        userName: { get () { return this.$store.state.main.userName } },
-        userLastName: { get () { return this.$store.state.main.userLastName } },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
-        apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
-        userTableLines: { get () { return this.$store.state.main.userTableLines } },
-        userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
-        editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
-        editRecord: {
-            get () { return this.$store.state[this.moduleName].editRecord },
-        },
-        lines: {
-            get () { return this.$store.state[this.moduleName].editData.lines },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataLines', val) }
-        },
-        partnerID: {
+        
+      },
+      partnerID: {
             get () { return this.$store.state[this.moduleName].editData.basic.partnerID },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
         },
-        methodID: {
+      partnerName: {
+            get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
+        },
+      methodID: {
             get () { return this.$store.state[this.moduleName].editData.basic.methodID },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'methodID', value: val}) }
         },
-        initialTypeID: {
-            get () { return this.$store.state[this.moduleName].editData.basic.initialTypeID },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'initialTypeID', value: val}) }
+      account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.account_id },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id_advance', value: val}) }
         },
-        account_id_advance: {
+      account_id_advance: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id_advance },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id_advance', value: val}) }
         },
-        reconciliation: {
-          get () { return this.$store.state[this.moduleName].editData.reconciliation },
-          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliation', val) }
-        },
-        reconciliationLines: {
-          get () { return this.$store.state[this.moduleName].editData.reconciliationLines },
-          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataReconciliationLines', val) }
-        },
-        lookup_accAP: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_accAP },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData_lookup_accAP', val) }
-        },
-        numeroDoc: {
+      numeroDoc: {
             get () { return this.$store.state[this.moduleName].editData.basic.numeroDoc },
+            //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'numeroDoc', value: val}) }
         },
-        lookup_accounts: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
-        },
-        lookup_prj: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_prj },
-        },
-        lookup_accTypes: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_accTypes },
-        },
-        lookup_accPaymentMethods: {
+      lines: {
+          get () { return this.$store.state[this.moduleName].editData.lines },
+          set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lines', value: val}) }
+      },
+      accountLines: {
+        get () { return this.$store.state[this.moduleName].editData.accountLines },
+        set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountLines', value: val}) }
+      },
+      lookup_accPaymentMethods: {
             get () { return this.$store.state[this.moduleName].editData.lookup_accPaymentMethods },
         },
-        lookup_voucherInitialTypes: {
-            get () { return this.$store.state[this.moduleName].editData.lookup_voucherInitialTypes },
-        },
-    },
+      lookup_prj: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_prj },
+      },
+      gridState: {
+          get () { 
+            return this.$store.state[this.moduleName].editData.gridState
+          },
+      },
+      lookup_accounts: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+      },
+  }
 })
 </script>

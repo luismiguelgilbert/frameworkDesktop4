@@ -32,7 +32,7 @@
                 v-for="columna in columnsUser.filter(x=>x.is_visible)" :key="columna.db_column"
                 :name="columna.db_column"
                 :data-field="columna.db_column"
-                :data-type="(columna.ux_type=='date'||columna.ux_type=='datetime')?'date':undefined"
+                :data-type="(columna.ux_type=='date'||columna.ux_type=='datetime')?'date':((columna.ux_type=='money')?'number':undefined)"
                 :caption="columna.label"
                 :width="columna.min_width"
                 :alignment="columna.align"
@@ -313,6 +313,7 @@ export default ({
                                     if(error.message){ mensaje = error.message }
                                     if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                                     if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                                    mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                                     this.$q.notify({ html: true, multiLine: false, color: 'red'
                                         ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                                         ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -339,6 +340,7 @@ export default ({
                                 if(error.message){ mensaje = error.message }
                                 if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                                 if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                                mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                                 this.$q.notify({ html: true, multiLine: false, color: 'red'
                                     ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                                     ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"

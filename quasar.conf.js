@@ -99,6 +99,7 @@ module.exports = function (/* ctx */) {
         'Loading',//nuevo
         'Notify',//nuevo
         'SessionStorage',//nuevo
+        'LocalStorage',//nuevo
         'Dialog',//nuevo
       ]
     },

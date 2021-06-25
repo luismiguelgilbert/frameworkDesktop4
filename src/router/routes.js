@@ -295,6 +295,7 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootAccounting/Locations/edit.vue') }
         ] 
       }
+      ,{ path: 'RootAccounting/accBalanceChart', component: () => import('pages/RootAccounting/accBalanceChart/main.vue') }
       
       //COMPRAS
       ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/main.vue')

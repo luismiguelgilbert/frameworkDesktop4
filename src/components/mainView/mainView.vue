@@ -74,6 +74,7 @@ export default ({
                     if(error.message){ mensaje = error.message }
                     if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                     if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                    mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                     this.$q.notify({ html: true, multiLine: false, color: 'red'
                         ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                         ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -124,6 +125,7 @@ export default ({
                     if(error.message){ mensaje = error.message }
                     if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                     if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                    mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                     this.$q.notify({ html: true, multiLine: false, color: 'red'
                         ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                         ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -201,6 +203,7 @@ export default ({
                             if(error.message){ mensaje = error.message }
                             if(error.response && error.response.data && error.response.data.message){mensaje = mensaje + '<br/>' + error.response.data.message }
                             if(error.response && error.response.data && error.response.data.info && error.response.data.info.message){mensaje = mensaje + '<br/>' + error.response.data.info.message }
+                            mensaje = mensaje.replace('Request failed with status code 400<br/>','')
                             this.$q.notify({ html: true, multiLine: false, color: 'red'
                                 ,message: "Lo sentimos, no se pudo obtener datos.<br/>" + mensaje
                                 ,timeout: 0, progress: false , icon: "fas fa-exclamation-circle"
@@ -222,6 +225,24 @@ export default ({
                 component: component,
                 topLeftCell: { row: 1, column: 1 },
                 //customizeCell: ({ gridCell, excelCell }) => { setAlternatingRowsBackground(gridCell, excelCell); }
+                customizeCell: ({ gridCell, excelCell }) => { 
+                    if(gridCell.rowType === 'data') {
+                        if(this.columnsSystem.some(x=>x.db_column==gridCell.column.dataField&&x.ux_type=='money')){
+                            try{
+                                excelCell.value = parseFloat(excelCell.value.replace(/[^\d.-]/g, '')); //remueve los símbolos, y convierte a Float
+                                //Solamente como número, SIN formato de moneda, para evitar problemas con diferentes idiomas de Excel
+                                //excelCell.numFmt = '$#,##0.00;[Red]-$#,##0.00';
+                                //excelCell.numFmt = '$#,##0.00';
+                            }catch(ex){ }
+                        }
+                    }
+                    /*if(gridCell.column.dataType=='number'||gridCell.column.dataType=='money'){
+                        console.dir(excelCell.numFmt)
+                        excelCell.numFmt = '#'
+                        console.dir(excelCell.numFmt)
+                    }*/
+                }
+
             }).then(() => {
                 workbook.xlsx.writeBuffer().then((buffer) => {
                     saveAs(new Blob([buffer], { type: 'application/octet-stream' }), this.rptName+'.xlsx');

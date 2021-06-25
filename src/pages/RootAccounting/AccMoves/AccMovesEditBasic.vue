@@ -4,17 +4,13 @@
         
       <q-toggle
         tabindex="-1"
-        v-model="anulado" color="red" label="Anulado" icon="fas fa-trash-alt" disable
+        v-model="anulado" color="red" label="Anulado" icon="fas fa-trash-alt" :disable="journalID!=1"
         />
     </div>
     <q-input
-        ref="accMoveID" readonly class="q-pt-md"
+        ref="accMoveID" readonly class="q-pt-md q-pb-md"
         placeholder="Número de Asiento Contable (*)" label="Asiento # (*)" filled type="number"
         v-model="accMoveID"
-        :rules="[
-                val => !!val || '* Requerido',
-                val => val >= 0 || 'Campo debe ser mayor al 2000',
-        ]"
         >
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
@@ -88,12 +84,23 @@ export default ({
       }
     },
     computed:{
-        userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+      userColor: { get () { return this.$store.state.main.userColor }  },
+        userCompany: { get () { return this.$store.state.main.userCompany } },
+        userCompanies: { get () { return this.$store.state.main.userCompanies } },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         anulado: {
             get () { return this.$store.state[this.moduleName].editData.basic.anulado },
