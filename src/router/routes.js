@@ -334,6 +334,12 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootPurchase/accRet/edit.vue') }
         ] 
       }
+     //SALES
+      ,{ path: 'RootSales/salesDashboard', component: () => import('pages/RootSales/salesDashboard/main.vue')
+      /*,children: [
+         { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
+      ]*/
+    }
 
       //BANK
       ,{ path: 'RootBank/accVoucherOut', component: () => import('pages/RootBank/accVoucherOut/main.vue')

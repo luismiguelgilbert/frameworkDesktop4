@@ -265,6 +265,7 @@
     background: yellow;
   }
   .dx-datagrid{  
+    //font-family: 'Calibri';
     font-weight: bold;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
@@ -272,6 +273,7 @@
     border-top-right-radius: 5px;
   }
   .dx-header-row > td[role="columnheader"]> div.dx-datagrid-text-content {  //controla que encabezado se vea con color azul (diferente a las filas)
+    //font-family: 'Calibri';
     font-size: 13px;  
     font-weight: bold;
     color: #2F74EB;
