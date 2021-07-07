@@ -222,6 +222,7 @@ export default ({
                     ////////////////////////////////////////////////
                     //url syntax to get PDF file from report [ssrs_pruebas]     >   'https://localhost/ReportServerBI?/ssrs_pruebas&rs:ClearSession=true&rs:format=PDF'
                     mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); 
+                    mailReportURL = mailReportURL + this.$q.sessionStorage.getItem('ReportServer_BI_Path_ChildPath'); 
                     //mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
                     mailReportURL += (this.rptLinkCompany?(this.rptLink+'_'+this.userCompany):(this.rptLink)); //reporte es x compañía, entonces se agrega
                     mailReportURL += '&rs:format=PDF'; //formato PDF
@@ -321,6 +322,7 @@ export default ({
                     ////////////////////////////////////////////////
                     //url syntax to get PDF file from report [ssrs_pruebas]     >   'https://localhost/ReportServerBI?/ssrs_pruebas&rs:ClearSession=true&rs:format=PDF'
                     mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); 
+                    mailReportURL = mailReportURL + this.$q.sessionStorage.getItem('ReportServer_BI_Path_ChildPath'); 
                     mailReportURL += (this.rptLinkCompany?(this.rptLink+'_'+this.userCompany):(this.rptLink)); //reporte es x compañía, entonces se agrega
                     mailReportURL += '&rs:format=PDF'; //formato PDF
                     mailReportURL += '&sys_user_code=' + this.userCode; //Parámetro Usuario
