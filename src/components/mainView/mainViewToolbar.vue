@@ -92,6 +92,7 @@
                 </q-tooltip>
             </q-btn>
 
+            <!--
             <q-btn
                 v-if="allow_report"
                 flat no-caps no-wrap round 
@@ -117,6 +118,7 @@
                     <b>Reportes</b><br>Ver reportes y dashboards
                 </q-tooltip>
             </q-btn>
+            -->
 
             <q-btn
                 flat no-caps no-wrap round class="q-mr-md"
