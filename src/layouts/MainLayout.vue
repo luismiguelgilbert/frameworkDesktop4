@@ -260,6 +260,7 @@
 </template>
 
 <style lang="scss">
+
   ::selection {
     color: red;
     background: yellow;
@@ -446,6 +447,10 @@ export default {
           }
           if(x=='userCompany'){
             this.$q.sessionStorage.set('sys_user_company', response.data[0][x]) //sys_user_company
+          }
+          //PBIRS
+          if(x=='ReportServer_Path'||x=='ReportServer_Export_Path'||x=='ReportServer_BI_Path'||x=='ReportServer_BI_Path_ChildPath'||x=='ReportServer_BI_Path_User'||x=='ReportServer_BI_Path_Pwd'||x=='Google_API_key'){
+            this.$q.sessionStorage.set(x, response.data[0][x]) 
           }
         })
         

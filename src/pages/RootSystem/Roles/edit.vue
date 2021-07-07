@@ -26,6 +26,7 @@ export default ({
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Item', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Roles/RolesEditBasic.vue' },
                 { tabName: 'system', iconName: 'fas fa-desktop', textLabel: 'Permisos (Desktop)', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Roles/RolesEditLinks.vue' },
                 { tabName: 'mobile', iconName: 'fas fa-mobile-alt', textLabel: 'Permisos (Mobile)', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Roles/RolesEditLinksMobile.vue' },
+                { tabName: 'report', iconName: 'fas fa-chart-bar', textLabel: 'Reportes', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Roles/RolesEditReports.vue' },
                 { tabName: 'users', iconName: 'fas fa-users', textLabel: 'Asignar este perfil', isTabDisable: false, rootPath:'components', importPath: 'editForm/editFormGrid.vue',
                     tabConfig: { 
                         dataName: 'users', 
@@ -53,6 +54,7 @@ export default ({
                 { name: 'basic', filterBy: null, fields: null },
                 { name: 'ticked_links', filterBy: null, fields: null },
                 { name: 'ticked_links_mobile', filterBy: null, fields: null },
+                { name: 'ticked_reports', filterBy: null, fields: null },
                 { name: 'users', filterBy: null, fields: ['sys_user_code'] },
                 /*
                 { name: 'lots', filterBy: null, fields: ['lotID', 'name_es', 'expirationDate', 'warrantyDate'] },

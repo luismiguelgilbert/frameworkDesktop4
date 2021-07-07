@@ -88,20 +88,33 @@ export default ({
             }catch(ex){}
             
             this.isloading = true
-            this.reportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
-            this.reportURL += this.rptLink + (this.rptLinkCompany?'_'+this.userCompany:'')
+
+                        ////////////////////////////////////////////////
+            //Nueva Versión PBIRS only
+            ////////////////////////////////////////////////
+            //url syntax to get PDF file from report [ssrs_pruebas]     >   'https://localhost/ReportServerBI?/ssrs_pruebas&rs:ClearSession=true&rs:format=PDF'
+            this.reportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); 
+            this.reportURL = this.reportURL + this.$q.sessionStorage.getItem('ReportServer_BI_Path_ChildPath'); 
+            this.reportURL = this.reportURL + this.rptLink + (this.rptLinkCompany?'_'+this.userCompany:'') //este component se carga dinámicamente, entonces el único parámetro que recibe es el del módulo; por lo tanto, en el vuex del módulo está el nombre del reporte)
+            this.reportURL += '&rs:ClearSession=true&rs:format=PDF&sys_user_code=' + this.userCode + '&sys_user_language=es&sys_user_company=' + this.userCompany + '&row_id=' + this.headerID //en vez de this.editStatus.navigateToRecord
+
+            //this.reportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
+            //this.reportURL += this.rptLink + (this.rptLinkCompany?'_'+this.userCompany:'')
             //ClearSession sirve para NO usar cache (de lo contrario, el reporte NO presenta datos actualizados, sino que hay que cerrar y volver a entrar)
             //format define el formato a exportar
-            this.reportURL += '&rs:ClearSession=true&rs:format=PDF&sys_user_code=' + this.userCode + '&sys_user_language=es&sys_user_company=' + this.userCompany + '&row_id=' + this.headerID
+            //this.reportURL += '&rs:ClearSession=true&rs:format=PDF&sys_user_code=' + this.userCode + '&sys_user_language=es&sys_user_company=' + this.userCompany + '&row_id=' + this.
 
             this.$axios({
                 method: 'GET',
-                url: this.apiURL + 'generatePDFandDOWNLOAD',
+                //url: this.apiURL + 'generatePDFandDOWNLOAD',
+                url: this.apiURL + 'pbirsGetPDF',
                 headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
                 responseType: 'blob', // important
                 params: { 
                     reportURL: this.reportURL,
-                    fileName: this.rptName + ' ' + this.headerID + '.pdf'
+                    pdfName: this.rptName + ' ' + this.headerID /*en vez de this.editStatus.navigateToRecord*/ + '.pdf'
+                    /*reportURL: this.reportURL,
+                    fileName: this.rptName + ' ' + this.headerID + '.pdf'*/
                 }
             }).then((response) => {
                 this.reportBlobData = response.data

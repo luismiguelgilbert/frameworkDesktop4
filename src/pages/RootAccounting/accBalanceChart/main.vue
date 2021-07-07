@@ -53,6 +53,7 @@
             
             <q-space />
 
+
             <q-btn 
                 flat no-caps no-wrap round @click="expandAll"
                 :color="userColor=='blackDark'?'white':'primary'"
@@ -204,8 +205,6 @@
                 </div>
         </DxPopup>
 
-        
-       
     </q-layout>
     <div v-if="dataLoading" style="height: calc(100vh - 80px)"  >
         <q-inner-loading :showing="dataLoading">
@@ -226,6 +225,7 @@
 <script>
 import Vue from 'vue';
 import { date } from 'quasar';
+
 
 import { DxTreeList, DxTreeColumn, DxTreeHeaderFilter, DxTreeSelection, DxTreeLookup } from 'devextreme-vue/tree-list';
 import { DxDataGrid, DxColumn, DxScrolling, DxLookup, DxExport, DxSorting, DxPaging, DxPager, DxSelection, DxSummary, DxTotalItem, DxValueFormat, DxStateStoring, DxHeaderFilter, DxRemoteOperations } from 'devextreme-vue/data-grid';
@@ -282,6 +282,15 @@ export default ({
                 monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
                 firstDayOfWeek: 1
             },
+
+            //remover
+            temporal: false,
+            isURLready: false,
+            rptType: 'ssrs',//'ssrs' ó 'PBIRS'
+            rptLinkCompany: false,
+            rptLink:'ssrs_pruebas',
+            reportURL: '',
+            //fin_remover
 
             
             exportKardexButton: {
@@ -466,7 +475,7 @@ export default ({
                     //e.rowElement.style.backgroundColor = 'lightgreen';
                 }
             }
-        }
+        },
     },
     computed: {
         userCode: { get () { return this.$store.state.main.userCode }  },
@@ -518,9 +527,6 @@ export default ({
     watch: {
         userCompany: function(val){
             this.gridData = [];
-            this.warehouseID = null;
-            this.warehouseName = null;
-            this.loadUserWarehouses();
         },
         toolbarSearchString: function(val){
             this.$refs['treelist'].instance.searchByText(this.toolbarSearchString);

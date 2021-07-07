@@ -10,8 +10,8 @@ export default ({
     },
     data () {
         return {
-            rootName: "RootBitacora",
-            rootTitle: "Reportes de Bitácora Digital",
+            rootName: "RootAccounting",
+            rootTitle: "Reportes Contables",
         }
     },
 })

@@ -296,7 +296,8 @@ const routes = [
         ] 
       }
       ,{ path: 'RootAccounting/accBalanceChart', component: () => import('pages/RootAccounting/accBalanceChart/main.vue') }
-      
+      ,{ path: 'RootAccounting/accDashboard', component: () => import('pages/RootAccounting/accDashboard/main.vue') }
+
       //COMPRAS
       ,{ path: 'RootPurchase/mktPR', component: () => import('pages/RootPurchase/mktPR/main.vue')
         ,children: [
@@ -420,6 +421,7 @@ const routes = [
           ,{ path: ':id', component: () => import('pages/RootCases/casInvoices/edit.vue') }
         ] 
       }
+      ,{ path: 'RootCases/casesDashboard', component: () => import('pages/RootCases/casesDashboard/main.vue') }
 
       //RRHH
       ,{ path: 'RootHHRR/Employees', component: () => import('pages/RootHHRR/Employees/main.vue')

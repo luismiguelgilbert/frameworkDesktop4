@@ -217,7 +217,12 @@ export default ({
                 //generate serverSide url for server generation in server disk
                 let mailReportURL = ''
                 if(this.rptType=='ssrs'){
-                    mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
+                    ////////////////////////////////////////////////
+                    //Nueva Versión PBIRS only
+                    ////////////////////////////////////////////////
+                    //url syntax to get PDF file from report [ssrs_pruebas]     >   'https://localhost/ReportServerBI?/ssrs_pruebas&rs:ClearSession=true&rs:format=PDF'
+                    mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); 
+                    //mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
                     mailReportURL += (this.rptLinkCompany?(this.rptLink+'_'+this.userCompany):(this.rptLink)); //reporte es x compañía, entonces se agrega
                     mailReportURL += '&rs:format=PDF'; //formato PDF
                     mailReportURL += '&sys_user_code=' + this.userCode; //Parámetro Usuario
@@ -226,10 +231,11 @@ export default ({
                     mailReportURL += '&row_id=' + this.router.currentRoute.params.id; //Parámetro RowID
                 }
                 //post Data and receive file
-                this.$axios.post( this.apiURL + 'generatePDFandEML', {
+                //this.$axios.post( this.apiURL + 'generatePDFandEML', {
+                this.$axios.post( this.apiURL + 'pbirsGetEML', {
                         mailReportURL: mailReportURL,
                         uid: uid(),
-                        rptName: this.rptName,
+                        rptName: this.rptName + ' ' + this.router.currentRoute.params.id + '.pdf',
                         senderMail: this.userMail,
                         senderName: this.userName + ' ' + this.userLastName,
                         destinations: this.mailData_destinations.filter(x=>x.isSelected),
@@ -242,6 +248,7 @@ export default ({
                     this.emlFile = response.data
                     this.downloadTempFile(response.data)
                 }).catch((error) => {
+                    this.$q.loading.hide();
                     console.dir(error)
                     let mensaje = ''
                     if(error.message){ mensaje = error.message }
@@ -266,8 +273,8 @@ export default ({
             }
         },
         downloadTempFile(file){
-            console.dir('downloadTempFile')
-            console.dir(file)
+            //console.dir('downloadTempFile')
+            //console.dir(file)
             this.isDownloadingEML = true
             this.$axios({
                 method: 'GET',
@@ -287,6 +294,7 @@ export default ({
                 link.remove()
                 this.isDownloadingEML = false
             }).catch((error) => {
+                this.$q.loading.hide();
                 this.isDownloadingEML = false
                 console.dir(error)
                 let mensaje = ''
@@ -308,7 +316,11 @@ export default ({
                 //generate serverSide url for server generation in server disk
                 let mailReportURL = ''
                 if(this.rptType=='ssrs'){
-                    mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); //ruta
+                    ////////////////////////////////////////////////
+                    //Nueva Versión PBIRS only
+                    ////////////////////////////////////////////////
+                    //url syntax to get PDF file from report [ssrs_pruebas]     >   'https://localhost/ReportServerBI?/ssrs_pruebas&rs:ClearSession=true&rs:format=PDF'
+                    mailReportURL = this.$q.sessionStorage.getItem('ReportServer_Export_Path'); 
                     mailReportURL += (this.rptLinkCompany?(this.rptLink+'_'+this.userCompany):(this.rptLink)); //reporte es x compañía, entonces se agrega
                     mailReportURL += '&rs:format=PDF'; //formato PDF
                     mailReportURL += '&sys_user_code=' + this.userCode; //Parámetro Usuario
@@ -317,10 +329,11 @@ export default ({
                     mailReportURL += '&row_id=' + this.router.currentRoute.params.id; //Parámetro RowID
                 }
                 //post Data and receive file
-                this.$axios.post( this.apiURL + 'generatePDFandSEND', {
+                //this.$axios.post( this.apiURL + 'generatePDFandSEND', {
+                this.$axios.post( this.apiURL + 'pbirsSendMail', {
                         mailReportURL: mailReportURL,
                         uid: uid(),
-                        rptName: this.rptName,
+                        rptName: this.rptName + ' ' + this.router.currentRoute.params.id + '.pdf',
                         senderMail: this.userMail,
                         senderName: this.userName + ' ' + this.userLastName,
                         destinations: this.mailData_destinations.filter(x=>x.isSelected),
@@ -335,6 +348,7 @@ export default ({
                         ,timeout: 1500, progress: true
                     })
                 }).catch((error) => {
+                    this.$q.loading.hide();
                     console.dir(error)
                     let mensaje = ''
                     if(error.message){ mensaje = error.message }
@@ -347,6 +361,7 @@ export default ({
                         ,actions: [ { icon: 'fas fa-times', color: 'white' } ]
                     })
                     this.isBusy = false;
+                    this.$q.loading.hide();
                 })
 
             }catch(ex){
