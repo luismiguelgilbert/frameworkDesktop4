@@ -524,7 +524,11 @@ const routes = [
            { path: '/', component: () => import('pages/RootBitacora/Bitadashboard/mainView.vue') }
         ]*/
       }
+
+      //DESPACHO (Holcim)
+      ,{ path: 'RootDispatch/sapTest', component: () => import('pages/RootDispatch/sapTest/sapTest.vue') }
       
+
     ]
   },
 
