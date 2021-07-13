@@ -60,7 +60,7 @@ export default({
     methods:{
         loadData(){
             this.$q.loading.show()
-            /*let parametroXML = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:com:lh:logistics:la:pegasus:guardia"><soapenv:Header/><soapenv:Body>'
+            let parametroXML = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:com:lh:logistics:la:pegasus:guardia"><soapenv:Header/><soapenv:Body>'
             parametroXML = parametroXML + '<urn:PlantTimesV03Request>'
             parametroXML = parametroXML + '<PAIS>' + this.pais + '</PAIS>'
             parametroXML = parametroXML + '<CENTRO>' + this.centro + '</CENTRO>'
@@ -75,8 +75,7 @@ export default({
             parametroXML = parametroXML + '<VBELN>' + this.vbeln + '</VBELN>'
             parametroXML = parametroXML + '<T_DADOS_ENTREGA><VBELN>' + this.dadosentrega_vbeln + '</VBELN><REF_EXT>' + this.dadosentrega_ref_ext + '</REF_EXT></T_DADOS_ENTREGA>'
             parametroXML = parametroXML + '</urn:PlantTimesV03Request></soapenv:Body></soapenv:Envelope>'
-            */
-           let parametroXML = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:com:lh:logistics:la:pegasus:planta"> <soapenv:Header/> <soapenv:Body> <urn:PlantTimesV03Request> <PAIS>EC</PAIS> <CENTRO>ACB0</CENTRO> <FECHA>2021-06-18</FECHA> <HORA>09:35:12</HORA> <IDANTENA>ACVIGIN</IDANTENA> <IDTAG>EGSI2736</IDTAG> <PESO></PESO> <PRECINTOS></PRECINTOS> <PESO_MANUAL></PESO_MANUAL> <PESO_TANDEM> <CAPAC></CAPAC> </PESO_TANDEM> <TKNUM>63401533</TKNUM> <PESO_TARA_1_PARC></PESO_TARA_1_PARC> <PESO_BRUTO_1_PARC></PESO_BRUTO_1_PARC> <PESO_TARA_2_PARC></PESO_TARA_2_PARC> <PESO_BRUTO_2_PARC></PESO_BRUTO_2_PARC> <VBELN>330101406</VBELN> <PRECINTOS_2></PRECINTOS_2> <PONTO_CARGA></PONTO_CARGA> <CONTINGENCIA></CONTINGENCIA> <T_DADOS_ENTREGA> <VBELN>330102016</VBELN> <REF_EXT>X1234</REF_EXT> </T_DADOS_ENTREGA> </urn:PlantTimesV03Request> </soapenv:Body> </soapenv:Envelope>'
+           //let parametroXML = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:com:lh:logistics:la:pegasus:planta"> <soapenv:Header/> <soapenv:Body> <urn:PlantTimesV03Request> <PAIS>EC</PAIS> <CENTRO>ACB0</CENTRO> <FECHA>2021-06-18</FECHA> <HORA>09:35:12</HORA> <IDANTENA>ACVIGIN</IDANTENA> <IDTAG>EGSI2736</IDTAG> <PESO></PESO> <PRECINTOS></PRECINTOS> <PESO_MANUAL></PESO_MANUAL> <PESO_TANDEM> <CAPAC></CAPAC> </PESO_TANDEM> <TKNUM>63401533</TKNUM> <PESO_TARA_1_PARC></PESO_TARA_1_PARC> <PESO_BRUTO_1_PARC></PESO_BRUTO_1_PARC> <PESO_TARA_2_PARC></PESO_TARA_2_PARC> <PESO_BRUTO_2_PARC></PESO_BRUTO_2_PARC> <VBELN>330101406</VBELN> <PRECINTOS_2></PRECINTOS_2> <PONTO_CARGA></PONTO_CARGA> <CONTINGENCIA></CONTINGENCIA> <T_DADOS_ENTREGA> <VBELN>330102016</VBELN> <REF_EXT>X1234</REF_EXT> </T_DADOS_ENTREGA> </urn:PlantTimesV03Request> </soapenv:Body> </soapenv:Envelope>'
 
             //POST data to server
                 this.$axios.post( this.apiURL + 'sde_' + 'PlantTimesV03_Out_Sync', {
