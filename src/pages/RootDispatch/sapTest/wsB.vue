@@ -60,7 +60,7 @@ export default({
     methods:{
         loadData(){
             this.$q.loading.show()
-            let parametroXML = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:com:lh:logistics:la:pegasus:guardia"><soapenv:Header/><soapenv:Body>'
+            let parametroXML = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:com:lh:logistics:la:pegasus:planta"><soapenv:Header/><soapenv:Body>'
             parametroXML = parametroXML + '<urn:PlantTimesV03Request>'
             parametroXML = parametroXML + '<PAIS>' + this.pais + '</PAIS>'
             parametroXML = parametroXML + '<CENTRO>' + this.centro + '</CENTRO>'
