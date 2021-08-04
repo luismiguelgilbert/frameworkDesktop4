@@ -174,7 +174,6 @@
                             <DxDataGrid
                                 ref="mainviewtableDxDataGrid"
                                 height="calc(100vh - 190px)"
-                                width="100%"
                                 column-resizing-mode="widget"
                                 :data-source="(currentData.eventTypeID==3||currentData.eventTypeID==4)?lookup_users:lookup_users.filter(x=>x.tipo==1)"
                                 :allow-column-resizing="true" 

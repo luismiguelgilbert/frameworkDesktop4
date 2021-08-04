@@ -1,35 +1,34 @@
 <template>
 <div>
-    <q-card class="q-ma-sm rounder-corners shadow-8"  style="min-height: 200px; height: calc(100vh - 68px); overflow-y: hidden;" >
+    <q-card class="q-ma-sm rounder-corners shadow-8 "  style="min-height: 200px; height: calc(100vh - 68px); overflow-y: hidden;" >
         <div v-if="dataLoaded">
             <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
                 <q-toolbar-title class="text-weight-bolder">{{rootTitle}}</q-toolbar-title>
             </q-toolbar>
             <q-separator />
-            <q-list class="rounded-borders q-ma-lg" separator bordered style=" height: calc(100vh - 168px); overflow-y: scroll;">
-                <div class="q-pa-md text-primary text-subtitle2">
+            <q-list  :class="'rounded-borders q-ma-lg ' + (userColor=='default'?' bg-white ':'  bg-dark ')" separator  style=" height: calc(100vh - 168px); overflow-y: auto;"> <!--bordered-->
+                <!--<div class="q-pa-md text-primary text-subtitle2">
                     <q-icon name="fas fa-th-list" color="primary" size="1.5rem" class="q-mr-sm" />
                     Lista de todos los reportes disponibles
                 </div>
                 <q-separator />
-                <q-item class="q-pl-xl" clickable v-for="report in all_reports" :key="report.sys_report_id" @click.prevent="openReport(report)"  v-ripple:primary>
-                    <q-item-section side >
-                        <q-btn :icon="report.icon" color="primary" />
-                    </q-item-section>
-                    <q-item-section>
-                        <q-item-label>{{report.name_es}}</q-item-label>
-                        <q-item-label caption>{{report.comment_es}}</q-item-label>
-                    </q-item-section>
-                    <!--<q-item-section side>
-                        Favorito
-                        <q-toggle tag="label" :value="report.autoOpen" color="yellow" @input="changeFavorite(report)" /> 
-                    </q-item-section>-->
-                    <q-item-section side>
-                        Automático
-                        <q-toggle tag="label" :value="report.autoOpen" color="green" title="Este reporte se abre de forma automática al abrir este módulo" @input="changeAutoOpen(report)" /> <!--v-model="value"-->
-                    </q-item-section>
-                </q-item>
-                <q-separator />
+                -->
+                <q-card v-for="report in all_reports" :key="report.sys_report_id"  class="q-ma-xl">
+                    <q-item clickable    v-ripple:primary @click.prevent="openReport(report)"  v-ripple :active="true" active-class="text-primary">
+                        <q-item-section side >
+                            <q-btn :icon="report.icon" color="primary" />
+                        </q-item-section>
+                        <q-item-section>
+                            <q-item-label>{{report.name_es}}</q-item-label>
+                            <q-item-label caption>{{report.comment_es}}</q-item-label>
+                        </q-item-section>
+                        <q-item-section side>
+                            Abrir de forma automática
+                            <q-toggle tag="label" :value="report.autoOpen" color="green" title="Este reporte se abre de forma automática al abrir este módulo" @input="changeAutoOpen(report)" /> <!--v-model="value"-->
+                        </q-item-section>
+                    </q-item>
+                    <!--<q-separator />-->
+                </q-card>
            
             </q-list>
         </div>

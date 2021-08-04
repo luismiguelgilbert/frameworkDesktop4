@@ -9,7 +9,6 @@
     <DxDataGrid
       ref="mainviewtableDxDataGrid"
       height="calc(100vh - 170px)"
-      width="100%"
       column-resizing-mode="widget"
       :data-source="payterms"
       :allow-column-resizing="true" 

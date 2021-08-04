@@ -1,18 +1,17 @@
 <template>
     <div v-if="tabRecord" style="margin: -16px;">
         <q-toolbar class="no-padding">
-            <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='form' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addForm" />
-            <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='list' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addList" />
-            <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='listRepeated' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Nuevo" color="primary" icon="fas fa-plus" @click="addList" />
-            <q-btn v-if="tabRecord.tabConfig.insertAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Editar Todos" color="primary" icon="fas fa-edit" :disable="!selectedRowKeys.length>0" @click="updateBatch" />
-            <q-btn v-if="tabRecord.tabConfig.deleteAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
+            <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='form' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch :label="$q.screen.gt.sm?'Nuevo':''" title="Nuevo" no-caps color="primary" icon="fas fa-plus" @click="addForm" />
+            <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='list' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch :label="$q.screen.gt.sm?'Nuevo':''" title="Nuevo" no-caps color="primary" icon="fas fa-plus" @click="addList" />
+            <q-btn v-if="tabRecord.tabConfig.insertAllowed && tabRecord.tabConfig.insertType=='listRepeated' && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch :label="$q.screen.gt.sm?'Nuevo':''" title="Nuevo" no-caps color="primary" icon="fas fa-plus" @click="addList" />
+            <q-btn v-if="tabRecord.tabConfig.insertAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch :label="$q.screen.gt.sm?'Editar Todos':''" title="Editar Todos" no-caps color="primary" icon="fas fa-edit" :disable="!selectedRowKeys.length>0" @click="updateBatch" />
+            <q-btn v-if="tabRecord.tabConfig.deleteAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch :label="$q.screen.gt.sm?'Eliminar':''" title="Eliminar" no-caps color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
         </q-toolbar>
         <q-separator />
         
         <DxDataGrid
             ref="mainviewtableDxDataGrid"
             height="calc(100vh - 170px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="gridData"
             :allow-column-resizing="true" 
@@ -24,8 +23,8 @@
             :selected-row-keys="selectedRowKeys" @selection-changed="onSelectionChanged"
             @row-updating="onRowUpdating"
             >
-            <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
-            <DxPaging :enabled="true" :page-size="userRowsPerPage" />
+            <DxScrolling mode="virtual"   :useNative="true" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen rowRenderingMode="virtual"-->
+            <!--<DxPaging :enabled="true" :page-size="userRowsPerPage" />-->
             <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
             <DxPager :visible="true" :show-page-size-selector="false" :allowed-page-sizes="allowedPageSizes" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="false" :showPageSizeSelector="false" />
             <DxStateStoring :enabled="true" type="localStorage" :storage-key="(moduleName + '_' + tabRecord.tabConfig.dataName)" :savingTimeout="500" />
@@ -114,7 +113,6 @@
                     <DxDataGrid
                         ref="dxGridSearchList"
                         height="calc(75vh - 110px)"
-                        width="100%"
                         :data-source="listData"
                         :show-borders="true"
                         :key-expr="tabRecord.tabConfig.listKeyColumn"
@@ -137,6 +135,7 @@
                         <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
                         <!--<DxSearchPanel :visible="true" :width="240" placeholder="Buscar..." /> -->
                     </DxDataGrid>
+        
 
                     <q-separator />
                     
@@ -451,6 +450,14 @@ export default ({
             })
             this.gridData = newGridData;
             this.isListDialog = false
+        },
+        tabShown(){
+            //esto realmente lo usa editForm.vue para que me sirva de apoyo para ejecutar alguna acción al mostrar nuevamente este tab (porque los tabs son keepalive entonces el evento MOUNTED no se vuelve a ejecutar)
+            setTimeout(()=>{
+                try{
+                    this.$refs['mainviewtableDxDataGrid'].instance.focus();//resuelve el problema de renderización del grid cuando se usa useNative="true"
+                }catch(ex){ console.dir(ex) }
+            }, 800); //run this after half second
         },
 
     },

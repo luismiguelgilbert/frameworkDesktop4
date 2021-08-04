@@ -3,7 +3,6 @@
     <DxDataGrid
         ref="dxgrid"
         height="calc(100vh - 119px)"
-        width="100%"
         column-resizing-mode="widget"
         :data-source="lookup_mmktPRD"
         :allow-column-resizing="true" 

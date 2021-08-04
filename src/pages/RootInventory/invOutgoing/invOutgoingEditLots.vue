@@ -100,7 +100,6 @@
             <DxDataGrid
                 ref="dxGridSearchList"
                 height="calc(75vh - 115px)"
-                width="100%"
                 column-resizing-mode="widget"
                 :data-source="computedLookupLots"
                 :allow-column-resizing="true" 

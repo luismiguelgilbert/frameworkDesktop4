@@ -88,7 +88,6 @@
   <DxDataGrid
     ref="dxgrid"
     height="calc(100vh - 170px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="internalLines"
     :allow-column-resizing="true" 

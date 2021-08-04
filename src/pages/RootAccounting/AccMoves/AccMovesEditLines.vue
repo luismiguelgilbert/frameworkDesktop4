@@ -17,7 +17,6 @@
     ref="dxgrid"
     key="maindatagrid"
     height="calc(100vh - 208px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="internalLines"
     :allow-column-resizing="true" 

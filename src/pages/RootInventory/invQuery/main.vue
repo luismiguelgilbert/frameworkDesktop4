@@ -106,7 +106,6 @@
                 <div style="margin: -15px;">
                     <DxDataGrid
                         ref="kardexGrid"
-                        width="100%"
                         height="calc(75vh - 55px)"
                         column-resizing-mode="widget"
                         :data-source="selectedItemKardex"
@@ -162,7 +161,6 @@
                 <div style="margin: -15px;">
                     <DxDataGrid
                         ref="kardexGrid"
-                        width="100%"
                         height="calc(75vh - 55px)"
                         column-resizing-mode="widget"
                         :data-source="selectedItemLots"

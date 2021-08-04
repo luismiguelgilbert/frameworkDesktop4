@@ -80,6 +80,8 @@ import mfgLocations from './mfgLocations' //mfgLocations
 import mfgTypes from './mfgTypes' //mfgTypes
 import mfgBOM from './mfgBOM' //mfgBOM
 
+import RewardTransactions from './RewardTransactions' //RewardTransactions
+
 Vue.use(Vuex)
 
 export default function (/* { ssrContext } */) {
@@ -174,6 +176,8 @@ export default function (/* { ssrContext } */) {
       ,mfgLocations
       ,mfgTypes
       ,mfgBOM
+      //Rewards
+      ,RewardTransactions
     },
     // enable strict mode (adds overhead!)
     // for dev mode only

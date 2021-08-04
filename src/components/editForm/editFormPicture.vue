@@ -1,8 +1,8 @@
 <template>
 <div style="margin: -16px;">
   <q-toolbar class="no-padding">
-    <q-btn label="Subir Imagen"  icon="fas fa-upload" color="primary" flat stretch @click="isDialogVisible=true"/>
-    <q-btn flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="upload_file_name?false:true" @click="clearFile"  />
+    <q-btn :label="$q.screen.gt.sm?'Subir Imagen':''" title="Subir Imagen" no-caps no-wrap  icon="fas fa-upload" color="primary" flat stretch @click="isDialogVisible=true"/>
+    <q-btn :label="$q.screen.gt.sm?'Eliminar':''" title="Eliminar" no-caps no-wrap flat stretch color="red" icon="fas fa-trash-alt" :disable="upload_file_name?false:true" @click="clearFile"  />
   </q-toolbar>
   <q-separator />
   

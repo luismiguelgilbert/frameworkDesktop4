@@ -109,7 +109,6 @@
     ref="dxgrid"
     key="maindatagrid"
     height="calc(100vh - 298px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="internalLines"
     :allow-column-resizing="true" 
@@ -127,7 +126,9 @@
       <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
       <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
       <DxEditing :allow-updating="true" mode="cell" :useIcons="false" :select-text-on-edit-start="true" start-edit-action="click" /> <!-- me gustan: cell, row, popup, batch mejora rendimiento pero NO calcula en línea y muestra un toolbar extra -->
-      <DxScrolling mode="standard" :useNative="true" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      <!--<DxScrolling mode="standard" :useNative="true" showScrollbar="always" />--> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      <!--<DxScrolling mode="virtual"  rowRenderingMode="virtual" columnRenderingMode="virtual" :useNative="false" showScrollbar="always" />-->
+      <DxScrolling mode="virtual"  rowRenderingMode="virtual" columnRenderingMode="virtual" :useNative="true" showScrollbar="always" />
       <DxPaging :enabled="false" /> 
 
 
@@ -179,8 +180,8 @@
             :set-cell-value="setAccountValue"> <!--calculate-display-value hace que DxLookup NO se use mientras no se esté editando la celda, y eso mejora rendimiento según devexpress-->
             <DxLookup value-expr="value" display-expr="label" :data-source="lookup_accounts_paginated" />
         </DxColumn>
-        <DxColumn caption="# OC" data-field="mktPOHeader" name="mktPOHeader" data-type="number" :allow-editing="true" alignment="right" :minWidth="75" :width="75" :format="userMoneyFormat" :editor-options="{ min: 0 }" /> <!--:cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'"-->
-        <DxColumn caption="# Línea OC" data-field="mktPOlineID" name="mktPOlineID" data-type="number" :allow-editing="true" alignment="right" :minWidth="75" :width="75" :format="userMoneyFormat" :editor-options="{ min: 0 }" /> <!--:cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'"-->
+        <DxColumn caption="# OC" data-field="mktPOHeader" name="mktPOHeader" data-type="number" :allow-editing="false" alignment="right" :minWidth="75" :width="75" :format="userMoneyFormat" :editor-options="{ min: 0 }" /> <!--:cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'"-->
+        <DxColumn caption="# Línea OC" data-field="mktPOlineID" name="mktPOlineID" data-type="number" :allow-editing="false" alignment="right" :minWidth="75" :width="75" :format="userMoneyFormat" :editor-options="{ min: 0 }" /> <!--:cssClass="userColor=='default'?'bg-grey-2':'bg-grey-9'"-->
       />
   </DxDataGrid>
 
@@ -210,7 +211,6 @@
           <DxDataGrid
             ref="dxGridSearchList"
             height="calc(75vh - 115px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="lookup_items.filter(x=>x.systemType==1)"
             :allow-column-resizing="true" 
@@ -222,7 +222,7 @@
             :selected-row-keys="listSelectedRowKeys" 
             ><!--@selection-changed="onListSelectionChanged"-->
             <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" :deferred="true" />
-            <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" />
+            <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="true" showScrollbar="always" />
             <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
             
             <DxColumn caption="value" data-field="value" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
@@ -264,7 +264,6 @@
           <DxDataGrid
             ref="dxGridRequisiciones"
             height="calc(75vh - 115px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="requisiciones"
             :allow-column-resizing="true" 

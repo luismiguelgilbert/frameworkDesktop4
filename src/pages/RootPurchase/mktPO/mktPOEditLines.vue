@@ -1,10 +1,10 @@
 <template>
 <div style="margin: -16px;">
   <q-toolbar class="no-padding">
-    <q-btn label="Nuevo" icon="fas fa-plus" color="primary" flat stretch @click="isListDialog=true" :disable="!allow_row_insert" />
-    <q-btn label="Requisiciones" icon="fas fa-file-alt" color="primary" flat stretch @click="isRequisicionesDialog=true" :disable="!allow_row_insert" />
-    <q-btn label="Eliminar" icon="fas fa-trash-alt" color="red" flat stretch :disable="maingridSelectedRowKeys.length<=0" @click="removeRows" />
-    <q-btn color="primary" flat stretch label="Opciones" icon-right="fas fa-chevron-down" no-caps>
+    <q-btn :label="$q.screen.gt.sm?'Nuevo':''" title="Nuevo" no-caps no-wrap icon="fas fa-plus" color="primary" flat stretch @click="isListDialog=true" :disable="!allow_row_insert" />
+    <q-btn :label="$q.screen.gt.sm?'Requisiciones':''" title="Requisiciones" no-caps no-wrap icon="fas fa-file-alt" color="primary" flat stretch @click="isRequisicionesDialog=true" :disable="!allow_row_insert" />
+    <q-btn :label="$q.screen.gt.sm?'Eliminar':''" title="Eliminar" no-caps no-wrap icon="fas fa-trash-alt" color="red" flat stretch :disable="maingridSelectedRowKeys.length<=0" @click="removeRows" />
+    <q-btn color="primary" flat stretch :label="$q.screen.gt.sm?'Opciones':''" no-caps no-wrap title="Opciones" icon-right="fas fa-chevron-down" no-caps>
       <q-menu>
         <q-list style="min-width: 100px">
           <q-item clickable>
@@ -113,11 +113,17 @@
 
   <q-separator />
 
+<!--
+    height="calc(100vh - 170px)"
+    width="500px"
+    -->
+
   <DxDataGrid
     ref="dxgrid"
     height="calc(100vh - 170px)"
-    width="100%"
     column-resizing-mode="widget"
+    :cacheEnabled="false"
+    :autoNavigateToFocusedRow="false"
     :data-source="internalLines"
     :allow-column-resizing="true" 
     :allow-column-reordering="true"
@@ -136,7 +142,7 @@
       <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
       <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
       <DxEditing :allow-updating="true" mode="cell" :select-text-on-edit-start="true"  /> <!-- me gustan: cell, row, popup -->
-      <DxScrolling mode="virtual" :useNative="false" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      <DxScrolling mode="virtual" :useNative="true" showScrollbar="auto" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
       
       <DxColumn caption="lineID" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
       <DxColumn caption="Item" data-field="invID" name="invID" data-type="number" :allow-editing="false" alignment="left" :minWidth="200">
@@ -217,10 +223,11 @@
 
         <div style="margin: -15px;">
 
+          <!--el width automático hace que el grid tenga ese misalignment width="100%"-->
           <DxDataGrid
             ref="dxGridSearchList"
             height="calc(75vh - 115px)"
-            width="100%"
+            
             column-resizing-mode="widget"
             :data-source="lookup_items"
             :allow-column-resizing="true" 
@@ -232,7 +239,7 @@
             :selected-row-keys="listSelectedRowKeys" @selection-changed="onListSelectionChanged"
             >
             <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
-            <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" />
+            <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="true" showScrollbar="always" />
             <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
             
             <DxColumn caption="value" data-field="value" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
@@ -274,7 +281,6 @@
           <DxDataGrid
             ref="dxGridRequisiciones"
             height="calc(75vh - 115px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="requisiciones"
             :allow-column-resizing="true" 
@@ -431,6 +437,7 @@ export default ({
     }
   },
   created(){
+    console.dir('created')
     this.internalLines = JSON.parse(JSON.stringify(this.lines));
   },
   mounted(){
@@ -621,6 +628,16 @@ export default ({
     updateVuex(){
       //esto realmente lo usa editForm.vue para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
       this.lines = JSON.parse(JSON.stringify(this.internalLines))
+      
+    },
+    tabShown(){
+      //esto realmente lo usa editForm.vue para que me sirva de apoyo para ejecutar alguna acción al mostrar nuevamente este tab (porque los tabs son keepalive entonces el evento MOUNTED no se vuelve a ejecutar)
+      setTimeout(()=>{
+        try{
+          //this.$refs['dxgrid'].instance.option('width','500px' );//resuelve el problema de renderización del grid cuando se usa useNative="true"
+          this.$refs['dxgrid'].instance.focus();//resuelve el problema de renderización del grid cuando se usa useNative="true"
+        }catch(ex){ console.dir(ex) }
+      }, 800); //run this after half second
     },
     listGridShown(){
       this.$refs['dxGridSearchList'].instance.searchByText('');

@@ -1,15 +1,14 @@
 <template>
 <div style="margin: -16px;">
   <q-toolbar class="no-padding">
-    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" label="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" flat stretch />
-    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" label="Cargar Foto" @click="addPicture" icon="fas fa-camera" color="primary" flat stretch />
-    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch label="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
+    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" :label="$q.screen.gt.sm?'Subir Archivo':''" title="Subir Archivo" @click="addRow" icon="fas fa-upload" color="primary" flat stretch no-caps no-wrap />
+    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" :label="$q.screen.gt.sm?'Cargar Foto':''" title="Cargar Foto" @click="addPicture" icon="fas fa-camera" color="primary" flat stretch no-caps no-wrap />
+    <q-btn v-if="( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch :label="$q.screen.gt.sm?'Eliminar':''" title="Eliminar" color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" no-caps no-wrap />
   </q-toolbar>
   <q-separator />
   <DxDataGrid
     ref="mainviewtableDxDataGrid"
     height="calc(100vh - 170px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="files"
     :allow-column-resizing="true" 
@@ -20,7 +19,7 @@
     key-expr="attach_id"
     :selected-row-keys="selectedRowKeys" @selection-changed="onSelectionChanged"
     >
-    <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
+    <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="true" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
     <DxPaging :enabled="true" :page-size="userRowsPerPage" />
     <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
     <DxPager :visible="true" :show-page-size-selector="false" :allowed-page-sizes="allowedPageSizes" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="false" :showPageSizeSelector="false" />
@@ -35,8 +34,8 @@
       <DxColumn  caption="Responsable" data-field="sys_user_fullname" data-type="string" width="200"  /> 
       <DxColumn  caption="Descargar" cell-template="cellTemplate" width="90" alignment="center" />
       
-      <template #cellTemplate="{ data }">
-        <q-btn icon="fas fa-download" flat color="primary" @click="downloadFile(data.data)" stretch />
+      <template #cellTemplate="{ data }" cssStyle="padding: -5px;">
+        <q-btn icon="fas fa-download" flat round color="primary" @click="downloadFile(data.data)" title="Descargar archivo"  />
       </template>
 
       <template #imagePreviewTemplate="{ data }">

@@ -19,7 +19,7 @@
             >
             <!-- :focused-row-enabled="true" Fue quitado, porque al activarse, obliga al grid a iniciarse por keycolumn (y NO siempre ese es el initial sort)-->
             <!-- :keyExpr="columnKeyName" The "keyExpr" option is not applied when dataSource is not an array  -->
-            <DxScrolling mode="virtual"  rowRenderingMode="virtual" columnRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
+            <DxScrolling mode="virtual"  rowRenderingMode="virtual" columnRenderingMode="virtual" :useNative="true" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
             <DxPager :visible="true" :show-page-size-selector="false" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="true" :showPageSizeSelector="false" />
             <DxPaging :enabled="true" :page-size="userRowsPerPage" /> <!-- controla que se pagine basado en registros x página del usuario-->
             <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
@@ -39,6 +39,7 @@
                 :allowFiltering="columna.is_filterable"
                 :allowSorting="columna.sortable"
                 :cell-template="columna.dxCellComponent"
+                :header-cell-template="columna.is_searchable?'headerTemplate':undefined"
                 >
                     <DxLookup v-if="columna.lookup_table&&columna.dxCellComponent!='image'"
                         value-expr="value" display-expr="label"
@@ -46,6 +47,10 @@
                     />
             </DxColumn>
             <!--sort-order="desc"-->
+            <template #headerTemplate="{ data }">
+                <!--<div>{{console.dir(data)}}<sup>2</sup></div>-->
+                <div><q-icon name="fas fa-search" color="primary" size="0.5rem" class="q-mr-sm" />{{data.column.caption}}</div>
+            </template>
             
             <template #mainViewCellTemplateKey="{ data }">
                 <mainViewCellTemplateKey :data="data" :moduleName="moduleName" @onOpenEditForm="openEditForm" @onKeyClicked="keyClicked" />
@@ -189,6 +194,7 @@ export default ({
         },
     },
     computed: {
+        console: () => console,
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
         //userColor: { get () { return this.$store.state.main.userColor }  },
         userCode: { get () { return this.$store.state.main.userCode }  },

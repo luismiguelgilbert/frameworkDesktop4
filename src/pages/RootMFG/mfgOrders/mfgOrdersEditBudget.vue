@@ -58,7 +58,6 @@
   <DxDataGrid
     ref="dxgrid"
     height="calc(100vh - 170px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="internalLines"
     :allow-column-resizing="true" 
@@ -115,7 +114,6 @@
           <DxDataGrid
             ref="dxGridSearchList"
             height="calc(75vh - 115px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="lookup_items.filter(x=>x.systemType!=3)"
             :allow-column-resizing="true" 
@@ -177,7 +175,6 @@
                 <DxDataGrid
                     ref="dxGridSearchBOMList"
                     height="calc(75vh - 115px)"
-                    width="100%"
                     column-resizing-mode="widget"
                     :data-source="lookup_mfgBudgetLines.filter(x=>x.value==this.BoMDialogSelection)"
                     :allow-column-resizing="true" 

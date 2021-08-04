@@ -10,7 +10,6 @@
             ref="dxgrid"
             key="maindatagrid"
             height="calc(100vh - 170px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="pagos"
             :allow-column-resizing="true" 

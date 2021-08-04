@@ -29,7 +29,6 @@
   <DxDataGrid
     ref="dxgrid"
     height="calc(100vh - 212px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="accountLines"
     :allow-column-resizing="true" 

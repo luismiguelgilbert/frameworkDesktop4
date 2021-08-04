@@ -378,6 +378,7 @@ export default ({
                 this.$refs['tab_'+oldVal][0].updateVuex();
             }catch(ex){}
         },
+       
         changeLeftMenu(){ 
             if(this.editFormLeftCollapsed){
                 this.splitterModel = 230//210
@@ -470,6 +471,14 @@ export default ({
                 this.loadData();
             }
         },
+        tab: function (val) {
+            if(val){
+                try{
+                    this.$refs['tab_'+val][0].tabShown();
+                }catch(ex){}
+            }
+        },
+        
     }
 })
 </script>

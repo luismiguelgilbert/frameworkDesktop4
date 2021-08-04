@@ -149,7 +149,6 @@
                 <div style="margin: -15px;">
                     <DxDataGrid
                         ref="detailsGrid"
-                        width="100%"
                         height="calc(75vh - 55px)"
                         column-resizing-mode="widget"
                         :data-source="currentAccountData"

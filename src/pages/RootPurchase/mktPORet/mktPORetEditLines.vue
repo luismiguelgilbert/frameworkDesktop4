@@ -115,7 +115,6 @@
   <DxDataGrid
     ref="dxgrid"
     height="calc(100vh - 170px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="internalLines"
     :allow-column-resizing="true" 
@@ -135,7 +134,7 @@
       <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
       <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
       <DxEditing :allow-updating="true" mode="cell" :select-text-on-edit-start="true"  /> <!-- me gustan: cell, row, popup -->
-      <DxScrolling mode="virtual" :useNative="false" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
+      <DxScrolling mode="virtual" :useNative="true" showScrollbar="always" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->
       
       <DxColumn caption="lineID" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :visible="false" />
       <DxColumn caption="Item" data-field="invID" name="invID" data-type="number" :allow-editing="false" alignment="left" :minWidth="200">
@@ -190,7 +189,6 @@
           <DxDataGrid
             ref="dxGridRequisiciones"
             height="calc(75vh - 115px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="requisiciones"
             :allow-column-resizing="true" 
@@ -691,7 +689,15 @@ export default ({
       }
       
 
-    }
+    },
+    tabShown(){
+      //esto realmente lo usa editForm.vue para que me sirva de apoyo para ejecutar alguna acción al mostrar nuevamente este tab (porque los tabs son keepalive entonces el evento MOUNTED no se vuelve a ejecutar)
+      setTimeout(()=>{
+        try{
+          this.$refs['dxgrid'].instance.focus();//resuelve el problema de renderización del grid cuando se usa useNative="true"
+        }catch(ex){ console.dir(ex) }
+      }, 800); //run this after half second
+    },
   },
   computed:{
       console: () => console,

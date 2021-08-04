@@ -13,7 +13,7 @@
     <q-separator />
     
 
-    <div style="height: calc(100vh - 123px); overflow-y: scroll;" :class="userColor=='default'?'bg-grey-2':'bg-grey-9'">
+    <div style="height: calc(100vh - 123px); overflow-y: scroll;" :class="userColor=='default'?'bg-grey-1':'bg-grey-9'">
       <q-page-sticky position="bottom-right" :offset="[18, 18]">
         <q-btn color="transparent" flat @click="openBittWebsite">
           <img height="25" src="/logoTransparent.png">
@@ -41,20 +41,25 @@
         <q-btn  
           v-for="modulo in menuData.filter(x=>x.parent==currentHomeTab)" :key="modulo.sys_link_id" 
           style="width: 100%; max-width: 300px;"
-          no-caps padding="none" flat :color="userColor=='default'?'primary':undefined"
-          :to="'/'+modulo.link_name"
-          >
-          <q-card flat bordered class="full-width full-height">
-            <q-card-section class="text-center">
-              <q-icon :name="modulo.icon" :color="userColor=='default'?'primary':undefined" size="4rem" />
-            </q-card-section>
-            <q-card-section>
-              <div :class="userColor=='default'?'text-primary text-h6':'text-white text-h6'">{{modulo.label}}</div>
-            </q-card-section>
-            <q-card-section class="q-pt-none">
-              {{modulo.comment}}
-            </q-card-section>
-          </q-card>
+          no-caps padding="none" 
+          :to="'/'+modulo.link_name"  
+          push 
+          :color="userColor=='default'?'white':undefined" 
+          :text-color="userColor=='default'?'primary':undefined"
+          > <!-- flat -->
+          <div >
+            <!--<q-card flat bordered class="full-width full-height all-pointer-events		" >-->
+              <q-card-section class="text-center">
+                <q-icon :name="modulo.icon" :color="userColor=='default'?'primary':undefined" size="4rem" />
+              </q-card-section>
+              <q-card-section>
+                <div :class="userColor=='default'?'text-primary text-h6':'text-white text-h6'">{{modulo.label}}</div>
+              </q-card-section>
+              <q-card-section class="q-pt-none">
+                {{modulo.comment}}
+              </q-card-section>
+          <!--</q-card>-->
+          </div>
         </q-btn>
       </div>
     </div>

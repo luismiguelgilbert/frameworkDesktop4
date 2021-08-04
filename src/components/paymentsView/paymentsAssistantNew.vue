@@ -70,7 +70,6 @@
             ref="dxgrid"
             key="maindatagrid"
             height="200px"
-            width="100%"
             :data-source="lines"
             column-resizing-mode="widget" :allow-column-resizing="true"  :allow-column-reordering="true"
             :show-borders="true"

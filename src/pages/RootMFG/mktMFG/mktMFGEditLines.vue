@@ -109,7 +109,6 @@
   <DxDataGrid
     ref="dxgrid"
     height="calc(100vh - 170px)"
-    width="100%"
     column-resizing-mode="widget"
     :data-source="internalLines"
     :allow-column-resizing="true" 
@@ -182,7 +181,6 @@
           <DxDataGrid
             ref="dxGridSearchList"
             height="calc(75vh - 115px)"
-            width="100%"
             column-resizing-mode="widget"
             :data-source="lookup_items.filter(x=>x.systemType!=3)"
             :allow-column-resizing="true" 
@@ -244,7 +242,6 @@
                 <DxDataGrid
                     ref="dxGridSearchBOMList"
                     height="calc(75vh - 115px)"
-                    width="100%"
                     column-resizing-mode="widget"
                     :data-source="lookup_bom_details.filter(x=>x.budgetID==this.BoMDialogSelection)"
                     :allow-column-resizing="true" 
@@ -307,7 +304,6 @@
             <DxDataGrid
                 ref="dxGridSearchBudgetList"
                 height="calc(75vh - 115px)"
-                width="100%"
                 column-resizing-mode="widget"
                 :data-source="lookup_mfgOrders_details.filter(x=>x.orderID==this.budgetDialogSelection)"
                 :allow-column-resizing="true" 
