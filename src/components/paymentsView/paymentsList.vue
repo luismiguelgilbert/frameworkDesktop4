@@ -210,7 +210,12 @@ export default ({
                 console.dir(window)
                 console.dir(window.location)
                 console.dir(window.location.origin)
-                openURL(window.location.origin + '/#/' + cellInfo.data.pathToDocument + '/' + cellInfo.data.accHeaderID)
+                console.dir(window.location.pathname)
+                if(window.location.pathname == '/'){
+                    openURL(window.location.origin + '/#/' + cellInfo.data.pathToDocument + '/' + cellInfo.data.accHeaderID)
+                }else{
+                    openURL(window.location.origin + window.location.pathname + '#/' + cellInfo.data.pathToDocument + '/' + cellInfo.data.accHeaderID)
+                }
             }catch(ex){
                 this.$q.notify({ html: true, multiLine: false, color: 'red'
                     ,message: "No se puede realizar acción: " + ex.message
