@@ -207,6 +207,9 @@ export default ({
             //Open new tab (mainlayout will read localstorage, copy to sessionStorage, and clear localstorage)
             try{
                 //openURL(window.location.origin + '/#/RootBank/accVoucherOut/2')
+                console.dir(window)
+                console.dir(window.location)
+                console.dir(window.location.origin)
                 openURL(window.location.origin + '/#/' + cellInfo.data.pathToDocument + '/' + cellInfo.data.accHeaderID)
             }catch(ex){
                 this.$q.notify({ html: true, multiLine: false, color: 'red'
