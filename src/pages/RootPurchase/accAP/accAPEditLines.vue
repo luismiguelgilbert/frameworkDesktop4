@@ -654,6 +654,7 @@ export default ({
           ,lineID: 0
       })
       //#endregion HABER*/
+      this.currentAmount = totalCreditAmount//esto actualiza el valor total de la factura que se usa para que en el tab de pagos, confirme si existe algún cambio del valor
       this.accountLines = internalAccountLines
     },
     setAccountValue(newData, value, currentRowData){
@@ -686,7 +687,7 @@ export default ({
     },
     updateVuex(){
       this.updateAccountMove();//actualiza asiento contable antes de guardar y/o al cambiar de tab
-      //esto realmente lo usa editForm.vue para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
+      //esto realmente lo usa editForm.vue (método [updateVuexData]) para actualizar los datos reales de este componente, antes de enviarlos al servidor en el POST
       this.lines = JSON.parse(JSON.stringify(this.internalLines))
     },
     listGridShown(){
@@ -1237,9 +1238,13 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerID', value: val}) }
         },
-      numeroDoc: {
+       numeroDoc: {
             get () { return this.$store.state[this.moduleName].editData.basic.numeroDoc },
             //set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'numeroDoc', value: val}) }
+        },
+      currentAmount: {
+            get () { return this.$store.state[this.moduleName].editData.basic.currentAmount },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'currentAmount', value: val}) }
         },
       partner_account_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id },

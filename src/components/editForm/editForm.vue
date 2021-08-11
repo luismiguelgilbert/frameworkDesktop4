@@ -47,6 +47,7 @@
                     <template v-slot:before >
                         <div style="height:  calc(100vh - 119px); overflow-y: auto; overflow-x: hidden;">
                             <q-list >
+
                                 <q-item 
                                     v-for="tabRecord in editConfig.moduleTabs" :key="tabRecord.tabName"
                                     clickable v-ripple 
@@ -62,18 +63,31 @@
                                         <q-item-section v-if="!editFormLeftCollapsed&&$q.screen.gt.xs">
                                             <q-item-label :class="'text-subtitle2 '+(tab==tabRecord.tabName?'text-white':'text-grey-7')">{{tabRecord.textLabel}}</q-item-label>
                                         </q-item-section>
+
+                                        <!--<q-item-section side v-if="tab==tabRecord.tabName">
+                                            <q-icon name="fas fa-chevron-right" color="white" />
+                                        </q-item-section>-->
+                                </q-item>
+
+                                <q-item clickable @click="changeLeftMenu">
+                                    <q-item-section side>
+                                        <q-icon :name="editFormLeftCollapsed?'fas fa-angle-double-right':'fas fa-angle-double-left'" color="primary" />
+                                    </q-item-section>
+                                    <!--<q-item-section >
+                                        <q-item-label>{{editFormLeftCollapsed}}</q-item-label>
+                                    </q-item-section>-->
                                 </q-item>
                             </q-list>
+                           
                         </div>
                     </template>
 
-                    <template v-slot:separator>
+                    <!--<template v-slot:separator>
                         <q-btn size="xs"  color="grey-6" round :title="editFormLeftCollapsed?'Expandir':'Contraer'" 
                             :icon="editFormLeftCollapsed?'fas fa-angle-right':'fas fa-angle-left'" 
                             @click="changeLeftMenu"
                             />
-                            
-                    </template>
+                    </template>-->
 
                     <template v-slot:after>
                         <q-tab-panels
@@ -113,6 +127,15 @@
                         </q-tab-panels>
                     </template>
                 </q-splitter>
+
+                <!--<q-page-sticky position="top-left" :offset="[7, 10]" >
+                    <q-fab fab color="primary" flat size="sm" square
+                        icon="fas fa-angle-double-left"
+                        active-icon="fas fa-angle-double-right"
+                        
+                        @click="changeLeftMenu"  />
+                </q-page-sticky>-->
+
             </div>
             <div v-else style="height: calc(100vh - 80px)"  >
                 <q-inner-loading :showing="!dataLoaded">

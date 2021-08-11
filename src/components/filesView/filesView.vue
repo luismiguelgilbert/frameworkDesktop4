@@ -26,30 +26,37 @@
     <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
     <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
     
-      <DxColumn  caption="" data-field="uploadFileName" data-type="string" alignment="center" :allowFiltering="false" :allowSorting="false" cell-template="imagePreviewTemplate" width="80" />
+      <DxColumn  caption="" data-field="uploadFileName" data-type="string" cell-template="imagePreviewTemplate" alignment="center" :allowFiltering="false" :allowSorting="false"  width="80" css-class="no-padding"/>
+      <template #imagePreviewTemplate="{ data }">
+        <!--<q-avatar square  :title="!(data.row.data.file_type.includes('image'))?data.row.data.file_type:undefined">-->
+          <div>
+          <q-icon v-if="!(data.row.data.file_type.includes('image'))" 
+            :name="getIcon(data.row.data.file_type)"
+            :color="userColor=='blackDark'?'white':'grey-7'" />
+          <q-img v-if="data.row.data.file_type.includes('image')" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]" style="max-height: 50px;">
+              <q-tooltip anchor="top left" self="top left" :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" >
+                  <q-img  style="width: 250px" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]" />
+              </q-tooltip>
+          </q-img>
+          </div>
+        <!--</q-avatar>-->
+      </template>
+
       <DxColumn  caption="Nombre" data-field="original_file_name" data-type="string" width="350" />
       <DxColumn  caption="Tipo" data-field="file_type" data-type="string" :visible="false" /> 
       <DxColumn  caption="Tamaño" data-field="file_size" data-type="number" alignment="left" :calculate-cell-value="calculateSizeCellValue" :calculateSortValue="calculateSizeSortValue" />
       <DxColumn  caption="Fecha Modif." data-field="audit_last_date" data-type="date" format="dd-MMM-yyyy" /> 
       <DxColumn  caption="Responsable" data-field="sys_user_fullname" data-type="string" width="200"  /> 
-      <DxColumn  caption="Descargar" cell-template="cellTemplate" width="90" alignment="center" />
       
-      <template #cellTemplate="{ data }" cssStyle="padding: -5px;">
-        <q-btn icon="fas fa-download" flat round color="primary" @click="downloadFile(data.data)" title="Descargar archivo"  />
+      <DxColumn  caption="Descargar" cell-template="cellTemplate" width="90" alignment="center" css-class="no-padding no-margin" :minWidth="70" :width="70" />
+      <template #cellTemplate="{ data }" >
+        <q-btn icon="fas fa-download" flat stretch color="primary" @click="downloadFile(data.data)" title="Descargar archivo" 
+          style="display: block; overflow: auto; height: 50px; width: 100%;"
+          />
+          
       </template>
 
-      <template #imagePreviewTemplate="{ data }">
-        <q-avatar size="40px" :title="!(data.row.data.file_type.includes('image'))?data.row.data.file_type:undefined">
-          <q-icon v-if="!(data.row.data.file_type.includes('image'))" 
-            :name="getIcon(data.row.data.file_type)"
-            :color="userColor=='blackDark'?'white':'grey-7'" />
-          <q-img v-if="data.row.data.file_type.includes('image')" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]">
-              <q-tooltip anchor="top left" self="top left" :content-class="userColor=='blackDark'?'bg-grey-9':'bg-grey-4'" >
-                  <q-img  style="width: 250px" :src="$q.sessionStorage.getItem('serverFilesPath') + data.data[data.column.dataField]" />
-              </q-tooltip>
-          </q-img>
-        </q-avatar>
-      </template>
+      
   </DxDataGrid>
 
   <q-dialog v-model="dialogVisible" square>

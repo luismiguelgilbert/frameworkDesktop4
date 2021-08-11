@@ -139,7 +139,7 @@
     >
       <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" />
       <DxColumnChooser  mode="select" />
-      <DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />
+      <!--<DxColumnFixing :enabled="true" :texts="{fix:'Fijar', unfix: 'Soltar'}" />-->
       <DxSorting mode="single" ascendingText="Ordenar ascendente" clearText="Limpar orden" descendingText="Ordenar descendente" />
       <DxEditing :allow-updating="true" mode="cell" :select-text-on-edit-start="true"  /> <!-- me gustan: cell, row, popup -->
       <DxScrolling mode="virtual" :useNative="true" showScrollbar="auto" /> <!--rowRenderingMode="virtual" deshabilitado, porque aquí cuando se edita causa un flickering que no me gusta || :useNative="true" hace que la última columna tenga un margen-->

@@ -69,12 +69,13 @@
         <DxDataGrid
             ref="dxgrid"
             key="maindatagrid"
-            height="200px"
+            height="150px"
+            width="100%"
             :data-source="lines"
             column-resizing-mode="widget" :allow-column-resizing="true"  :allow-column-reordering="true"
             :show-borders="true"
-            :show-column-lines="false"
-            :show-row-lines="true"
+            :show-column-lines="userTableLinesDXcols"
+            :show-row-lines="userTableLinesDXrows"
             key-expr="lineID"
             >
             <DxEditing :allow-updating="true" :allow-deleting="true" :confirmDelete="false" mode="cell" :useIcons="true" :select-text-on-edit-start="true" start-edit-action="click" /> <!-- me gustan: cell, row, popup, batch mejora rendimiento pero NO calcula en línea y muestra un toolbar extra -->
@@ -82,7 +83,7 @@
             <!--<DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" :deferred="true" />-->
             <DxPaging :enabled="false" /> 
                 <DxColumn caption="# Posición" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :visible="false" />
-                <DxColumn caption="Cuenta Contable" data-field="account_id" name="account_id" data-type="number" :allow-editing="true" alignment="left" :width="350" calculate-display-value="account_name"
+                <DxColumn caption="Cuenta Contable" data-field="account_id" name="account_id" data-type="number" :allow-editing="true" alignment="left" :minWidth="350" :width="350" calculate-display-value="account_name"
                     :editor-options="{ opened: true }"
                     :set-cell-value="setAccountValue"> <!--calculate-display-value hace que DxLookup NO se use mientras no se esté editando la celda, y eso mejora rendimiento según devexpress-->
                     <DxLookup value-expr="value" display-expr="label" :data-source="lookup_accounts_paginated" />
@@ -216,6 +217,13 @@ export default ({
                         ,printName: this.printName
                         ,comments: this.comments
                         ,lines: this.lines
+                        /*
+                        ,lineID: max_id
+                        ,line_account_id: this.currentPartnerData.accPaymentOutcomeAdvance
+                        ,line_account_name: this.currentPartnerAccountData.code_es + ' - ' + this.currentPartnerAccountData.label
+                        ,line_comments: this.comments
+                        ,amount: 0
+                        */
                     }
                     this.$emit('onClose', newPaymentData)
                 }else{
@@ -251,6 +259,19 @@ export default ({
         if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
         return resultado }
       },
+      userTableLines: { get () { return this.$store.state.main.userTableLines } },
+      userTableLinesDXcols: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+                return result
+            } 
+        },
+        userTableLinesDXrows: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+                return result
+            } 
+        },
     }
 
 })
