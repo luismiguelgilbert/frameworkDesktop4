@@ -1,5 +1,5 @@
 <template>
-    <!--<q-card style="margin: 10px;" class="shadow-8 rounded-borders">-->
+    <q-card style="margin: 10px;" class="shadow-8 rounded-borders">
         <DxDataGrid
             v-if="columnsUser&&columnsUser.length>0"
             ref="mainviewtableDxDataGrid"
@@ -75,7 +75,7 @@
             </template>
 
         </DxDataGrid>
-    <!--</q-card>-->
+    </q-card>
 </template>
 
 <script>
