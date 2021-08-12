@@ -4,7 +4,7 @@
             v-if="columnsUser&&columnsUser.length>0"
             ref="mainviewtableDxDataGrid"
             column-resizing-mode="widget"
-            height="calc(100vh - 125px)"
+            height="calc(100vh - 120px)"
             width="calc(100vw - 20px)"
             :data-source="dataSource"
             :allow-column-resizing="true" 
