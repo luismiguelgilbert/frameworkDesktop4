@@ -1,4 +1,5 @@
 <template>
+<div>
     <div v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false">
         <!--<q-layout v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;">-->
         <div>
@@ -12,12 +13,14 @@
             <mainViewTable :moduleName="moduleName" @onOpenEditForm="openEditForm" @onApplyFilter="applyFilter" @onCompanyChange="companyChange" ref="mainViewTable" />
         </div>
         <!--</q-layout>-->
-        <div v-if="!(isModuleDataLoaded&&isLookupDataLoaded)" style="height: calc(100vh - 80px)"  >
-            <q-inner-loading :showing="!(isModuleDataLoaded&&isLookupDataLoaded)">
-                <q-spinner-facebook size="10%" color="primary" />
-            </q-inner-loading>
-        </div>
+      
     </div>
+    <div v-if="!(isModuleDataLoaded&&isLookupDataLoaded)" style="height: calc(100vh - 80px)"  >
+        <q-inner-loading :showing="!(isModuleDataLoaded&&isLookupDataLoaded)">
+            <q-spinner-facebook size="10%" color="primary" />
+        </q-inner-loading>
+    </div>
+</div>
 </template>
 <script>
 import mainViewToolbar from '../mainView/mainViewToolbar'

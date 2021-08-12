@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
+import { Loading, QSpinnerGears} from 'quasar'
 import routes from './routes'
 
 Vue.use(VueRouter)
@@ -27,14 +27,20 @@ export default function (/* { store, ssrContext } */) {
   })
 
   //TODO: Pendiente agregar metdata to router, y con eso ver si ruta requiere sesión activa 
-  /*Router.beforeEach((to, from, next) => {
+  Router.beforeEach((to, from, next) => {
+    Loading.show({ spinner: QSpinnerGears,})
+    /*
     console.dir('Router change')
     console.dir('From')
     console.dir(from)
     console.dir('To')
     console.dir(to)
+    */
     next()
-  })*/
+  })
+  Router.afterEach((to,from)=>{
+    Loading.hide()
+  })
 
   return Router
 }
