@@ -214,9 +214,9 @@
 </q-layout>
 </template>
 <style>
-.dx-overlay-wrapper {
+/*.dx-overlay-wrapper {
     z-index: 999999 !important;
-}
+}*/
 </style>
 <script>
 import Vue from 'vue'
