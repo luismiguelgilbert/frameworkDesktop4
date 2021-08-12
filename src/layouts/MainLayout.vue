@@ -167,7 +167,7 @@
                       </q-item>
                       <q-item dense>
                         <q-item-section side><q-icon name="fas fa-code-branch"/></q-item-section>
-                        <q-item-section><q-item-label class="text-primary text-subtitle2">Version: {{version}}</q-item-label></q-item-section>
+                        <q-item-section><q-item-label class="text-primary text-subtitle2">Version: {{version}} ({{$q.version}})</q-item-label></q-item-section>
                       </q-item>
                       
                       <!--<q-item-label caption>{{userProfileName}}</q-item-label>-->
@@ -381,7 +381,7 @@ import { locale, loadMessages } from 'devextreme/localization';
 export default {
   name: 'MainLayout',
   /*components: {
-    DevExpress
+    core
   },*/
   
   data () {

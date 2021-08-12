@@ -3,9 +3,9 @@
         <DxDataGrid
             v-if="columnsUser&&columnsUser.length>0"
             ref="mainviewtableDxDataGrid"
+            column-resizing-mode="widget"
             height="calc(100vh - 120px)"
             width="calc(100vw - 20px)"
-            column-resizing-mode="widget"
             :data-source="dataSource"
             :allow-column-resizing="true" 
             :allow-column-reordering="true"
@@ -19,7 +19,10 @@
             >
             <!-- :focused-row-enabled="true" Fue quitado, porque al activarse, obliga al grid a iniciarse por keycolumn (y NO siempre ese es el initial sort)-->
             <!-- :keyExpr="columnKeyName" The "keyExpr" option is not applied when dataSource is not an array  -->
-            <DxScrolling mode="virtual"  rowRenderingMode="virtual" columnRenderingMode="virtual" :useNative="true" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
+            
+            
+            <!-- -->
+            <DxScrolling mode="virtual" rowRenderingMode="virtual"  columnRenderingMode="virtual" showScrollbar="always"  :useNative="true"   /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
             <DxPager :visible="true" :show-page-size-selector="false" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="true" :showPageSizeSelector="false" />
             <DxPaging :enabled="true" :page-size="userRowsPerPage" /> <!-- controla que se pagine basado en registros x página del usuario-->
             <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
@@ -118,7 +121,7 @@ export default ({
     },
     data() {
         return {
-           totalRunsCount: 0
+           totalRunsCount: 0, calculatedGridHeight: '300px'
         }
     },
     mounted(){
