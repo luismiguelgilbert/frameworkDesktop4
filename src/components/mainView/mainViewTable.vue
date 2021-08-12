@@ -125,7 +125,11 @@ export default ({
         }
     },
     mounted(){
-        this.columnKeyName = this.$store.state[this.moduleName].columnsUser.find(x=>x.is_key).db_column;  
+        try{
+            this.columnKeyName = this.$store.state[this.moduleName].columnsUser.find(x=>x.is_key).db_column;  
+        }catch(ex){
+            console.dir(ex.message)
+        }
     },
     methods: {
         dxSearchValueIterator(resultadoFinal, filtro){

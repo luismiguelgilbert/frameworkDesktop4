@@ -1,6 +1,7 @@
 <template>
-    <div>
-        <q-layout v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;">
+    <div v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false">
+        <!--<q-layout v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;">-->
+        <div>
             <!--Toolbar-->
             <mainViewToolbar :moduleName="moduleName" @clearFilter="clearFilter" @onOpenEditForm="openEditForm" @onApplyFilter="applyFilter" @onExportData="exportData" @onSaveFilter="saveFilter" ref="mainViewToolbar" />
             <!--Columns-->
@@ -9,8 +10,8 @@
             <mainViewFilters :moduleName="moduleName" />
             <!--Tabla-->
             <mainViewTable :moduleName="moduleName" @onOpenEditForm="openEditForm" @onApplyFilter="applyFilter" @onCompanyChange="companyChange" ref="mainViewTable" />
-
-        </q-layout>
+        </div>
+        <!--</q-layout>-->
         <div v-if="!(isModuleDataLoaded&&isLookupDataLoaded)" style="height: calc(100vh - 80px)"  >
             <q-inner-loading :showing="!(isModuleDataLoaded&&isLookupDataLoaded)">
                 <q-spinner-facebook size="10%" color="primary" />
