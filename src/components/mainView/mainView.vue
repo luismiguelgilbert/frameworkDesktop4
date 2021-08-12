@@ -1,6 +1,6 @@
 <template>
     <div>
-        <q-layout v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px);">
+        <q-layout v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;">
             <!--Toolbar-->
             <mainViewToolbar :moduleName="moduleName" @clearFilter="clearFilter" @onOpenEditForm="openEditForm" @onApplyFilter="applyFilter" @onExportData="exportData" @onSaveFilter="saveFilter" ref="mainViewToolbar" />
             <!--Tabla-->
