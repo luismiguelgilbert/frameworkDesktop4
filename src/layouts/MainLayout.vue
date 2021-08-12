@@ -315,6 +315,7 @@
   .dx-dropdownlist-popup-wrapper {
     z-index: 6000 !important;
   }
+  
   /*.dx-overlay-wrapper .dx-dropdowneditor-overlay .dx-popup-wrapper .dx-dropdownlist-popup-wrapper .dx-selectbox-popup-wrapper {
     z-index: 6000 !important;
   }*/
