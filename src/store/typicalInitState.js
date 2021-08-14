@@ -37,6 +37,7 @@ export default function () {
       ,rptLinkCompany: false
       ,rptType: 'ssrs'
       ,isFilterApplied: false
+      ,toolbarExtraButtons: []
 
      
        

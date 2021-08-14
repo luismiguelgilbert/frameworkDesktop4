@@ -4,7 +4,7 @@
         <!--<q-layout v-if="(isModuleDataLoaded&&isLookupDataLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;">-->
         <div>
             <!--Toolbar-->
-            <mainViewToolbar :moduleName="moduleName" @clearFilter="clearFilter" @onOpenEditForm="openEditForm" @onApplyFilter="applyFilter" @onExportData="exportData" @onSaveFilter="saveFilter" ref="mainViewToolbar" />
+            <mainViewToolbar :moduleName="moduleName" @clearFilter="clearFilter" @onOpenEditForm="openEditForm" @onApplyFilter="applyFilter" @onExportData="exportData" @onSaveFilter="saveFilter" ref="mainViewToolbar" @onExtraButtonClick="extraButtonClick" />
             <!--Columns-->
             <mainViewColumns :moduleName="moduleName" @onShow="reorganizeUserColumns" />
             <!--Filters-->
@@ -265,6 +265,9 @@ export default ({
             })
             newColumnsOrder = newColumnsOrder.sort(function(a, b){ return a.sortIndex-b.sortIndex })
             this.columnsUser = newColumnsOrder;
+        },
+        extraButtonClick(metodo){
+            this.$emit('onMethodRun', metodo)
         }
     },
     computed: {

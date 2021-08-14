@@ -4,7 +4,9 @@
             <q-btn
                 v-if="allow_insert"
                 :rounded="$q.screen.gt.xs"
-                no-caps no-wrap  class="q-ml-sm"  :color="userColor!=='blackDark'?'primary':undefined"
+                no-caps no-wrap  class="q-ml-sm"  
+                :color="userColor!=='blackDark'?'primary':undefined"
+                glossy
                 v-shortkey="['alt', 'n']" @shortkey="openEditForm({value: 0, row: null}, true)"
                 @click="openEditForm({value: 0, row: null}, true)"
                 icon="fas fa-plus-circle">
@@ -14,6 +16,27 @@
                 </q-tooltip>
             </q-btn>
             
+         
+
+            <!-- para ver contenido de botones extras -->
+            <!--<div class="text-positive">toolbarExtraButtons={{toolbarExtraButtons}}</div>-->
+
+            <q-btn
+                v-if="(toolbarExtraButtons) && (toolbarExtraButtons.filter(x=>!x.isRight) .length > 0) "
+                v-for="(boton,index) in toolbarExtraButtons" :key="index"
+                :rounded="$q.screen.gt.xs" no-caps no-wrap class="q-ml-sm"
+                :icon="boton.icon"
+                :color="boton.color?boton.color:(userColor!=='blackDark'?'primary':undefined)" glossy
+                @click="ejecutarMetodo(boton.methodName)"
+                >
+                <div class="q-pl-xs gt-sm">{{boton.label}}</div>
+                <q-tooltip content-class="bg-primary text-white" :delay="1200" :offset="[10, 40]">
+                    <div v-html="boton.title" />
+                </q-tooltip>
+            </q-btn>
+
+            
+
             <q-input 
                 v-model="toolbarSearchString" class="q-ml-md"
                 debounce="1000" maxlength="50" style="max-width: 200px;"
@@ -31,58 +54,67 @@
 
             <q-space />
 
-            <q-btn v-if="isFilterApplied" 
-                rounded flat size="sm" @click="clearFilter" icon="fas fa-filter" icon-right="fas fa-times" 
+            <q-btn v-if="isFilterApplied" no-caps no-wrap
+                flat size="sm" @click="clearFilter" icon="fas fa-filter" icon-right="fas fa-times" 
                 :color="userColor=='blackDark'?'white':'primary'">
                 <q-tooltip content-class="bg-primary text-white" :delay="1200" :offset="[10, 40]">
                     <b>Limpiar Filtro</b><br>Quita todos los filtros aplicados en todas las columnas
                 </q-tooltip>
             </q-btn>
+
+            <!--SECCIÓN BOTONES CUANDO PANTALLA ES PEQUEÑA-->
+            <q-btn 
+                v-if="!($q.screen.gt.sm)"  
+                flat color="primary" icon="fas fa-ellipsis-v" class="q-mr-sm"
+                >
+                <q-menu>
+                    <q-list class="text-primary">
+                        <q-item clickable @click="isFilterDialog=true" v-close-popup>
+                            <q-item-section side>
+                                <q-icon name="fas fa-filter" color="primary" />
+                            </q-item-section>
+                            <q-item-section>
+                                <q-item-label>FILTROS</q-item-label>
+                                <q-item-label caption>Filtrar datos en pantalla usando filtros guardados</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                        <q-item v-if="allow_export" clickable @click="exportData(false)" v-close-popup>
+                            <q-item-section side>
+                                <q-icon name="fas fa-file-excel" color="primary" />
+                            </q-item-section>
+                            <q-item-section>
+                                <q-item-label>EXPORTAR</q-item-label>
+                                <q-item-label caption>Exporte rápidamente los datos actuales del grid</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup
+                            @click="isFiltersDrawerVisible = false; isColumnsDrawerVisible = !isColumnsDrawerVisible;">
+                            <q-item-section side>
+                                <q-icon name="fas fa-columns" color="primary" />
+                            </q-item-section>
+                            <q-item-section>
+                                <q-item-label>COLUMNAS</q-item-label>
+                                <q-item-label caption>Agregar o quitar columnas</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                    </q-list>
+                </q-menu>
+            </q-btn>
             
+            <!--SECCIÓN BOTONES CUANDO PANTALLA ES GRANDE-->
             <q-btn 
                 flat no-caps no-wrap round
                 icon="fas fa-filter"
                 :color="userColor=='blackDark'?'white':'primary'"
+                v-if="$q.screen.gt.sm"
+                @click="isFilterDialog=true"
                 >
-                <q-menu>
-                    <!--<q-card>-->
-                        <q-card-section class="no-padding" style="width: 500px; min-width: 80%; max-height: 250px; min-height: 250px; overflow-y: scroll;">
-                            <q-list dense >
-                                <q-item
-                                    clickable v-close-popup  class="q-pr-xs"
-                                    v-for="(filtro, index) in filters" :key="index"
-                                    :title="filtro.is_default?'Este es su filtro predeterminado':''"
-                                    @click="applyFilter(filtro)"
-                                    >
-                                    <q-item-section side>
-                                        <q-icon :name="filtro.is_system?'fas fa-database':'fas fa-user'" size="0.8rem" />
-                                    </q-item-section>
-                                    <q-item-section >
-                                        <q-item-label>
-                                            {{filtro.label}}
-                                        </q-item-label>
-                                    </q-item-section>
-                                    <q-item-section side>
-                                        <q-icon v-if="filtro.is_default" name="fas fa-check-circle" color="grey-6" size="1rem" class="q-mr-md" />
-                                    </q-item-section>
-                                    
-                                </q-item>
-                                
-                            </q-list>
-                        </q-card-section>
-                        <q-separator />
-                        <q-btn-group flat class="no-margin no-padding full-width">
-                            <q-btn v-close-popup color="primary" icon="fas fa-user-cog" flat no-caps no-wrap :label="$q.screen.gt.sm?'Mis Filtros':undefined" @click="isFiltersDrawerVisible=true" class="full-width" />
-                            <q-btn v-close-popup color="primary" icon="fas fa-save" flat no-caps no-wrap :label="$q.screen.gt.sm?'Guardar Filtro':undefined" @click="saveFilter" class="full-width" />
-                        </q-btn-group>
-                    <!--</q-card>-->
-                </q-menu>
-                <q-tooltip content-class="bg-primary text-white" :delay="1200" :offset="[10, 40]">
-                    <b>Filtros</b><br>Aplicar filtros a los datos<br>Administrador de filtros
+                 <q-tooltip content-class="bg-primary text-white" :delay="1200" :offset="[10, 40]">
+                    <b>FILTROS</b><br>Filtrar datos en pantalla usando filtros guardados.<br>Guardar, Eliminar filtros guardados.
                 </q-tooltip>
             </q-btn>
-
-            <q-btn v-if="allow_export"
+            <q-btn 
+                v-if="$q.screen.gt.sm&&allow_export"
                 flat no-caps no-wrap round
                 :color="userColor=='blackDark'?'white':'primary'"
                 @click="exportData(false)"
@@ -91,36 +123,8 @@
                     <b>EXPORTAR</b><br>Exporte rápidamente los datos actuales del grid
                 </q-tooltip>
             </q-btn>
-
-            <!--
             <q-btn
-                v-if="allow_report"
-                flat no-caps no-wrap round 
-                :color="userColor=='blackDark'?'white':'primary'"
-                icon="fas fa-chart-bar"
-                >
-                <q-menu >
-                    <q-list >
-                        <q-item
-                            v-for="(report,index) in moduleReports" :key="index"
-                            clickable @click="openReportForm(report)"
-                            :class="userColor=='blackDark'?'text-white':'text-primary'"
-                            >
-                            <q-item-section avatar><q-icon :name="report.icon" /></q-item-section>
-                            <q-item-section>
-                                <q-item-label>{{report.name_es}}</q-item-label>
-                                <q-item-label caption>{{report.comment_es}}</q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-                </q-menu>
-                <q-tooltip content-class="bg-primary text-white" :delay="1200" :offset="[10, 40]">
-                    <b>Reportes</b><br>Ver reportes y dashboards
-                </q-tooltip>
-            </q-btn>
-            -->
-
-            <q-btn
+                v-if="$q.screen.gt.sm"
                 flat no-caps no-wrap round class="q-mr-md"
                 :color="userColor=='blackDark'?'white':'primary'"
                 @click="isFiltersDrawerVisible = false; isColumnsDrawerVisible = !isColumnsDrawerVisible;"
@@ -132,25 +136,42 @@
 
         </q-toolbar>
 
-        <q-dialog v-if="isreportDialog" v-model="isreportDialog" square>
-            <q-card style="min-width: calc(95vw)">
+        <q-dialog v-if="isFilterDialog" v-model="isFilterDialog" square>
+            <q-card>
                 <q-bar class="bg-primary text-white q-pl-none q-pr-none">
-                    <q-btn :label="'Reporte: ' + reportData.name_es" no-caps flat stretch color="white" />
+                    <q-btn label="Filtros" no-caps flat stretch color="white" />
                     <q-space />
-                    <q-btn flat stretch color="white" icon="fas fa-times" @click="isreportDialog=false" />
+                    <q-btn flat stretch color="white" icon="fas fa-times" @click="isFilterDialog=false" />
                 </q-bar>
-                <q-card-section>
-                    <reportComponent
-                        :moduleName="moduleName"
-                        :rptName="reportData.name_es"
-                        :rptLink="reportData.link_name"
-                        :rptLinkCompany="false"
-                        :rptType="reportData.report_type"
-                        v-if="isreportDialog"
-                        @closeComponent="isreportDialog=false"
-                        />
-                </q-card-section>
-                
+                <q-list >
+                    <q-item
+                        clickable v-close-popup  class="q-pr-xs"
+                        v-for="(filtro, index) in filters" :key="index"
+                        :title="filtro.is_default?'Este es su filtro predeterminado':''"
+                        @click="applyFilter(filtro)"
+                        >
+                        <q-item-section side>
+                            <q-icon :name="filtro.is_system?'fas fa-database':'fas fa-user'" size="0.8rem" />
+                        </q-item-section>
+                        <q-item-section >
+                            <q-item-label>
+                                {{filtro.label}}
+                            </q-item-label>
+                        </q-item-section>
+                        <q-item-section side>
+                            <q-icon v-if="filtro.is_default" name="fas fa-check-circle" color="grey-6" size="1rem" class="q-mr-md" />
+                        </q-item-section>
+                        
+                    </q-item>
+                    <q-item v-if="!(filters&&filters.length>0)">
+                        <q-item-label caption>No hay filtros guardados</q-item-label>
+                    </q-item>
+                </q-list>
+                <q-separator />
+                <q-toolbar class="no-padding">
+                    <q-btn v-close-popup color="primary" stretch icon="fas fa-user-cog" flat no-caps no-wrap :label="$q.screen.gt.sm?'Mis Filtros':undefined" @click="isFiltersDrawerVisible=true" class="full-width" />
+                    <q-btn v-close-popup color="primary" stretch icon="fas fa-save" flat no-caps no-wrap :label="$q.screen.gt.sm?'Guardar Filtro':undefined" @click="saveFilter" class="full-width" />
+                </q-toolbar>
             </q-card>
         </q-dialog>
 
@@ -171,7 +192,7 @@ export default ({
     },
     data () {
         return {
-            isreportDialog: false, reportData: null
+            isreportDialog: false, reportData: null, isFilterDialog: false,
         }
     },
     methods:{
@@ -187,11 +208,11 @@ export default ({
         clearFilter(){
             this.$emit('clearFilter')
         },
-        openReportForm(report){
+        /*openReportForm(report){
             //this.$emit('onFilterApply', report)
             this.reportData = report;
             this.isreportDialog = true;
-        },
+        },*/
         applyFilter(filtro){
             this.$emit('onApplyFilter', filtro)
         },
@@ -200,9 +221,14 @@ export default ({
         },
         saveFilter(){
             this.$emit('onSaveFilter')
+        },
+        //nuevo desde versión 5.2.3
+        ejecutarMetodo(methodName){
+            this.$emit('onExtraButtonClick', methodName)
         }
     },
     computed: {
+        console: () => console,
         userColor: { get () { return this.$store.state.main.userColor }  },
         moduleReports: { get () { return this.$store.state[this.moduleName].moduleReports }, },
         columnsUser: { get () { return this.$store.state[this.moduleName].columnsUser }, },
@@ -251,6 +277,7 @@ export default ({
             get () { return this.$store.state[this.moduleName].editStatus },
             set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
         },
+        toolbarExtraButtons: { get () { return this.$store.state[this.moduleName].toolbarExtraButtons} }
     },
     
 })

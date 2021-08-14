@@ -1,10 +1,12 @@
 <template>
     <q-dialog v-model="isColumnsDrawerVisible" square @show="reorganizeUserColumns"  >
-        <q-card style="minWidth: 400px;">
+        <q-card style="minWidth: 350px;">
             <q-bar class="bg-primary text-white q-pl-none q-pr-none">
-                <q-btn label="Columnas" no-caps flat stretch color="white" />
+                <!--<q-btn label="Columnas" no-caps flat stretch color="white" />-->
+                <q-toggle v-model="shouldWrapCellText" dense class="q-pl-sm" size="xs" color="positive" left-label label="Ajustar texto" title="Ajustar Alto de Celdas a Texto" />
                 <q-space />
-                <q-space />
+                
+                
                 <q-select title="Estilo de Tabla"
                     v-model="userTableLines" dense borderless emit-value map-options 
                     :dark="userColor=='blackDark'?undefined:true"
@@ -21,6 +23,7 @@
                 <q-btn flat stretch color="white" icon="fas fa-times" @click="isColumnsDrawerVisible=false" />
             </q-bar>
             <q-list dense separator class="scroll" style="height: calc(35vh);">
+                <q-item-label header>Columnas</q-item-label>
                 <q-item v-for="(columna, index) in columnsUser" :key="index">
                     <q-item-section side>
                         <!--:disable="columna.is_required"-->
@@ -33,16 +36,16 @@
                     <q-item-section>
                         <q-item-label>
                             {{columna.label}}
-                            <q-icon v-if="columna.is_searchable" name="fas fa-search" color="primary" title="Opción 'Buscar' sí considera esta columna" />
+                            <!--<q-icon v-if="columna.is_searchable" name="fas fa-search" color="primary" title="Opción 'Buscar' sí considera esta columna" />-->
                         </q-item-label>
                     </q-item-section>
                 </q-item>
             </q-list>
             <q-separator />
-            <q-card-actions align="around">
-                <q-btn color="primary" icon="fas fa-save" flat title="Guardar mi configuración" @click="saveConfig" />
-                <q-btn color="red" icon="fas fa-trash-alt" flat title="Regresar a configuración original del sistema" @click="resetConfig" />
-            </q-card-actions>
+            <q-toolbar class="no-padding">
+                <q-btn color="primary" icon="fas fa-save" flat stretch title="Guardar mi configuración de columnas" :label="$q.screen.gt.sm?'Guardar':undefined" no-caps @click="saveConfig" class="full-width" />
+                <q-btn color="red" icon="fas fa-trash-alt" flat stretch title="Regresar a configuración original de columnas" :label="$q.screen.gt.sm?'Reiniciar':undefined" no-caps @click="resetConfig" class="full-width" />
+            </q-toolbar>
         </q-card>
     </q-dialog>
     
@@ -82,7 +85,9 @@ export default ({
                     {
                         link_name: this.moduleName,
                         sys_user_code: this.userCode,
-                        columns: JSON.stringify(gridColumnsFormated)
+                        columns: JSON.stringify(gridColumnsFormated),
+                        shouldWrapCellText: this.shouldWrapCellText,
+                        tableLines: this.userTableLines,
                     } , {headers: { 'Authorization': "Bearer " + this.$q.sessionStorage.getItem('jwtToken') }}
                 ).then((response) => {
                     this.$q.notify({color: 'positive', message: 'Sus datos han sido guardados' , timeout: 500, icon: "fas fa-save" });
@@ -128,6 +133,10 @@ export default ({
         userTableLines: { 
             get () { return this.$store.state.main.userTableLines }, 
             set (val) { this.$store.commit('main/updateState', {key: 'userTableLines', value: val}) } 
+        },
+        shouldWrapCellText: { 
+            get () { return this.$store.state.main.shouldWrapCellText }, 
+            set (val) { this.$store.commit('main/updateState', {key: 'shouldWrapCellText', value: val}) } 
         },
     }
 

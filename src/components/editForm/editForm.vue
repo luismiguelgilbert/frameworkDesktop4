@@ -18,7 +18,7 @@
                         v-if="(editStatus.editMode=='create'&&allow_insert)||(editStatus.editMode=='edit'&&allow_edit)"
                         :label="$q.screen.gt.sm?'Guardar':''" 
                         icon="fas fa-save" 
-                        color="primary"  stretch >
+                        color="primary" stretch >
                         <q-list>
                             <q-item v-if="!(editConfig.disableSaveButton==true)" clickable v-ripple v-close-popup :class="userColor=='blackDark'?'text-white':'text-primary'" @click="saveData(false)">
                                 <q-item-section avatar>
