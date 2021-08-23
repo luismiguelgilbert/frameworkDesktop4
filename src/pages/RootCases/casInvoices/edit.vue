@@ -30,6 +30,7 @@ export default ({
                         keyColumn: 'rowID',  listKeyColumn: 'rowID',
                         insertAllowed: true, insertType: 'list',  insertList: 'lookup_payterms',
                         deleteAllowed: true,
+                        summarycolumns: [{columnName: 'amount', summaryType: 'sum'}],
                         columns: [
                             //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'rowID', listDataField: 'rowID', dataType: 'string', visible: false },
@@ -37,7 +38,7 @@ export default ({
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código Compromiso', dataField: 'paytermID', listDataField: 'paytermID', dataType: 'number', visible: false },
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Caso', dataField: 'caseName', listDataField: 'caseName', dataType: 'string', visible: true },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Observaciones', listDataField: 'comments', dataType: 'string', visible: true },
-                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Monto', dataField: 'amount', listDataField: 'amount', dataType: 'number', visible: true },
+                            {alignment: 'right', allowEditing: true, isDataRequired: true, caption: 'Monto', dataField: 'amount', listDataField: 'amount', dataType: 'number', visible: true, format: 'userMoneyFormat' },
                         ],
                     }
                 },
@@ -47,11 +48,12 @@ export default ({
                         keyColumn: 'paymentID', 
                         insertAllowed: true, insertType: 'form',  insertList: null,
                         deleteAllowed: true,
+                        summarycolumns: [{columnName: 'amount', summaryType: 'sum'}],
                         columns: [
                             //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'paymentID', dataType: 'number', visible: false },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Fecha', dataField: 'paymentDate', dataType: 'date', visible: true, format: 'dd-MMM-yyyy' },
-                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Monto', dataField: 'amount', dataType: 'number', visible: true },
+                            {alignment: 'right', allowEditing: true, isDataRequired: true, caption: 'Monto', dataField: 'amount', dataType: 'number', visible: true, format: 'userMoneyFormat' },
                             {alignment: 'left', allowEditing: true, isDataRequired: false, caption: 'Comentario', dataField: 'comments', dataType: 'string', visible: true },
                             //{alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Anulado?', dataField: 'voided', dataType: 'boolean', visible: true },
                         ]

@@ -96,11 +96,27 @@ export default ({
         userColor: { get () { return this.$store.state.main.userColor }  },
         userDateFormat: { get () { return this.$store.state.main.userDateFormat=='dddd, dd MMMM yyyy'?'dddd, DD MMMM YYYY':this.$store.state.main.userDateFormat.toUpperCase() }  },
         userTableLines: { get () { return this.$store.state.main.userTableLines } },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         sys_user_color: { get () { return this.$store.state[this.moduleName].editData.basic.sys_user_color }, },
         userMoneyFormat: { get () { return this.$store.state.main.userMoneyFormat }  },
         tableLastLine: {

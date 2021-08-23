@@ -148,7 +148,7 @@ export default ({
             if(e.row.rowType=='data'){
                 e.component.selectRows(e.row.data[this.columnKeyName]);//this way is the correct way, now that I have a key defined in customStore definition (instead of //this.$refs['mainviewtableDxDataGrid'].instance.selectRows(e.row.data);//visually select grid row)
                 //this.shouldScrollToRow = true;
-                if(this.allow_insert){
+                if(this.allow_insert&&!(this.isNewBlocked)){
                     e.items = [
                         //Navega a registro, y registro de copia = 0
                         { text: "Abrir Registro", icon: "far fa-folder-open", onItemClick: ()=> { 
@@ -377,7 +377,8 @@ export default ({
         },
         defaultSortDescending:{
             get () { return this.$store.state[this.moduleName].defaultSortDescending },
-        }
+        },
+        isNewBlocked: { get () { return this.$store.state[this.moduleName].isNewBlocked} }
     },
     watch: {
         toolbarSearchString: function(val){

@@ -35,10 +35,12 @@ export default ({
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'sys_location_pos_id', dataType: 'number', visible: false },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: '# Serie de Punto Emisión', dataField: 'pos_code', dataType: 'string', visible: true, defaultValue: '001' },
                             {alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Emisión Electrónica?', dataField: 'esElectronica', dataType: 'boolean', visible: true, defaultValue: true },
+                            {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Ambiente', dataField: 'ambiente', dataType: 'number', visible: true, defaultValue: 2, lookupOptions: [{value: 1, label: 'Pruebas'}, {value: 2, label: 'Producción'} ] },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: '# Primera Factura', dataField: 'firstNumberAR', dataType: 'number', visible: true, defaultValue: 1 },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: '# Primera Guía', dataField: 'firstNumberDelivery', dataType: 'number', visible: true, defaultValue: 1 },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: '# Primera NC', dataField: 'firstNumberNC', dataType: 'number', visible: true, defaultValue: 1 },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: '# Primera Retención', dataField: 'firstNumberRetencion', dataType: 'number', visible: true, defaultValue: 1 },
+                            {alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Activa?', dataField: 'estado', dataType: 'boolean', visible: true, defaultValue: true },
                         ],
                     }
                 },

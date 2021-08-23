@@ -52,6 +52,18 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-percent" /></template>
     </q-input>
+
+    <q-input
+        ref="printName" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
+        placeholder="Ingrese el porcentaje a imprimir en documentos (*)" label="Porcentaje a Imprimir (*)" filled
+        v-model="printName"
+        :rules="[
+                val => !!val || '* Requerido',
+                val => val.length > 0 || 'Campo debe tener al menos 1 carater',
+        ]"
+        >
+        <template v-slot:prepend><q-icon name="fas fa-print" /></template>
+    </q-input>
     
     
 
@@ -158,11 +170,27 @@ export default ({
     },
     computed:{
         userColor: { get () { return this.$store.state.main.userColor }  },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         name_es: {
             get () { return this.$store.state[this.moduleName].editData.basic.name_es },
@@ -187,6 +215,10 @@ export default ({
         factor_base: {
             get () { return this.$store.state[this.moduleName].editData.basic.factor_base },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'factor_base', value: val}) }
+        },
+        printName: {
+            get () { return this.$store.state[this.moduleName].editData.basic.printName },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printName', value: val}) }
         },
         atsTipoImpuesto: {
             get () { return this.$store.state[this.moduleName].editData.basic.atsTipoImpuesto },

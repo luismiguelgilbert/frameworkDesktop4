@@ -44,8 +44,8 @@
                 :allow-column-resizing="true" 
                 :allow-column-reordering="true"
                 :show-borders="true"
-                :show-column-lines="false"
-                :show-row-lines="true"
+                :show-column-lines="userTableLinesDXcols"
+                :show-row-lines="userTableLinesDXrows"
                 key-expr="rowID"
                 @selection-changed="onSelectionChanged"
                 >
@@ -59,7 +59,7 @@
                     <DxColumn caption="headerID" data-field="headerID" name="headerID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
                     <DxColumn caption="lineID" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
                     <DxColumn caption="account_id" data-field="account_id" name="account_id" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
-                    <DxColumn  caption="Documento" data-field="documentName" name="documentName" cell-template="cellTemplateDocumentName" :allow-editing="false" alignment="left" :minWidth="50" :width="330" :visible="true"  />
+                    <DxColumn  caption="Documento" data-field="documentName" name="documentName" cell-template="cellTemplateDocumentName" :allow-editing="false" alignment="left" :minWidth="50" :width="300" :visible="true"  />
                     <template #cellTemplateDocumentName="{ data }" >
                         <div
                             v-if="parametersData&&parametersData.editData&&parametersData.editData.basic&&parametersData.editData.basic.numeroDoc&&parametersData.editData.basic.numeroDoc==data.data.numeroDoc"
@@ -87,11 +87,11 @@
                             </q-item>
                         </div>
                     </template>
-                    <DxColumn caption="headerDate" data-field="headerDate" name="headerDate" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
+                    <DxColumn caption="headerDate" data-field="headerDate" name="headerDate" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
                     <DxColumn caption="Fecha Doc." data-field="headerDateName" name="headerDateName" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="true" />
                     <DxColumn caption="dueDate" data-field="dueDate" name="dueDate" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
-                    <DxColumn caption="amountTotal" data-field="amountTotal" name="amountTotal" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
-                    <DxColumn caption="amountPaid" data-field="amountPaid" name="amountPaid" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="false" />
+                    <DxColumn caption="Total" data-field="amountTotal" name="amountTotal" data-type="number" :allow-editing="false" alignment="right" :minWidth="50" :width="120" :visible="true" :format="userMoneyFormat" />
+                    <DxColumn caption="Pagado" data-field="amountPaid" name="amountPaid" data-type="number" :allow-editing="false" alignment="right" :minWidth="50" :width="120" :visible="true" :format="userMoneyFormat" />
                     <DxColumn caption="Saldo" data-field="amountUnpaid" name="amountUnpaid" cell-template="cellTemplateAmountUnpaid" data-type="number" :allow-editing="false" alignment="right" :minWidth="50" :width="90" :visible="true" :format="userMoneyFormat" />
                     <template #cellTemplateAmountUnpaid="{ data }" >
                         <div v-if="data.data.esPositivo">{{data.data.amountUnpaid.toFixed(2)}}</div>
@@ -136,8 +136,8 @@
                 :allow-column-resizing="true" 
                 :allow-column-reordering="true"
                 :show-borders="true"
-                :show-column-lines="true"
-                :show-row-lines="true"
+                :show-column-lines="userTableLinesDXcols"
+                :show-row-lines="userTableLinesDXrows"
                 key-expr="lineID"
                 >
                     <DxScrolling mode="virtual"  rowRenderingMode="virtual" columnRenderingMode="virtual" :useNative="true" showScrollbar="always" />
@@ -290,11 +290,11 @@ import { date } from 'quasar';
 import selectSearchable from '../selectSearchable/selectSearchable.vue'
 import paymentsListAssistantNew from './paymentsListAssistantNew.vue'
 
-import { DxDataGrid, DxColumn, DxMasterDetail, DxSelection, DxScrolling, DxSummary, DxTotalItem, DxValueFormat, DxFormat, DxPaging, DxEditing } from 'devextreme-vue/data-grid';
+import { DxDataGrid, DxColumn, DxSelection, DxScrolling, DxSummary, DxTotalItem, DxValueFormat, DxFormat, DxPaging, DxEditing } from 'devextreme-vue/data-grid';
 
 export default ({
     components: {
-        selectSearchable, DxDataGrid, DxColumn, DxMasterDetail, DxSelection, DxScrolling, DxSummary, DxTotalItem, DxValueFormat, DxFormat,  DxPaging, DxEditing, paymentsListAssistantNew: paymentsListAssistantNew
+        selectSearchable, DxDataGrid, DxColumn, DxSelection, DxScrolling, DxSummary, DxTotalItem, DxValueFormat, DxFormat,  DxPaging, DxEditing, paymentsListAssistantNew: paymentsListAssistantNew
     },
     props: {
         parametersData: { type: Object, required: false },
@@ -737,6 +737,19 @@ export default ({
             if(this.$store.state.main.userMoneyFormat==5){ resultado = "#0.00000" }
             if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
             return resultado }
+        },
+        userTableLines: { get () { return this.$store.state.main.userTableLines } },
+        userTableLinesDXcols: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='vertical'){ result = true }
+                return result
+            } 
+        },
+        userTableLinesDXrows: { get () { 
+                let result = false;
+                if(this.userTableLines=='cell'||this.userTableLines=='horizontal'){ result = true }
+                return result
+            } 
         },
     },
     watch: {

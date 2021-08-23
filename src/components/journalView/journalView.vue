@@ -79,15 +79,15 @@
          -->
           
       <DxSummary >
-        <DxTotalItem column="invID" summary-type="count"/>
-        <DxTotalItem column="debit" summary-type="sum" cssClass="q-mr-none" > <DxValueFormat type="#.00" /> </DxTotalItem>
-        <DxTotalItem column="credit" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxTotalItem column="invID" summary-type="count" display-format="{0}"/>
+        <DxTotalItem column="debit" summary-type="sum" cssClass="q-mr-none" display-format="{0}" > <DxValueFormat type="#.00" /> </DxTotalItem>
+        <DxTotalItem column="credit" summary-type="sum" display-format="{0}"> <DxValueFormat type="#.00" /> </DxTotalItem>
         <DxTotalItem showInColumn="comments" column="calculated" summary-type="sum" > <DxValueFormat type="#.00" /> </DxTotalItem>
 
-        <DxGroupItem name="totalDebit" :show-in-group-footer="false" :align-by-column="true" column="debit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
-        <DxGroupItem name="totalCredit" :show-in-group-footer="false" :align-by-column="true" column="credit" summary-type="sum"> <DxValueFormat type="#.00" /> </DxGroupItem>
+        <DxGroupItem name="totalDebit" :show-in-group-footer="false" :align-by-column="true" column="debit" summary-type="sum" display-format="{0}"> <DxValueFormat type="#.00" /> </DxGroupItem>
+        <DxGroupItem name="totalCredit" :show-in-group-footer="false" :align-by-column="true" column="credit" summary-type="sum" display-format="{0}"> <DxValueFormat type="#.00" /> </DxGroupItem>
       </DxSummary>
-      <DxSortByGroupSummaryInfo  summary-item="totalCredit" sort-order="desc" />
+      <DxSortByGroupSummaryInfo  summary-item="totalCredit" sort-order="desc"  />
       <DxSortByGroupSummaryInfo  summary-item="totalDebit" sort-order="desc" />
       
       

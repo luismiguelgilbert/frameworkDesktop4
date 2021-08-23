@@ -70,6 +70,10 @@
                                 </q-item>
 
                                 <q-item clickable @click="changeLeftMenu">
+                                    <q-item-section v-if="!editFormLeftCollapsed" side>
+                                    </q-item-section>
+                                    <q-item-section v-if="!editFormLeftCollapsed">
+                                    </q-item-section>
                                     <q-item-section side>
                                         <q-icon :name="editFormLeftCollapsed?'fas fa-angle-double-right':'fas fa-angle-double-left'" color="primary" />
                                     </q-item-section>

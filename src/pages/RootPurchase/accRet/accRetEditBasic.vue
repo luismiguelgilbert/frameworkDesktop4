@@ -1,48 +1,23 @@
 <template>
 <q-form style="margin: -16px;" ref="formulario" greedy autofocus no-error-focus spellcheck="false" autocorrect="off" autocapitalize="off" class="q-gutter-sm q-pa-md">
     <div class="row">
-        <q-toggle class="col-12 col-md-4"
+        <q-toggle class="col-12 col-md-6"
             v-model="estado" icon="fas fa-check" color="positive" label="Estado" disable
             />
-        <q-toggle class="col-12 col-md-4"
+        <q-toggle class="col-12 col-md-6"
             v-model="voided" icon="fas fa-ban" color="red" label="Anulado?" :disable="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
             />
         <!--<q-btn label="pruebas" @click="openPartnerCreate" />-->
     </div>
 
-    <!--partnerID-->
-    <selectSearchable 
-        prependIcon="fas fa-handshake"
-        labelText="Proveedor (*)" labelSearchText="Buscar Proveedor"
-        :optionsList="this.lookup_partners"
-        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
-        :isRequired="true" 
-        :isDisable="false" 
-        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
-        :initialValue="partnerID"
-        :tableSearchColumns="[
-                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
-                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
-            ]"
-        @onItemSelected="(row)=>{
-                this.partnerID=row.value;
-                this.partner_account_id=row.account_id;//se usa en asiento contable
-                this.partnerName=row.label;
-                this.lines = [];
-                this.$emit('onAccMoveCompute')
-                this.loadPendingInvoices();
-            }"
-        />
-
-    
     <selectSearchable 
         prependIcon="fas fa-store"
-        labelText="Establecimiento (*)" labelSearchText="Buscar Establecimiento"
+        labelText="Establecimiento donde se emite la Retención (*)" labelSearchText="Buscar Establecimiento"
         :optionsList="this.lookup_establecimientos"
         rowValueField="value" optionsListLabel="label" optionDisableField="estado"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :isReadonly="true"
         :initialValue="sys_location_id"
         :tableSearchColumns="[
                  { name: 'label', label: 'Establecimiento', field: 'label', align: 'left'}
@@ -56,12 +31,13 @@
 
     <selectSearchable 
         prependIcon="fas fa-cash-register"
-        labelText="Punto de Emisión (*)" labelSearchText="Buscar Punto de Emisión"
+        labelText="Punto de Emisión donde se emite la Retención (*)" labelSearchText="Buscar Punto de Emisión" 
+        optionsListCaption="esElectronicaName"
         :optionsList="sys_location_id>0?lookup_pos.filter(x=>x.sys_location_id==this.sys_location_id):[]"
         rowValueField="value" optionsListLabel="label" optionDisableField="estado"
         :isRequired="true" 
         :isDisable="false" 
-        :isReadonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
+        :isReadonly="true"
         :initialValue="sys_location_pos_id"
         :tableSearchColumns="[
                  { name: 'label', label: 'Punto de Emisión', field: 'label', align: 'left'}
@@ -81,11 +57,10 @@
                 //this.ambiente='000000000';
             }"
         />
-    
-    
+
     <q-input
         ref="numeroDoc"
-        placeholder="Ingrese el Número del Documento (*)" label="Número del Documento (*)" filled
+        placeholder="Ingrese el Secuencial del Documento (*)" label="Secuencial de la Retención(*)" filled
         v-model="numeroDoc" counter
         mask="#########" unmasked-value
         :readonly="sys_location_id&&sys_location_pos_id?lookup_pos.filter(x=>x.sys_location_id==sys_location_id && x.value==sys_location_pos_id)[0].esElectronica:false"
@@ -97,26 +72,6 @@
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
 
-    <selectSearchable 
-        prependIcon="fas fa-flask"
-        labelText="Ambiente (*)" labelSearchText="Buscar Ambiente"
-        :optionsList="lookup_ambientes"
-        rowValueField="value" optionsListLabel="label"
-        :isRequired="true" 
-        :isDisable="false" 
-        :isReadonly="sys_location_id&&sys_location_pos_id?!(lookup_pos.filter(x=>x.sys_location_id==sys_location_id && x.value==sys_location_pos_id)[0].esElectronica):true"
-        :initialValue="ambiente"
-        :tableSearchColumns="[
-                 { name: 'label', label: 'Punto de Emisión', field: 'label', align: 'left'}
-            ]"
-        @onItemSelected="(row)=>{
-                this.ambiente=row.value;
-            }"
-        />
-    
-    <!--
-        :readonly="sys_location_id&&sys_location_pos_id?lookup_pos.filter(x=>x.sys_location_id==sys_location_id && x.value==sys_location_pos_id)[0].esElectronica:false"
-    -->
     <q-input
         ref="headerDate" 
         mask="date" :rules="['date']"
@@ -139,9 +94,64 @@
         <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
     </q-input>
 
+
+    <selectSearchable 
+        prependIcon="fas fa-handshake"
+        labelText="Proveedor (*)" labelSearchText="Buscar Proveedor"
+        :optionsList="this.lookup_partners"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="true"
+        :initialValue="partnerID"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.partnerID=row.value;
+                this.partner_account_id=row.account_id;//se usa en asiento contable
+                this.partnerName=row.label;
+                this.lines = [];
+                this.$emit('onAccMoveCompute')
+                this.loadPendingInvoices();
+            }"
+        />
+
+    
     
 
-    <q-input
+    
+    
+    
+
+
+    <!--
+    <selectSearchable 
+        prependIcon="fas fa-flask"
+        labelText="Ambiente (*)" labelSearchText="Buscar Ambiente"
+        :optionsList="lookup_ambientes"
+        rowValueField="value" optionsListLabel="label"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="sys_location_id&&sys_location_pos_id?!(lookup_pos.filter(x=>x.sys_location_id==sys_location_id && x.value==sys_location_pos_id)[0].esElectronica):true"
+        :initialValue="ambiente"
+        :tableSearchColumns="[
+                 { name: 'label', label: 'Punto de Emisión', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                this.ambiente=row.value;
+            }"
+        />-->
+    
+    <!--
+        :readonly="sys_location_id&&sys_location_pos_id?lookup_pos.filter(x=>x.sys_location_id==sys_location_id && x.value==sys_location_pos_id)[0].esElectronica:false"
+    -->
+    
+
+    
+
+    <!--<q-input
         ref="autorizacionDoc"
         placeholder="Ingreso el Número de Autorización del Documento (*)" label="Número de Autorización (*)" filled
         v-model="autorizacionDoc" counter
@@ -153,6 +163,7 @@
         >
         <template v-slot:prepend><q-icon name="fas fa-check" /></template>
     </q-input>
+    -->
     
     <q-input
         label="Comentarios" placeholder="Ingrese comentarios sobre este Pedido" filled
@@ -256,11 +267,27 @@ export default ({
         userCompany: { get () { return this.$store.state.main.userCompany } },
         userCompanies: { get () { return this.$store.state.main.userCompanies } },
         apiURL: { get () { return this.$q.sessionStorage.getItem('URL_Data') + (this.$q.sessionStorage.getItem('URL_Port')?(':' + this.$q.sessionStorage.getItem('URL_Port')):'') + this.$q.sessionStorage.getItem('URL_Path') } },
-        allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        allow_report: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_report').value }, },
-        allow_disable: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_disable').value }, },
+        allow_edit: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_edit').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_insert: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },

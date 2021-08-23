@@ -101,6 +101,13 @@ export default ({
             }).value; 
             return resultado }, 
         },
+        allow_disable: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_disable').map(y=>{
+              resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         anulado: {
             get () { return this.$store.state[this.moduleName].editData.basic.anulado },

@@ -1,8 +1,10 @@
 <template>
     <div>
         <q-toolbar :class="toolbarComponentClass">
+            <!-- para ver contenido de isNewBlocked -->
+            <!--<div class="text-positive">isNewBlocked={{isNewBlocked}}</div>-->
             <q-btn
-                v-if="allow_insert"
+                v-if="allow_insert && !(isNewBlocked)"
                 :rounded="$q.screen.gt.xs"
                 no-caps no-wrap  class="q-ml-sm"  
                 :color="userColor!=='blackDark'?'primary':undefined"
@@ -22,7 +24,7 @@
             <!--<div class="text-positive">toolbarExtraButtons={{toolbarExtraButtons}}</div>-->
 
             <q-btn
-                v-if="(toolbarExtraButtons) && (toolbarExtraButtons.filter(x=>!x.isRight) .length > 0) "
+                v-if="(toolbarExtraButtons) && (toolbarExtraButtons.filter(x=>!x.isRight).length > 0) "
                 v-for="(boton,index) in toolbarExtraButtons" :key="index"
                 :rounded="$q.screen.gt.xs" no-caps no-wrap class="q-ml-sm"
                 :icon="boton.icon"
@@ -277,7 +279,8 @@ export default ({
             get () { return this.$store.state[this.moduleName].editStatus },
             set (val) {  this.$store.commit((this.moduleName)+'/updateState', {key: 'editStatus', value: val})  }
         },
-        toolbarExtraButtons: { get () { return this.$store.state[this.moduleName].toolbarExtraButtons} }
+        toolbarExtraButtons: { get () { return this.$store.state[this.moduleName].toolbarExtraButtons} },
+        isNewBlocked: { get () { return this.$store.state[this.moduleName].isNewBlocked} }
     },
     
 })

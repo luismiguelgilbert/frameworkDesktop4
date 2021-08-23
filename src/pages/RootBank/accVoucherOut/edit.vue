@@ -3,7 +3,12 @@
         v-if="editReady"
         ref="editFormComponent" 
         :moduleName="moduleName"
-        :parametersData="{ editStatus: editStatus, editConfig: editConfig, editData: editData }"
+        :parametersData="{ 
+            editStatus: editStatus
+            ,editConfig: editConfig
+            ,editData: editData 
+            ,moduleName: moduleName
+        }"
         @onLoadedData="updateTabStatus"
         /><!--parametersData es opcional-->
 </template>

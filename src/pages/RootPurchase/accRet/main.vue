@@ -12,12 +12,13 @@ export default ({
         this.rptLink = this.rptLink_;
         this.rptLinkCompany = this.rptLinkCompany_;
         this.rptType = this.rptType_;
+        this.isNewBlocked = true;
     },
     data () {
         return {
-            moduleName: "Partners", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
-            moduleMainRoute: '/RootMaster/Partners',
-            rptName_: 'Detalle de Socios', rptLink_: 'mktPO', rptLinkCompany_: true, rptType_: 'ssrs',
+            moduleName: "accRet", //this should match the module Name (same as table sys_links.link_name) AND should match Vuex Store Name
+            moduleMainRoute: '/RootPurchase/accRet',
+            rptName_: 'Retención en Compra', rptLink_: 'accRet', rptLinkCompany_: true, rptType_: 'ssrs',
         }
     },
     computed:{
@@ -41,7 +42,11 @@ export default ({
             get () { return this.$store.state[this.moduleName].rptType },
             set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'rptType', value: val}) }
         },
-        
+        //Nuevo desde versión 5.2.3
+        isNewBlocked: {
+            get () { return this.$store.state[this.moduleName].isNewBlocked },
+            set (val) { this.$store.commit((this.moduleName)+'/updateState', {key: 'isNewBlocked', value: val}) }
+        },
     }    
 })
 </script>

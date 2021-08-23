@@ -52,7 +52,7 @@ export default ({
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'lineID', dataType: 'number', visible: false },
                             {alignment: 'left', allowEditing: true, isDataRequired: true, caption: 'Descripción', dataField: 'comments', dataType: 'string', visible: true },
                             {alignment: 'left', allowEditing: true, isDataRequired: false, caption: 'Fecha', dataField: 'expenseDate', dataType: 'date', visible: true, format: 'dd-MMM-yyyy' },
-                            {alignment: 'right', allowEditing: true, isDataRequired: true, caption: 'Monto', dataField: 'lineSubtotal', dataType: 'number', visible: true },
+                            {alignment: 'right', allowEditing: true, isDataRequired: true, caption: 'Monto', dataField: 'lineSubtotal', dataType: 'number', visible: true, format: 'userMoneyFormat' },
                             //{alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Activo', dataField: 'estado', dataType: 'boolean', visible: true, defaultValue: true },
                         ]
                     }

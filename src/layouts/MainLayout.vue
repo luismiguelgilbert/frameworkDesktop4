@@ -6,36 +6,60 @@
       <q-header>
         <q-toolbar v-if="userCompanies && userCompanies.length>0" :class="userMainLayoutToolbar">
           
-          <q-btn flat stretch icon="fas fa-bars" @click="leftDrawerOpen=!leftDrawerOpen" :color="userColor=='blackDark'?'primary':null" />
-          <!--ROOT-->
-          <div class="q-ml-md"
-            v-if="menuData.find(x=>x.link_name==ruta) && menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent)">
-              <div class="row items-center no-wrap">
-                <q-icon v-if="$q.screen.gt.xs" left :name="menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent).icon"  />
-                <div v-if="$q.screen.gt.xs" class="text-center">
-                  {{menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent).label}}
-                </div>
-                <div v-if="$q.screen.gt.xs" class="q-ml-sm ">/</div>
-              </div>
-          </div>
-          <q-btn v-else-if="$q.screen.gt.xs&&router.currentRoute.path=='/'" stretch flat no-caps 
-            icon="fas fa-home" 
-            label="Inicio" />
-
+          <q-btn flat  stretch icon="fas fa-bars" @click="leftDrawerOpen=!leftDrawerOpen" :color="userColor=='blackDark'?'primary':null" no-wrap />
+          
+          <q-btn icon="fas fa-home" flat stretch to="/" title="Ir a Inicio" 
+            :label="$q.screen.gt.xs?'Inicio':undefined"  size="sm"
+            :icon-right="router.currentRoute.path=='/'?undefined:($q.screen.gt.xs?'fas fa-caret-right':undefined)"  />
+          
+          <q-btn 
+            v-if="$q.screen.gt.xs&&menuData.find(x=>x.link_name==ruta) && menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent)"
+            :icon="menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent).icon" 
+            :label="$q.screen.gt.xs?menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent).label:undefined"
+            flat stretch size="sm"
+            :icon-right="router.currentRoute.path=='/'?undefined:($q.screen.gt.xs?'fas fa-caret-right':undefined)"  >
+            <q-menu content-style="border-top-right-radius: 0px; border-top-left-radius: 0px;"> 
+              <q-list class="text-grey-7">
+                <q-item 
+                  v-for="(rootMenu, index) in menuData.filter(x=>x.parent==null&&x.sys_link_id!=99&&x.sys_link_id!=98)" :key="index" 
+                  :active="menuData.find(y=>y.sys_link_id==menuData.find(x=>x.link_name==ruta).parent).sys_link_id == rootMenu.sys_link_id"
+                  active-class="bg-primary text-white text-weight-bold"
+                  clickable>
+                  <q-item-section avatar><q-icon :name="rootMenu.icon" /></q-item-section>
+                  <q-item-section><q-item-label>{{rootMenu.label}}</q-item-label></q-item-section>
+                  <q-item-section avatar><q-icon name="fas fa-caret-right" /></q-item-section>
+                  <q-menu anchor="top end" self="top start">
+                    <q-list class="text-grey-7">
+                      <!-- :active="item.link_name==menuData.find(x=>x.link_name==ruta).link_name"
+                        active-class="bg-primary text-white text-weight-bold"-->
+                      <q-item 
+                        v-for="(item, index) in menuData.filter(y=>y.parent == rootMenu.sys_link_id)" :key="index"
+                        clickable :to="'/'+item.link_name"
+                        :title="item.comment">
+                        <q-item-section avatar><q-icon :name="item.icon" /></q-item-section>
+                        <q-item-section><q-item-label >{{item.label}}</q-item-label></q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
 
           <!--MODULE-->
-          <!--icon-right="fas fa-caret-down"-->
-          <q-btn  flat stretch class="q-ml-sm"
+          <q-btn  flat stretch 
             v-if="$q.screen.gt.xs&&menuData.find(x=>x.link_name==ruta)"
             :label="$q.screen.gt.xs?menuData.find(x=>x.link_name==ruta).label:undefined"
             :icon="menuData.find(x=>x.link_name==ruta).icon"
+            icon-right="fas fa-caret-down" size="sm"
             :title="$q.screen.gt.xs?menuData.find(x=>x.link_name==ruta).label:undefined"
             
             menu-anchor="bottom left" menu-self="top left"  no-caps >
-            <q-menu square v-if="router.currentRoute.path!='/RootPreferences'" @show="scrolltoOption">
-              <q-virtual-scroll ref="dropdownMenuList" style="height: 250px;" :items="menuData.filter(y=>y.parent == menuData.find(x=>x.link_name==ruta).parent)"  class="text-grey-7">
-                <template v-slot="{ item, index }">
-                  <q-item :key="index"
+            <!--@show="scrolltoOption"-->
+            <q-menu  v-if="router.currentRoute.path!='/RootPreferences'"  content-style="border-top-right-radius: 0px; border-top-left-radius: 0px;">
+              <q-list class="text-grey-7">
+                <q-item 
+                    v-for="(item, index) in menuData.filter(y=>y.parent == menuData.find(x=>x.link_name==ruta).parent)" :key="index"
                     clickable :to="'/'+item.link_name"
                     :active="item.link_name==menuData.find(x=>x.link_name==ruta).link_name"
                     active-class="bg-primary text-white text-weight-bold"
@@ -47,32 +71,18 @@
                       <q-item-label >{{item.label}}</q-item-label>
                     </q-item-section>
                   </q-item>
-                </template>
-              </q-virtual-scroll>
-              <!--<q-list class="text-grey-7">
-                  <q-item
-                    v-for="(menuItem,index) in menuData.filter(y=>y.parent == menuData.find(x=>x.link_name==ruta).parent)" :key="index"
-                    clickable :to="'/'+menuItem.link_name"
-                    :active="menuItem.link_name==menuData.find(x=>x.link_name==ruta).link_name"
-                    active-class="bg-primary text-white text-weight-bold"
-                    :title="menuItem.comment"
-                    >
-                    <q-item-section avatar>
-                      <q-icon :name="menuItem.icon" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label >{{menuItem.label}}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-              </q-list>-->
+              </q-list>
             </q-menu>
           </q-btn>
 
-          <div v-if="$q.screen.gt.xs&&router.currentRoute.path!='/'&&!isNaN(router.currentRoute.path.split('/')[(router.currentRoute.path.split('/').length)-1])"
+          <!--<div v-if="$q.screen.gt.xs&&router.currentRoute.path!='/'&&!isNaN(router.currentRoute.path.split('/')[(router.currentRoute.path.split('/').length)-1])"
             class="row items-center q-ml-sm" >
             <div v-if="$q.screen.gt.xs" class="q-mr-sm">/</div>
             <q-icon name="fas fa-edit" color="white" class="q-mr-sm" /> Edición
-          </div>
+          </div>-->
+          <q-btn 
+            v-if="$q.screen.gt.xs&&router.currentRoute.path!='/'&&!isNaN(router.currentRoute.path.split('/')[(router.currentRoute.path.split('/').length)-1])"
+            icon="fas fa-pencil-alt" label="Edición" no-caps size="sm" flat stretch />
 
           <q-space />
           
@@ -82,14 +92,14 @@
 
           
           <!--COMPANY-->
-          <q-btn icon="fas fa-home" flat stretch to="/" title="Ir a Inicio" />
+          <!--<q-btn icon="fas fa-home" flat stretch to="/" title="Ir a Inicio" />-->
           <q-btn 
             flat stretch no-caps 
             :label="$q.screen.gt.sm?(userCompanies.find(x=>x.companyID==userCompany).companyShortName):undefined"
             :disable="disableCompanyChange"
-            v-if="$q.screen.gt.sm"
+            v-if="$q.screen.gt.sm" icon="fas fa-caret-down" size="sm"
             >
-            <q-menu v-if="userCompanies.length>1">
+            <q-menu v-if="userCompanies.length>1" content-style="border-top-right-radius: 0px; border-top-left-radius: 0px;">
               <q-list class="text-grey-7" v-close-popup >
                 <q-item
                   v-for="company in userCompanies" :key="company.companyID"
@@ -244,7 +254,7 @@
       </q-drawer>
 
       <!-- El style hace que la página siempre crezca lo máximo disponible para que el drawer se extienda automáticamente-->
-      <q-page-container style="height: calc(100vh); overflow-y: hidden;" ><!--background-color: #F2F6F9;-->
+      <q-page-container style="height: calc(100vh); overflow-y: hidden;" :class="userColor=='blackDark'?'bg-grey-10':undefined"><!--background-color: #F2F6F9;-->
         <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" mode="out-in" >
           <router-view />
         </transition>

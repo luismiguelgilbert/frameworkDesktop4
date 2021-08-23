@@ -8,7 +8,6 @@
             <q-btn v-if="tabRecord.tabConfig.deleteAllowed && ( (editStatus.editMode=='edit'&&allow_edit) || (editStatus.editMode=='create'&&allow_insert) )" flat stretch :label="$q.screen.gt.sm?'Eliminar':''" title="Eliminar" no-caps color="red" icon="fas fa-trash-alt" :disable="!selectedRowKeys.length>0" @click="deleteSelectedRows" />
         </q-toolbar>
         <q-separator />
-        
         <DxDataGrid
             ref="mainviewtableDxDataGrid"
             height="calc(100vh - 170px)"
@@ -37,7 +36,7 @@
                 :data-type="columna.dataType=='textArea'?'string':columna.dataType"
                 :visible="columna.visible"
                 :allow-editing="columna.allowEditing"
-                :format="columna.format?columna.format:undefined"
+                :format="columna.format?(columna.format=='userMoneyFormat'?userMoneyFormat:columna.format):undefined"
                 :alignment="columna.alignment?columna.alignment:'left'"
                 >
                 <DxLookup v-if="columna.lookupOptions"
@@ -509,6 +508,17 @@ export default ({
         editStatus: {
             get () { return this.$store.state[this.moduleName].editStatus },
         },
+        userMoneyFormat: { get () { 
+            let resultado ="#0.000000";
+            if(this.$store.state.main.userMoneyFormat==0){ resultado = "#0" }
+            if(this.$store.state.main.userMoneyFormat==1){ resultado = "#0.0" }
+            if(this.$store.state.main.userMoneyFormat==2){ resultado = "#0.00" }
+            if(this.$store.state.main.userMoneyFormat==3){ resultado = "#0.000" }
+            if(this.$store.state.main.userMoneyFormat==4){ resultado = "#0.0000" }
+            if(this.$store.state.main.userMoneyFormat==5){ resultado = "#0.00000" }
+            if(this.$store.state.main.userMoneyFormat==6){ resultado = "#0.000000" }
+            return resultado }
+        }
     }
 })
 </script>

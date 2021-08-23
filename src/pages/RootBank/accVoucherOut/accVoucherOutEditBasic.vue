@@ -230,10 +230,6 @@ export default ({
             }).value; 
             return resultado }, 
         },
-        //allow_view: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_view').value }, },
-        //allow_edit: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_edit').value }, },
-        //allow_insert: { get () { return this.$store.state[this.moduleName].security.find(x=>x.label=='allow_insert').value }, },
-        
         editMode: { get () { return this.$store.state[this.moduleName].editMode }, },
         lines: {
             get () { return this.$store.state[this.moduleName].editData.lines },

@@ -51,7 +51,7 @@ export default ({
                             //'string' | 'number' | 'date' | 'boolean' | 'object' | 'datetime'
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Código', dataField: 'pricelistID', listDataField: 'value', dataType: 'number', visible: false },
                             {alignment: 'left', allowEditing: false, isDataRequired: true, caption: 'Lista de Precio', dataField: 'name_es', listDataField: 'label', dataType: 'string', visible: true },
-                            {alignment: 'right', allowEditing: true, isDataRequired: true, caption: 'Precio Venta', dataField: 'sales_price', dataType: 'number', visible: true, defaultValue: 0 },//en el lookup NO va cantidad
+                            {alignment: 'right', allowEditing: true, isDataRequired: true, caption: 'Precio Venta', dataField: 'sales_price', dataType: 'number', visible: true, defaultValue: 0, format: 'userMoneyFormat' },//en el lookup NO va cantidad
                             //{alignment: 'center', allowEditing: true, isDataRequired: true, caption: 'Activo', dataField: 'estado', listDataField: 'estado', dataType: 'boolean', visible: true },
                         ],
                     }

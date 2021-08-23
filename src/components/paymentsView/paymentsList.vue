@@ -4,6 +4,9 @@
         <div v-if="parametersData.editData.basic.initialAmount == parametersData.editData.basic.currentAmount">
             <q-toolbar class="no-padding">
                 <q-btn label="Asistente de Pagos" no-caps icon="fas fa-exchange-alt" color="primary" flat stretch @click="paymentsAssistantVisible=true" />
+                <q-btn 
+                    v-if="parametersData.moduleName=='accAP'"
+                    label="Asistente de Retenciones" no-caps icon="fas fa-percent" color="primary" flat stretch @click="paymentsRetencionesVisible=true"  />
                 <q-btn label="Actualizar Datos" no-caps icon="fas fa-sync" color="primary" flat stretch @click="loadData" />
                 <q-space />
                     <q-btn title="Ayuda" color="primary" icon="fas fa-info-circle" flat stretch>
@@ -61,6 +64,9 @@
             <q-dialog square persistent v-model="paymentsAssistantVisible">
                 <paymentsListAssistant v-if="paymentsAssistantVisible" @onClose="loadData" :parametersData="parametersData"/>
             </q-dialog>
+            <q-dialog square persistent v-model="paymentsRetencionesVisible">
+                <paymentsRetenciones v-if="paymentsRetencionesVisible" @onClose="loadData" :parametersData="parametersData"/>
+            </q-dialog>
         </div>
         <div v-else >
             <q-banner dense class="bg-primary text-white">
@@ -81,6 +87,8 @@
 </template>
 <script>
 import paymentsListAssistant from './paymentsListAssistant.vue'
+import paymentsRetenciones from './paymentsRetenciones.vue'
+
 import { DxDataGrid, DxColumn, DxColumnFixing, DxScrolling, DxPaging, DxStateStoring, DxSorting, DxHeaderFilter, DxSelection, DxEditing, DxLookup, DxSummary, DxTotalItem, DxValueFormat, DxColumnChooser, DxGrouping, DxGroupPanel, DxGroupItem } from 'devextreme-vue/data-grid';
 //import DxPopup, { DxToolbarItem  } from 'devextreme-vue/popup';
 import { openURL } from 'quasar'
@@ -88,6 +96,7 @@ import { openURL } from 'quasar'
 export default ({
     components:{
         paymentsListAssistant: paymentsListAssistant,
+        paymentsRetenciones: paymentsRetenciones,
         DxDataGrid,
         DxColumn,
         DxColumnFixing,
@@ -116,6 +125,7 @@ export default ({
         return {
             router: this.$router
             ,paymentsAssistantVisible: false
+            ,paymentsRetencionesVisible: false
             ,pagos: []
         }
     },
@@ -125,6 +135,7 @@ export default ({
     methods:{
         loadData(){
             this.paymentsAssistantVisible=false
+            this.paymentsRetencionesVisible=false
             if(this.parametersData&&this.parametersData.editStatus&&this.parametersData.editStatus.editMode&&this.parametersData.editStatus.editMode=='edit'){
                 this.$q.loading.show()
                 this.$axios({
