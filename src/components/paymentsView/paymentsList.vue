@@ -33,23 +33,24 @@
                 :show-row-lines="userTableLinesDXrows"
                 key-expr="rowID"
                 >
+                <DxScrolling mode="virtual" rowRenderingMode="virtual"  columnRenderingMode="virtual" showScrollbar="always"  :useNative="true"   /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
                 <DxColumn caption="ID de Conciliación" data-field="headerID" name="headerID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :visible="false" />
                 <DxColumn caption="# Línea Conciliación" data-field="lineID" name="lineID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :visible="false" />
                 <DxColumn caption=" " name="printButton" :allow-editing="false" alignment="left" :visible="true" cell-template="printEditor" :width="57" :minWidth="57" css-class="no-padding no-margin"/>
                 <template #printEditor="{ data: cellInfo }">
-                    <q-btn icon="fas fa-print" color="primary" flat stretch title="Abrir Documento para Imprimir Comprobante" @click="openDocument(cellInfo)"
+                    <q-btn icon="fas fa-print" color="primary" flat stretch title="Abrir Documento para Ver o Imprimir Comprobante" @click="openDocument(cellInfo)"
                         style="width: 100%;"/>
                 </template>
                 <DxColumn caption="# Asiento" data-field="accMoveID" name="accMoveID" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :width="80" :visible="true" />
                 <DxColumn caption="Conciliación" data-field="headerDate" :allow-editing="false" alignment="center" :visible="true" :minWidth="60" :width="100" />
-                <DxColumn caption="Tipo Documento" data-field="accTypeName" name="accTypeName" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :width="120" :visible="true" />
+                <DxColumn caption="Doc. Conciliación" data-field="accTypeName" name="accTypeName" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :width="155" :visible="true" />
                 <DxColumn caption="Documento" data-field="paymentMethodTypeName" name="paymentMethodTypeName" data-type="string" :allow-editing="false" alignment="left" :minWidth="200" :visible="true" />
                 <DxColumn caption="ID Documento de Pago" data-field="accHeaderID" name="accHeaderID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :visible="false" />
-                <DxColumn caption="# Documento" data-field="numeroDoc" name="numeroDoc" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :visible="true" />
+                <DxColumn caption="# Documento" data-field="numeroDoc" name="numeroDoc" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :width="135" :visible="true" />
                 <DxColumn caption="Documento" data-field="paymentHeaderDate"  :allow-editing="false" alignment="center" :visible="true" :minWidth="60" :width="100"  />
                 <DxColumn caption="# Línea Doc Pago" data-field="accLineID" name="accLineID" data-type="number" :allow-editing="false" alignment="left" :minWidth="50" :visible="false" />
                 <DxColumn caption="Cuenta Línea Doc de Pago" data-field="accLineAccountName" name="accLineAccountName" data-type="string" :allow-editing="false" alignment="left" :minWidth="50" :visible="false" />
-                <DxColumn caption="Monto" data-field="lineAmount" name="lineAmount" data-type="number" :allow-editing="false" alignment="right" :minWidth="150" :width="150" :format="userMoneyFormat" />
+                <DxColumn caption="Monto" data-field="lineAmount" name="lineAmount" data-type="number" :allow-editing="false" alignment="right" :minWidth="100" :width="144" :format="userMoneyFormat" />
                 <DxColumn caption=" " name="voidButton" :allow-editing="false" alignment="left" :visible="true" cell-template="voidEditor" :width="57" css-class="no-padding no-margin" />
                 <template #voidEditor="{ data: cellInfo }">
                     <q-btn icon="fas fa-trash-alt" color="red" flat stretch :title="'Anular Conciliación # ' + cellInfo.data.headerID" @click="anularConciliacion(cellInfo)"

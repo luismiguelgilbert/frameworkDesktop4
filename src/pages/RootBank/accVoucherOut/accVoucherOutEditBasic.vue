@@ -39,7 +39,7 @@
         prependIcon="fas fa-money-check"
         labelText="Medio de Pago (*)" labelSearchText="Buscar Medio de Pago"
         :optionsList="this.lookup_accPaymentMethods"
-        rowValueField="value" optionsListLabel="label"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="account_name"
         :isRequired="true" 
         :isDisable="false" 
         :isReadonly="(allow_edit==false && allow_insert==false)"
@@ -49,6 +49,7 @@
                 ,{ name: 'paymentTypeName', label: 'Medio de Pago', field: 'paymentTypeName', align: 'left'}
                 ,{ name: 'numberTypeName', label: 'Secuencial', field: 'numberTypeName', align: 'left'}
                 ,{ name: 'lastNumber', label: 'Último Documento', field: 'lastNumber', align: 'left'}
+                ,{ name: 'account_name', label: 'Cuenta Contable', field: 'account_name', align: 'left'}
             ]"
         @onItemSelected="(row)=>{
                 this.numberType = row.numberType
