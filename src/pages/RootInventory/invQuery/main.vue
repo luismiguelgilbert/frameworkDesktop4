@@ -3,17 +3,17 @@
     <q-layout v-if="(whLoaded)?true:false" container view="hHh lpR lff" style="min-height: 50px !important; height: calc(100vh - 50px); overflow-y: hidden !important;" >
 
         <q-toolbar :class="toolbarComponentClass">
-            <q-icon name="fas fa-warehouse" color="primary" class="q-ml-md q-mr-md" />
             <q-select
-                v-model="warehouseID"
+                v-model="warehouseID" filled
                 :options="lookup_bodegas"
-                plac
                 emit-value map-options
                 borderless
                 placeholder="Seleccione una bodega"
                 @input="loadData"
                 :display-value="`${warehouseID ? lookup_bodegas.find(x=>x.value==warehouseID).label : 'Selecciona una bodega'}`"
-                />
+                >
+                <template v-slot:prepend><q-icon name="fas fa-warehouse" /></template>
+            </q-select>
                 <!--<q-btn :label="kardexVisible.toString()" color="primary" />-->
             <q-space />
                 
@@ -60,6 +60,7 @@
             keyExpr="invID"
             @context-menu-preparing="showOptions"
             >
+                <DxScrolling mode="virtual"   :useNative="true" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen rowRenderingMode="virtual"-->
                 <DxColumn name="internal_code" data-field="internal_code" data-type="string" caption="Código" width="150" alignment="left" :allowFiltering="true" :allowSorting="true" />
                 <DxColumn name="invName" data-field="invName" data-type="string" caption="Item" :minWidth="350" alignment="left" :allowFiltering="true" :allowSorting="true" />
                 
@@ -75,7 +76,6 @@
                 <DxColumn name="brandName" data-field="brandName" data-type="string" caption="Marca" width="150" alignment="left" :allowFiltering="true" :allowSorting="true" />
                 
                 <DxColumn name="invID" data-field="invID" data-type="number" caption="Código Interno" width="100" alignment="left" :allowFiltering="true" :allowSorting="true" :visible="showInternalCode" />
-            <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
             <DxPager :visible="true" :show-page-size-selector="false" :allowed-page-sizes="allowedPageSizes" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="true" :showPageSizeSelector="false" />
                 
             <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />

@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSysUsersSelectEdit',
             spUpdateName: 'spSysUsersUpdate',
             toolbarTitle: "Usuario",
+            toolbarTitleName: "basic.sys_user_id",
             startTab: 'basic',
             moduleTabs: [
                  { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Usuario', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Users/UsersEditBasic.vue' },

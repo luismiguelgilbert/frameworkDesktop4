@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spmktMFGSelectEdit',
             spUpdateName: 'spmktMFGUpdate',
             toolbarTitle: "Pedido de Insusmos",
+            toolbarTitleName: "basic.headerID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

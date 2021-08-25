@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSchApostoladosSelectEdit',
             spUpdateName: 'spSchApostoladosUpdate',
             toolbarTitle: "Apostolado",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Apostolado', isTabDisable: false, rootPath:'pages', importPath: 'RootSchoenstatt/SCHApostolados/SCHApostoladosEditBasic.vue' },

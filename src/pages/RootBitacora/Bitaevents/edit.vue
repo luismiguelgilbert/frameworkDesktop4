@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spBitaeventsSelectEdit',
             spUpdateName: 'spBitaeventsUpdate',
             toolbarTitle: "Evento",
+            toolbarTitleName: "basic.record_id",
             startTab: 'basic',
             disableSaveButton: true,//hides save button from dropwn save and dropwn down save and close
             moduleTabs: [

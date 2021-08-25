@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spEnsLibrosSelectEdit',
             spUpdateName: 'spEnsLibrosUpdate',
             toolbarTitle: "Libro",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Libro', isTabDisable: false, rootPath:'pages', importPath: 'RootENS/ENSLibros/ENSLibrosEditBasic.vue' },

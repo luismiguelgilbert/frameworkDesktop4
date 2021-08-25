@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSysProfilesSelectEdit',
             spUpdateName: 'spSysProfilesUpdate',
             toolbarTitle: "Rol",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Item', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Roles/RolesEditBasic.vue' },

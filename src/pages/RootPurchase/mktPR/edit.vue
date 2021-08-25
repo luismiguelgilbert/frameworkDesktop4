@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMktPRSelectEdit',
             spUpdateName: 'spMktPRUpdate',
             toolbarTitle: "Requisición de Compra",
+            toolbarTitleName: "basic.headerID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

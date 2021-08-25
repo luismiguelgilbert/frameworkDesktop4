@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spRewMasterSelectEdit',
             spUpdateName: 'spRewMasterUpdate',
             toolbarTitle: "Cálculo de Comisiones",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 

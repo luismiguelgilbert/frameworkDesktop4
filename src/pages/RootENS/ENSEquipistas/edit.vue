@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spEnsPersonasSelectEdit',
             spUpdateName: 'spEnsPersonasUpdate',
             toolbarTitle: "Equipista",
+            toolbarTitleName: "basic.sys_user_fullname",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Datos del Equipista', isTabDisable: false, rootPath:'pages', importPath: 'RootENS/ENSEquipistas/ENSEquipistasEditBasicMultiple.vue' },

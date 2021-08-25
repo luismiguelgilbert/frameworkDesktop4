@@ -22,6 +22,7 @@ export default ({
             spSelectName: 'spAccMovesSelectEdit',
             spUpdateName: 'spAccMovesUpdate',
             toolbarTitle: "Asiento Contable",
+            toolbarTitleName: "basic.accMoveID",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Asiento', isTabDisable: false, rootPath:'pages', importPath: 'RootAccounting/AccMoves/AccMovesEditBasic.vue' },

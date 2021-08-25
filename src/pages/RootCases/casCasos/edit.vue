@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spCasCasesSelectEdit',
             spUpdateName: 'spCasCasesUpdate',
             toolbarTitle: "Caso",
+            toolbarTitleName: "basic.name_es",
             startTab: (this.editStatus.editMode=='create'?'basic':'tasks'),
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Caso', isTabDisable: false, rootPath:'pages', importPath: 'RootCases/casCasos/casCasosEditBasic.vue' },

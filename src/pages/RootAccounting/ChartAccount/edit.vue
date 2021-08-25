@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spAccAccountsSelectEdit',
             spUpdateName: 'spAccAccountsUpdate',
             toolbarTitle: "Cuenta",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Cuenta', isTabDisable: false, rootPath:'pages', importPath: 'RootAccounting/ChartAccount/ChartAccountEditBasic.vue' },

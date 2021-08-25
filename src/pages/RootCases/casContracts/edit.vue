@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spCasContractsSelectEdit',
             spUpdateName: 'spCasContratosUpdate',
             toolbarTitle: "Contrato",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Contrato', isTabDisable: false, rootPath:'pages', importPath: 'RootCases/casContracts/casContractsEditBasic.vue' },

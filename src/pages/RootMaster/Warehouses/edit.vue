@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spWhMasterSelectEdit',
             spUpdateName: 'spWhMasterUpdate',
             toolbarTitle: "Bodega",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Bodega', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Warehouses/WarehousesEditBasic.vue' },

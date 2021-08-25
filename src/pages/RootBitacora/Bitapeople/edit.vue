@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spBitapeopleSelectEdit',
             spUpdateName: 'spBitapeopleUpdate',
             toolbarTitle: "Ingreso",
+            toolbarTitleName: "basic.record_id",
             startTab: this.editStatus.editMode=='create'?'basic':'exit',
             disableSaveButton: true,//hides save button from dropwn save and dropwn down save and close
             moduleTabs: [

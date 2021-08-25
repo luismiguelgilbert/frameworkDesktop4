@@ -2,8 +2,19 @@
     <div>
         <q-card class="q-ma-sm rounder-corners shadow-8"  style="min-height: 200px; height: calc(100vh - 68px); overflow-y: hidden;" >
             <div v-if="dataLoaded">
-                <q-toolbar :class="'q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
-                    <q-toolbar-title class="text-weight-bolder">{{ (editStatus.editMode=='create'?('Crear '+ editConfig.toolbarTitle):(editConfig.toolbarTitle + (router.currentRoute.params.id?(': '+router.currentRoute.params.id):'') ))}}</q-toolbar-title>
+                <q-toolbar :class="'q-pl-none q-pr-none text-subtitle2 '+(userColor=='blackDark'?'text-white':'text-primary')">
+                    <q-toolbar-title class="text-weight-bolder">
+                        <q-item dense >
+                            <q-item-section :title="toolbarTitleName">
+                                <q-item-label class="ellipsis">{{toolbarTitleName}}</q-item-label>
+                                <q-item-label caption v-if="router&&router.currentRoute&&router.currentRoute.params&&router.currentRoute.params.id">{{router.currentRoute.params.id}}</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                        <!--<div v-if="!(editConfig.toolbarTitleName)&&router&&router.currentRoute&&router.currentRoute.params&&router.currentRoute.params.id"
+                            style="display: inline" class="text-caption"
+                            >{{router.currentRoute.params.id}}
+                        </div>--->
+                    </q-toolbar-title>
                     <q-space />
                     <!--
                     <q-btn icon="fas fa-chevron-up" title="Cargar registro anterior de la lista" flat dense stretch @click="goPrevRecord" />
@@ -178,6 +189,7 @@ export default ({
             router: this.$router
             ,tab: null
             ,dataLoaded: false
+            ,fixedTitle: null
         }
     },
     methods:{
@@ -405,7 +417,6 @@ export default ({
                 this.$refs['tab_'+oldVal][0].updateVuex();
             }catch(ex){}
         },
-       
         changeLeftMenu(){ 
             if(this.editFormLeftCollapsed){
                 this.splitterModel = 230//210
@@ -490,6 +501,33 @@ export default ({
         columnKeyName:{
             get () { return this.$store.state[this.moduleName].columnKeyName },
         },
+        toolbarTitleName: {
+            //{{ (editStatus.editMode=='create'?('Crear '+ editConfig.toolbarTitle):(editConfig.toolbarTitle + (router.currentRoute.params.id?router.currentRoute.params.id:'') ))}}
+            get() {
+                let resultado = ''
+                if(this.editStatus.editMode=='create'){ resultado = 'Crear ' + this.editConfig.toolbarTitle; }
+                if(this.editStatus.editMode!='create'){ 
+                    resultado = this.editConfig.toolbarTitle + ': ';
+                    //Agrega la ruta del objeto si es que existe
+                    if(this.editConfig.toolbarTitleName){
+                        try{
+                            let o = this.editData
+                            let s = this.editConfig.toolbarTitleName
+                            s = s.replace(/\[(\w+)\]/g, '.$1');     // convert indexes to properties
+                            s = s.replace(/^\./, '');   // strip a leading dot
+                            var a = s.split('.');
+                            for (var i = 0, n = a.length; i < n; ++i) {
+                                var k = a[i];
+                                if (k in o) { o = o[k]; }
+                                else { return;}
+                            }
+                            resultado = resultado + ' ' + o;//return o;
+                        }catch(ex){}
+                    }
+                }
+                return resultado
+            }
+        }
     },
     watch: {
         '$route.params.id': function (val) {

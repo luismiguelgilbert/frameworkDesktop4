@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSchFormacionesSelectEdit',
             spUpdateName: 'spSchFormacionesUpdate',
             toolbarTitle: "Formación",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Formación', isTabDisable: false, rootPath:'pages', importPath: 'RootSchoenstatt/SCHFormaciones/SCHFormacionesEditBasic.vue' },

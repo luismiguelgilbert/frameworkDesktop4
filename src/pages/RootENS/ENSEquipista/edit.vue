@@ -30,6 +30,7 @@ export default ({
             spSelectName: 'spEnsPersonaSelectEdit', //notar que es específico para este módulo (en vez de spEnsPersonasSelectEdit que lleva s)
             spUpdateName: 'spEnsPersonasUpdate',
             toolbarTitle: "Mi Perfil",
+            toolbarTitleName: "basic.sys_user_fullname",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Datos del Equipista', isTabDisable: false, rootPath:'pages', importPath: 'RootENS/ENSEquipista/ENSEquipistaEditBasic.vue' },

@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spInvMasterUoMSelectEdit',
             spUpdateName: 'spInvMasterUoMUpdate',
             toolbarTitle: "Unidad",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Unidad', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/UoM/UoMEditBasic.vue' },

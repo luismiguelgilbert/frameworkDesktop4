@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spmktMFGRetSelectEdit',
             spUpdateName: 'spmktMFGRetUpdate',
             toolbarTitle: "Devolución de Insumos",
+            toolbarTitleName: "basic.headerID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

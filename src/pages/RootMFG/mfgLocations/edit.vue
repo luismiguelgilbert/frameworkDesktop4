@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMfgLocationsSelectEdit',
             spUpdateName: 'spMfgLocationsUpdate',
             toolbarTitle: "Línea de Producción",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Línea de Producción', isTabDisable: false, rootPath:'pages', importPath: 'RootMFG/mfgLocations/mfgLocationsEditBasic.vue' },

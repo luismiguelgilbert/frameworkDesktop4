@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMktPRDRetSelectEdit',
             spUpdateName: 'spMktPRDRetUpdate',
             toolbarTitle: "Devolución de Producto Terminado",
+            toolbarTitleName: "basic.headerID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

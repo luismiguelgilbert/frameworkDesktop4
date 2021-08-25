@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spAccPeriodsSelectEdit',
             spUpdateName: 'spAccPeriodsUpdate',
             toolbarTitle: "Periodo",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Usuario', isTabDisable: false, rootPath:'pages', importPath: 'RootAccounting/AccPeriods/AccPeriodsEditBasic.vue' },

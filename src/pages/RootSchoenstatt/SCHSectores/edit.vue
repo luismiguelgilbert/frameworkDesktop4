@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSchSectoresSelectEdit',
             spUpdateName: 'spSchSectoresUpdate',
             toolbarTitle: "Sector",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Sector', isTabDisable: false, rootPath:'pages', importPath: 'RootSchoenstatt/SCHSectores/SCHSectoresEditBasic.vue' },

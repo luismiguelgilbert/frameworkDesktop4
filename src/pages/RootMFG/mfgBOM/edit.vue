@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMfgBudgetSelectEdit',
             spUpdateName: 'spMfgBudgetUpdate',
             toolbarTitle: "Lista de Materiales",
+            toolbarTitleName: "basic.budgetID",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Lista de Materiales', isTabDisable: false, rootPath:'pages', importPath: 'RootMFG/mfgBOM/mfgBOMEditBasic.vue' },

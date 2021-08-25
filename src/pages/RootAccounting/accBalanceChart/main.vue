@@ -4,7 +4,7 @@
 
         <q-toolbar :class="toolbarComponentClass">
             <q-input 
-                v-model="startDate" class="q-ml-md"
+                v-model="startDate" class="q-ml-md" filled
                 :title="dateName(startDate)"
                 maxlength="50" style="max-width: 180px;" dense 
                 placeholder="Ingrese fecha de Inicio" label="Desde (aaaa/mm/dd)"
@@ -27,7 +27,7 @@
             </q-input>
 
             <q-input 
-                v-model="stopDate" class="q-ml-md"
+                v-model="stopDate" class="q-ml-md" filled
                 :title="dateName(stopDate)"
                 maxlength="50" style="max-width: 180px;" dense 
                 placeholder="Ingrese fecha de Corte" label="Hasta (aaaa/mm/dd)"
@@ -120,6 +120,7 @@
             :show-row-lines="userTableLinesDXrows"
             @row-prepared="treeListRowPrepared"
             >
+                <DxScrolling mode="virtual"   :useNative="true" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen rowRenderingMode="virtual"-->
                 <DxColumn data-field="account_name" data-type="string" caption="Cuenta Contable" :minWidth="100" alignment="left" :allowFiltering="true" :allowSorting="false" />
                 <DxColumn data-field="Saldo_Inicial" data-type="number" caption="Saldo Inicial" alignment="right" :minWidth="80" :width="100" :format="userMoneyFormat" :allowSorting="false" />
                 <DxColumn data-field="Saldo_Mes" data-type="number" caption="Saldo del Mes" alignment="right" :minWidth="80" :width="100" :format="userMoneyFormat" :allowSorting="false" />

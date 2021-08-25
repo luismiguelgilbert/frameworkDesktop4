@@ -27,6 +27,7 @@ export default ({
             spSelectName: 'spAccAPSelectEdit',
             spUpdateName: 'spAccAPUpdate',
             toolbarTitle: "Documento x Pagar",
+            toolbarTitleName: "basic.numeroDoc",
             startTab: 'basic',
             splitterModel: 250,
             moduleTabs: [

@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spinvMasterTypesSelectEdit',
             spUpdateName: 'spinvMasterTypesUpdate',
             toolbarTitle: "Calisificación",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Clasificación', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/InvTypes/InvTypesEditBasic.vue' },

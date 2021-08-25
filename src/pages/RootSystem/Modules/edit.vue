@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSysModulesSelectEdit',
             spUpdateName: 'spSysModulesUpdate',
             toolbarTitle: "Módulo",
+            toolbarTitleName: "basic.link_name",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-database', textLabel: 'Información del Módulo', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Modules/ModulesEditBasic.vue' },

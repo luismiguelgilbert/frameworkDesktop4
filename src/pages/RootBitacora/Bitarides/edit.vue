@@ -20,7 +20,8 @@ export default ({
         let newEditConfig = {
             spSelectName: 'spBitaridesSelectEdit',
             spUpdateName: 'spBitaridesUpdate',
-            toolbarTitle: "Vehículo",
+            toolbarTitle: "Viaje",
+            toolbarTitleName: "basic.record_id",
             startTab: 'basic',
             disableSaveButton: true,//hides save button from dropwn save and dropwn down save and close
             moduleTabs: [

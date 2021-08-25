@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spBitacarsSelectEdit',
             spUpdateName: 'spBitaCarsUpdate',
             toolbarTitle: "Vehículo",
+            toolbarTitleName: "basic.placa",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Vehículo', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitacars/BitacarsEditBasic.vue' },

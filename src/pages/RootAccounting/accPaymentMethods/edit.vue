@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spAccPaymentMethodsSelectEdit',
             spUpdateName: 'spAccPaymentMethodsUpdate',
             toolbarTitle: "Medio",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Medio Pago', isTabDisable: false, rootPath:'pages', importPath: 'RootAccounting/accPaymentMethods/accPaymentMethodsEditBasic.vue' },

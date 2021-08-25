@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSysCompaniesSelectEdit',
             spUpdateName: 'spSysCompaniesUpdate',
             toolbarTitle: "Compañía",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                  { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Compañía', isTabDisable: false, rootPath:'pages', importPath: 'RootSystem/Companies/CompaniesEditBasic.vue' },

@@ -27,6 +27,7 @@ export default ({
             spSelectName: 'spAccRETSelectEdit',
             spUpdateName: 'spAccRETUpdate',
             toolbarTitle: "Retención",
+            toolbarTitleName: "basic.numeroDoc",
             startTab: 'basic',
             splitterModel: 250,
             moduleTabs: [

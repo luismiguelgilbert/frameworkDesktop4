@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spCasTasksTypesSelectEdit',
             spUpdateName: 'spCasTasksTypesUpdate',
             toolbarTitle: "Tipo de Caso",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Tipo Actividad', isTabDisable: false, rootPath:'pages', importPath: 'RootCases/casTasksTypes/casTasksTypesEditBasic.vue' },

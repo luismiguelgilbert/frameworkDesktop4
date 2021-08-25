@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMfgTypesSelectEdit',
             spUpdateName: 'spMfgTypesUpdate',
             toolbarTitle: "Tipo de Producción",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Tipo de Producción', isTabDisable: false, rootPath:'pages', importPath: 'RootMFG/mfgTypes/mfgTypesEditBasic.vue' },

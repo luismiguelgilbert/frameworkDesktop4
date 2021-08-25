@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spInvMasterSelectEdit',
             spUpdateName: 'spInvMasterUpdate',
             toolbarTitle: "Item",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                  { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Item', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Items/ItemsEditBasic.vue' }

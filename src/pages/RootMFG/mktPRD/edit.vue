@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMktPRDSelectEdit',
             spUpdateName: 'spMktPRDUpdate',
             toolbarTitle: "Entrega de Producto Terminado",
+            toolbarTitleName: "basic.headerID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

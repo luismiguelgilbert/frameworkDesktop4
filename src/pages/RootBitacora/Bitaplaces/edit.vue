@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spBitaplacesSelectEdit',
             spUpdateName: 'spBitaplacesUpdate',
             toolbarTitle: "Punto de Control",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Punto de Control', isTabDisable: false, rootPath:'pages', importPath: 'RootBitacora/Bitaplaces/BitaplacesEditBasic.vue' },

@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spEnsTeamsSelectEdit',
             spUpdateName: 'spEnsTeamsUpdate',
             toolbarTitle: "Equipo",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Equipo', isTabDisable: false, rootPath:'pages', importPath: 'RootENS/ENSTeams/ENSTeamsEditBasic.vue' },

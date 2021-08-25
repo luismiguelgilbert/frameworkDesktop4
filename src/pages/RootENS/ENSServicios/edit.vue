@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spEnsServiciosSelectEdit',
             spUpdateName: 'spEnsServiciosUpdate',
             toolbarTitle: "Servicio",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Servicio', isTabDisable: false, rootPath:'pages', importPath: 'RootENS/ENSServicios/ENSServiciosEditBasic.vue' },

@@ -27,6 +27,7 @@ export default ({
             spSelectName: 'spAccvoucherOutSelectEdit',
             spUpdateName: 'spAccvoucherOutUpdate',
             toolbarTitle: "Pago",
+            toolbarTitleName: "basic.numeroDoc",
             startTab: 'basic',
             splitterModel: 250,
             moduleTabs: [

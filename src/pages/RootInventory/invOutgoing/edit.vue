@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spInvKardexOutgoingSelectEdit',
             spUpdateName: 'spInvKardexOutgoingUpdate',
             toolbarTitle: "Egreso", //aunque puntualmente este módulo realmente toma el número de orden de ingreso (cabecera) y muestra todas las líneas
+            toolbarTitleName: "basic.kardexID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

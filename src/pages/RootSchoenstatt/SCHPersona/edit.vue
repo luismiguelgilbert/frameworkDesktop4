@@ -30,6 +30,7 @@ export default ({
             spSelectName: 'spSchPersonasSelectEdit',
             spUpdateName: 'spSchPersonasUpdate',
             toolbarTitle: "Mi Perfil",
+            toolbarTitleName: "basic.sys_user_fullname",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Mi Perfil', isTabDisable: false, rootPath:'pages', importPath: 'RootSchoenstatt/SCHPersona/SCHPersonaEditBasicSingle.vue' },

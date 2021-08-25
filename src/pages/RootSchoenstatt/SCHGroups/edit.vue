@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSchGroupsSelectEdit',
             spUpdateName: 'spSchGroupsUpdate',
             toolbarTitle: "Grupo",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Grupo', isTabDisable: false, rootPath:'pages', importPath: 'RootSchoenstatt/SCHGroups/SCHGroupsEditBasic.vue' },

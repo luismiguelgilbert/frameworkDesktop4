@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spAccPaytermsSelectEdit',
             spUpdateName: 'spAccPaytermsUpdate',
             toolbarTitle: "Plazo de Pago",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Plazo Pago', isTabDisable: false, rootPath:'pages', importPath: 'RootAccounting/Payterms/PaytermsEditBasic.vue' },

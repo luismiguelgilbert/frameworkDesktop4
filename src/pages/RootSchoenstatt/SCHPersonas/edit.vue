@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSchPersonasSelectEdit',
             spUpdateName: 'spSchPersonasUpdate',
             toolbarTitle: "Persona",
+            toolbarTitleName: "basic.sys_user_fullname",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Datos de la Persona', isTabDisable: false, rootPath:'pages', importPath: 'RootSchoenstatt/SCHPersonas/SCHPersonasEditBasicMultiple.vue' },

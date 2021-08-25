@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spInvMasterBrandsSelectEdit',
             spUpdateName: 'spInvMasterBrandsUpdate',
             toolbarTitle: "Marca",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información de Marca', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Brands/BrandsEditBasic.vue' },

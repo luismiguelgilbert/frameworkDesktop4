@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spSysCompLocSelectEdit',
             spUpdateName: 'spSysCompLocUpdate',
             toolbarTitle: "Usuario",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Establecimiento', isTabDisable: false, rootPath:'pages', importPath: 'RootAccounting/Locations/LocationsEditBasic.vue' },

@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spAccTaxesSelectEdit',
             spUpdateName: 'spAccTaxesUpdate',
             toolbarTitle: "Impuesto",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Impuesto', isTabDisable: false, rootPath:'pages', importPath: 'RootAccounting/Taxes/TaxesEditBasic.vue' },

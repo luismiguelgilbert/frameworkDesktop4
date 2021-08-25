@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMktPORetSelectEdit',
             spUpdateName: 'spMktPORetUpdate',
             toolbarTitle: "Devolución de Compra",
+            toolbarTitleName: "basic.headerID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

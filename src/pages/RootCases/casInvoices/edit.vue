@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spCasInvoicesSelectEdit',
             spUpdateName: 'spCasInvoicesUpdate',
             toolbarTitle: "Factura",
+            toolbarTitleName: "basic.invoiceNumber",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Factura', isTabDisable: false, rootPath:'pages', importPath: 'RootCases/casInvoices/casInvoicesEditBasic.vue' },

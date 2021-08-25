@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spCasLocationsSelectEdit',
             spUpdateName: 'spCasLocationsUpdate',
             toolbarTitle: "Localidad",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Localidad', isTabDisable: false, rootPath:'pages', importPath: 'RootCases/casLocations/casLocationsEditBasic.vue' },

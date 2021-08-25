@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spMktPOSelectEdit',
             spUpdateName: 'spMktPOUpdate',
             toolbarTitle: "Orden de Compra",
+            toolbarTitleName: "basic.headerID",
             startTab: 'basic',
             splitterModel: 230,
             moduleTabs: [

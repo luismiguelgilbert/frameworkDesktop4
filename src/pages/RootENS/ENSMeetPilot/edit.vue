@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spEnsPilotMeetSelectEdit',
             spUpdateName: 'spEnsPilotMeetUpdate',
             toolbarTitle: "Reunión de Pilotaje",
+            toolbarTitleName: "basic.meetingDate",
             startTab: 'basic',
             disableSaveButton: true,//hides save button from dropwn save and dropwn down save and close
             moduleTabs: [

@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spCasCasesTasksSelectEdit',
             spUpdateName: 'spCasCasesTasksUpdate',
             toolbarTitle: "Actividad",
+            toolbarTitleName: "basic.activityID",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Actividad', isTabDisable: false, rootPath:'pages', importPath: 'RootCases/casTasks/casTasksEditBasic.vue' },

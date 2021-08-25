@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spPartnerMasterSelectEdit',
             spUpdateName: 'spPartnerMasterUpdate',
             toolbarTitle: "Socio",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                  { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Socio', isTabDisable: false, rootPath:'pages', importPath: 'RootMaster/Partners/PartnersEditBasic.vue' }

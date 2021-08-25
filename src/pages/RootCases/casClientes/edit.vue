@@ -21,6 +21,7 @@ export default ({
             spSelectName: 'spCasClientesSelectEdit',
             spUpdateName: 'spCasClientesUpdate',
             toolbarTitle: "Cliente",
+            toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Cliente', isTabDisable: false, rootPath:'pages', importPath: 'RootCases/casClientes/casClientesEditBasic.vue' },
