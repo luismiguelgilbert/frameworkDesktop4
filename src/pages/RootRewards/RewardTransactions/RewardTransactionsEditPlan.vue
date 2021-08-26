@@ -19,7 +19,7 @@
                                             <q-item-label>Agregar Registro a Lista de Resultados</q-item-label>
                                         </q-item-section>
                                     </q-item>
-                                    <q-item clickable clickable v-close-popup @click="addRewMasterResult" >
+                                    <q-item clickable clickable v-close-popup @click="batchUpdateConditions" >
                                         <q-item-section side>
                                             <q-icon name="fas fa-pen-square" />
                                         </q-item-section>
@@ -191,7 +191,7 @@
                         
                         <q-tab-panels v-model="tabInternal" animated style="height: calc(100vh - 220px); overflow-y: auto;" >
                             <q-tab-panel name="payment" >
-                                <div class="text-caption">Resultados se obtendrán de la siguiente forma:</div>
+                                <div class="text-subtitle2 text-primary q-ml-xs">Resultados se obtendrán de la siguiente forma:</div>
                                 <q-select dense
                                     :options="lookup_sumType" emit-value map-options
                                     :value="rewMasterResultsLinesSelected.sumType" 
@@ -202,49 +202,68 @@
                                         rewMasterResultsLines = temporal;
                                         rewMasterResultsLinesSelected.sumType = valor;
                                         }"
-                                    />
+                                    >
+                                    <template v-slot:prepend><q-icon flat dense name="fas fa-folder-plus" /></template>
+                                </q-select>
 
                                 
                                 <q-select  dense
                                     :options="lookup_fields.filter(x=>x.allow_calculation)" emit-value map-options
                                     :value="rewMasterResultsLinesSelected.sumFieldName" 
-                                    filled label="Campo a Sumarizar" class="q-mt-sm"
+                                    filled label="Campo sobre el cual realizar el Tipo de Operación" class="q-mt-sm"
                                     @input="(valor)=>{
                                         let temporal = JSON.parse(JSON.stringify(rewMasterResultsLines));
                                         temporal.find(x=>x.resultID==rewMasterResultsLinesSelected.resultID&&x.lineID==rewMasterResultsLinesSelected.lineID).sumFieldName = valor;
                                         rewMasterResultsLines = temporal
                                         rewMasterResultsLinesSelected.sumFieldName = valor;
                                         }"
-                                    />
+                                    >
+                                    <template v-slot:prepend><q-icon flat dense name="fas fa-search-plus" /></template>
+                                </q-select>
                                     
-                                <br /><div class="text-caption">Calcular resultado de la siguiente forma:</div>
+                                <br /><div class="text-subtitle2 text-primary q-ml-xs">Calcular resultado de la siguiente forma:</div>
                                 <q-select dense
                                     :options="lookup_resultType" emit-value map-options
                                     :value="rewMasterResultsLinesSelected.resultType"
-                                    filled label="Calcular Porcentaje ó Rango"  class="q-mt-sm"
+                                    filled label="Calcular Monto a Pagar usando esta metodología"  class="q-mt-sm"
                                     @input="(valor)=>{
                                         let temporal = JSON.parse(JSON.stringify(rewMasterResultsLines));
                                         temporal.find(x=>x.resultID==rewMasterResultsLinesSelected.resultID&&x.lineID==rewMasterResultsLinesSelected.lineID).resultType = valor;
                                         rewMasterResultsLines = temporal
                                         rewMasterResultsLinesSelected.resultType = valor;
                                         }"
-                                    />
+                                    >
+                                    <template v-slot:prepend><q-icon flat dense name="fas fa-calculator" /></template>
+                                </q-select>
                                 
-                                <q-select dense
-                                    :options="lookup_ranges" emit-value map-options
+                                <selectSearchable 
                                     v-if="rewMasterResultsLinesSelected.resultType==1"
-                                    :value="rewMasterResultsLinesSelected.resultRangeTableID"
-                                    filled label="Rango" class="q-mt-sm"
-                                    @input="(valor)=>{
-                                        let temporal = JSON.parse(JSON.stringify(rewMasterResultsLines));
-                                        temporal.find(x=>x.resultID==rewMasterResultsLinesSelected.resultID&&x.lineID==rewMasterResultsLinesSelected.lineID).resultRangeTableID = valor;
-                                        rewMasterResultsLines = temporal
-                                        rewMasterResultsLinesSelected.resultRangeTableID = valor;
+                                    class="q-mt-sm"
+                                    prependIcon="fas fa-table"
+                                    labelText="Tabla de Rangos (*)" labelSearchText="Buscar Tabla"
+                                    :optionsList="lookup_ranges"
+                                    rowValueField="value" optionsListLabel="label" optionsListCaption="rangeTableResultTypeName"
+                                    :isRequired="true" 
+                                    :isDisable="false" 
+                                    :isDense="true"
+                                    :initialValue="rewMasterResultsLinesSelected.resultRangeTableID"
+                                    :tableSearchColumns="[
+                                            { name: 'label', label: 'Tabla', field: 'label', align: 'left'}
+                                            ,{ name: 'rangeTableResultTypeName', label: 'Tipo de Resultado', field: 'rangeTableResultTypeName', align: 'left'}
+                                        ]"
+                                    @onItemSelected="(row)=>{
+                                            //rewMasterResultsLinesSelected.resultRangeTableID=row.value;
+                                            
+                                            let temporal = JSON.parse(JSON.stringify(rewMasterResultsLines));
+                                            temporal.find(x=>x.resultID==rewMasterResultsLinesSelected.resultID&&x.lineID==rewMasterResultsLinesSelected.lineID).resultRangeTableID = row.value;
+                                            rewMasterResultsLines = temporal
+                                            rewMasterResultsLinesSelected.resultRangeTableID = row.value;
+
                                         }"
                                     />
                                     
                                 <q-input
-                                    v-if="rewMasterResultsLinesSelected.resultType==2"
+                                    v-if="rewMasterResultsLinesSelected.resultType==2" dense
                                     :value="rewMasterResultsLinesSelected.resultRangeValue"
                                     filled label="Porcentaje (%)" max="100" min="0" type="number" class="q-mt-sm"
                                     @input="(valor)=>{
@@ -253,12 +272,11 @@
                                         rewMasterResultsLines = temporal
                                         rewMasterResultsLinesSelected.resultRangeValue = valor;
                                         }"
-                                    />
+                                    >
+                                    <template v-slot:prepend><q-icon flat dense name="fas fa-percent" /></template>
+                                </q-input>
                             </q-tab-panel>
                             <q-tab-panel name="filters" >
-                                <!--{{rewMasterResultsLinesSelected}}
-                                <br/>
-                                selected={{selected}}-->
                                 <q-toolbar class="no-padding">
                                     <!-- {{selected}} -->
                                             <q-btn-dropdown color="primary" label="Agregar Filtro" no-caps>
@@ -282,44 +300,7 @@
                                             v-for="filtro in rewMasterResultsLinesSelected.filters" :key="filtro.fieldName"
                                             :label="filtro.fieldFriendlyName" group="samegroup"
                                             >
-                                            <div  >
-
-                                                <!--
-                                                    class="q-pa-md"
-                                                     temporalmente, estoy mandando todo como operatorType = 1 que es el operador "IN" que muestra la lista-->
-                                                <!--<q-select 
-                                                    :value="filtro.operatorType" emit-value map-options option-value="value"
-                                                    :options="lookup_operators.filter(y=>y.fieldType==lookup_fields.find(x=>x.value==filtro.fieldName).fieldType)"
-                                                    filled label="Buscar valores donde el campo"
-                                                    @input="(valor)=>{
-                                                        let nuevoResultLines = JSON.parse(JSON.stringify(rewMasterResultsLines))
-                                                        nuevoResultLines.find(x=>x.resultID==rewMasterResultsLinesSelected.resultID&&x.lineID==rewMasterResultsLinesSelected.lineID).filters.find(y=>y.fieldName==filtro.fieldName).operatorType = valor
-                                                        rewMasterResultsLines = nuevoResultLines
-                                                        filtro.operatorType = valor
-                                                    }"
-                                                    />
-                                                <q-input 
-                                                    v-if="filtro.operatorType&&filtro.operatorType!=1&&filtro.fieldType=='string'"
-                                                    filled :value="filtro.valueA" 
-                                                    @input="(valor)=>{
-                                                        let nuevoResultLines = JSON.parse(JSON.stringify(rewMasterResultsLines))
-                                                        nuevoResultLines.find(x=>x.resultID==rewMasterResultsLinesSelected.resultID&&x.lineID==rewMasterResultsLinesSelected.lineID).filters.find(y=>y.fieldName==filtro.fieldName).valueA = valor
-                                                        rewMasterResultsLines = nuevoResultLines
-                                                        filtro.valueA = valor
-                                                    }"
-                                                    />
-                                                <q-input 
-                                                    v-if="filtro.operatorType&&filtro.operatorType!=1&&filtro.fieldType=='number'"
-                                                    filled :value="filtro.valueA" class="q-mt-md"  type="number"
-                                                    @input="(valor)=>{
-                                                        let nuevoResultLines = JSON.parse(JSON.stringify(rewMasterResultsLines))
-                                                        nuevoResultLines.find(x=>x.resultID==rewMasterResultsLinesSelected.resultID&&x.lineID==rewMasterResultsLinesSelected.lineID).filters.find(y=>y.fieldName==filtro.fieldName).valueA = valor
-                                                        rewMasterResultsLines = nuevoResultLines
-                                                        filtro.valueA = valor
-                                                    }"
-                                                    />
-                                                    
-                                                -->
+                                            <div >
                                                 <div v-if="filtro.operatorType&&filtro.operatorType==1" class="q-pa-sm">
                                                         <q-table
                                                             v-if="filtro.operatorType&&filtro.operatorType==1" bordered flat square dense color="primary"
@@ -381,6 +362,47 @@
     <div v-else class="text-red text-subtitle2" >
         Antes de continuar, debe escoger una Tabla de Datos en la sección "Información Básica"
     </div>
+
+    <q-dialog v-model="batchUpdateCondition">
+        <q-card>
+            <q-toolbar>
+                <q-toolbar-title>Actualizar Condición de Pago en Todos los Resultados</q-toolbar-title>
+            </q-toolbar>
+            <q-separator />
+            <q-card-section>
+                <div class="text-primary text-subtitle2">Seleccione el Campo que desea Modificar en lote:</div>
+                <q-select
+                    filled label="Reemplzar Filtro"
+                    :options="lookup_fields.filter(x=>x.allow_filter&&x.estado)"
+                    option-value="value" option-label="label" map-options emit-value
+                    v-model="batchUpdateConditionSelectedField"
+                    @input="()=>{batchUpdateConditionSelectedRows=[]}"
+                    >
+                    <template v-slot:prepend><q-icon flat dense name="fas fa-filter" /></template>
+                </q-select>
+
+                <div v-if="batchUpdateConditionSelectedField">
+                    <div class="q-mt-md text-primary text-subtitle2">Seleccione los nuevos valores a reemplazar en lote:</div>
+                    <q-table
+                        v-if="batchUpdateConditionSelectedField"
+                        bordered flat square dense color="primary"
+                        :data="internal_lookup_data.filter(x=>x.field==batchUpdateConditionSelectedField)" 
+                        row-key="value" 
+                        virtual-scroll style="height: 150px" :rows-per-page-options="[0]" hide-header hide-bottom
+                        selection="multiple"  
+                        :selected.sync="batchUpdateConditionSelectedRows"
+                        :columns="[
+                            { name: 'value', field: 'value', sortable: false, align: 'left' },
+                        ]"
+                    />
+                </div>
+            </q-card-section>
+            <q-card-actions align="right">
+                <q-btn label="Cancelar" color="red" flat no-caps @click="batchUpdateCondition=false" />
+                <q-btn icon="fas fa-edit" label="Modificar" color="primary" flat no-caps @click="batchUpdateConditionsApply" />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
 </q-form>
 </template>
 <script>
@@ -410,12 +432,17 @@ export default ({
             tabInternal: 'payment',
             internal_lookup_data: [],
             selectedInternal: [],
+            batchUpdateCondition: false, batchUpdateConditionSelectedField: null, batchUpdateConditionSelectedRows: []
         }
         
         //selected
     },
     mounted(){
+        //console.dir('mounted')
         this.internal_lookup_data = JSON.parse(JSON.stringify(this.lookup_data))
+        this.selectedInternal = JSON.parse(JSON.stringify(this.selected))
+        //console.dir(this.internal_lookup_data)
+        //console.dir(this.selectedInternal)
         this.$refs.formulario.validate()
     },
     methods:{
@@ -554,6 +581,43 @@ export default ({
             //this.rewMasterResultsSelected = null
             this.tabInternal = 'payment';
         },
+        batchUpdateConditions(){
+            this.batchUpdateCondition = true;
+        },
+        batchUpdateConditionsApply(){
+            
+            if(this.batchUpdateConditionSelectedRows.length > 0 ){
+                //copy object
+                let temporal = JSON.parse(JSON.stringify(this.selectedInternal))
+                temporal = temporal.filter(x=>x.fieldName!=this.batchUpdateConditionSelectedField) //remove all selected equals to field to be replaced with new values
+                //loop
+                this.rewMasterResultsLines.map(resultLine =>{
+                    resultLine.filters.map(resultLineFilter=>{
+                        if(resultLineFilter.fieldName == this.batchUpdateConditionSelectedField){
+                            this.batchUpdateConditionSelectedRows.map(selectedRow =>{
+                                temporal.push({
+                                    resultID: resultLineFilter.resultID
+                                    ,lineID: resultLineFilter.lineID
+                                    ,fieldName: resultLineFilter.fieldName
+                                    ,value: selectedRow.value
+                                })
+                            })
+                        }
+                    })
+                })
+                this.selectedInternal = temporal;
+                this.batchUpdateCondition = false;
+                this.$q.notify({ html: true, multiLine: false, color: 'positive'
+                    ,message: "Se realizaron los cambios"
+                    ,timeout: 1000, progress: false , icon: "fas fa-edit"
+                })
+            }else{
+                this.$q.notify({ html: true, multiLine: false, color: 'red'
+                    ,message: "No ha seleccionado ningún valor!"
+                    ,timeout: 1000, progress: false , icon: "fas fa-exclamation-circle"
+                })
+            }
+        },
         deleteRewMasterResultLine(selectedLine){
             this.$q.dialog({ 
                 title: 'Confirmación'
@@ -627,6 +691,7 @@ export default ({
                     }
                 })
                 this.$q.loading.hide()
+                //console.dir(this.internal_lookup_data)
             }).catch((error) => {
                 console.dir(error)
                 let mensaje = ''
@@ -781,12 +846,15 @@ export default ({
         },
         lookup_fields: {
             get () { return this.$store.state[this.moduleName].editData.lookup_fields },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lookup_fields', value: val}) }
         },
         lookup_ranges: {
             get () { return this.$store.state[this.moduleName].editData.lookup_ranges },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lookup_ranges', value: val}) }
         },
         lookup_operators: {
             get () { return this.$store.state[this.moduleName].editData.lookup_operators },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'lookup_operators', value: val}) }
         },
         lookup_data: {
             get () { return this.$store.state[this.moduleName].editData.lookup_data },
@@ -817,6 +885,16 @@ export default ({
             //this.$refs['mainviewtableDxDataGrid'].instance.refresh()
             console.dir('selectedInternal watch')
             this.selected = JSON.parse(JSON.stringify(val))
+        },
+        internal_lookup_data: function(val){
+            //this.$refs['mainviewtableDxDataGrid'].instance.refresh()
+            /*console.dir('internal_lookup_data')
+            console.dir('val')
+            console.dir(val)
+            console.dir('this.internal_lookup_data')
+            console.dir(this.internal_lookup_data)
+            */
+            this.lookup_data = JSON.parse(JSON.stringify(val))
         },
     }
 })

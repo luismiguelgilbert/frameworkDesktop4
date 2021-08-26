@@ -11,6 +11,7 @@
             ref="mainviewtableDxDataGrid"
             height="calc(100vh - 170px)"
             column-resizing-mode="widget"
+            :column-auto-width="true"
             :data-source="gridData"
             :allow-column-resizing="true" 
             :allow-column-reordering="true"
@@ -18,6 +19,10 @@
             :show-column-lines="true"
             :show-row-lines="true"
             >
+            <DxScrolling mode="virtual"  :useNative="true" showScrollbar="always" />
+            <DxSummary >
+                <DxTotalItem column="Monto_a_Pagar" summary-type="sum" cssClass="q-mr-none" display-format="{0}" > <DxValueFormat type="#.00" /> </DxTotalItem>
+            </DxSummary>
          </DxDataGrid>
     </div>
     <div v-else class="text-red text-subtitle2" >
@@ -77,7 +82,7 @@ export default ({
                 }
             , { headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') } }
             ).then((response) => {
-                console.dir(response)
+                //console.dir(response)
                 this.gridData = response.data
                 
                 this.$q.loading.hide()

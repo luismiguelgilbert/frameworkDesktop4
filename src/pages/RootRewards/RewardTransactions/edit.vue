@@ -24,7 +24,6 @@ export default ({
             toolbarTitleName: "basic.name_es",
             startTab: 'basic',
             moduleTabs: [
-                
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información Básica', isTabDisable: false, rootPath:'pages', importPath: 'RootRewards/RewardTransactions/RewardTransactionsEditBasic.vue' },
                 { tabName: 'details', iconName: 'fas fa-calculator', textLabel: 'Plan de Comisiones', isTabDisable: false, rootPath:'pages', importPath: 'RootRewards/RewardTransactions/RewardTransactionsEditPlan.vue' },
                 { tabName: 'results', iconName: 'fas fa-hand-holding-usd', textLabel: 'Ver Resultados', isTabDisable: false, rootPath:'pages', importPath: 'RootRewards/RewardTransactions/RewardTransactionsEditResults.vue' },
@@ -35,6 +34,9 @@ export default ({
             //fields sirve para enviar específicamente los campos indicados (si es null entonces envía todos)
             editDataSaveProperties: [
                 { name: 'basic', filterBy: null, fields: null },
+                { name: 'rewMasterResults', filterBy: null, fields: null },
+                { name: 'rewMasterResultsLines', filterBy: null, fields: null },
+                { name: 'selected', filterBy: null, fields: null },
             ],
             //hide Tabs if something happens
             tabStatusChange:[
