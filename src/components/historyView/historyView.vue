@@ -13,7 +13,7 @@
     :show-row-lines="userTableLinesDXrows"
     key-expr="record_id"
     >
-    <DxScrolling mode="virtual"  rowRenderingMode="virtual" :useNative="false" showScrollbar="always" /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
+    <DxScrolling mode="virtual" rowRenderingMode="virtual"  columnRenderingMode="virtual" showScrollbar="always"  :useNative="true"   /> <!--columnRenderingMode="virtual" hace que la última columna tenga un margen-->
     <DxPaging :enabled="true" :page-size="userRowsPerPage" />
     <DxHeaderFilter :visible="true" :allowSearch="true" :texts="{cancel: 'Cancelar', ok: 'Filtrar', emptyValue: '(Vacío)'}" />
     <DxPager :visible="true" :show-page-size-selector="false" :allowed-page-sizes="allowedPageSizes" :show-info="true" :infoText="'Página {0} de {1} ({2} registros)'" :showNavigationButtons="false" :showPageSizeSelector="false" />

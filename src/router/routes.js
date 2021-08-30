@@ -527,11 +527,17 @@ const routes = [
 
       //COMISIONES (RootRewards)
       ,{ path: 'RootRewards/RewardTransactions', component: () => import('pages/RootRewards/RewardTransactions/main.vue')
-      ,children: [
-         { path: '/', component: () => import('../components/mainView/mainView.vue') }
-        ,{ path: ':id', component: () => import('pages/RootRewards/RewardTransactions/edit.vue') }
-      ] 
-    }
+        ,children: [
+          { path: '/', component: () => import('../components/mainView/mainView.vue') }
+          ,{ path: ':id', component: () => import('pages/RootRewards/RewardTransactions/edit.vue') }
+        ] 
+      }
+      ,{ path: 'RootRewards/RewardRanges', component: () => import('pages/RootRewards/RewardRanges/main.vue')
+        ,children: [
+          { path: '/', component: () => import('../components/mainView/mainView.vue') }
+          ,{ path: ':id', component: () => import('pages/RootRewards/RewardRanges/edit.vue') }
+        ] 
+      }
 
       //DESPACHO (Holcim)
       ,{ path: 'RootDispatch/sapTest', component: () => import('pages/RootDispatch/sapTest/sapTest.vue') }

@@ -81,6 +81,8 @@ import mfgTypes from './mfgTypes' //mfgTypes
 import mfgBOM from './mfgBOM' //mfgBOM
 
 import RewardTransactions from './RewardTransactions' //RewardTransactions
+import RewardRanges from './RewardRanges' //RewardRanges
+
 
 Vue.use(Vuex)
 
@@ -177,6 +179,7 @@ export default function (/* { ssrContext } */) {
       ,mfgTypes
       ,mfgBOM
       //Rewards
+      ,RewardRanges
       ,RewardTransactions
     },
     // enable strict mode (adds overhead!)
