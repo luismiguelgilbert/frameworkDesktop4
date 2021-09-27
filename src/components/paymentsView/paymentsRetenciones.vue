@@ -9,7 +9,7 @@
         <q-step :name="1" title="1. Datos Básico" icon="fas fa-info" active-icon="fas fa-info" :done="step > 1">
             <div style="height: calc(100vh - 266px);">
                 <selectSearchable 
-                    :square="false" :isDense="false"
+                    :square="false" :isDense="true"
                     prependIcon="fas fa-store"
                     labelText="Establecimiento donde se emite la Retención (*)" labelSearchText="Buscar Establecimiento"
                     :optionsList="this.lookup_sys_companies_locations" borderless
@@ -24,9 +24,17 @@
                     @onItemSelected="(row)=>{
                             this.sys_location_id=row.value;
                             //Pre-selecciona Punto de Emisión y Número de Documento Sugerido
+                            console.dir('estoy aquí')
                             if(this.lookup_sys_companies_locations_pos.length>0){
+                                //recupera el primer POS del establecimiento
                                 this.sys_location_pos_id = this.lookup_sys_companies_locations_pos.find(x=>x.sys_location_id==this.sys_location_id&&x.estado).value
+                                //recupera el número sugerido del POS
                                 this.numeroDoc = this.lookup_sys_companies_locations_pos.find(x=>x.sys_location_id==this.sys_location_id).suggestedNumberRetencion
+                                //trata de incrementar la secuencia
+                                if(!isNaN(this.numeroDoc)){
+                                    this.numeroDoc = '0000000000' + (parseInt(this.numeroDoc)+1).toString();
+                                    this.numeroDoc = this.numeroDoc.slice(-9)
+                                }
                             }
                             //Resetea selección del grid del paso 2, y variable a guardar
                             this.retentionsDetails = [];
@@ -34,7 +42,7 @@
                         }"
                     />
                 <selectSearchable 
-                    :square="false" :isDense="false"
+                    :square="false" :isDense="true"
                     prependIcon="fas fa-list"
                     labelText="Punto de Emisión donde se emite la Retención (*)" labelSearchText="Buscar Punto de Emisión" optionsListCaption="esElectronicaName"
                     :optionsList="this.lookup_sys_companies_locations_pos.filter(x=>x.sys_location_id==sys_location_id)" borderless
@@ -47,14 +55,21 @@
                             { name: 'label', label: 'Punto de Emisión', field: 'label', align: 'left'}
                         ]"
                     @onItemSelected="(row)=>{
+                            //recupera el primer POS del establecimiento
                             this.sys_location_pos_id=row.value;
+                            //recupera el número sugerido del POS
                             this.numeroDoc = row.suggestedNumberRetencion;
+                            //trata de incrementar la secuencia
+                            if(!isNaN(this.numeroDoc)){
+                                this.numeroDoc = '0000000000' + (parseInt(this.numeroDoc)+1).toString();
+                                this.numeroDoc = this.numeroDoc.slice(-9)
+                            }
                             this.retentionsDetails = [];
                             if(this.$refs.dxgrid){this.$refs.dxgrid.instance.clearSelection()}
                         }"
                     />
                 <q-input 
-                    v-model="numeroDoc" 
+                    v-model="numeroDoc" dense
                     placeholder="Ingrese el Secuencial del Documento (*)" label="Secuencial de la Retención(*)" filled
                     filled 
                     mask="#########"
@@ -70,8 +85,8 @@
                     <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
                 </q-input>
                 <q-input
-                    ref="headerDate" 
-                    mask="date" :rules="['date']"
+                    ref="headerDate" dense
+                    mask="date" :rules="['date']" 
                     placeholder="Ingrese la fecha de Retención (aaaa/mm/dd)" label="Fecha de Retención (aaaa/mm/dd) (*)" filled
                     v-model="headerDate" :title="dateName(headerDate)"
                     >
@@ -89,7 +104,7 @@
                     <template v-slot:prepend><q-icon name="fas fa-calendar" /></template>
                 </q-input>
                 <selectSearchable 
-                            prependIcon="fas fa-handshake"
+                            prependIcon="fas fa-handshake" :isDense="true"
                             labelText="Proveedor(*)" labelSearchText="Buscar Proveedor"
                             :optionsList="this.lookup_partners"
                             rowValueField="value" optionsListLabel="label" optionsListCaption="partner_ruc"
@@ -103,9 +118,34 @@
                                 ]"
                             @onItemSelected="(row)=>{
                                 this.partnerID=row.value;
+                                this.payment_account_id = row.accPaymentOutcomeAdvance;
                                 this.loadPartnerDocuments();
                                 }"
                             />
+                <selectSearchable 
+                    prependIcon="fas fa-sign-in-alt fa-rotate-180" :isDense="true" 
+                    labelText="Cuenta del Pago de Retención(*)" labelSearchText="Cuenta Contable del Pago de Retención"
+                    :optionsList="lookup_accounts"
+                    rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
+                    :isRequired="true" 
+                    :isDisable="false" 
+                    :isReadonly="false"
+                    :initialValue="payment_account_id"
+                    :tableSearchColumns="[
+                            { name: 'label', label: 'Proveedor', field: 'label', align: 'left'}
+                            ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
+                        ]"
+                    @onItemSelected="(row)=>{
+                            //console.dir(row)
+                            //this.account_id_invoice=row.account_id_invoice;
+                            this.payment_account_id=row.value;
+                            
+                            //let temp = this.lookup_accounts.find(x=>x.value==this.payment_account_id)
+                            this.payment_account_name = row.code_es + ' - ' + row.label
+                            //this.$emit('onAccMoveCompute')
+                            //this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
+                        }"
+                    />
             </div>
         </q-step>
         <q-step :name="2" title="2. Selección de Documentos" icon="fas fa-file-invoice-dollar" active-icon="fas fa-file-invoice-dollar" :done="step > 2">
@@ -288,8 +328,10 @@ export default ({
             ,lookup_sys_companies_locations_pos: []
             ,lookup_partners: []
             ,lookup_taxes: []
+            ,lookup_accounts: []
             ,sys_location_id: 0
             ,sys_location_pos_id: 0
+            ,payment_account_id: 0
             ,numeroDoc: ''
             ,ambiente: 0
             ,partnerID: 0
@@ -336,6 +378,11 @@ export default ({
         },
         nextSaveButtonClick(){
             if(this.step < 3){
+                if(this.step==1){
+                    if(this.$refs.dxgrid){
+                        this.$refs.dxgrid.instance.clearSelection();
+                    }
+                }
                 this.$refs.stepper.next()
             }else{
                 //console.dir(this.documentos)
@@ -368,16 +415,24 @@ export default ({
                 this.lookup_sys_companies_locations_pos = JSON.parse(response.data[0].lookup_sys_companies_locations_pos)
                 this.lookup_partners = JSON.parse(response.data[0].lookup_partners)
                 this.lookup_taxes = JSON.parse(response.data[0].lookup_taxes)
+                this.lookup_accounts = JSON.parse(response.data[0].lookup_accounts)
                 //Pre-Selecciona los primeros registros de ESTABLECIMIENTO y PUNTOEMISION
                 if(this.lookup_sys_companies_locations.filter(e=>e.estado).length > 0){
                     this.sys_location_id = this.lookup_sys_companies_locations.filter(e=>e.estado)[0].value//preselecciono el primero
                     if(this.lookup_sys_companies_locations_pos.find(x=>x.sys_location_id==this.sys_location_id&&x.estado)){
                         this.sys_location_pos_id = this.lookup_sys_companies_locations_pos.find(x=>x.sys_location_id==this.sys_location_id&&x.estado).value
+                        //recupera el número sugerido del POS
                         this.numeroDoc = this.lookup_sys_companies_locations_pos.find(x=>x.sys_location_id==this.sys_location_id).suggestedNumberRetencion
+                        //trata de incrementar la secuencia
+                        if(!isNaN(this.numeroDoc)){
+                            this.numeroDoc = '0000000000' + (parseInt(this.numeroDoc)+1).toString();
+                            this.numeroDoc = this.numeroDoc.slice(-9)
+                        }
                     }
                 }
                 if(this.parametersData&&this.parametersData.editData&&this.parametersData.editData.basic&&this.parametersData.editData.basic.partnerID){
                     this.partnerID = this.parametersData.editData.basic.partnerID;
+                    this.payment_account_id = this.lookup_partners.find(x=>x.value==this.partnerID).accPaymentOutcomeAdvance;
                 }
                 this.$q.loading.hide()
                 this.loadPartnerDocuments();
@@ -468,7 +523,7 @@ export default ({
                         ,sustentoShortName: lineaSustento.sustentoShortName
                         ,taxID: 0
                         ,tax_account_id: 0//va al HABER (normalmente es una cuenta [Retención de IVA, Retennción de Fuente] )
-                        ,paymentOutcome_account_id: selectedRow.accPaymentOutcomeAdvance//va al DEBE (normalmente es una cuenta [Anticipo a Proveedores])
+                        ,paymentOutcome_account_id: this.payment_account_id//selectedRow.accPaymentOutcomeAdvance//va al DEBE (normalmente es una cuenta [Anticipo a Proveedores])
                         ,factor: 0
                         ,factor_base: 0
                         ,printName: ''
@@ -522,7 +577,8 @@ export default ({
                             ,sustentoShortName: lineaSustento.sustentoShortName
                             ,taxID: 0
                             ,tax_account_id: 0//va al HABER (normalmente es una cuenta [Retención de IVA, Retennción de Fuente] )
-                            ,paymentOutcome_account_id: selectedRow.accPaymentOutcomeAdvance//va al DEBE (normalmente es una cuenta [Anticipo a Proveedores])
+                            //,paymentOutcome_account_id: selectedRow.accPaymentOutcomeAdvance//va al DEBE (normalmente es una cuenta [Anticipo a Proveedores])
+                            ,paymentOutcome_account_id: this.payment_account_id//selectedRow.accPaymentOutcomeAdvance//va al DEBE (normalmente es una cuenta [Anticipo a Proveedores])
                             ,factor: 0
                             ,factor_base: 0
                             ,printName: ''
@@ -547,7 +603,8 @@ export default ({
                 }
 
                 //POST data to server
-                this.$axios.post( this.apiURL + 'spAccRETAsistantUpdate', {
+                //this.$axios.post( this.apiURL + 'spAccRETAsistantUpdate', {
+                this.$axios.post( this.apiURL + 'spAccRetOutAsistantUpdate', {    
                         userCode: this.userCode,
                         userCompany: this.userCompany,
                         row_id: 0,

@@ -234,7 +234,7 @@ export default ({
             this.$q.loading.show()
             this.$axios({
             method: 'GET',
-            url: this.apiURL + 'spAccRETSelectPendingInvoices',
+            url: this.apiURL + 'spAccRetOutSelectPendingInvoices',
             headers: { Authorization: "Bearer " + this.$q.sessionStorage.getItem('jwtToken') },
             params: {
                 userCode: this.userCode,

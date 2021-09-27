@@ -23,20 +23,43 @@
                 ,{ name: 'partner_ruc', label: '# Identificación', field: 'partner_ruc', align: 'left'}
             ]"
         @onItemSelected="(row)=>{
+                //console.dir(row)
                 this.partnerID=row.value;
                 this.printName=row.label;
-                this.account_id_invoice=row.account_id_invoice;
-                this.account_id_advance=row.account_id_advance;
                 this.partnerName=row.label;//usado en el asiento contable, en la línea de proveedor (campo comentario), 
-
+                this.payment_account_id=row.account_id_advance;
+                //this.account_id_invoice=row.account_id_invoice;
                 //this.partner_account_id=row.account_id
-                this.$emit('onAccMoveCompute')
+                //this.$emit('onAccMoveCompute')
+                this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
+            }"
+        />
+
+    <selectSearchable 
+        prependIcon="fas fa-sign-in-alt fa-rotate-180"
+        labelText="Cuenta del Pago ó Anticipo (*)" labelSearchText="Cuenta Contable del Pago ó Anticipo"
+        :optionsList="this.lookup_accounts"
+        rowValueField="value" optionsListLabel="label" optionsListCaption="code_es" optionDisableField="estado"
+        :isRequired="true" 
+        :isDisable="false" 
+        :isReadonly="(allow_edit==false && allow_insert==false) || (allow_accounting == false)"
+        :initialValue="payment_account_id"
+        :tableSearchColumns="[
+                { name: 'code_es', label: 'Código', field: 'code_es', align: 'left'}
+                ,{ name: 'label', label: 'Cuenta', field: 'label', align: 'left'}
+            ]"
+        @onItemSelected="(row)=>{
+                //console.dir(row)
+                //this.account_id_invoice=row.account_id_invoice;
+                this.payment_account_id=row.value;
+                //this.$emit('onAccMoveCompute')
+                this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
             }"
         />
     
     
     <selectSearchable 
-        prependIcon="fas fa-money-check"
+        prependIcon="fas fa-sign-out-alt"
         labelText="Medio de Pago (*)" labelSearchText="Buscar Medio de Pago"
         :optionsList="this.lookup_accPaymentMethods"
         rowValueField="value" optionsListLabel="label" optionsListCaption="account_name"
@@ -56,6 +79,8 @@
                 this.numeroDoc = isNaN(row.lastNumber)?0:(parseInt(row.lastNumber)+1);
                 this.account_id = row.account_id//asigna la cuenta contable asociada al [Medio de Pago]
                 this.methodID=row.value;
+                //this.$emit('onAccMoveCompute')
+                this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
             }"
         />
 
@@ -68,6 +93,11 @@
         :rules="[
                 val => !!val || '* Requerido',
         ]"
+        debounce="650"
+        @input="()=>{   
+            //this.$emit('onAccMoveCompute')  
+            this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
+        }"
         >
         <template v-slot:prepend><q-icon name="fas fa-hashtag" /></template>
     </q-input>
@@ -76,8 +106,18 @@
         ref="amountTotal" :readonly="(editMode==false) || (allow_edit==false && allow_insert==false)"
         placeholder="Monto del Pago (*)" label="Monto del Pago (*)" filled
         v-model="amountTotal" :min="0" :max="amountTotal"
-        :disable="!dialogMode"
+        :disable="false"
         type="number" class="q-pb-md"
+        debounce="650"
+        @input="()=>{   
+            //this.$emit('onAccMoveCompute')  
+            this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
+        }"
+        :rules="[
+                val => !!val || '* Requerido',
+                val => val > 0 || '* Incorrecto',
+        ]"
+
         >
         <template v-slot:prepend><q-icon name="fas fa-dollar-sign" /></template>
     </q-input>
@@ -93,6 +133,11 @@
         mask="date" :rules="['date']"
         placeholder="Ingrese la fecha del Documento usado para contabilizar asiento (aaaa/mm/dd)" label="Fecha de Documento (aaaa/mm/dd) (*)" filled
         v-model="headerDate" :title="dateName(headerDate)"
+        debounce="650"
+        @input="()=>{   
+            //this.$emit('onAccMoveCompute')  
+            this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
+        }"
         >
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
@@ -112,6 +157,11 @@
         label="Comentarios" placeholder="Ingrese comentarios sobre este Pedido" filled
         type="textarea" :readonly="(!editMode&&!allow_edit)||(editMode&&!allow_insert)"
         v-model="comments"
+        debounce="650"
+        @input="()=>{   
+            //this.$emit('onAccMoveCompute')  
+            this.$emit('onRunMethod',{tabName: 'basic', methodName: 'updateAccountMove'});//emite hacia [editForm] y editForm dispara [runMethod] que ejecutará el método dentro del tab de los parámetros
+        }"
         />
 
     
@@ -212,8 +262,77 @@ export default ({
             }
             )
         },
+        updateAccountMove(){
+            this.$q.loading.show()
+            let internalAccountLines = [];
+
+            //let newAccLineID = 1 //porque empieza en 2 por la autosuma de cada línea, y la #1 es la del HABER para el proveedor
+            //let totalCreditAmount = 0
+
+            
+
+            try{
+                //#region DEBE (Items)
+                    //this.internalLines.map(row=>{
+                    //newAccLineID++;
+                    //totalCreditAmount = parseFloat(totalCreditAmount) + parseFloat(parseFloat(row.amount).toFixed(6))
+                    //totalCreditAmount = parseFloat(this.amountTotal)
+                    internalAccountLines.push({
+                        //accLineID: newAccLineID
+                        accLineID: 1
+                        //,lineID: row.lineID
+                        ,lineID: 1
+                        ,taxLineID: 0
+                        //,account_id: row.line_account_id
+                        ,account_id: this.payment_account_id
+                        ,partnerID: this.partnerID
+                        //,debit: row.amount
+                        ,debit: this.amountTotal
+                        ,credit: 0
+                        ,invID: 0
+                        ,prjID: 0
+                        ,stockID: 0
+                        ,mktLineID: 0
+                        //,comments: this.partnerName + ' - ' + row.comments
+                        ,comments: this.lookup_accPaymentMethods.filter(x=>x.value == this.methodID).map(z=>z.label).join(', ') + ' #' +  this.numeroDoc
+                        ,mktTypeID: 0
+                        ,headerID: 0
+                    })
+                //#endregion DEBE (Items)
+                
+                //#region HABER
+                internalAccountLines.push({
+                    accLineID: 2
+                    ,lineID: 2
+                    ,taxLineID: 0
+                    ,account_id: this.account_id
+                    ,partnerID: this.partnerID
+                    ,debit: 0
+                    //,credit: parseFloat(parseFloat(totalCreditAmount).toFixed(6))
+                    ,credit: parseFloat(parseFloat(this.amountTotal).toFixed(6))
+                    ,invID: 0
+                    ,prjID: 0
+                    ,stockID: 0
+                    ,mktLineID: 0
+                    //,comments: this.lookup_accPaymentMethods.filter(x=>x.value == this.methodID).map(z=>z.paymentTypeName).join(', ') + ' #' +  this.numeroDoc
+                    ,comments: this.lookup_accPaymentMethods.filter(x=>x.value == this.methodID).map(z=>z.label).join(', ') + ' #' +  this.numeroDoc
+                    ,mktTypeID: 0
+                    ,headerID: 0
+                    ,lineID: 0
+                })
+                //#endregion HABER*/
+                this.accountLines = internalAccountLines
+                this.$q.loading.hide()
+            }catch(ex){
+                console.dir('Se presentó error')
+                console.dir(ex)
+                this.$q.loading.hide()
+            }
+
+        },
     },
     computed:{
+        console: () => console,
         userColor: { get () { return this.$store.state.main.userColor }  },
         userCompany: { get () { return this.$store.state.main.userCompany } },
         userCompanies: { get () { return this.$store.state.main.userCompanies } },
@@ -228,6 +347,13 @@ export default ({
             let resultado = false;
             this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_insert').map(y=>{
               resultado = y.value;  
+            }).value; 
+            return resultado }, 
+        },
+        allow_accounting: { get () { 
+            let resultado = false;
+            this.$store.state[this.moduleName].editData.security.filter(x=>x.label=='allow_accounting').map(y=>{
+                resultado = y.value;  
             }).value; 
             return resultado }, 
         },
@@ -260,13 +386,13 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.partnerName },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'partnerName', value: val}) }
         },
-        account_id_invoice: {
+        /*account_id_invoice: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id_invoice },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id_invoice', value: val}) }
-        },
-        account_id_advance: {
-            get () { return this.$store.state[this.moduleName].editData.basic.account_id_advance },
-            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'account_id_advance', value: val}) }
+        },*/
+        payment_account_id: {
+            get () { return this.$store.state[this.moduleName].editData.basic.payment_account_id },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'payment_account_id', value: val}) }
         },
         account_id: {
             get () { return this.$store.state[this.moduleName].editData.basic.account_id },
@@ -292,8 +418,8 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.headerDate },
             set (val) { 
                 this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'headerDate', value: val}) //actualiza campo
+                this.$store.commit((this.moduleName)+'/updateEditData', {section: 'accountHeader', key: 'accMoveDateNew', value: val}) //actualiza también nueva fecha de asiento
                 this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'printDate', value: val}) //actualiza campo de impresión (pero el de impresión NO cambia éste)
-                this.$emit('onAccMoveCompute')
             }
         },
         printDate:  {
@@ -312,6 +438,10 @@ export default ({
             get () { return this.$store.state[this.moduleName].editData.basic.comments },
             set (val) { this.$store.commit((this.moduleName)+'/updateEditData', {section: 'basic', key: 'comments', value: val}) }
         },
+        accountLines: {
+            get () { return this.$store.state[this.moduleName].editData.accountLines },
+            set (val) { this.$store.commit((this.moduleName)+'/updateEditDataAttribute', {key: 'accountLines', value: val}) }
+        },
         lookup_users: {
             get () { return this.$store.state[this.moduleName].editData.lookup_users },
         },
@@ -327,6 +457,9 @@ export default ({
         lookup_voucherInitialTypes: {
             get () { return this.$store.state[this.moduleName].editData.lookup_voucherInitialTypes },
         },
+        lookup_accounts: {
+          get () { return this.$store.state[this.moduleName].editData.lookup_accounts },
+      },
     },
 })
 </script>

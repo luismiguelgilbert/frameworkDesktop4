@@ -32,7 +32,7 @@ export default ({
             splitterModel: 250,
             moduleTabs: [
                 { tabName: 'basic', iconName: 'fas fa-info-circle', textLabel: 'Información del Pago', isTabDisable: false, rootPath:'pages', importPath: 'RootBank/accVoucherOut/accVoucherOutEditBasic.vue' },
-                { tabName: 'lines', iconName: 'fas fa-list-ol', textLabel: 'Detalle del Pago', isTabDisable: false, rootPath:'pages', importPath: 'RootBank/accVoucherOut/accVoucherOutEditLines.vue' },
+                //{ tabName: 'lines', iconName: 'fas fa-list-ol', textLabel: 'Detalle del Pago', isTabDisable: false, rootPath:'pages', importPath: 'RootBank/accVoucherOut/accVoucherOutEditLines.vue' },
                 //{ tabName: 'status', iconName: 'fas fa-shipping-fast', textLabel: 'Mi Pedido', isTabDisable: false, rootPath:'pages', importPath: 'RootPurchase/accAP/mktPOEditWH.vue' },
                 //{ tabName: 'print', iconName: 'fas fa-print', textLabel: 'Ver Comprobante', isTabDisable: false, rootPath:'components', importPath: 'mainReport/reportComponentPDF' },
                 //{ tabName: 'share', iconName: 'fas fa-envelope', textLabel: 'Enviar Documento', isTabDisable: false, rootPath:'components', importPath: 'mailForm/mailFormDialog' },
@@ -49,7 +49,7 @@ export default ({
             //fields sirve para enviar específicamente los campos indicados (si es null entonces envía todos)
             editDataSaveProperties: [
                 { name: 'basic', filterBy: null, fields: null },
-                { name: 'lines', filterBy: null, fields: null },
+                //{ name: 'lines', filterBy: null, fields: null },
                 { name: 'accountLines', filterBy: null, fields: null },
                 { name: 'files', filterBy: null, fields: ['attach_id'] },
             ],

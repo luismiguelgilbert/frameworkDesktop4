@@ -48,6 +48,16 @@
                 :show-row-lines="userTableLinesDXrows"
                 key-expr="rowID"
                 @selection-changed="onSelectionChanged"
+                @row-prepared="(e)=>{
+                        if(e.rowType === 'data'){
+                            if(e.data.esPositivo == false){
+                                e.rowElement.style.backgroundColor = (this.userColor=='blackDark'?'#C62828':'#FDEBD0');
+                            }
+                            if(e.data.esPositivo == true){//Verde = Positivo
+                                e.rowElement.style.backgroundColor = (this.userColor=='blackDark'?'#21BA45':'#E8F8F5'); 
+                            }
+                        }
+                    }"
                 >
                     <DxScrolling mode="virtual"  rowRenderingMode="virtual" columnRenderingMode="virtual" :useNative="true" showScrollbar="always" />
                     <DxSelection select-all-mode="allPages" show-check-boxes-mode="always" mode="multiple" :deferred="false" /><!--:deferred="false" hace que el customTotalCalculate busque por key-->
@@ -67,7 +77,7 @@
                         >
                             <q-item dense>
                                 <q-item-section>
-                                    <q-item-label>{{data.data.documentName}} </q-item-label>
+                                    <q-item-label class="ellipsis">{{data.data.documentName}} </q-item-label>
                                     <q-item-label caption>{{data.data.subdocumentName}} {{data.data.numeroDoc}} </q-item-label>
                                 </q-item-section>
                                 <q-item-section side v-if="data.data.isNew">
@@ -78,7 +88,7 @@
                         <div v-else style="margin-left: -15px;">
                             <q-item dense>
                                 <q-item-section>
-                                    <q-item-label>{{data.data.documentName}} </q-item-label>
+                                    <q-item-label class="ellipsis">{{data.data.documentName}} </q-item-label>
                                     <q-item-label caption>{{data.data.subdocumentName}} {{data.data.numeroDoc}} </q-item-label>
                                 </q-item-section>
                                 <q-item-section side v-if="data.data.isNew">
@@ -416,6 +426,7 @@ export default ({
             this.createNewDialog = true
         },
         newPaymentClose(data){
+            //console.dir(data)
             this.createNewDialog = false;
             if(data){
                 //GetMaxId
@@ -427,7 +438,7 @@ export default ({
                 }
                 
                 if(!(this.allDocs.some(x=>x.methodID==data.payment_method_id&&x.numeroDoc==data.numeroDoc))){
-                    data.lines.map(linea=>{
+                    //data.lines.map(linea=>{
                         max_id++;
                         let nuevoPago = {
                             rowID: max_id
@@ -436,9 +447,13 @@ export default ({
                             ,accTypeID: 3 /*3 = accTypes.accTypeID = Pago*/
                             ,ID: max_id
                             ,headerID: max_id
-                            ,lineID: linea.lineID
-                            ,account_id: linea.account_id//,line_account_id: linea.account_id
-                            ,account_name: linea.account_name //,line_account_name: linea.account_name
+                            //,lineID: linea.lineID
+                            ,lineID: 1
+                            //,account_id: linea.account_id//,line_account_id: linea.account_id
+                            ,account_id: data.account_id//,line_account_id: linea.account_id
+                            //,account_name: linea.account_name //,line_account_name: linea.account_name
+                            ,payment_account_id: data.payment_account_id //,line_account_name: linea.account_name
+                            ,account_name: data.payment_account_name //,line_account_name: linea.account_name
                             ,documentName: this.lookup_payment_methods.find(x=>x.value==data.payment_method_id).paymentTypeName
                             ,subdocumentName: this.lookup_payment_methods.find(x=>x.value==data.payment_method_id).paymentTypeSubname
                             ,numeroDoc: data.numeroDoc
@@ -452,16 +467,16 @@ export default ({
                             ,comments: data.comments
                             ,printDate: data.printDate
                             ,printName: data.printName
-                            ,line_comments: linea.comments
-                            ,amountTotal: linea.amount
-                            ,amountUnpaid: linea.amount
+                            ,line_comments: data.comments//linea.comments
+                            ,amountTotal: data.amountTotal//linea.amount
+                            ,amountUnpaid: data.amountTotal//linea.amount
                             ,amountNew: 0
-                            ,amountPending: linea.amount
+                            ,amountPending: data.amountTotal//linea.amount
                         }
                         //this.pagos.push(nuevoPago)
                         this.allDocs.push(nuevoPago)
                         
-                    })
+                    //})
                 }else{
                     this.$q.notify({ html: true, multiLine: false, color: 'red'
                         ,message: "Ya se encuentra regiatrado ese número de documento. No se registró el nuevo pago."
@@ -543,6 +558,7 @@ export default ({
             })
         },
         applyPayment(){
+            //alert('applyPayment')
             //GetMaxId
             let max_id = 0
             let temp = null
@@ -552,8 +568,13 @@ export default ({
             }
 
             let facturas = this.$refs.dxgrid.instance.getSelectedRowsData().filter(x=>x.esPositivo&&x.amountPending > 0); //registros seleccionados del grid, y que sean POSITIVOS entonces son facturas que se están conciliando
-            //let pagos = this.allDocs.filter(x=>x.esPositivo==false&&x.amountPending > 0); //porque si tiene saldo disponible entonces lo considero
             let pagos = this.$refs.dxgrid.instance.getSelectedRowsData().filter(x=>x.esPositivo==false&&x.amountPending > 0); //registros seleccionados del grid, y que sean NEGATIVOS entonces son pagos que se están conciliando
+            /*
+            console.dir('pagos')
+            console.dir(pagos)
+            console.dir('facturas')
+            console.dir(facturas)
+            */
             let internalPartnerID = this.partnerID
             for (var i = 0; i < pagos.length; i++) {
                     for (var j = 0; j < facturas.length; j++) {
@@ -591,8 +612,8 @@ export default ({
                                         ,pago_accTypeID: pagos[i].accTypeID
                                         ,pago_isNew: pagos[i].isNew
                                         ,pago_line_id: pagos[i].lineID
-                                        ,pago_account_id: pagos[i].account_id //line_account_id
-                                        ,pago_account_name: pagos[i].account_name //line_account_name
+                                        ,pago_account_id: pagos[i].payment_account_id //antes se usaba pagos[i].account_id, pero era incorrecto porque necesito el código de la cuenta cabecera del pago hacia dónde se envía la plata
+                                        ,pago_account_name: pagos[i].account_name //aquí viene el nombre de la cuenta [payment_account_id] (no confundirse con [account_id])
                                         ,pagoDocumentName: pagos[i].documentName
                                         ,pagoSubdocumentName: pagos[i].subdocumentName
                                         ,pagoDocumentNumber: pagos[i].numeroDoc
@@ -629,8 +650,8 @@ export default ({
                                         ,pago_accTypeID: pagos[i].accTypeID
                                         ,pago_isNew: pagos[i].isNew
                                         ,pago_line_id: pagos[i].lineID
-                                        ,pago_account_id: pagos[i].account_id //line_account_id
-                                        ,pago_account_name: pagos[i].account_name //line_account_name
+                                        ,pago_account_id: pagos[i].payment_account_id //antes se usaba pagos[i].account_id, pero era incorrecto porque necesito el código de la cuenta cabecera del pago hacia dónde se envía la plata
+                                        ,pago_account_name: pagos[i].account_name //aquí viene el nombre de la cuenta [payment_account_id] (no confundirse con [account_id])
                                         ,pagoDocumentName: pagos[i].documentName
                                         ,pagoSubdocumentName: pagos[i].subdocumentName
                                         ,pagoDocumentNumber: pagos[i].numeroDoc
@@ -640,8 +661,10 @@ export default ({
                             }
                         }
                     }
-                }
+            }
             this.isApplyDisable = true;//obliga a resetear el estado del botón para que el usuario se vea forzado a seleccionar nuevamente documentos a conciliar
+            //alert('this.nuevosPagos')
+            //console.dir(this.nuevosPagos)
         },
         eliminarPagoDeNuevosPagos(fila){
             this.nuevosPagos = this.nuevosPagos.filter(x=>x.lineID != fila.lineID) //elimina todos los registros de Nuevos pagos

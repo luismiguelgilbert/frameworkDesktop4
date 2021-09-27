@@ -24,8 +24,8 @@ export default ({
     },
     mounted(){//NO debe ser created, porque aun NO estaría creado el componente editForm
         let newEditConfig = {
-            spSelectName: 'spAccRETSelectEdit',
-            spUpdateName: 'spAccRETUpdate',
+            spSelectName: 'spAccRetOutSelectEdit',
+            spUpdateName: 'spAccRetOutUpdate',
             toolbarTitle: "Retención",
             toolbarTitleName: "basic.numeroDoc",
             startTab: 'basic',
